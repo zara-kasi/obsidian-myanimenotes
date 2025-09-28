@@ -37,6 +37,11 @@ export class CassetteSettingTab extends PluginSettingTab {
     const Template = section('Template');
     const About = section('About');
     
+    new Setting(AniList)
+      .addText(text => text
+        .setPlaceholder('Enter Client ID')
+          await this.plugin.saveSettings();
+        }));
     
     new Setting(About)
       .setName('Author')
