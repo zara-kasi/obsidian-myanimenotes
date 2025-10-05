@@ -159,6 +159,9 @@ async function exchangeCodeForToken(
       console.warn('[MAL-AUTH] Failed to fetch user info but auth succeeded', userError);
     }
     
+    // Refresh settings UI after Authentication
+    plugin.refreshSettingsUI();
+    
   } catch (err) {
     new Notice(`❌ MAL Auth failed: ${err.message}`, 5000);
     throw err;
