@@ -76,13 +76,14 @@ export class CassetteSettingTab extends PluginSettingTab {
     if (isAuth && this.plugin.settings.malUserInfo) {
       const userInfo = this.plugin.settings.malUserInfo;
       
-      const userSetting = new Setting(container)
-        .setName('Logged in as')
-        .setDesc(userInfo.name);
-
+      const userSetting = new Setting(container);
+      
+      // Create a container for avatar and name
+      const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
+      
       // Add avatar if available
       if (userInfo.picture) {
-        userSetting.controlEl.createEl('img', {
+        userInfoContainer.createEl('img', {
           cls: 'cassette-user-avatar',
           attr: {
             src: userInfo.picture,
@@ -90,6 +91,12 @@ export class CassetteSettingTab extends PluginSettingTab {
           }
         });
       }
+      
+      // Add username
+      userInfoContainer.createEl('span', {
+        cls: 'cassette-user-name',
+        text: userInfo.name
+      });
     }
 
     // Client ID
