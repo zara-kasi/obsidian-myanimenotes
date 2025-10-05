@@ -1,4 +1,3 @@
-// src/auth/mal/types.ts
 // Type definitions for MAL authentication
 
 export interface MALUserInfo {
