@@ -56,24 +56,6 @@ export class CassetteSettingTab extends PluginSettingTab {
     
     // Add Template settings here
 
-    // ========================================================================
-    // About Section
-    // ========================================================================
-    
-    containerEl.createEl('h2', { text: 'About' });
-    
-    new Setting(containerEl)
-      .setName('Author')
-      .setDesc(this.plugin.manifest.author);
-    
-    new Setting(containerEl)
-      .setName('Version')
-      .setDesc(this.plugin.manifest.version);
-    
-    new Setting(containerEl)
-      .setName('Privacy')
-      .setDesc('Cassette only talks to the APIs to fetch & update your media data. Nothing else is sent or shared—your data stays local.');
-
     new Setting(containerEl)
       .setName('GitHub')
       .setDesc('Get more info or report an issue.')
