@@ -5,6 +5,17 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+/* Setting with user info - remove default flex behavior */
+.setting-item:has(.cassette-user-info) {
+  display: block;
+}
+
+.setting-item:has(.cassette-user-info) .setting-item-control {
+  justify-content: flex-start;
 }
 
 /* MAL User Avatar */
