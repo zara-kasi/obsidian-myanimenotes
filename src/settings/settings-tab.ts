@@ -137,6 +137,7 @@ export class CassetteSettingTab extends PluginSettingTab {
               this.display(); // Refresh settings UI
             } else {
               await startAuthFlow(this.plugin);
+              this.display();
             }
           });
         
