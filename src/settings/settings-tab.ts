@@ -14,53 +14,67 @@ export class CassetteSettingTab extends PluginSettingTab {
 
   display(): void {
     const { containerEl } = this;
-
     containerEl.empty();
-
-    const section = (title: string, startOpen = false) => {
-      const head = containerEl.createEl('h2', { text: title });
-      head.style.cursor = 'pointer';
-      head.style.userSelect = 'none';
-      head.style.margin = '1.2em 0 0.4em 0';
-      const body = containerEl.createDiv();
-      body.style.marginLeft = '1em';
-      body.style.display = startOpen ? 'block' : 'none';
-      head.addEventListener('click', () => {
-        body.style.display = body.style.display === 'none' ? 'block' : 'none';
-      });
-      return body;
-    };
-
-    const MAL = section('MAL');
-    const Simkl = section('Simkl');
-    const Setup = section('Setup');
-    const Display = section('Sync');
-    const Template = section('Template');
-    const About = section('About');
 
     // ========================================================================
     // MAL Section
     // ========================================================================
+    
+    containerEl.createEl('h2', { text: 'MyAnimeList' });
+    
+    this.renderMALSection(containerEl);
 
-    this.renderMALSection(MAL);
+    // ========================================================================
+    // Simkl Section
+    // ========================================================================
+    
+    containerEl.createEl('h2', { text: 'Simkl' });
+    
+    // Add Simkl settings here when ready
 
-  // ========================================================================
+    // ========================================================================
+    // Setup Section
+    // ========================================================================
+    
+    containerEl.createEl('h2', { text: 'Setup' });
+    
+    // Add Setup settings here
+
+    // ========================================================================
+    // Sync Section
+    // ========================================================================
+    
+    containerEl.createEl('h2', { text: 'Sync' });
+    
+    // Add Sync settings here
+
+    // ========================================================================
+    // Template Section
+    // ========================================================================
+    
+    containerEl.createEl('h2', { text: 'Template' });
+    
+    // Add Template settings here
+
+    // ========================================================================
     // About Section
     // ========================================================================
     
-    new Setting(About)
+    containerEl.createEl('h2', { text: 'About' });
+    
+    new Setting(containerEl)
       .setName('Author')
       .setDesc(this.plugin.manifest.author);
     
-    new Setting(About)
+    new Setting(containerEl)
       .setName('Version')
       .setDesc(this.plugin.manifest.version);
     
-    new Setting(About)
+    new Setting(containerEl)
       .setName('Privacy')
       .setDesc('Cassette only talks to the APIs to fetch & update your media data. Nothing else is sent or shared—your data stays local.');
 
-    new Setting(About)
+    new Setting(containerEl)
       .setName('GitHub')
       .setDesc('Get more info or report an issue.')
       .addButton(button =>
@@ -111,10 +125,10 @@ export class CassetteSettingTab extends PluginSettingTab {
     // Client Secret (optional)
     new Setting(container)
       .setName('Client Secret')
-      .setDesc('Your MyAnimeList Client Secret (optional for some apps)')
+      .setDesc('Your MyAnimeList Client Secret')
       .addText(text => {
         text
-          .setPlaceholder('Enter Client Secret (optional)')
+          .setPlaceholder('Enter Client Secret')
           .setValue(this.plugin.settings.malClientSecret || '')
           .onChange(async (value) => {
             this.plugin.settings.malClientSecret = value.trim();
