@@ -1,4 +1,3 @@
-// src/auth/mal/token-manager.ts
 // Token validation, refresh, and management
 
 import { requestUrl } from 'obsidian';
