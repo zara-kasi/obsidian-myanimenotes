@@ -1,7 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
-import { CassetteSettingTab } from './settings';
+import { CassetteSettingTab } from './settings/settings-tab';
 
 interface CassettePluginSettings {
 	mySetting: string;
