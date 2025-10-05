@@ -12,7 +12,8 @@ export default class CassettePlugin extends Plugin {
     await this.loadSettings();
 
     // Add settings tab
-    this.addSettingTab(new CassetteSettingTab(this.app, this));
+   this.settingsTab = new CassetteSettingTab(this.app, this);
+   this.addSettingTab(this.settingsTab);
 
     // Register OAuth protocol handler for MAL
     this.registerObsidianProtocolHandler('cassette-auth/mal', async (params) => {
@@ -34,4 +35,10 @@ export default class CassettePlugin extends Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
   }
+  
+  refreshSettingsUI(): void {
+  if (this.settingsTab) {
+    this.settingsTab.display();
+  }
+}
 }
