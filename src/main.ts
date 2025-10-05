@@ -7,6 +7,7 @@ import { handleOAuthRedirect } from './auth/mal';
 
 export default class CassettePlugin extends Plugin {
   settings: CassetteSettings;
+  settingsTab: CassetteSettingTab | null = null;  
 
   async onload() {
     await this.loadSettings();
