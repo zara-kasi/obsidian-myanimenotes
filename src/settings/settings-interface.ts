@@ -1,4 +1,3 @@
-// src/settings/settings-interface.ts
 // Main settings interface for Cassette plugin
 
 import type { MALUserInfo } from '../auth/mal';
