@@ -1,4 +1,4 @@
-// OAuth 2.0 authorization flow
+// OAuth 2.0 authorization flow 
 
 import { Notice, requestUrl } from 'obsidian';
 import type CassettePlugin from '../../main';
@@ -29,10 +29,12 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
   // Generate PKCE parameters
   const verifier = generateVerifier();
   const challenge = generateChallenge(verifier);
-  const state = generateState();
+  const state = generateState() + '_mal';
 
   // Store for later validation
   authState = { verifier, state };
+
+  console.log('[MAL Auth] Starting auth flow with state:', state.substring(0, 8) + '...');
 
   // Build authorization URL
   const params = new URLSearchParams({
@@ -46,12 +48,13 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
 
   const authUrl = `${MAL_AUTH_URL}?${params.toString()}`;
 
+  console.log('[MAL Auth] Authorization URL:', authUrl.substring(0, 100) + '...');
   new Notice('🔐 Opening MyAnimeList login page…', 3000);
   
-  // Open in external browser
+  // Open in external browser - DO NOT await to ensure it opens in default browser
   if (window.require) {
     const { shell } = window.require('electron');
-    await shell.openExternal(authUrl);
+    shell.openExternal(authUrl);
   } else {
     window.open(authUrl, '_blank');
   }
@@ -64,12 +67,24 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
  */
 export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthParams): Promise<void> {
   try {
-    console.log('[MAL Auth] Received OAuth redirect:', params);
+    console.log('[MAL Auth] Received OAuth redirect');
+    console.log('[MAL Auth] Raw params:', JSON.stringify(params, null, 2));
     
     const { code, state } = extractOAuthParams(params);
     
+    console.log('[MAL Auth] Extracted - Code:', code?.substring(0, 10) + '...', 'State:', state?.substring(0, 8) + '...');
+    console.log('[MAL Auth] Expected state:', authState?.state.substring(0, 8) + '...');
+    
     // Validate state to prevent CSRF
-    if (!authState || state !== authState.state) {
+    if (!authState) {
+      throw new Error('No auth state found. Please try authenticating again.');
+    }
+    
+    if (!state || !state.endsWith('_mal')) {
+      throw new Error('Invalid state parameter - missing _mal marker');
+    }
+    
+    if (state !== authState.state) {
       throw new Error('State mismatch - possible CSRF attack');
     }
     
@@ -104,6 +119,7 @@ async function exchangeCodeForToken(
     throw new Error('Invalid authorization code');
   }
 
+  console.log('[MAL Auth] Exchanging code for token...');
   new Notice('Exchanging authorization code for tokens…', 2000);
 
   const body = new URLSearchParams({
@@ -117,6 +133,7 @@ async function exchangeCodeForToken(
   // Add client secret if provided
   if (plugin.settings.malClientSecret?.trim()) {
     body.append('client_secret', plugin.settings.malClientSecret.trim());
+    console.log('[MAL Auth] Using client secret');
   }
 
   try {
@@ -130,6 +147,8 @@ async function exchangeCodeForToken(
       throw: false
     });
 
+    console.log('[MAL Auth] Token response status:', res.status);
+
     if (res.status < 200 || res.status >= 300) {
       throw new Error(formatTokenError(res));
     }
@@ -139,6 +158,8 @@ async function exchangeCodeForToken(
     if (!data.access_token) {
       throw new Error('No access token received from MyAnimeList');
     }
+
+    console.log('[MAL Auth] Successfully received tokens');
 
     // Save tokens
     plugin.settings.malAccessToken = data.access_token;
@@ -155,11 +176,13 @@ async function exchangeCodeForToken(
     // Fetch user info
     try {
       await fetchUserInfo(plugin);
+      console.log('[MAL Auth] User info fetched successfully');
     } catch (userError) {
-      console.warn('[MAL-AUTH] Failed to fetch user info but auth succeeded', userError);
+      console.warn('[MAL Auth] Failed to fetch user info but auth succeeded', userError);
     }
     
   } catch (err) {
+    console.error('[MAL Auth] Token exchange error:', err);
     new Notice(`❌ MAL Auth failed: ${err.message}`, 5000);
     throw err;
   }
@@ -174,15 +197,20 @@ function extractOAuthParams(params: OAuthParams): { code: string | null; state: 
   let code: string | null = null;
   let state: string | null = null;
   
+  // Direct properties
   if (params.code) {
     code = params.code;
     state = params.state || null;
-  } else if (typeof params === 'string') {
+  } 
+  // String format
+  else if (typeof params === 'string') {
     const paramsStr = params as string;
     const urlParams = new URLSearchParams(paramsStr.startsWith('?') ? paramsStr.slice(1) : paramsStr);
     code = urlParams.get('code');
     state = urlParams.get('state');
-  } else if ((params as any).url) {
+  } 
+  // URL object format
+  else if ((params as any).url) {
     try {
       const url = new URL((params as any).url);
       code = url.searchParams.get('code');
@@ -214,9 +242,11 @@ function formatTokenError(res: any): string {
     
     // Add helpful tips
     if (errorData.error === 'invalid_client') {
-      errorMsg += '\n\nTip: Check your Client ID and Secret in settings.';
+      errorMsg += '\n\nTip: Check your Client ID and Secret in settings. For apps without a secret, leave the Client Secret field empty.';
+    } else if (errorData.error === 'invalid_request') {
+      errorMsg += '\n\nTip: Ensure your Redirect URI exactly matches what\'s registered in your MAL app settings (obsidian://cassette-auth/).';
     } else if (errorData.error === 'invalid_grant') {
-      errorMsg += '\n\nTip: The authorization code may have expired. Please try again.';
+      errorMsg += '\n\nTip: The authorization code may have expired or been used already. Please try authenticating again.';
     }
   } catch (parseError) {
     errorMsg += `: ${errorText}`;
