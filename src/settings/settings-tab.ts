@@ -83,10 +83,10 @@ export class CassetteSettingTab extends PluginSettingTab {
       // Add avatar if available
       if (userInfo.picture) {
         userSetting.controlEl.createEl('img', {
+          cls: 'cassette-user-avatar',
           attr: {
             src: userInfo.picture,
-            alt: userInfo.name,
-            style: 'width: 32px; height: 32px; border-radius: 50%; margin-left: 8px;'
+            alt: userInfo.name
           }
         });
       }
@@ -141,9 +141,9 @@ export class CassetteSettingTab extends PluginSettingTab {
             }
           });
         
-        // Style the button based on auth state
+        // Add class for sign out button styling
         if (isAuth) {
-          button.buttonEl.style.backgroundColor = 'var(--interactive-accent)';
+          button.buttonEl.addClass('cassette-signout-button');
         }
       });
 
@@ -153,9 +153,7 @@ export class CassetteSettingTab extends PluginSettingTab {
         .setName('How to get credentials')
         .setDesc('Create an app at https://myanimelist.net/apiconfig to get your Client ID and Secret. Set the redirect URI to: obsidian://cassette-auth/mal')
         .then(setting => {
-          setting.settingEl.style.borderTop = '1px solid var(--background-modifier-border)';
-          setting.settingEl.style.paddingTop = '1em';
-          setting.settingEl.style.marginTop = '1em';
+          setting.settingEl.addClass('cassette-credential-info');
         });
     }
   }
