@@ -191,11 +191,14 @@ export class CassetteSettingTab extends PluginSettingTab {
       // Create a container for user info
       const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
       
-      // Add username
-      userInfoContainer.createEl('span', {
-        cls: 'cassette-user-name',
-        text: userInfo.user.name
-      });
+      // Add username (with safe access)
+      const userName = userInfo.user?.name;
+      if (userName) {
+        userInfoContainer.createEl('span', {
+          cls: 'cassette-user-name',
+          text: userName
+        });
+      }
     }
 
     // Client ID
