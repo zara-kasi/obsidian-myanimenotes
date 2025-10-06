@@ -1,10 +1,31 @@
 // Type definitions for SIMKL authentication
 
-// Placeholder for SIMKL types
-// Add SIMKL-specific interfaces here as needed
-
 export interface SimklUserInfo {
-  // Add SIMKL user info fields when implementing SIMKL integration
-  id?: number;
-  name?: string;
+  user?: {
+    name: string;
+    id?: number;
+  };
+  account?: {
+    id: number;
+    timezone: string;
+  };
+}
+
+export interface SimklPinResponse {
+  user_code: string;
+  verification_url?: string;
+  expires_in?: number;
+  interval?: number;
+}
+
+export interface SimklTokenResponse {
+  access_token: string;
+  token_type?: string;
+  scope?: string;
+}
+
+export interface SimklAuthState {
+  userCode: string;
+  interval: number;
+  expiresIn: number;
 }
