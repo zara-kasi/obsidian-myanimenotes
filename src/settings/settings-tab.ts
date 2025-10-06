@@ -183,22 +183,30 @@ export class CassetteSettingTab extends PluginSettingTab {
     const isAuth = isSimklAuthenticated(this.plugin);
 
     // Show user info if authenticated
-    if (isAuth && this.plugin.settings.simklUserInfo?.user?.name) {
+    if (isAuth && this.plugin.settings.simklUserInfo) {
       const userInfo = this.plugin.settings.simklUserInfo;
       
       const userSetting = new Setting(container);
       
-      // Create a container for user info
+      // Create a container for avatar and name
       const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
       
-      // Add username (with safe access)
-      const userName = userInfo.user?.name;
-      if (userName) {
-        userInfoContainer.createEl('span', {
-          cls: 'cassette-user-name',
-          text: userName
+      // Add avatar if available
+      if (userInfo.picture) {
+        userInfoContainer.createEl('img', {
+          cls: 'cassette-user-avatar',
+          attr: {
+            src: userInfo.picture,
+            alt: userInfo.name
+          }
         });
       }
+      
+      // Add username
+      userInfoContainer.createEl('span', {
+        cls: 'cassette-user-name',
+        text: userInfo.name
+      });
     }
 
     // Client ID
