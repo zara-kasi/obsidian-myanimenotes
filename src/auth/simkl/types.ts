@@ -11,13 +11,6 @@ export interface SimklUserInfo {
   };
 }
 
-export interface SimklPinResponse {
-  user_code: string;
-  verification_url?: string;
-  expires_in?: number;
-  interval?: number;
-}
-
 export interface SimklTokenResponse {
   access_token: string;
   token_type?: string;
@@ -25,7 +18,14 @@ export interface SimklTokenResponse {
 }
 
 export interface SimklAuthState {
-  userCode: string;
-  interval: number;
-  expiresIn: number;
+  state: string;
+}
+
+export interface OAuthParams {
+  code?: string;
+  state?: string;
+  error?: string;
+  error_description?: string;
+  url?: string;
+  [key: string]: any;
 }
