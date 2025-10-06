@@ -2,7 +2,7 @@
 
 ---
 
-1. Go to [simkl.com/settings/developer/new](https://simkl.com/settings/developer/new) → **Create App**.  
+1. Go to [simkl.com/settings/developer/new](https://simkl.com/settings/developer/new)
 2. Fill in the following details:  
 
 | Field                | Value                                                                                                                                                                                                                                   |
