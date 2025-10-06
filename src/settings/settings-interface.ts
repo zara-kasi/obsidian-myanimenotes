@@ -1,6 +1,7 @@
 // Main settings interface for Cassette plugin
 
 import type { MALUserInfo } from '../auth/mal';
+import type { SimklUserInfo } from '../auth/simkl';
 
 export interface CassetteSettings {
   // MAL Authentication
@@ -12,13 +13,16 @@ export interface CassetteSettings {
   malUserInfo?: MALUserInfo | null;
   malAuthenticated: boolean;
   
-  // Add other platform settings here as needed
-  // anilistToken?: string;
-  // simklToken?: string;
-  // etc...
+  // SIMKL Authentication
+  simklClientId: string;
+  simklClientSecret?: string;
+  simklAccessToken?: string;
+  simklUserInfo?: SimklUserInfo | null;
+  simklAuthenticated: boolean;
 }
 
 export const DEFAULT_SETTINGS: CassetteSettings = {
+  // MAL defaults
   malClientId: '',
   malClientSecret: '',
   malAccessToken: '',
@@ -26,4 +30,11 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malTokenExpiry: null,
   malUserInfo: null,
   malAuthenticated: false,
+  
+  // SIMKL defaults
+  simklClientId: '',
+  simklClientSecret: '',
+  simklAccessToken: '',
+  simklUserInfo: null,
+  simklAuthenticated: false,
 };
