@@ -1,14 +1,9 @@
 // Type definitions for SIMKL authentication
 
 export interface SimklUserInfo {
-  user?: {
-    name: string;
-    id?: number;
-  };
-  account?: {
-    id: number;
-    timezone: string;
-  };
+  id: number;
+  name: string;
+  picture?: string;
 }
 
 export interface SimklTokenResponse {
