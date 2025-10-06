@@ -22,13 +22,36 @@ export function generateVerifier(): string {
 }
 
 /**
- * Generates code challenge from verifier
- * MAL uses 'plain' method, so challenge = verifier
+ * Generates code challenge from verifier using SHA-256
+ * Implements S256 method as per RFC 7636
  * @param verifier The code verifier
- * @returns The code challenge
+ * @returns Promise resolving to the base64url-encoded SHA-256 hash
  */
-export function generateChallenge(verifier: string): string {
-  return verifier;
+export async function generateChallenge(verifier: string): Promise<string> {
+  try {
+    // Check if SubtleCrypto is available (browser/Electron)
+    if (typeof crypto !== 'undefined' && crypto.subtle && crypto.subtle.digest) {
+      // Convert verifier string to Uint8Array
+      const encoder = new TextEncoder();
+      const data = encoder.encode(verifier);
+      
+      // Hash with SHA-256
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      
+      // Convert ArrayBuffer to Uint8Array and base64url encode
+      const hashArray = new Uint8Array(hashBuffer);
+      return base64UrlEncode(hashArray);
+    } else {
+      console.warn('[MAL-AUTH] crypto.subtle not available, falling back to plain verifier');
+      // Fallback to plain method if crypto.subtle is not available
+      // This should rarely happen in modern browsers/Electron
+      return verifier;
+    }
+  } catch (error) {
+    console.error('[MAL-AUTH] Failed to generate S256 challenge:', error);
+    // Fallback to plain method on error
+    return verifier;
+  }
 }
 
 /**
