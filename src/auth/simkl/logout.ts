@@ -2,16 +2,12 @@
 
 import { Notice } from 'obsidian';
 import type CassettePlugin from '../../main';
-import { stopPolling } from './pin-flow';
 
 /**
  * Clears all SIMKL authentication data and credentials
  * @param plugin Plugin instance
  */
 export async function logout(plugin: CassettePlugin): Promise<void> {
-  // Stop any ongoing polling
-  stopPolling();
-  
   // Clear credentials
   plugin.settings.simklClientId = '';
   plugin.settings.simklClientSecret = '';
