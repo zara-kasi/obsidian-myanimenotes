@@ -166,7 +166,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       // Create description with link
       const descEl = credentialSetting.descEl;
       descEl.createSpan({ 
-        text: 'Create an app at https://myanimelist.net/apiconfig to get your Client ID and Secret. Set the redirect URI to: obsidian://cassette-auth/mal. See our ' 
+        text: 'Create an app at `https://myanimelist.net/apiconfig/create` to get your Client ID and Secret. Set the redirect URI to: `obsidian://cassette-auth/mal`. See our ' 
       });
       descEl.createEl('a', {
         text: 'guide',
@@ -275,7 +275,7 @@ private renderSimklSection(container: HTMLElement): void {
       // Create description with link
       const descEl = credentialSetting.descEl;
       descEl.createSpan({ 
-        text: 'Create an app at https://simkl.com/settings/developer to get your Client ID and Secret. Set the redirect URI to: obsidian://cassette-auth/simkl. See our ' 
+        text: 'Create an app at `https://simkl.com/settings/developer/new` to get your Client ID and Secret. Set the redirect URI to: `obsidian://cassette-auth/simkl`. See our ' 
       });
       descEl.createEl('a', {
         text: 'guide',
