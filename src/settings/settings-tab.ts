@@ -99,7 +99,9 @@ export class CassetteSettingTab extends PluginSettingTab {
         text: userInfo.name
       });
     }
-
+    
+    // Only show Client ID and Secret when not authenticated
+   if (!isAuth) {
     // Client ID
     new Setting(container)
       .setName('Client ID')
@@ -112,7 +114,7 @@ export class CassetteSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    // Client Secret (optional)
+    // Client Secret
     new Setting(container)
       .setName('Client Secret')
       .setDesc('Your MyAnimeList Client Secret')
@@ -127,7 +129,7 @@ export class CassetteSettingTab extends PluginSettingTab {
         text.inputEl.type = 'password';
         return text;
       });
-
+   }
     // Authentication button
     new Setting(container)
       .setName(isAuth ? 'Clear' : 'Authenticate')
@@ -209,6 +211,8 @@ private renderSimklSection(container: HTMLElement): void {
       });
     }
 
+  // Only show Client ID and Secret when not authenticated
+  if (!isAuth) {
     // Client ID
     new Setting(container)
       .setName('Client ID')
@@ -236,7 +240,7 @@ private renderSimklSection(container: HTMLElement): void {
         text.inputEl.type = 'password';
         return text;
       });
-
+  }
     // Authentication button
     new Setting(container)
       .setName(isAuth ? 'Clear' : 'Authenticate')
