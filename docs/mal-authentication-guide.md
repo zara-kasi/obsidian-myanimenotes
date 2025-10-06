@@ -2,7 +2,7 @@
 
 ---
 
-1. Go to [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig/create) → **Create ID**.  
+1. Go to [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig/create)
 2. Fill in the following details:  
 
 
