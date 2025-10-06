@@ -1,12 +1,9 @@
 // SIMKL API endpoints and configuration
 
-export const SIMKL_PIN_URL = 'https://api.simkl.com/oauth/pin';
-export const SIMKL_PIN_CHECK_URL = 'https://api.simkl.com/oauth/pin/';
+export const SIMKL_AUTH_URL = 'https://simkl.com/oauth/authorize';
+export const SIMKL_TOKEN_URL = 'https://api.simkl.com/oauth/token';
 export const SIMKL_USER_URL = 'https://api.simkl.com/users/settings';
 export const REDIRECT_URI = 'obsidian://cassette-auth/simkl';
 
-// Default polling interval in seconds
-export const DEFAULT_POLL_INTERVAL = 5;
-
-// Default expiry time in seconds (15 minutes)
-export const DEFAULT_EXPIRY = 900;
+// Token expiry buffer (5 minutes in milliseconds)
+export const TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000;
