@@ -26,34 +26,39 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
     return;
   }
 
-  // Generate PKCE parameters
-  const verifier = generateVerifier();
-  const challenge = generateChallenge(verifier);
-  const state = generateState();
+  try {
+    // Generate PKCE parameters
+    const verifier = generateVerifier();
+    const challenge = await generateChallenge(verifier);
+    const state = generateState();
 
-  // Store for later validation
-  authState = { verifier, state };
+    // Store for later validation
+    authState = { verifier, state };
 
-  // Build authorization URL
-  const params = new URLSearchParams({
-    response_type: 'code',
-    client_id: plugin.settings.malClientId,
-    redirect_uri: REDIRECT_URI,
-    code_challenge: challenge,
-    code_challenge_method: 'plain',
-    state: state
-  });
+    // Build authorization URL
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: plugin.settings.malClientId,
+      redirect_uri: REDIRECT_URI,
+      code_challenge: challenge,
+      code_challenge_method: 'S256',
+      state: state
+    });
 
-  const authUrl = `${MAL_AUTH_URL}?${params.toString()}`;
+    const authUrl = `${MAL_AUTH_URL}?${params.toString()}`;
 
-  new Notice('🔐 Opening MyAnimeList login page…', 3000);
-  
-  // Open in external browser
-  if (window.require) {
-    const { shell } = window.require('electron');
-    await shell.openExternal(authUrl);
-  } else {
-    window.open(authUrl, '_blank');
+    new Notice('🔐 Opening MyAnimeList login page…', 3000);
+    
+    // Open in external browser
+    if (window.require) {
+      const { shell } = window.require('electron');
+      await shell.openExternal(authUrl);
+    } else {
+      window.open(authUrl, '_blank');
+    }
+  } catch (error) {
+    console.error('[MAL Auth] Failed to start auth flow:', error);
+    new Notice(`❌ Failed to start authentication: ${error.message}`, 5000);
   }
 }
 
