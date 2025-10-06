@@ -5,7 +5,7 @@
 
 ---
 
-1. Go to [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig) → **Create App**.  
+1. Go to [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig) → **Create ID**.  
 2. Fill in the following details:  
 
 | Field | Value |
