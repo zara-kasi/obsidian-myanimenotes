@@ -1,7 +1,7 @@
 // Main entry point for SIMKL authentication module
 
 // Re-export all public APIs
-export { startPinFlow, stopPolling } from './pin-flow';
+export { startAuthFlow, handleOAuthRedirect } from './oauth-flow';
 export { logout } from './logout';
 export { 
   isTokenValid, 
@@ -19,7 +19,6 @@ export {
 // Re-export types
 export type { 
   SimklUserInfo, 
-  SimklPinResponse, 
   SimklTokenResponse,
   SimklAuthState
 } from './types';
