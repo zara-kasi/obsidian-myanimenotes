@@ -3,7 +3,7 @@
 	"name": "Cassette",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Make your media a part of your knowledge. Sync your media items from MyAnimeList, AniList, and Simkl directly into your vault.",
+	"description": "Make your media a part of your knowledge. Sync your media items from MyAnimeList and Simkl directly into your vault.",
 	"author": "Zarakasi",
 	"authorUrl": "https://github.com/zara-kasi",
 	"isDesktopOnly": false
