@@ -129,14 +129,14 @@ export class CassetteSettingTab extends PluginSettingTab {
 
     // Authentication button
     new Setting(container)
-      .setName(isAuth ? 'Sign Out' : 'Authenticate')
+      .setName(isAuth ? 'Clear' : 'Authenticate')
       .setDesc(isAuth 
-        ? 'Sign out from MyAnimeList' 
+        ? 'Clear all MyAnimeList credentials and authentication data' 
         : 'Sign in to MyAnimeList to sync your anime list'
       )
       .addButton(button => {
         button
-          .setButtonText(isAuth ? 'Sign Out' : 'Authenticate')
+          .setButtonText(isAuth ? 'Clear' : 'Authenticate')
           .setCta()
           .onClick(async () => {
             if (isAuth) {
@@ -148,9 +148,9 @@ export class CassetteSettingTab extends PluginSettingTab {
             }
           });
         
-        // Add class for sign out button styling
+        // Add class for clear button styling
         if (isAuth) {
-          button.buttonEl.addClass('cassette-signout-button');
+          button.buttonEl.addClass('cassette-clear-button');
         }
       });
 
