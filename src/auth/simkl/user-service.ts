@@ -28,7 +28,15 @@ export async function fetchUserInfo(plugin: CassettePlugin): Promise<void> {
     throw new Error(`Could not fetch SIMKL user info (HTTP ${res.status})`);
   }
   
-  plugin.settings.simklUserInfo = res.json;
+  const fullResponse = res.json || JSON.parse(res.text);
+  
+  // Extract only necessary fields in the same format as MAL
+  plugin.settings.simklUserInfo = {
+    id: fullResponse.user?.id || fullResponse.account?.id,
+    name: fullResponse.user?.name,
+    picture: fullResponse.user?.avatar || fullResponse.user?.avatar_url
+  };
+  
   await plugin.saveSettings();
 }
 
@@ -56,7 +64,7 @@ export async function getAuthenticatedUsername(plugin: CassettePlugin): Promise<
     await fetchUserInfo(plugin);
   }
 
-  const name = plugin.settings.simklUserInfo?.user?.name;
+  const name = plugin.settings.simklUserInfo?.name;
   if (!name) {
     throw new Error('Could not fetch SIMKL username');
   }
