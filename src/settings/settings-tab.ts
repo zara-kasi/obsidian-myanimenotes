@@ -2,8 +2,8 @@
 
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import CassettePlugin from '../main';
-import { startAuthFlow, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../auth/mal';
-import { startPinFlow, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../auth/simkl';
+import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../auth/mal';
+import { startAuthFlow as startSimklAuth, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../auth/simkl';
 
 export class CassetteSettingTab extends PluginSettingTab {
   plugin: CassettePlugin;
@@ -144,7 +144,7 @@ export class CassetteSettingTab extends PluginSettingTab {
               await malLogout(this.plugin);
               this.display(); // Refresh settings UI
             } else {
-              await startAuthFlow(this.plugin);
+              await startMALAuth(this.plugin);
               this.display();
             }
           });
@@ -245,7 +245,7 @@ export class CassetteSettingTab extends PluginSettingTab {
               await simklLogout(this.plugin);
               this.display(); // Refresh settings UI
             } else {
-              await startPinFlow(this.plugin);
+              await startSimklAuth(this.plugin);
               // UI will refresh automatically after successful auth
             }
           });
@@ -270,7 +270,7 @@ export class CassetteSettingTab extends PluginSettingTab {
         text: 'Create an app at https://simkl.com/settings/developer to get your Client ID and Secret. Set the redirect URI to: obsidian://cassette-auth/simkl. ' 
       });
       descEl.createSpan({ 
-        text: 'SIMKL uses PIN-based authentication, so you\'ll enter a PIN code after clicking Authenticate.' 
+        text: 'SIMKL uses OAuth 2.0 authentication for secure authorization.' 
       });
     }
   }
