@@ -179,7 +179,7 @@ export class CassetteSettingTab extends PluginSettingTab {
     }
   }
 
-  private renderSimklSection(container: HTMLElement): void {
+private renderSimklSection(container: HTMLElement): void {
     const isAuth = isSimklAuthenticated(this.plugin);
 
     // Show user info if authenticated
@@ -275,11 +275,16 @@ export class CassetteSettingTab extends PluginSettingTab {
       // Create description with link
       const descEl = credentialSetting.descEl;
       descEl.createSpan({ 
-        text: 'Create an app at https://simkl.com/settings/developer to get your Client ID and Secret. Set the redirect URI to: obsidian://cassette-auth/simkl. ' 
+        text: 'Create an app at https://simkl.com/settings/developer to get your Client ID and Secret. Set the redirect URI to: obsidian://cassette-auth/simkl. See our ' 
       });
-      descEl.createSpan({ 
-        text: 'SIMKL uses OAuth 2.0 authentication for secure authorization.' 
+      descEl.createEl('a', {
+        text: 'guide',
+        href: 'https://github.com/zara-kasi/cassette/blob/main/docs/simkl-authentication-guide.md'
+      }).addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open('https://github.com/zara-kasi/cassette/blob/main/docs/simkl-authentication-guide.md', '_blank');
       });
+      descEl.createSpan({ text: ' for detailed instructions.' });
     }
   }
 }
