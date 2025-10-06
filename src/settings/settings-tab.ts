@@ -155,13 +155,26 @@ export class CassetteSettingTab extends PluginSettingTab {
       });
 
     // Add info about getting credentials
-    if (!isAuth) {
-      new Setting(container)
+if (!isAuth) {
+      const credentialSetting = new Setting(container)
         .setName('How to get credentials')
-        .setDesc('Create an app at https://myanimelist.net/apiconfig to get your Client ID and Secret. Set the redirect URI to: obsidian://cassette-auth/mal')
         .then(setting => {
           setting.settingEl.addClass('cassette-credential-info');
         });
+      
+      // Create description with link
+      const descEl = credentialSetting.descEl;
+      descEl.createSpan({ 
+        text: 'Create an app at https://myanimelist.net/apiconfig to get your Client ID and Secret. Set the redirect URI to: obsidian://cassette-auth/mal. See our ' 
+      });
+      descEl.createEl('a', {
+        text: 'guide',
+        href: 'https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md'
+      }).addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open('https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md', '_blank');
+      });
+      descEl.createSpan({ text: ' for detailed instructions.' });
     }
   }
 }
