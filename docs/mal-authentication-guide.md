@@ -1,11 +1,8 @@
 # Get Client ID & Client Secret from MyAnimeList
 
-🎥 **Watch Tutorial:**  
-[![Watch the YouTube Short](https://img.youtube.com/vi/SIOmZo6MSh4/0.jpg)](https://youtube.com/shorts/SIOmZo6MSh4)
-
 ---
 
-1. Go to [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig) → **Create ID**.  
+1. Go to [myanimelist.net/apiconfig](https://myanimelist.net/apiconfig/create) → **Create ID**.  
 2. Fill in the following details:  
 
 
