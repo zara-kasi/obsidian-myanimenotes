@@ -12,7 +12,7 @@ import { MAL_USER_URL } from './constants';
  */
 export async function fetchUserInfo(plugin: CassettePlugin): Promise<void> {
   const res = await requestUrl({
-    url: `${MAL_USER_URL}?fields=id,name,picture`,  // Only request what you need
+    url: MAL_USER_URL,
     method: 'GET',
     headers: { 
       'Authorization': `Bearer ${plugin.settings.malAccessToken}`
@@ -20,12 +20,19 @@ export async function fetchUserInfo(plugin: CassettePlugin): Promise<void> {
     throw: false
   });
   
-  
   if (res.status < 200 || res.status >= 300) {
     throw new Error(`Could not fetch user info (HTTP ${res.status})`);
   }
   
-  plugin.settings.malUserInfo = res.json || JSON.parse(res.text);
+  const fullResponse = res.json || JSON.parse(res.text);
+  
+  // Only save necessary fields
+  plugin.settings.malUserInfo = {
+    id: fullResponse.id,
+    name: fullResponse.name,
+    picture: fullResponse.picture
+  };
+  
   await plugin.saveSettings();
 }
 
