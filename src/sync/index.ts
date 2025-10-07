@@ -12,15 +12,12 @@ export type {
   SyncResult,
 } from './types';
 
-// Export enums (value exports)
+// Export enums (value exports only - no type exports to avoid duplicates)
 export { MediaStatus, UserListStatus, MediaCategory } from './types';
-
-// Re-export enum types for convenience
-export type { MediaStatus, UserListStatus, MediaCategory } from './types';
 
 // Export MAL services
 export type { MALSyncOptions } from './services/mal-sync-service';
-export { syncMAL, quickSyncMAL } from './services/mal-sync-service';
+export { syncMAL } from './services/mal-sync-service';
 
 export {
   fetchCompleteMALAnimeList,
