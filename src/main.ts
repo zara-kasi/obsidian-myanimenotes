@@ -5,7 +5,7 @@ import { CassetteSettingTab } from './settings/settings-tab';
 import { CassetteSettings, DEFAULT_SETTINGS } from './settings/settings-interface';
 import { handleOAuthRedirect as handleMALRedirect } from './auth/mal';
 import { handleOAuthRedirect as handleSimklRedirect } from './auth/simkl';
-import { SyncManager, createSyncManager } from './sync/sync-manager';
+import { SyncManager, createSyncManager, MediaCategory } from './sync';
 
 export default class CassettePlugin extends Plugin {
   settings: CassetteSettings;
@@ -98,7 +98,7 @@ export default class CassettePlugin extends Plugin {
       name: 'Sync currently watching anime',
       callback: async () => {
         if (!this.syncManager) return;
-        await this.syncManager.syncByStatus('anime', 'watching');
+        await this.syncManager.syncByStatus(MediaCategory.ANIME, 'watching');
       },
     });
 
@@ -108,7 +108,7 @@ export default class CassettePlugin extends Plugin {
       name: 'Sync currently reading manga',
       callback: async () => {
         if (!this.syncManager) return;
-        await this.syncManager.syncByStatus('manga', 'reading');
+        await this.syncManager.syncByStatus(MediaCategory.MANGA, 'reading');
       },
     });
   }
