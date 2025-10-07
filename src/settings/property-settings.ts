@@ -9,13 +9,6 @@ export function renderPropertyMappingSection(
   container: HTMLElement,
   plugin: CassettePlugin
 ): void {
-  container.createEl('h3', { text: 'Property Field Names' });
-  
-  container.createEl('p', { 
-    text: 'Customize the property names used in your note frontmatter. Leave blank to use defaults.',
-    cls: 'setting-item-description'
-  });
-  
   // Toggle for custom mapping
   new Setting(container)
     .setName('Use custom property names')
