@@ -1,71 +1,62 @@
-// src/sync/services/mal-api-service.ts
-// MAL API service for fetching anime and manga data
-
 import { requestUrl } from 'obsidian';
 import type CassettePlugin from '../../main';
 import { ensureValidToken, getAuthHeaders } from '../../auth/mal';
 
 const MAL_API_BASE = 'https://api.myanimelist.net/v2';
 
-// Field sets for different request types
+// Optimized field sets - only fields we actually use from the reference document
 const ANIME_FIELDS = [
+  // Basic info
   'id',
   'title',
   'main_picture',
   'alternative_titles',
-  'start_date',
-  'end_date',
+  
+  // Description
   'synopsis',
+  
+  // Scores
   'mean',
-  'rank',
-  'popularity',
-  'num_list_users',
-  'num_scoring_users',
-  'nsfw',
+  
+  // Categories
   'genres',
   'media_type',
   'status',
+  
+  // Anime-specific
   'num_episodes',
   'start_season',
-  'broadcast',
   'source',
-  'average_episode_duration',
-  'rating',
-  'studios',
-  'pictures',
-  'background',
-  'related_anime',
-  'related_manga',
-  'recommendations',
-  'statistics'
+  
+  // Additional pictures
+  'pictures'
 ].join(',');
 
 const MANGA_FIELDS = [
+  // Basic info
   'id',
   'title',
   'main_picture',
   'alternative_titles',
-  'start_date',
-  'end_date',
+  
+  // Description
   'synopsis',
+  
+  // Scores
   'mean',
-  'rank',
-  'popularity',
-  'num_list_users',
-  'num_scoring_users',
-  'nsfw',
+  
+  // Categories
   'genres',
   'media_type',
   'status',
+  
+  // Manga-specific
   'num_volumes',
   'num_chapters',
   'authors{first_name,last_name}',
-  'pictures',
-  'background',
-  'related_anime',
-  'related_manga',
-  'recommendations',
-  'serialization'
+  
+  // Additional pictures
+  'pictures'
 ].join(',');
 
 /**
@@ -127,6 +118,15 @@ async function fetchAllPages(
     const data = await makeMALRequest(plugin, endpoint, requestParams);
     
     if (data.data && Array.isArray(data.data)) {
+      // Log first item to see structure
+      if (offset === 0 && data.data.length > 0) {
+        console.log('[MAL API] Sample response structure:', {
+          hasNode: !!data.data[0].node,
+          hasListStatus: !!data.data[0].list_status,
+          listStatusKeys: data.data[0].list_status ? Object.keys(data.data[0].list_status) : [],
+          sampleItem: data.data[0]
+        });
+      }
       allItems.push(...data.data);
     }
 
@@ -147,6 +147,7 @@ async function fetchAllPages(
 
 /**
  * Fetches complete anime list for authenticated user
+ * Note: User list data (status, score, episodes watched) comes automatically with /users/@me/animelist
  */
 export async function fetchCompleteMALAnimeList(plugin: CassettePlugin): Promise<any[]> {
   return fetchAllPages(plugin, '/users/@me/animelist', {
@@ -157,6 +158,7 @@ export async function fetchCompleteMALAnimeList(plugin: CassettePlugin): Promise
 
 /**
  * Fetches complete manga list for authenticated user
+ * Note: User list data (status, score, volumes/chapters read) comes automatically with /users/@me/mangalist
  */
 export async function fetchCompleteMALMangaList(plugin: CassettePlugin): Promise<any[]> {
   return fetchAllPages(plugin, '/users/@me/mangalist', {
