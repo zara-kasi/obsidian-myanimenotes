@@ -25,7 +25,6 @@ export interface PropertyMapping {
   
   // Anime-specific
   numEpisodes?: string;
-  startSeason?: string;
   startSeasonYear?: string;
   startSeasonName?: string;
   source?: string;
@@ -47,34 +46,53 @@ export interface PropertyMapping {
 }
 
 /**
- * Default property mappings based on your specification
+ * Default property mappings based on MAL specification
+ * Matches the template from the mapping document
  */
 export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
+  // Basic fields
   id: 'id',
   title: 'title',
   category: 'category',
   platform: 'platform',
+  
+  // Visual
   mainPicture: 'cover',
   pictures: 'banner',
-  aliases: 'aliases', // Obsidian's built-in property for alternative titles
+  
+  // Alternative titles - uses Obsidian's built-in aliases
+  aliases: 'aliases',
+  
+  // Description
   synopsis: 'synopsis',
+  
+  // Metadata
   mediaType: 'type',
   status: 'status',
   mean: 'score',
+  
+  // Genres
   genres: 'genres',
+  
+  // Anime-specific (matching document 1)
   numEpisodes: 'total_episodes',
-  startSeason: 'start_season',
   startSeasonYear: 'season_year',
   startSeasonName: 'season_name',
   source: 'source',
+  
+  // Manga-specific (matching document 1)
   numVolumes: 'total_volumes',
   numChapters: 'total_chapters',
   authors: 'authors',
+  
+  // User list data (matching document 1)
   userStatus: 'list',
   userScore: 'rating',
   numEpisodesWatched: 'episodes',
   numVolumesRead: 'volumes_read',
   numChaptersRead: 'chapters_read',
+  
+  // Sync metadata
   lastSynced: 'last_synced',
 };
 
