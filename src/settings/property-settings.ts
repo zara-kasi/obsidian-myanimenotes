@@ -32,21 +32,24 @@ export function renderPropertyMappingSection(
     return;
   }
   
-  // Common fields
+  // Common fields (for both anime and manga per updated reference)
   const commonFields = [
     { key: 'id', label: 'ID', default: 'id' },
     { key: 'title', label: 'Title', default: 'title' },
     { key: 'category', label: 'Category', default: 'category' },
     { key: 'platform', label: 'Platform', default: 'platform' },
-    { key: 'mainPicture', label: 'Main Picture/Cover', default: 'cover' },
+    { key: 'mainPicture', label: 'Cover (Main Picture)', default: 'cover' },
+    { key: 'pictures', label: 'Banner (Additional Pictures)', default: 'banner' },
     { key: 'synopsis', label: 'Synopsis', default: 'synopsis' },
-    { key: 'mediaType', label: 'Media Type', default: 'type' },
+    { key: 'mediaType', label: 'Type', default: 'type' },
     { key: 'status', label: 'Status', default: 'status' },
-    { key: 'mean', label: 'Average Score', default: 'score' },
+    { key: 'mean', label: 'Score (Average)', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
-    { key: 'userStatus', label: 'My Status', default: 'list' },
-    { key: 'userScore', label: 'My Score', default: 'rating' },
-    { key: 'pictures', label: 'Banner/Additional Pictures', default: 'banner' },
+    { key: 'seasonYear', label: 'Season Year', default: 'season_year' },
+    { key: 'seasonName', label: 'Season Name', default: 'season_name' },
+    { key: 'source', label: 'Source Material', default: 'source' },
+    { key: 'userStatus', label: 'List Status', default: 'list' },
+    { key: 'userScore', label: 'Rating (My Score)', default: 'rating' },
   ];
   
   container.createEl('h4', { text: 'Common Fields' });
@@ -68,9 +71,7 @@ export function renderPropertyMappingSection(
   const animeFields = [
     { key: 'numEpisodes', label: 'Total Episodes', default: 'total_episodes' },
     { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'episodes' },
-    { key: 'startSeasonYear', label: 'Season Year', default: 'season_year' },
-    { key: 'startSeasonName', label: 'Season Name', default: 'season_name' },
-    { key: 'source', label: 'Source Material', default: 'source' },
+    { key: 'startSeason', label: 'Start Season (combined format)', default: 'start_season' },
   ];
   
   container.createEl('h4', { text: 'Anime-Specific Fields' });
