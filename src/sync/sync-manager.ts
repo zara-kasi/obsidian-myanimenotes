@@ -75,13 +75,17 @@ export class SyncManager {
   ): Promise<UniversalMediaItem[]> {
     console.log(`[Sync Manager] Quick sync for ${category}...`);
     
-    const options: CompleteSyncOptions = {
+    const options: MALSyncOptions = {
       syncAnime: category === MediaCategory.ANIME,
       syncManga: category === MediaCategory.MANGA,
+    };
+    
+    const completeOptions: CompleteSyncOptions = {
+      ...options,
       saveToVault
     };
     
-    const { items } = await this.syncFromMAL(options);
+    const { items } = await this.syncFromMAL(completeOptions);
     return items;
   }
 
@@ -117,17 +121,21 @@ export class SyncManager {
   ): Promise<UniversalMediaItem[]> {
     console.log(`[Sync Manager] Syncing ${category} with status ${status}...`);
     
-    const options: CompleteSyncOptions = {
+    const malOptions: MALSyncOptions = {
       syncAnime: category === MediaCategory.ANIME,
       syncManga: category === MediaCategory.MANGA,
-      saveToVault,
     };
     
     if (category === MediaCategory.ANIME) {
-      options.animeStatuses = [status];
+      malOptions.animeStatuses = [status];
     } else {
-      options.mangaStatuses = [status];
+      malOptions.mangaStatuses = [status];
     }
+    
+    const options: CompleteSyncOptions = {
+      ...malOptions,
+      saveToVault,
+    };
     
     const { items } = await this.syncFromMAL(options);
     return items;
