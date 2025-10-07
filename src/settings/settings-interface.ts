@@ -1,7 +1,7 @@
 import type { MALUserInfo } from '../auth/mal';
 import type { SimklUserInfo } from '../auth/simkl';
-import type { PropertyMapping, PropertyTemplate } from '../sync/storage/property-mapping';
-import { DEFAULT_PROPERTY_MAPPING, DEFAULT_PROPERTY_TEMPLATE } from '../sync/storage/property-mapping';
+import type { PropertyMapping } from '../sync/storage/property-mapping';
+import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
 
 export interface CassetteSettings {
   // MAL Authentication
@@ -26,7 +26,6 @@ export interface CassetteSettings {
   
   // Property Customization
   propertyMapping: PropertyMapping;
-  propertyTemplate: PropertyTemplate;
   useCustomPropertyMapping: boolean;
   
   // Sync Settings
@@ -62,7 +61,6 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   
   // Property customization defaults
   propertyMapping: DEFAULT_PROPERTY_MAPPING,
-  propertyTemplate: DEFAULT_PROPERTY_TEMPLATE,
   useCustomPropertyMapping: false,
   
   // Sync defaults
