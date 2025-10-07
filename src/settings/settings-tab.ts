@@ -139,23 +139,26 @@ export class CassetteSettingTab extends PluginSettingTab {
         : 'Sign in to MyAnimeList to sync your anime list'
       )
       .addButton(button => {
-        button
-          .setButtonText(isAuth ? 'Clear' : 'Authenticate')
-          .setCta()
-          .onClick(async () => {
-            if (isAuth) {
-              await malLogout(this.plugin);
-              this.display();
-            } else {
-              await startMALAuth(this.plugin);
-              this.display();
-            }
-          });
-        
-        if (isAuth) {
-          button.buttonEl.addClass('cassette-clear-button');
-        }
-      });
+  button
+    .setButtonText(isAuth ? 'Clear' : 'Authenticate')
+    .onClick(async () => {
+      if (isAuth) {
+        await malLogout(this.plugin);
+        this.display();
+      } else {
+        await startMALAuth(this.plugin);
+        this.display();
+      }
+    });
+
+  if (isAuth) {
+    // Use native red warning tone
+    button.buttonEl.addClass('mod-warning');
+  } else {
+    // Default authenticate button: blue accent
+    button.setCta();
+  }
+});
 
     // Add info about getting credentials
     if (!isAuth) {
@@ -246,22 +249,20 @@ export class CassetteSettingTab extends PluginSettingTab {
         : 'Sign in to SIMKL to sync your watch list'
       )
       .addButton(button => {
-        button
-          .setButtonText(isAuth ? 'Clear' : 'Authenticate')
-          .setCta()
-          .onClick(async () => {
-            if (isAuth) {
-              await simklLogout(this.plugin);
-              this.display();
-            } else {
-              await startSimklAuth(this.plugin);
-            }
-          });
-        
-        if (isAuth) {
-          button.buttonEl.addClass('cassette-clear-button');
-        }
-      });
+  button
+    .setButtonText(isAuth ? 'Clear' : 'Authenticate')
+    .onClick(async () => {
+      if (isAuth) {
+        await simklLogout(this.plugin);
+        this.display();
+      } else {
+        await startSimklAuth(this.plugin);
+        this.display();
+      }
+    });
+
+  button.buttonEl.addClass(isAuth ? 'mod-warning' : 'mod-cta');
+});
 
     if (!isAuth) {
       const credentialSetting = new Setting(container)
