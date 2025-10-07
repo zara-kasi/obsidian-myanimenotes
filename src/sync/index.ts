@@ -1,5 +1,3 @@
-// Main entry point for sync module
-
 // Export types (type-only exports)
 export type {
   UniversalMediaItem,
@@ -41,6 +39,19 @@ export {
   saveMediaItems,
   saveMediaItemsByCategory,
 } from './storage/storage-service';
+
+// Export property mapping types
+export type {
+  PropertyMapping,
+  PropertyTemplate,
+} from './storage/property-mapping';
+
+export {
+  DEFAULT_PROPERTY_MAPPING,
+  DEFAULT_PROPERTY_TEMPLATE,
+  getMappedPropertyName,
+  getPropertyTemplate,
+} from './storage/property-mapping';
 
 // Export sync manager
 export type { CompleteSyncOptions } from './sync-manager';
