@@ -3,6 +3,7 @@ import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../types';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName, DEFAULT_PROPERTY_MAPPING } from './property-mapping';
+import * as yaml from 'js-yaml';
 
 /**
  * Storage configuration
@@ -56,40 +57,6 @@ function sanitizeSynopsis(synopsis: string | undefined): string {
 }
 
 /**
- * Converts a value to YAML-safe format
- */
-function toYAMLValue(value: any): string {
-  if (value === null || value === undefined) {
-    return '""';
-  }
-  
-  if (typeof value === 'string') {
-    // Always wrap strings in quotes for safety
-    return `"${value.replace(/"/g, '\\"')}"`;
-  }
-  
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return String(value);
-  }
-  
-  if (Array.isArray(value)) {
-    if (value.length === 0) return '[]';
-    return '\n' + value.map(v => {
-      if (typeof v === 'string') {
-        return `  - "${v.replace(/"/g, '\\"')}"`;
-      }
-      return `  - ${v}`;
-    }).join('\n');
-  }
-  
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-  
-  return String(value);
-}
-
-/**
  * Formats start_season as "season year" (e.g., "winter 2024")
  */
 function formatStartSeason(season?: { year?: number; season?: string }): string | undefined {
@@ -98,9 +65,62 @@ function formatStartSeason(season?: { year?: number; season?: string }): string 
 }
 
 /**
- * Builds frontmatter properties from a media item
+ * Parses existing file content to extract frontmatter and body
+ * Returns null if file doesn't exist or has invalid structure
  */
-function buildFrontmatterProperties(
+function parseExistingFile(content: string): { 
+  frontmatter: Record<string, any>; 
+  body: string;
+} | null {
+  // Check if content starts with frontmatter delimiter
+  if (!content.startsWith('---\n') && !content.startsWith('---\r\n')) {
+    return null;
+  }
+
+  // Find the closing frontmatter delimiter
+  const lines = content.split('\n');
+  let closingIndex = -1;
+  
+  // Start from line 1 (skip the opening ---)
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '---') {
+      closingIndex = i;
+      break;
+    }
+  }
+
+  // No closing delimiter found
+  if (closingIndex === -1) {
+    return null;
+  }
+
+  // Extract frontmatter content (between the --- delimiters)
+  const frontmatterText = lines.slice(1, closingIndex).join('\n');
+  
+  // Extract body content (everything after closing ---)
+  const body = lines.slice(closingIndex + 1).join('\n');
+
+  // Parse YAML frontmatter
+  let frontmatter: Record<string, any> = {};
+  try {
+    const parsed = yaml.load(frontmatterText);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      frontmatter = parsed as Record<string, any>;
+    }
+  } catch (error) {
+    console.warn('[Storage] Failed to parse existing frontmatter:', error);
+    // Return empty frontmatter but preserve body
+    return { frontmatter: {}, body };
+  }
+
+  return { frontmatter, body };
+}
+
+/**
+ * Builds frontmatter properties from a media item
+ * These are the "controlled" properties that sync will manage
+ */
+function buildSyncedFrontmatterProperties(
   item: UniversalMediaItem,
   mapping: PropertyMapping
 ): Record<string, any> {
@@ -208,20 +228,29 @@ function buildFrontmatterProperties(
 }
 
 /**
- * Generates markdown content with only frontmatter (empty body)
+ * Merges synced properties into existing frontmatter
+ * Preserves all user-added properties that aren't controlled by sync
  */
-function generateMarkdown(
-  item: UniversalMediaItem,
-  config: StorageConfig
-): string {
-  const mapping = config.propertyMapping || DEFAULT_PROPERTY_MAPPING;
+function mergeFrontmatter(
+  existingFrontmatter: Record<string, any>,
+  syncedProperties: Record<string, any>
+): Record<string, any> {
+  // Start with existing frontmatter to preserve user properties
+  const merged = { ...existingFrontmatter };
   
-  // Build properties
-  const properties = buildFrontmatterProperties(item, mapping);
+  // Overlay synced properties (controlled fields)
+  // This will update existing controlled fields or add new ones
+  Object.entries(syncedProperties).forEach(([key, value]) => {
+    merged[key] = value;
+  });
   
-  // Generate YAML frontmatter
-  const lines: string[] = ['---'];
-  
+  return merged;
+}
+
+/**
+ * Serializes frontmatter to YAML string with consistent formatting
+ */
+function serializeFrontmatter(frontmatter: Record<string, any>): string {
   // Define property order matching the reference document structure
   const propertyOrder = [
     'id',
@@ -252,39 +281,85 @@ function generateMarkdown(
     'last_synced'
   ];
   
-  // Add properties in order
+  // Create ordered object
+  const ordered: Record<string, any> = {};
+  
+  // Add properties in defined order
   propertyOrder.forEach(key => {
-    if (properties.hasOwnProperty(key)) {
-      const value = properties[key];
-      const yamlValue = toYAMLValue(value);
-      if (yamlValue.startsWith('\n')) {
-        // Array values
-        lines.push(`${key}:${yamlValue}`);
-      } else {
-        lines.push(`${key}: ${yamlValue}`);
-      }
-      delete properties[key]; // Remove so we don't add it again
+    if (frontmatter.hasOwnProperty(key)) {
+      ordered[key] = frontmatter[key];
     }
   });
   
-  // Add any remaining properties not in the order list
-  Object.entries(properties).forEach(([key, value]) => {
-    const yamlValue = toYAMLValue(value);
-    if (yamlValue.startsWith('\n')) {
-      lines.push(`${key}:${yamlValue}`);
-    } else {
-      lines.push(`${key}: ${yamlValue}`);
+  // Add any remaining properties not in the order list (user-defined properties)
+  Object.keys(frontmatter).forEach(key => {
+    if (!ordered.hasOwnProperty(key)) {
+      ordered[key] = frontmatter[key];
     }
   });
   
-  lines.push('---');
-  lines.push(''); // Empty body
-  
-  return lines.join('\n');
+  // Serialize to YAML with consistent formatting
+  try {
+    return yaml.dump(ordered, {
+      indent: 2,
+      lineWidth: -1, // No line wrapping
+      noRefs: true, // Don't use YAML references
+      sortKeys: false // Maintain our custom order
+    });
+  } catch (error) {
+    console.error('[Storage] Failed to serialize frontmatter:', error);
+    throw new Error(`Failed to serialize frontmatter: ${error.message}`);
+  }
 }
 
 /**
- * Saves a media item to vault (frontmatter only)
+ * Generates complete markdown content with merged frontmatter and preserved body
+ */
+function generateMarkdownWithPreservedContent(
+  item: UniversalMediaItem,
+  config: StorageConfig,
+  existingContent?: string
+): string {
+  const mapping = config.propertyMapping || DEFAULT_PROPERTY_MAPPING;
+  
+  // Build synced properties (controlled by sync system)
+  const syncedProperties = buildSyncedFrontmatterProperties(item, mapping);
+  
+  // Parse existing file if it exists
+  let finalFrontmatter: Record<string, any>;
+  let body = ''; // Default to empty body for new files
+  
+  if (existingContent) {
+    const parsed = parseExistingFile(existingContent);
+    if (parsed) {
+      // Merge: preserve existing frontmatter + user body
+      finalFrontmatter = mergeFrontmatter(parsed.frontmatter, syncedProperties);
+      body = parsed.body; // Preserve existing body exactly
+      console.log('[Storage] Merged frontmatter and preserved body');
+    } else {
+      // File exists but has no valid frontmatter structure
+      // Treat entire content as body and add new frontmatter
+      finalFrontmatter = syncedProperties;
+      body = existingContent; // Preserve entire content as body
+      console.log('[Storage] No existing frontmatter found, preserving content as body');
+    }
+  } else {
+    // New file: use synced properties only
+    finalFrontmatter = syncedProperties;
+    console.log('[Storage] Creating new file with synced frontmatter');
+  }
+  
+  // Serialize frontmatter to YAML
+  const yamlContent = serializeFrontmatter(finalFrontmatter);
+  
+  // Build final markdown content
+  // Format: ---\n<yaml>\n---\n<body>
+  return `---\n${yamlContent}---\n${body}`;
+}
+
+/**
+ * Saves a media item to vault with safe frontmatter merging
+ * SAFETY GUARANTEE: Preserves existing body content and non-synced frontmatter properties
  */
 export async function saveMediaItem(
   plugin: CassettePlugin,
@@ -306,16 +381,24 @@ export async function saveMediaItem(
   const filename = `${sanitizedTitle}.md`;
   const filePath = `${folderPath}/${filename}`;
   
-  // Generate markdown content (frontmatter only)
-  const content = generateMarkdown(item, config);
-  
-  // Check if file exists
+  // Check if file exists and read its content
   const existingFile = vault.getAbstractFileByPath(filePath);
+  let existingContent: string | undefined;
   
   if (existingFile instanceof TFile) {
-    // Update existing file
+    // Read existing content to preserve body and user properties
+    existingContent = await vault.read(existingFile);
+    console.log(`[Storage] Read existing file: ${filePath} (${existingContent.length} chars)`);
+  }
+  
+  // Generate markdown content with safe merging
+  // This preserves existing body and merges frontmatter properties
+  const content = generateMarkdownWithPreservedContent(item, config, existingContent);
+  
+  if (existingFile instanceof TFile) {
+    // Update existing file - frontmatter merged, body preserved
     await vault.modify(existingFile, content);
-    console.log(`[Storage] Updated: ${filePath}`);
+    console.log(`[Storage] Updated: ${filePath} (preserved body, merged frontmatter)`);
   } else {
     // Create new file
     await vault.create(filePath, content);
