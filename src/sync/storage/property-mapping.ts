@@ -1,6 +1,3 @@
-// src/sync/storage/property-mapping.ts
-// Property mapping configuration for customizable frontmatter
-
 export interface PropertyMapping {
   // Basic fields
   id?: string;
@@ -12,10 +9,8 @@ export interface PropertyMapping {
   mainPicture?: string;
   pictures?: string;
   
-  // Alternative titles
-  alternativeTitlesEn?: string;
-  alternativeTitlesJa?: string;
-  alternativeTitlesSynonyms?: string;
+  // Alternative titles (Obsidian's aliases property)
+  aliases?: string;
   
   // Description
   synopsis?: string;
@@ -24,8 +19,6 @@ export interface PropertyMapping {
   mediaType?: string;
   status?: string;
   mean?: string;
-  rank?: string;
-  popularity?: string;
   
   // Genres
   genres?: string;
@@ -54,7 +47,7 @@ export interface PropertyMapping {
 }
 
 /**
- * Default property mappings
+ * Default property mappings based on your specification
  */
 export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   id: 'id',
@@ -62,97 +55,27 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   category: 'category',
   platform: 'platform',
   mainPicture: 'cover',
-  pictures: 'images',
-  alternativeTitlesEn: 'title_english',
-  alternativeTitlesJa: 'title_japanese',
-  alternativeTitlesSynonyms: 'title_synonyms',
+  pictures: 'banner',
+  aliases: 'aliases', // Obsidian's built-in property for alternative titles
   synopsis: 'synopsis',
   mediaType: 'type',
   status: 'status',
   mean: 'score',
-  rank: 'rank',
-  popularity: 'popularity',
   genres: 'genres',
-  numEpisodes: 'episodes',
-  startSeason: 'season',
+  numEpisodes: 'total_episodes',
+  startSeason: 'start_season',
   startSeasonYear: 'season_year',
   startSeasonName: 'season_name',
   source: 'source',
-  numVolumes: 'volumes',
-  numChapters: 'chapters',
+  numVolumes: 'total_volumes',
+  numChapters: 'total_chapters',
   authors: 'authors',
-  userStatus: 'my_status',
-  userScore: 'my_score',
-  numEpisodesWatched: 'episodes_watched',
+  userStatus: 'list',
+  userScore: 'rating',
+  numEpisodesWatched: 'episodes',
   numVolumesRead: 'volumes_read',
   numChaptersRead: 'chapters_read',
   lastSynced: 'last_synced',
-};
-
-/**
- * Property template defining the order and structure
- */
-export interface PropertyTemplate {
-  anime: string[];
-  manga: string[];
-}
-
-/**
- * Default property order templates
- */
-export const DEFAULT_PROPERTY_TEMPLATE: PropertyTemplate = {
-  anime: [
-    'id',
-    'title',
-    'alternativeTitlesEn',
-    'alternativeTitlesJa',
-    'alternativeTitlesSynonyms',
-    'category',
-    'platform',
-    'mediaType',
-    'status',
-    'userStatus',
-    'userScore',
-    'mean',
-    'rank',
-    'popularity',
-    'numEpisodes',
-    'numEpisodesWatched',
-    'startSeasonYear',
-    'startSeasonName',
-    'source',
-    'genres',
-    'mainPicture',
-    'pictures',
-    'synopsis',
-    'lastSynced',
-  ],
-  manga: [
-    'id',
-    'title',
-    'alternativeTitlesEn',
-    'alternativeTitlesJa',
-    'alternativeTitlesSynonyms',
-    'category',
-    'platform',
-    'mediaType',
-    'status',
-    'userStatus',
-    'userScore',
-    'mean',
-    'rank',
-    'popularity',
-    'numVolumes',
-    'numVolumesRead',
-    'numChapters',
-    'numChaptersRead',
-    'authors',
-    'genres',
-    'mainPicture',
-    'pictures',
-    'synopsis',
-    'lastSynced',
-  ],
 };
 
 /**
@@ -163,14 +86,4 @@ export function getMappedPropertyName(
   mapping: PropertyMapping
 ): string {
   return mapping[key] || DEFAULT_PROPERTY_MAPPING[key] || key;
-}
-
-/**
- * Gets the template for a category
- */
-export function getPropertyTemplate(
-  category: 'anime' | 'manga',
-  template: PropertyTemplate
-): string[] {
-  return template[category] || DEFAULT_PROPERTY_TEMPLATE[category];
 }
