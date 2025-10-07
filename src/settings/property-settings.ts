@@ -1,9 +1,6 @@
-// src/settings/property-settings.ts
-// Settings UI for property customization
-
 import { Setting } from 'obsidian';
 import type CassettePlugin from '../main';
-import { DEFAULT_PROPERTY_MAPPING, DEFAULT_PROPERTY_TEMPLATE } from '../sync/storage/property-mapping';
+import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
 
 /**
  * Renders property mapping settings section
@@ -47,8 +44,9 @@ export function renderPropertyMappingSection(
     { key: 'status', label: 'Status', default: 'status' },
     { key: 'mean', label: 'Average Score', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
-    { key: 'userStatus', label: 'My Status', default: 'my_status' },
-    { key: 'userScore', label: 'My Score', default: 'my_score' },
+    { key: 'userStatus', label: 'My Status', default: 'list' },
+    { key: 'userScore', label: 'My Score', default: 'rating' },
+    { key: 'pictures', label: 'Banner/Additional Pictures', default: 'banner' },
   ];
   
   container.createEl('h4', { text: 'Common Fields' });
@@ -68,8 +66,8 @@ export function renderPropertyMappingSection(
   
   // Anime-specific fields
   const animeFields = [
-    { key: 'numEpisodes', label: 'Number of Episodes', default: 'episodes' },
-    { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'episodes_watched' },
+    { key: 'numEpisodes', label: 'Total Episodes', default: 'total_episodes' },
+    { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'episodes' },
     { key: 'startSeasonYear', label: 'Season Year', default: 'season_year' },
     { key: 'startSeasonName', label: 'Season Name', default: 'season_name' },
     { key: 'source', label: 'Source Material', default: 'source' },
@@ -92,9 +90,9 @@ export function renderPropertyMappingSection(
   
   // Manga-specific fields
   const mangaFields = [
-    { key: 'numVolumes', label: 'Number of Volumes', default: 'volumes' },
+    { key: 'numVolumes', label: 'Total Volumes', default: 'total_volumes' },
     { key: 'numVolumesRead', label: 'Volumes Read', default: 'volumes_read' },
-    { key: 'numChapters', label: 'Number of Chapters', default: 'chapters' },
+    { key: 'numChapters', label: 'Total Chapters', default: 'total_chapters' },
     { key: 'numChaptersRead', label: 'Chapters Read', default: 'chapters_read' },
     { key: 'authors', label: 'Authors', default: 'authors' },
   ];
@@ -126,102 +124,4 @@ export function renderPropertyMappingSection(
         await plugin.saveSettings();
         plugin.refreshSettingsUI();
       }));
-}
-
-/**
- * Renders property order template settings section
- */
-export function renderPropertyOrderSection(
-  container: HTMLElement,
-  plugin: CassettePlugin
-): void {
-  container.createEl('h3', { text: 'Property Order' });
-  
-  container.createEl('p', { 
-    text: 'Define the order in which properties appear in your notes. One property key per line.',
-    cls: 'setting-item-description'
-  });
-  
-  // Anime template
-  new Setting(container)
-    .setName('Anime property order')
-    .setDesc('Order of properties for anime notes (one per line)')
-    .addTextArea(text => {
-      text
-        .setPlaceholder(DEFAULT_PROPERTY_TEMPLATE.anime.join('\n'))
-        .setValue(plugin.settings.propertyTemplate.anime.join('\n'))
-        .onChange(async (value) => {
-          plugin.settings.propertyTemplate.anime = value
-            .split('\n')
-            .map(line => line.trim())
-            .filter(Boolean);
-          await plugin.saveSettings();
-        });
-      text.inputEl.rows = 15;
-      text.inputEl.cols = 30;
-    });
-  
-  // Manga template
-  new Setting(container)
-    .setName('Manga property order')
-    .setDesc('Order of properties for manga notes (one per line)')
-    .addTextArea(text => {
-      text
-        .setPlaceholder(DEFAULT_PROPERTY_TEMPLATE.manga.join('\n'))
-        .setValue(plugin.settings.propertyTemplate.manga.join('\n'))
-        .onChange(async (value) => {
-          plugin.settings.propertyTemplate.manga = value
-            .split('\n')
-            .map(line => line.trim())
-            .filter(Boolean);
-          await plugin.saveSettings();
-        });
-      text.inputEl.rows = 15;
-      text.inputEl.cols = 30;
-    });
-  
-  // Reset button
-  new Setting(container)
-    .setName('Reset to defaults')
-    .setDesc('Reset property order to default templates')
-    .addButton(button => button
-      .setButtonText('Reset')
-      .setWarning()
-      .onClick(async () => {
-        plugin.settings.propertyTemplate = { ...DEFAULT_PROPERTY_TEMPLATE };
-        await plugin.saveSettings();
-        plugin.refreshSettingsUI();
-      }));
-  
-  // Available properties reference
-  const availableProps = container.createEl('details');
-  availableProps.createEl('summary', { text: 'Available property keys (click to expand)' });
-  
-  const propsDiv = availableProps.createDiv({ cls: 'cassette-available-props' });
-  propsDiv.createEl('p', { text: 'Common:' });
-  propsDiv.createEl('pre', { 
-    text: [
-      'id', 'title', 'category', 'platform',
-      'mainPicture', 'pictures',
-      'alternativeTitlesEn', 'alternativeTitlesJa', 'alternativeTitlesSynonyms',
-      'synopsis', 'mediaType', 'status', 'mean', 'genres',
-      'userStatus', 'userScore', 'lastSynced'
-    ].join('\n')
-  });
-  
-  propsDiv.createEl('p', { text: 'Anime-specific:' });
-  propsDiv.createEl('pre', { 
-    text: [
-      'numEpisodes', 'numEpisodesWatched',
-      'startSeasonYear', 'startSeasonName', 'source'
-    ].join('\n')
-  });
-  
-  propsDiv.createEl('p', { text: 'Manga-specific:' });
-  propsDiv.createEl('pre', { 
-    text: [
-      'numVolumes', 'numVolumesRead',
-      'numChapters', 'numChaptersRead', 'authors'
-    ].join('\n')
-  });
 }
