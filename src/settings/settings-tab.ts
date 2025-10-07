@@ -20,16 +20,18 @@ export class CassetteSettingTab extends PluginSettingTab {
     // ========================================================================
     // MAL Section
     // ========================================================================
-    
-    containerEl.createEl('h2', { text: 'MyAnimeList' });
+    new Setting(containerEl)
+  .setName('MyAnimeList')
+  .setHeading();
     
     this.renderMALSection(containerEl);
 
     // ========================================================================
     // SIMKL Section
     // ========================================================================
-    
-    containerEl.createEl('h2', { text: 'SIMKL' });
+    new Setting(containerEl)
+  .setName('SIMKL')
+  .setHeading();
     
     this.renderSimklSection(containerEl);
 
