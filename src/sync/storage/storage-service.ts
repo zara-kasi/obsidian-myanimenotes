@@ -1,9 +1,8 @@
-// src/sync/storage/storage-service.ts
-// Handles storage of synced media items
-
-import { TFile, TFolder, Notice } from 'obsidian';
+import { TFile, Notice } from 'obsidian';
 import type CassettePlugin from '../../main';
-import type { UniversalMediaItem, MediaCategory } from '../types';
+import type { UniversalMediaItem } from '../types';
+import type { PropertyMapping, PropertyTemplate } from './property-mapping';
+import { getMappedPropertyName, getPropertyTemplate } from './property-mapping';
 
 /**
  * Storage configuration
@@ -12,30 +11,18 @@ export interface StorageConfig {
   animeFolder: string;
   mangaFolder: string;
   createFolders: boolean;
+  propertyMapping?: PropertyMapping;
+  propertyTemplate?: PropertyTemplate;
 }
 
 /**
- * Default storage configuration
- */
-const DEFAULT_CONFIG: StorageConfig = {
-  animeFolder: 'Cassette/Anime',
-  mangaFolder: 'Cassette/Manga',
-  createFolders: true,
-};
-
-/**
  * Ensures a folder exists, creating it if necessary
- * @param plugin Plugin instance
- * @param folderPath Path to folder
  */
 async function ensureFolderExists(plugin: CassettePlugin, folderPath: string): Promise<void> {
   const { vault } = plugin.app;
-  
-  // Check if folder exists
   const folder = vault.getAbstractFileByPath(folderPath);
   
   if (!folder) {
-    // Create folder
     await vault.createFolder(folderPath);
     console.log(`[Storage] Created folder: ${folderPath}`);
   }
@@ -43,180 +30,222 @@ async function ensureFolderExists(plugin: CassettePlugin, folderPath: string): P
 
 /**
  * Sanitizes a filename by removing invalid characters
- * @param filename Original filename
- * @returns Sanitized filename
  */
 function sanitizeFilename(filename: string): string {
   return filename
-    .replace(/[\\/:*?"<>|]/g, '-') // Replace invalid chars
-    .replace(/\s+/g, ' ') // Normalize spaces
+    .replace(/[\\/:*?"<>|]/g, '-')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
 /**
- * Generates markdown content for a media item
- * @param item Universal media item
- * @returns Markdown content
+ * Converts a value to YAML-safe format
  */
-function generateMarkdown(item: UniversalMediaItem): string {
-  const lines: string[] = [];
+function toYAMLValue(value: any): string {
+  if (value === null || value === undefined) {
+    return '""';
+  }
   
-  // Frontmatter
+  if (typeof value === 'string') {
+    // Escape quotes and wrap in quotes if contains special chars
+    const needsQuotes = /[:#\[\]{}|>@`\n]/.test(value) || value.includes('"');
+    if (needsQuotes) {
+      return `"${value.replace(/"/g, '\\"')}"`;
+    }
+    return value;
+  }
+  
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]';
+    return '\n' + value.map(v => `  - ${toYAMLValue(v)}`).join('\n');
+  }
+  
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  
+  return String(value);
+}
+
+/**
+ * Builds frontmatter properties from a media item
+ */
+function buildFrontmatterProperties(
+  item: UniversalMediaItem,
+  mapping: PropertyMapping,
+  template: string[]
+): Record<string, any> {
+  const properties: Record<string, any> = {};
+  
+  // Helper to add property if it exists
+  const addProperty = (key: keyof PropertyMapping, value: any) => {
+    if (value !== undefined && value !== null && value !== '') {
+      const mappedKey = getMappedPropertyName(key, mapping);
+      properties[mappedKey] = value;
+    }
+  };
+  
+  // Add properties based on template order
+  template.forEach(key => {
+    switch (key) {
+      case 'id':
+        addProperty('id', item.id);
+        break;
+      case 'title':
+        addProperty('title', item.title);
+        break;
+      case 'category':
+        addProperty('category', item.category);
+        break;
+      case 'platform':
+        addProperty('platform', item.platform);
+        break;
+      case 'mainPicture':
+        if (item.mainPicture) {
+          addProperty('mainPicture', item.mainPicture.large || item.mainPicture.medium);
+        }
+        break;
+      case 'pictures':
+        if (item.pictures && item.pictures.length > 0) {
+          const urls = item.pictures
+            .map(p => p.large || p.medium)
+            .filter(Boolean);
+          if (urls.length > 0) {
+            addProperty('pictures', urls);
+          }
+        }
+        break;
+      case 'alternativeTitlesEn':
+        addProperty('alternativeTitlesEn', item.alternativeTitles?.en);
+        break;
+      case 'alternativeTitlesJa':
+        addProperty('alternativeTitlesJa', item.alternativeTitles?.ja);
+        break;
+      case 'alternativeTitlesSynonyms':
+        if (item.alternativeTitles?.synonyms && item.alternativeTitles.synonyms.length > 0) {
+          addProperty('alternativeTitlesSynonyms', item.alternativeTitles.synonyms);
+        }
+        break;
+      case 'synopsis':
+        addProperty('synopsis', item.synopsis);
+        break;
+      case 'mediaType':
+        addProperty('mediaType', item.mediaType);
+        break;
+      case 'status':
+        addProperty('status', item.status);
+        break;
+      case 'mean':
+        addProperty('mean', item.mean);
+        break;
+      case 'genres':
+        if (item.genres && item.genres.length > 0) {
+          addProperty('genres', item.genres.map(g => g.name));
+        }
+        break;
+      case 'numEpisodes':
+        addProperty('numEpisodes', item.numEpisodes);
+        break;
+      case 'startSeasonYear':
+        addProperty('startSeasonYear', item.startSeason?.year);
+        break;
+      case 'startSeasonName':
+        addProperty('startSeasonName', item.startSeason?.season);
+        break;
+      case 'source':
+        addProperty('source', item.source);
+        break;
+      case 'numVolumes':
+        addProperty('numVolumes', item.numVolumes);
+        break;
+      case 'numChapters':
+        addProperty('numChapters', item.numChapters);
+        break;
+      case 'authors':
+        if (item.authors && item.authors.length > 0) {
+          const authorNames = item.authors.map(a => 
+            `${a.firstName} ${a.lastName}`.trim()
+          ).filter(Boolean);
+          if (authorNames.length > 0) {
+            addProperty('authors', authorNames);
+          }
+        }
+        break;
+      case 'userStatus':
+        addProperty('userStatus', item.userStatus);
+        break;
+      case 'userScore':
+        if (item.userScore !== undefined && item.userScore > 0) {
+          addProperty('userScore', item.userScore);
+        }
+        break;
+      case 'numEpisodesWatched':
+        addProperty('numEpisodesWatched', item.numEpisodesWatched);
+        break;
+      case 'numVolumesRead':
+        addProperty('numVolumesRead', item.numVolumesRead);
+        break;
+      case 'numChaptersRead':
+        addProperty('numChaptersRead', item.numChaptersRead);
+        break;
+      case 'lastSynced':
+        addProperty('lastSynced', new Date(item.lastSynced || Date.now()).toISOString());
+        break;
+    }
+  });
+  
+  return properties;
+}
+
+/**
+ * Generates markdown content with only frontmatter (empty body)
+ */
+function generateMarkdown(
+  item: UniversalMediaItem,
+  config: StorageConfig
+): string {
+  const mapping = config.propertyMapping || {};
+  const template = config.propertyTemplate || {};
+  
+  // Get the appropriate template for the category
+  const categoryTemplate = getPropertyTemplate(
+    item.category as 'anime' | 'manga',
+    template
+  );
+  
+  // Build properties
+  const properties = buildFrontmatterProperties(item, mapping, categoryTemplate);
+  
+  // Generate YAML frontmatter
+  const lines: string[] = ['---'];
+  
+  Object.entries(properties).forEach(([key, value]) => {
+    const yamlValue = toYAMLValue(value);
+    if (yamlValue.startsWith('\n')) {
+      // Array values
+      lines.push(`${key}:${yamlValue}`);
+    } else {
+      lines.push(`${key}: ${yamlValue}`);
+    }
+  });
+  
   lines.push('---');
-  lines.push(`id: ${item.id}`);
-  lines.push(`title: "${item.title.replace(/"/g, '\\"')}"`);
-  lines.push(`category: ${item.category}`);
-  lines.push(`platform: ${item.platform}`);
-  
-  if (item.mediaType) {
-    lines.push(`type: ${item.mediaType}`);
-  }
-  
-  if (item.userStatus) {
-    lines.push(`status: ${item.userStatus}`);
-  }
-  
-  if (item.userScore !== undefined && item.userScore > 0) {
-    lines.push(`score: ${item.userScore}`);
-  }
-  
-  if (item.mean !== undefined) {
-    lines.push(`averageScore: ${item.mean}`);
-  }
-  
-  if (item.genres && item.genres.length > 0) {
-    lines.push(`genres:`);
-    item.genres.forEach(genre => {
-      lines.push(`  - ${genre.name}`);
-    });
-  }
-  
-  lines.push(`lastSynced: ${new Date(item.lastSynced || Date.now()).toISOString()}`);
-  lines.push('---');
-  lines.push('');
-  
-  // Main content
-  lines.push(`# ${item.title}`);
-  lines.push('');
-  
-  // Alternative titles
-  if (item.alternativeTitles) {
-    const { en, ja, synonyms } = item.alternativeTitles;
-    
-    if (en || ja || (synonyms && synonyms.length > 0)) {
-      lines.push('## Alternative Titles');
-      if (en) lines.push(`- **English:** ${en}`);
-      if (ja) lines.push(`- **Japanese:** ${ja}`);
-      if (synonyms && synonyms.length > 0) {
-        lines.push(`- **Synonyms:** ${synonyms.join(', ')}`);
-      }
-      lines.push('');
-    }
-  }
-  
-  // Image
-  if (item.mainPicture?.large || item.mainPicture?.medium) {
-    const imgUrl = item.mainPicture.large || item.mainPicture.medium;
-    lines.push(`![${item.title}](${imgUrl})`);
-    lines.push('');
-  }
-  
-  // Synopsis
-  if (item.synopsis) {
-    lines.push('## Synopsis');
-    lines.push(item.synopsis);
-    lines.push('');
-  }
-  
-  // Details section
-  lines.push('## Details');
-  lines.push('');
-  
-  if (item.category === 'anime') {
-    if (item.numEpisodes) {
-      lines.push(`- **Episodes:** ${item.numEpisodes}`);
-    }
-    if (item.numEpisodesWatched !== undefined) {
-      lines.push(`- **Episodes Watched:** ${item.numEpisodesWatched}`);
-    }
-    if (item.startSeason) {
-      lines.push(`- **Season:** ${item.startSeason.season} ${item.startSeason.year}`);
-    }
-    if (item.source) {
-      lines.push(`- **Source:** ${item.source}`);
-    }
-  } else if (item.category === 'manga') {
-    if (item.numVolumes) {
-      lines.push(`- **Volumes:** ${item.numVolumes}`);
-    }
-    if (item.numVolumesRead !== undefined) {
-      lines.push(`- **Volumes Read:** ${item.numVolumesRead}`);
-    }
-    if (item.numChapters) {
-      lines.push(`- **Chapters:** ${item.numChapters}`);
-    }
-    if (item.numChaptersRead !== undefined) {
-      lines.push(`- **Chapters Read:** ${item.numChaptersRead}`);
-    }
-    if (item.authors && item.authors.length > 0) {
-      lines.push(`- **Authors:** ${item.authors.map(a => `${a.firstName} ${a.lastName}`).join(', ')}`);
-    }
-  }
-  
-  lines.push(`- **Status:** ${item.status}`);
-  lines.push(`- **Type:** ${item.mediaType}`);
-  
-  if (item.mean) {
-    lines.push(`- **Average Score:** ${item.mean}/10`);
-  }
-  
-  lines.push('');
-  
-  // User progress section
-  if (item.userStatus || item.userScore) {
-    lines.push('## My Progress');
-    lines.push('');
-    
-    if (item.userStatus) {
-      lines.push(`- **Status:** ${item.userStatus}`);
-    }
-    if (item.userScore !== undefined && item.userScore > 0) {
-      lines.push(`- **My Score:** ${item.userScore}/10`);
-    }
-    
-    lines.push('');
-  }
-  
-  // Links
-  lines.push('## Links');
-  lines.push('');
-  
-  if (item.platform === 'mal') {
-    const urlType = item.category === 'anime' ? 'anime' : 'manga';
-    lines.push(`- [MyAnimeList](https://myanimelist.net/${urlType}/${item.id})`);
-  }
-  
-  lines.push('');
-  
-  // Metadata footer
-  lines.push('---');
-  lines.push('');
-  lines.push(`*Synced from ${item.platform.toUpperCase()} on ${new Date(item.lastSynced || Date.now()).toLocaleString()}*`);
+  lines.push(''); // Empty body
   
   return lines.join('\n');
 }
 
 /**
- * Saves a media item to vault
- * @param plugin Plugin instance
- * @param item Universal media item
- * @param config Storage configuration
- * @returns Path to created/updated file
+ * Saves a media item to vault (frontmatter only)
  */
 export async function saveMediaItem(
   plugin: CassettePlugin,
   item: UniversalMediaItem,
-  config: StorageConfig = DEFAULT_CONFIG
+  config: StorageConfig
 ): Promise<string> {
   const { vault } = plugin.app;
   
@@ -233,8 +262,8 @@ export async function saveMediaItem(
   const filename = `${sanitizedTitle}.md`;
   const filePath = `${folderPath}/${filename}`;
   
-  // Generate markdown content
-  const content = generateMarkdown(item);
+  // Generate markdown content (frontmatter only)
+  const content = generateMarkdown(item, config);
   
   // Check if file exists
   const existingFile = vault.getAbstractFileByPath(filePath);
@@ -254,15 +283,11 @@ export async function saveMediaItem(
 
 /**
  * Saves multiple media items to vault
- * @param plugin Plugin instance
- * @param items Array of universal media items
- * @param config Storage configuration
- * @returns Array of file paths
  */
 export async function saveMediaItems(
   plugin: CassettePlugin,
   items: UniversalMediaItem[],
-  config: StorageConfig = DEFAULT_CONFIG
+  config: StorageConfig
 ): Promise<string[]> {
   const paths: string[] = [];
   
@@ -285,15 +310,11 @@ export async function saveMediaItems(
 
 /**
  * Saves items grouped by category
- * @param plugin Plugin instance
- * @param items Array of universal media items
- * @param config Storage configuration
- * @returns Object with anime and manga paths
  */
 export async function saveMediaItemsByCategory(
   plugin: CassettePlugin,
   items: UniversalMediaItem[],
-  config: StorageConfig = DEFAULT_CONFIG
+  config: StorageConfig
 ): Promise<{ anime: string[]; manga: string[] }> {
   const animePaths: string[] = [];
   const mangaPaths: string[] = [];
