@@ -1,12 +1,8 @@
 import { TFile, Notice } from 'obsidian';
 import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../types';
-import type { PropertyMapping, PropertyTemplate } from './property-mapping';
-import { 
-  getMappedPropertyName, 
-  getPropertyTemplate, 
-  DEFAULT_PROPERTY_TEMPLATE 
-} from './property-mapping';
+import type { PropertyMapping } from './property-mapping';
+import { getMappedPropertyName, DEFAULT_PROPERTY_MAPPING } from './property-mapping';
 
 /**
  * Storage configuration
@@ -16,7 +12,6 @@ export interface StorageConfig {
   mangaFolder: string;
   createFolders: boolean;
   propertyMapping?: PropertyMapping;
-  propertyTemplate?: PropertyTemplate;
 }
 
 /**
@@ -43,6 +38,22 @@ function sanitizeFilename(filename: string): string {
 }
 
 /**
+ * Converts synopsis to plain text, escaping special characters
+ */
+function sanitizeSynopsis(synopsis: string | undefined): string {
+  if (!synopsis) return '';
+  
+  // Replace problematic characters that might break YAML
+  return synopsis
+    .replace(/\\/g, '\\\\')  // Escape backslashes
+    .replace(/"/g, '\\"')    // Escape quotes
+    .replace(/\n/g, ' ')     // Replace newlines with spaces
+    .replace(/\r/g, '')      // Remove carriage returns
+    .replace(/\t/g, ' ')     // Replace tabs with spaces
+    .trim();
+}
+
+/**
  * Converts a value to YAML-safe format
  */
 function toYAMLValue(value: any): string {
@@ -51,12 +62,8 @@ function toYAMLValue(value: any): string {
   }
   
   if (typeof value === 'string') {
-    // Escape quotes and wrap in quotes if contains special chars
-    const needsQuotes = /[:#\[\]{}|>@`\n]/.test(value) || value.includes('"');
-    if (needsQuotes) {
-      return `"${value.replace(/"/g, '\\"')}"`;
-    }
-    return value;
+    // Always wrap strings in quotes for safety
+    return `"${value.replace(/"/g, '\\"')}"`;
   }
   
   if (typeof value === 'number' || typeof value === 'boolean') {
@@ -65,7 +72,12 @@ function toYAMLValue(value: any): string {
   
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
-    return '\n' + value.map(v => `  - ${toYAMLValue(v)}`).join('\n');
+    return '\n' + value.map(v => {
+      if (typeof v === 'string') {
+        return `  - "${v.replace(/"/g, '\\"')}"`;
+      }
+      return `  - ${v}`;
+    }).join('\n');
   }
   
   if (typeof value === 'object') {
@@ -80,8 +92,7 @@ function toYAMLValue(value: any): string {
  */
 function buildFrontmatterProperties(
   item: UniversalMediaItem,
-  mapping: PropertyMapping,
-  template: string[]
+  mapping: PropertyMapping
 ): Record<string, any> {
   const properties: Record<string, any> = {};
   
@@ -93,114 +104,85 @@ function buildFrontmatterProperties(
     }
   };
   
-  // Add properties based on template order
-  template.forEach(key => {
-    switch (key) {
-      case 'id':
-        addProperty('id', item.id);
-        break;
-      case 'title':
-        addProperty('title', item.title);
-        break;
-      case 'category':
-        addProperty('category', item.category);
-        break;
-      case 'platform':
-        addProperty('platform', item.platform);
-        break;
-      case 'mainPicture':
-        if (item.mainPicture) {
-          addProperty('mainPicture', item.mainPicture.large || item.mainPicture.medium);
-        }
-        break;
-      case 'pictures':
-        if (item.pictures && item.pictures.length > 0) {
-          const urls = item.pictures
-            .map(p => p.large || p.medium)
-            .filter(Boolean);
-          if (urls.length > 0) {
-            addProperty('pictures', urls);
-          }
-        }
-        break;
-      case 'alternativeTitlesEn':
-        addProperty('alternativeTitlesEn', item.alternativeTitles?.en);
-        break;
-      case 'alternativeTitlesJa':
-        addProperty('alternativeTitlesJa', item.alternativeTitles?.ja);
-        break;
-      case 'alternativeTitlesSynonyms':
-        if (item.alternativeTitles?.synonyms && item.alternativeTitles.synonyms.length > 0) {
-          addProperty('alternativeTitlesSynonyms', item.alternativeTitles.synonyms);
-        }
-        break;
-      case 'synopsis':
-        addProperty('synopsis', item.synopsis);
-        break;
-      case 'mediaType':
-        addProperty('mediaType', item.mediaType);
-        break;
-      case 'status':
-        addProperty('status', item.status);
-        break;
-      case 'mean':
-        addProperty('mean', item.mean);
-        break;
-      case 'genres':
-        if (item.genres && item.genres.length > 0) {
-          addProperty('genres', item.genres.map(g => g.name));
-        }
-        break;
-      case 'numEpisodes':
-        addProperty('numEpisodes', item.numEpisodes);
-        break;
-      case 'startSeasonYear':
-        addProperty('startSeasonYear', item.startSeason?.year);
-        break;
-      case 'startSeasonName':
-        addProperty('startSeasonName', item.startSeason?.season);
-        break;
-      case 'source':
-        addProperty('source', item.source);
-        break;
-      case 'numVolumes':
-        addProperty('numVolumes', item.numVolumes);
-        break;
-      case 'numChapters':
-        addProperty('numChapters', item.numChapters);
-        break;
-      case 'authors':
-        if (item.authors && item.authors.length > 0) {
-          const authorNames = item.authors.map(a => 
-            `${a.firstName} ${a.lastName}`.trim()
-          ).filter(Boolean);
-          if (authorNames.length > 0) {
-            addProperty('authors', authorNames);
-          }
-        }
-        break;
-      case 'userStatus':
-        addProperty('userStatus', item.userStatus);
-        break;
-      case 'userScore':
-        if (item.userScore !== undefined && item.userScore > 0) {
-          addProperty('userScore', item.userScore);
-        }
-        break;
-      case 'numEpisodesWatched':
-        addProperty('numEpisodesWatched', item.numEpisodesWatched);
-        break;
-      case 'numVolumesRead':
-        addProperty('numVolumesRead', item.numVolumesRead);
-        break;
-      case 'numChaptersRead':
-        addProperty('numChaptersRead', item.numChaptersRead);
-        break;
-      case 'lastSynced':
-        addProperty('lastSynced', new Date(item.lastSynced || Date.now()).toISOString());
-        break;
+  // Basic fields
+  addProperty('id', item.id);
+  addProperty('title', item.title);
+  addProperty('category', item.category);
+  addProperty('platform', item.platform);
+  
+  // Visual
+  if (item.mainPicture) {
+    addProperty('mainPicture', item.mainPicture.large || item.mainPicture.medium);
+  }
+  
+  // Banner (additional pictures) - use first additional picture if available
+  if (item.pictures && item.pictures.length > 0) {
+    const bannerUrl = item.pictures[0].large || item.pictures[0].medium;
+    if (bannerUrl) {
+      addProperty('pictures', bannerUrl);
     }
-  });
+  }
+  
+  // Aliases (Obsidian's built-in property for alternative titles)
+  if (item.alternativeTitles) {
+    const aliases: string[] = [];
+    if (item.alternativeTitles.en) aliases.push(item.alternativeTitles.en);
+    if (item.alternativeTitles.ja) aliases.push(item.alternativeTitles.ja);
+    if (item.alternativeTitles.synonyms) {
+      aliases.push(...item.alternativeTitles.synonyms);
+    }
+    if (aliases.length > 0) {
+      addProperty('aliases', aliases);
+    }
+  }
+  
+  // Synopsis (sanitized for YAML safety)
+  if (item.synopsis) {
+    addProperty('synopsis', sanitizeSynopsis(item.synopsis));
+  }
+  
+  // Metadata
+  addProperty('mediaType', item.mediaType);
+  addProperty('status', item.status);
+  addProperty('mean', item.mean);
+  
+  // Genres
+  if (item.genres && item.genres.length > 0) {
+    addProperty('genres', item.genres.map(g => g.name));
+  }
+  
+  // Category-specific fields
+  if (item.category === 'anime') {
+    addProperty('numEpisodes', item.numEpisodes);
+    addProperty('numEpisodesWatched', item.numEpisodesWatched);
+    addProperty('startSeasonYear', item.startSeason?.year);
+    addProperty('startSeasonName', item.startSeason?.season);
+    addProperty('source', item.source);
+  } else if (item.category === 'manga') {
+    addProperty('numVolumes', item.numVolumes);
+    addProperty('numVolumesRead', item.numVolumesRead);
+    addProperty('numChapters', item.numChapters);
+    addProperty('numChaptersRead', item.numChaptersRead);
+    
+    // Authors
+    if (item.authors && item.authors.length > 0) {
+      const authorNames = item.authors.map(a => 
+        `${a.firstName} ${a.lastName}`.trim()
+      ).filter(Boolean);
+      if (authorNames.length > 0) {
+        addProperty('authors', authorNames);
+      }
+    }
+  }
+  
+  // User list data
+  addProperty('userStatus', item.userStatus);
+  if (item.userScore !== undefined && item.userScore > 0) {
+    addProperty('userScore', item.userScore);
+  }
+  
+  // Sync metadata
+  addProperty('lastSynced', new Date(item.lastSynced || Date.now()).toISOString());
   
   return properties;
 }
@@ -212,26 +194,45 @@ function generateMarkdown(
   item: UniversalMediaItem,
   config: StorageConfig
 ): string {
-  const mapping = config.propertyMapping || {};
-  
-  // Get the appropriate template for the category
-  const categoryTemplate = config.propertyTemplate 
-    ? getPropertyTemplate(item.category as 'anime' | 'manga', config.propertyTemplate)
-    : getPropertyTemplate(item.category as 'anime' | 'manga', { 
-        anime: [], 
-        manga: [] 
-      } as any);
+  const mapping = config.propertyMapping || DEFAULT_PROPERTY_MAPPING;
   
   // Build properties
-  const properties = buildFrontmatterProperties(item, mapping, categoryTemplate);
+  const properties = buildFrontmatterProperties(item, mapping);
   
   // Generate YAML frontmatter
   const lines: string[] = ['---'];
   
+  // Define property order for consistent output
+  const propertyOrder = [
+    'id', 'title', 'aliases', 'category', 'platform', 'type', 
+    'status', 'list', 'rating', 'score',
+    // Anime-specific
+    'total_episodes', 'episodes', 'season_year', 'season_name', 'source',
+    // Manga-specific  
+    'total_volumes', 'volumes_read', 'total_chapters', 'chapters_read', 'authors',
+    // Common
+    'genres', 'cover', 'banner', 'synopsis', 'last_synced'
+  ];
+  
+  // Add properties in order
+  propertyOrder.forEach(key => {
+    if (properties.hasOwnProperty(key)) {
+      const value = properties[key];
+      const yamlValue = toYAMLValue(value);
+      if (yamlValue.startsWith('\n')) {
+        // Array values
+        lines.push(`${key}:${yamlValue}`);
+      } else {
+        lines.push(`${key}: ${yamlValue}`);
+      }
+      delete properties[key]; // Remove so we don't add it again
+    }
+  });
+  
+  // Add any remaining properties not in the order list
   Object.entries(properties).forEach(([key, value]) => {
     const yamlValue = toYAMLValue(value);
     if (yamlValue.startsWith('\n')) {
-      // Array values
       lines.push(`${key}:${yamlValue}`);
     } else {
       lines.push(`${key}: ${yamlValue}`);
