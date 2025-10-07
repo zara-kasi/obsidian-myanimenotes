@@ -1,6 +1,3 @@
-// src/sync/transformers/mal-transformer.ts
-// Transforms MAL API responses to universal format
-
 import type {
   UniversalMediaItem,
   UniversalPicture,
@@ -118,10 +115,17 @@ function transformSeason(malSeason: any): UniversalSeason | undefined {
 
 /**
  * Transforms a single MAL anime item to universal format
+ * IMPORTANT: User list data comes from list_status object in /users/@me/animelist response
  */
 export function transformMALAnime(malItem: any): UniversalMediaItem {
   const node = malItem.node || malItem;
-  const listStatus = malItem.list_status;
+  const listStatus = malItem.list_status; // User-specific data
+
+  console.log('[MAL Transformer] Processing anime:', {
+    title: node.title,
+    hasListStatus: !!listStatus,
+    listStatus: listStatus
+  });
 
   return {
     // Basic info
@@ -131,7 +135,7 @@ export function transformMALAnime(malItem: any): UniversalMediaItem {
     
     // Visual
     mainPicture: transformPicture(node.main_picture),
-    pictures: node.pictures?.map(transformPicture) || [],
+    pictures: node.pictures?.map(transformPicture).filter(Boolean) || [],
     
     // Alternative titles
     alternativeTitles: transformAlternativeTitles(node.alternative_titles),
@@ -152,10 +156,11 @@ export function transformMALAnime(malItem: any): UniversalMediaItem {
     startSeason: transformSeason(node.start_season),
     source: node.source,
     
-    // User list data
+    // User list data - THIS IS THE KEY PART
+    // list_status is returned by /users/@me/animelist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
     userScore: listStatus?.score || 0,
-    numEpisodesWatched: listStatus?.num_episodes_watched,
+    numEpisodesWatched: listStatus?.num_episodes_watched || 0,
     
     // Platform metadata
     platform: 'mal',
@@ -165,10 +170,17 @@ export function transformMALAnime(malItem: any): UniversalMediaItem {
 
 /**
  * Transforms a single MAL manga item to universal format
+ * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
  */
 export function transformMALManga(malItem: any): UniversalMediaItem {
   const node = malItem.node || malItem;
-  const listStatus = malItem.list_status;
+  const listStatus = malItem.list_status; // User-specific data
+
+  console.log('[MAL Transformer] Processing manga:', {
+    title: node.title,
+    hasListStatus: !!listStatus,
+    listStatus: listStatus
+  });
 
   return {
     // Basic info
@@ -178,7 +190,7 @@ export function transformMALManga(malItem: any): UniversalMediaItem {
     
     // Visual
     mainPicture: transformPicture(node.main_picture),
-    pictures: node.pictures?.map(transformPicture) || [],
+    pictures: node.pictures?.map(transformPicture).filter(Boolean) || [],
     
     // Alternative titles
     alternativeTitles: transformAlternativeTitles(node.alternative_titles),
@@ -199,11 +211,12 @@ export function transformMALManga(malItem: any): UniversalMediaItem {
     numChapters: node.num_chapters,
     authors: transformAuthors(node.authors),
     
-    // User list data
+    // User list data - THIS IS THE KEY PART
+    // list_status is returned by /users/@me/mangalist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
     userScore: listStatus?.score || 0,
-    numVolumesRead: listStatus?.num_volumes_read,
-    numChaptersRead: listStatus?.num_chapters_read,
+    numVolumesRead: listStatus?.num_volumes_read || 0,
+    numChaptersRead: listStatus?.num_chapters_read || 0,
     
     // Platform metadata
     platform: 'mal',
