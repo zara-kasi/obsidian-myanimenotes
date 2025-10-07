@@ -1,10 +1,10 @@
-// src/sync/sync-manager.ts
 // Main orchestrator for sync operations
 
 import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
-import type { UniversalMediaItem, SyncResult, MediaCategory } from './types';
-import { syncMAL, quickSyncMAL, type MALSyncOptions } from './services/mal-sync-service';
+import type { UniversalMediaItem, SyncResult } from './types';
+import { MediaCategory } from './types';
+import { syncMAL, type MALSyncOptions } from './services/mal-sync-service';
 import { saveMediaItemsByCategory, type StorageConfig } from './storage/storage-service';
 
 /**
@@ -75,12 +75,13 @@ export class SyncManager {
   ): Promise<UniversalMediaItem[]> {
     console.log(`[Sync Manager] Quick sync for ${category}...`);
     
-    const items = await quickSyncMAL(this.plugin, category);
+    const options: CompleteSyncOptions = {
+      syncAnime: category === MediaCategory.ANIME,
+      syncManga: category === MediaCategory.MANGA,
+      saveToVault
+    };
     
-    if (saveToVault && items.length > 0) {
-      await saveMediaItemsByCategory(this.plugin, items);
-    }
-    
+    const { items } = await this.syncFromMAL(options);
     return items;
   }
 
@@ -90,7 +91,7 @@ export class SyncManager {
    * @returns Synced anime items
    */
   async syncAnime(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
-    return this.quickSync('anime', saveToVault);
+    return this.quickSync(MediaCategory.ANIME, saveToVault);
   }
 
   /**
@@ -99,7 +100,7 @@ export class SyncManager {
    * @returns Synced manga items
    */
   async syncManga(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
-    return this.quickSync('manga', saveToVault);
+    return this.quickSync(MediaCategory.MANGA, saveToVault);
   }
 
   /**
@@ -117,12 +118,12 @@ export class SyncManager {
     console.log(`[Sync Manager] Syncing ${category} with status ${status}...`);
     
     const options: CompleteSyncOptions = {
-      syncAnime: category === 'anime',
-      syncManga: category === 'manga',
+      syncAnime: category === MediaCategory.ANIME,
+      syncManga: category === MediaCategory.MANGA,
       saveToVault,
     };
     
-    if (category === 'anime') {
+    if (category === MediaCategory.ANIME) {
       options.animeStatuses = [status];
     } else {
       options.mangaStatuses = [status];
