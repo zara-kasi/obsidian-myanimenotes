@@ -38,18 +38,20 @@ function sanitizeFilename(filename: string): string {
 }
 
 /**
- * Converts synopsis to plain text, escaping special characters
+ * Sanitizes synopsis for YAML properties - only keeps commas and periods
+ * All other special characters are removed or replaced with spaces
  */
 function sanitizeSynopsis(synopsis: string | undefined): string {
   if (!synopsis) return '';
   
-  // Replace problematic characters that might break YAML
   return synopsis
-    .replace(/\\/g, '\\\\')  // Escape backslashes
-    .replace(/"/g, '\\"')    // Escape quotes
-    .replace(/\n/g, ' ')     // Replace newlines with spaces
-    .replace(/\r/g, '')      // Remove carriage returns
-    .replace(/\t/g, ' ')     // Replace tabs with spaces
+    // Replace newlines, carriage returns, and tabs with spaces
+    .replace(/[\n\r\t]/g, ' ')
+    // Remove all special characters except commas and periods
+    .replace(/[^\w\s,.]/g, '')
+    // Replace multiple spaces with single space
+    .replace(/\s+/g, ' ')
+    // Trim whitespace
     .trim();
 }
 
@@ -88,6 +90,14 @@ function toYAMLValue(value: any): string {
 }
 
 /**
+ * Formats start_season as "season year" (e.g., "winter 2024")
+ */
+function formatStartSeason(season?: { year?: number; season?: string }): string | undefined {
+  if (!season || !season.year || !season.season) return undefined;
+  return `${season.season} ${season.year}`;
+}
+
+/**
  * Builds frontmatter properties from a media item
  */
 function buildFrontmatterProperties(
@@ -107,6 +117,20 @@ function buildFrontmatterProperties(
   // Basic fields
   addProperty('id', item.id);
   addProperty('title', item.title);
+  
+  // Aliases (Obsidian's built-in property for alternative titles)
+  if (item.alternativeTitles) {
+    const aliases: string[] = [];
+    if (item.alternativeTitles.en) aliases.push(item.alternativeTitles.en);
+    if (item.alternativeTitles.ja) aliases.push(item.alternativeTitles.ja);
+    if (item.alternativeTitles.synonyms) {
+      aliases.push(...item.alternativeTitles.synonyms);
+    }
+    if (aliases.length > 0) {
+      addProperty('aliases', aliases);
+    }
+  }
+  
   addProperty('category', item.category);
   addProperty('platform', item.platform);
   
@@ -123,20 +147,7 @@ function buildFrontmatterProperties(
     }
   }
   
-  // Aliases (Obsidian's built-in property for alternative titles)
-  if (item.alternativeTitles) {
-    const aliases: string[] = [];
-    if (item.alternativeTitles.en) aliases.push(item.alternativeTitles.en);
-    if (item.alternativeTitles.ja) aliases.push(item.alternativeTitles.ja);
-    if (item.alternativeTitles.synonyms) {
-      aliases.push(...item.alternativeTitles.synonyms);
-    }
-    if (aliases.length > 0) {
-      addProperty('aliases', aliases);
-    }
-  }
-  
-  // Synopsis (sanitized for YAML safety)
+  // Synopsis (sanitized - only commas and periods allowed)
   if (item.synopsis) {
     addProperty('synopsis', sanitizeSynopsis(item.synopsis));
   }
@@ -151,20 +162,29 @@ function buildFrontmatterProperties(
     addProperty('genres', item.genres.map(g => g.name));
   }
   
+  // Season info (common to both anime and manga per updated reference)
+  addProperty('seasonYear', item.startSeason?.year);
+  addProperty('seasonName', item.startSeason?.season);
+  
+  // Source material (common to both anime and manga per updated reference)
+  addProperty('source', item.source);
+  
   // Category-specific fields
   if (item.category === 'anime') {
     addProperty('numEpisodes', item.numEpisodes);
     addProperty('numEpisodesWatched', item.numEpisodesWatched);
-    addProperty('startSeasonYear', item.startSeason?.year);
-    addProperty('startSeasonName', item.startSeason?.season);
-    addProperty('source', item.source);
+    
+    // start_season as "season year" format (anime only)
+    if (item.startSeason) {
+      addProperty('startSeason', formatStartSeason(item.startSeason));
+    }
   } else if (item.category === 'manga') {
     addProperty('numVolumes', item.numVolumes);
     addProperty('numVolumesRead', item.numVolumesRead);
     addProperty('numChapters', item.numChapters);
     addProperty('numChaptersRead', item.numChaptersRead);
     
-    // Authors
+    // Authors (manga only)
     if (item.authors && item.authors.length > 0) {
       const authorNames = item.authors.map(a => 
         `${a.firstName} ${a.lastName}`.trim()
@@ -202,16 +222,34 @@ function generateMarkdown(
   // Generate YAML frontmatter
   const lines: string[] = ['---'];
   
-  // Define property order for consistent output matching the template
+  // Define property order matching the reference document structure
   const propertyOrder = [
-    'id', 'title', 'aliases', 'category', 'platform', 'type', 
-    'status', 'list', 'rating', 'score',
-    // Anime-specific
-    'total_episodes', 'episodes', 'season_year', 'season_name', 'source',
-    // Manga-specific  
-    'total_volumes', 'volumes_read', 'total_chapters', 'chapters_read', 'authors',
-    // Common
-    'genres', 'cover', 'banner', 'synopsis', 'last_synced'
+    'id',
+    'title', 
+    'aliases',
+    'cover',
+    'synopsis',
+    'score',
+    'type',
+    'status',
+    'genres',
+    'total_episodes',
+    'start_season',
+    'source',
+    'banner',
+    'list',
+    'rating',
+    'episodes',
+    'season_year',
+    'season_name',
+    'platform',
+    'category',
+    'total_volumes',
+    'total_chapters',
+    'authors',
+    'volumes_read',
+    'chapters_read',
+    'last_synced'
   ];
   
   // Add properties in order
