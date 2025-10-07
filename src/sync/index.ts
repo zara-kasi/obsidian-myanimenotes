@@ -1,11 +1,8 @@
 // Main entry point for sync module
 
-// Export types
+// Export types (type-only exports)
 export type {
   UniversalMediaItem,
-  MediaStatus,
-  UserListStatus,
-  MediaCategory,
   UniversalPicture,
   UniversalAlternativeTitles,
   UniversalGenre,
@@ -15,18 +12,15 @@ export type {
   SyncResult,
 } from './types';
 
-export {
-  MediaStatus,
-  UserListStatus,
-  MediaCategory,
-} from './types';
+// Export enums (value exports)
+export { MediaStatus, UserListStatus, MediaCategory } from './types';
+
+// Re-export enum types for convenience
+export type { MediaStatus, UserListStatus, MediaCategory } from './types';
 
 // Export MAL services
-export {
-  syncMAL,
-  quickSyncMAL,
-  type MALSyncOptions,
-} from './services/mal-sync-service';
+export type { MALSyncOptions } from './services/mal-sync-service';
+export { syncMAL, quickSyncMAL } from './services/mal-sync-service';
 
 export {
   fetchCompleteMALAnimeList,
@@ -44,16 +38,13 @@ export {
 } from './transformers/mal-transformer';
 
 // Export storage services
+export type { StorageConfig } from './storage/storage-service';
 export {
   saveMediaItem,
   saveMediaItems,
   saveMediaItemsByCategory,
-  type StorageConfig,
 } from './storage/storage-service';
 
 // Export sync manager
-export {
-  SyncManager,
-  createSyncManager,
-  type CompleteSyncOptions,
-} from './sync-manager';
+export type { CompleteSyncOptions } from './sync-manager';
+export { SyncManager, createSyncManager } from './sync-manager';
