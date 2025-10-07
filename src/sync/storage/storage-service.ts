@@ -202,7 +202,7 @@ function generateMarkdown(
   // Generate YAML frontmatter
   const lines: string[] = ['---'];
   
-  // Define property order for consistent output
+  // Define property order for consistent output matching the template
   const propertyOrder = [
     'id', 'title', 'aliases', 'category', 'platform', 'type', 
     'status', 'list', 'rating', 'score',
