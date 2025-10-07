@@ -37,28 +37,17 @@ export class CassetteSettingTab extends PluginSettingTab {
     // Storage Section
     // ========================================================================
     
-    containerEl.createEl('h2', { text: 'Storage' });
-    
     this.renderStorageSection(containerEl);
 
     // ========================================================================
     // Property Customization Section
     // ========================================================================
     
-    containerEl.createEl('h2', { text: 'Property Customization' });
-    
-    containerEl.createEl('p', {
-      text: 'Customize how data is stored in note frontmatter. All synced data is stored as YAML properties only.',
-      cls: 'setting-item-description'
-    });
-    
     renderPropertyMappingSection(containerEl, this.plugin);
 
     // ========================================================================
     // Sync Section
     // ========================================================================
-    
-    containerEl.createEl('h2', { text: 'Sync' });
     
     this.renderSyncSection(containerEl);
 
