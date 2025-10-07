@@ -1,9 +1,8 @@
-// Settings UI for Cassette plugin
-
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../auth/mal';
 import { startAuthFlow as startSimklAuth, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../auth/simkl';
+import { renderPropertyMappingSection, renderPropertyOrderSection } from './property-settings';
 
 export class CassetteSettingTab extends PluginSettingTab {
   plugin: CassettePlugin;
@@ -34,12 +33,26 @@ export class CassetteSettingTab extends PluginSettingTab {
     this.renderSimklSection(containerEl);
 
     // ========================================================================
-    // Setup Section
+    // Storage Section
     // ========================================================================
     
-    containerEl.createEl('h2', { text: 'Setup' });
+    containerEl.createEl('h2', { text: 'Storage' });
     
-    // Add Setup settings here
+    this.renderStorageSection(containerEl);
+
+    // ========================================================================
+    // Property Customization Section
+    // ========================================================================
+    
+    containerEl.createEl('h2', { text: 'Property Customization' });
+    
+    containerEl.createEl('p', {
+      text: 'Customize how data is stored in note frontmatter. All synced data is stored as YAML properties only.',
+      cls: 'setting-item-description'
+    });
+    
+    renderPropertyMappingSection(containerEl, this.plugin);
+    renderPropertyOrderSection(containerEl, this.plugin);
 
     // ========================================================================
     // Sync Section
@@ -47,15 +60,11 @@ export class CassetteSettingTab extends PluginSettingTab {
     
     containerEl.createEl('h2', { text: 'Sync' });
     
-    // Add Sync settings here
+    this.renderSyncSection(containerEl);
 
     // ========================================================================
-    // Template Section
+    // Footer
     // ========================================================================
-    
-    containerEl.createEl('h2', { text: 'Template' });
-    
-    // Add Template settings here
 
     new Setting(containerEl)
       .setName('GitHub')
@@ -101,35 +110,36 @@ export class CassetteSettingTab extends PluginSettingTab {
     }
     
     // Only show Client ID and Secret when not authenticated
-   if (!isAuth) {
-    // Client ID
-    new Setting(container)
-      .setName('Client ID')
-      .setDesc('Your MyAnimeList Client ID')
-      .addText(text => text
-        .setPlaceholder('Enter Client ID')
-        .setValue(this.plugin.settings.malClientId)
-        .onChange(async (value) => {
-          this.plugin.settings.malClientId = value.trim();
-          await this.plugin.saveSettings();
-        }));
-
-    // Client Secret
-    new Setting(container)
-      .setName('Client Secret')
-      .setDesc('Your MyAnimeList Client Secret')
-      .addText(text => {
-        text
-          .setPlaceholder('Enter Client Secret')
-          .setValue(this.plugin.settings.malClientSecret || '')
+    if (!isAuth) {
+      // Client ID
+      new Setting(container)
+        .setName('Client ID')
+        .setDesc('Your MyAnimeList Client ID')
+        .addText(text => text
+          .setPlaceholder('Enter Client ID')
+          .setValue(this.plugin.settings.malClientId)
           .onChange(async (value) => {
-            this.plugin.settings.malClientSecret = value.trim();
+            this.plugin.settings.malClientId = value.trim();
             await this.plugin.saveSettings();
-          });
-        text.inputEl.type = 'password';
-        return text;
-      });
-   }
+          }));
+
+      // Client Secret
+      new Setting(container)
+        .setName('Client Secret')
+        .setDesc('Your MyAnimeList Client Secret')
+        .addText(text => {
+          text
+            .setPlaceholder('Enter Client Secret')
+            .setValue(this.plugin.settings.malClientSecret || '')
+            .onChange(async (value) => {
+              this.plugin.settings.malClientSecret = value.trim();
+              await this.plugin.saveSettings();
+            });
+          text.inputEl.type = 'password';
+          return text;
+        });
+    }
+    
     // Authentication button
     new Setting(container)
       .setName(isAuth ? 'Clear' : 'Authenticate')
@@ -144,14 +154,13 @@ export class CassetteSettingTab extends PluginSettingTab {
           .onClick(async () => {
             if (isAuth) {
               await malLogout(this.plugin);
-              this.display(); // Refresh settings UI
+              this.display();
             } else {
               await startMALAuth(this.plugin);
               this.display();
             }
           });
         
-        // Add class for clear button styling
         if (isAuth) {
           button.buttonEl.addClass('cassette-clear-button');
         }
@@ -165,7 +174,6 @@ export class CassetteSettingTab extends PluginSettingTab {
           setting.settingEl.addClass('cassette-credential-info');
         });
       
-      // Create description with link
       const descEl = credentialSetting.descEl;
       descEl.createSpan({ 
         text: 'Create an app at `https://myanimelist.net/apiconfig/create` to get your Client ID and Secret. Set the redirect URI to: `obsidian://cassette-auth/mal`. See our ' 
@@ -181,7 +189,7 @@ export class CassetteSettingTab extends PluginSettingTab {
     }
   }
 
-private renderSimklSection(container: HTMLElement): void {
+  private renderSimklSection(container: HTMLElement): void {
     const isAuth = isSimklAuthenticated(this.plugin);
 
     // Show user info if authenticated
@@ -190,10 +198,8 @@ private renderSimklSection(container: HTMLElement): void {
       
       const userSetting = new Setting(container);
       
-      // Create a container for avatar and name
       const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
       
-      // Add avatar if available
       if (userInfo.picture) {
         userInfoContainer.createEl('img', {
           cls: 'cassette-user-avatar',
@@ -204,44 +210,40 @@ private renderSimklSection(container: HTMLElement): void {
         });
       }
       
-      // Add username
       userInfoContainer.createEl('span', {
         cls: 'cassette-user-name',
         text: userInfo.name
       });
     }
 
-  // Only show Client ID and Secret when not authenticated
-  if (!isAuth) {
-    // Client ID
-    new Setting(container)
-      .setName('Client ID')
-      .setDesc('Your SIMKL Client ID')
-      .addText(text => text
-        .setPlaceholder('Enter Client ID')
-        .setValue(this.plugin.settings.simklClientId)
-        .onChange(async (value) => {
-          this.plugin.settings.simklClientId = value.trim();
-          await this.plugin.saveSettings();
-        }));
-
-    // Client Secret
-    new Setting(container)
-      .setName('Client Secret')
-      .setDesc('Your SIMKL Client Secret')
-      .addText(text => {
-        text
-          .setPlaceholder('Enter Client Secret')
-          .setValue(this.plugin.settings.simklClientSecret || '')
+    if (!isAuth) {
+      new Setting(container)
+        .setName('Client ID')
+        .setDesc('Your SIMKL Client ID')
+        .addText(text => text
+          .setPlaceholder('Enter Client ID')
+          .setValue(this.plugin.settings.simklClientId)
           .onChange(async (value) => {
-            this.plugin.settings.simklClientSecret = value.trim();
+            this.plugin.settings.simklClientId = value.trim();
             await this.plugin.saveSettings();
-          });
-        text.inputEl.type = 'password';
-        return text;
-      });
-  }
-    // Authentication button
+          }));
+
+      new Setting(container)
+        .setName('Client Secret')
+        .setDesc('Your SIMKL Client Secret')
+        .addText(text => {
+          text
+            .setPlaceholder('Enter Client Secret')
+            .setValue(this.plugin.settings.simklClientSecret || '')
+            .onChange(async (value) => {
+              this.plugin.settings.simklClientSecret = value.trim();
+              await this.plugin.saveSettings();
+            });
+          text.inputEl.type = 'password';
+          return text;
+        });
+    }
+    
     new Setting(container)
       .setName(isAuth ? 'Clear' : 'Authenticate')
       .setDesc(isAuth 
@@ -255,20 +257,17 @@ private renderSimklSection(container: HTMLElement): void {
           .onClick(async () => {
             if (isAuth) {
               await simklLogout(this.plugin);
-              this.display(); // Refresh settings UI
+              this.display();
             } else {
               await startSimklAuth(this.plugin);
-              // UI will refresh automatically after successful auth
             }
           });
         
-        // Add class for clear button styling
         if (isAuth) {
           button.buttonEl.addClass('cassette-clear-button');
         }
       });
 
-    // Add info about getting credentials
     if (!isAuth) {
       const credentialSetting = new Setting(container)
         .setName('How to get credentials')
@@ -276,7 +275,6 @@ private renderSimklSection(container: HTMLElement): void {
           setting.settingEl.addClass('cassette-credential-info');
         });
       
-      // Create description with link
       const descEl = credentialSetting.descEl;
       descEl.createSpan({ 
         text: 'Create an app at `https://simkl.com/settings/developer/new` to get your Client ID and Secret. Set the redirect URI to: `obsidian://cassette-auth/simkl`. See our ' 
@@ -290,5 +288,55 @@ private renderSimklSection(container: HTMLElement): void {
       });
       descEl.createSpan({ text: ' for detailed instructions.' });
     }
+  }
+
+  private renderStorageSection(container: HTMLElement): void {
+    new Setting(container)
+      .setName('Anime folder')
+      .setDesc('Folder where anime notes will be saved')
+      .addText(text => text
+        .setPlaceholder('Cassette/Anime')
+        .setValue(this.plugin.settings.animeFolder)
+        .onChange(async (value) => {
+          this.plugin.settings.animeFolder = value.trim() || 'Cassette/Anime';
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(container)
+      .setName('Manga folder')
+      .setDesc('Folder where manga notes will be saved')
+      .addText(text => text
+        .setPlaceholder('Cassette/Manga')
+        .setValue(this.plugin.settings.mangaFolder)
+        .onChange(async (value) => {
+          this.plugin.settings.mangaFolder = value.trim() || 'Cassette/Manga';
+          await this.plugin.saveSettings();
+        }));
+  }
+
+  private renderSyncSection(container: HTMLElement): void {
+    new Setting(container)
+      .setName('Auto-sync')
+      .setDesc('Automatically sync your lists at regular intervals')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.autoSync)
+        .onChange(async (value) => {
+          this.plugin.settings.autoSync = value;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(container)
+      .setName('Sync interval')
+      .setDesc('How often to sync automatically (in minutes)')
+      .addText(text => text
+        .setPlaceholder('60')
+        .setValue(String(this.plugin.settings.syncInterval))
+        .onChange(async (value) => {
+          const interval = parseInt(value);
+          if (!isNaN(interval) && interval > 0) {
+            this.plugin.settings.syncInterval = interval;
+            await this.plugin.saveSettings();
+          }
+        }));
   }
 }
