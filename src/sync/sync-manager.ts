@@ -1,5 +1,3 @@
-// Main orchestrator for sync operations
-
 import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem, SyncResult } from './types';
@@ -22,6 +20,21 @@ export class SyncManager {
   constructor(private plugin: CassettePlugin) {}
 
   /**
+   * Gets storage configuration from plugin settings
+   */
+  private getStorageConfig(): StorageConfig {
+    return {
+      animeFolder: this.plugin.settings.animeFolder,
+      mangaFolder: this.plugin.settings.mangaFolder,
+      createFolders: true,
+      propertyMapping: this.plugin.settings.useCustomPropertyMapping 
+        ? this.plugin.settings.propertyMapping 
+        : undefined,
+      propertyTemplate: this.plugin.settings.propertyTemplate,
+    };
+  }
+
+  /**
    * Performs a complete sync from MAL
    * @param options Sync options
    * @returns Synced items and result
@@ -42,10 +55,12 @@ export class SyncManager {
       
       if (options.saveToVault !== false && items.length > 0) {
         try {
+          const storageConfig = options.storageConfig || this.getStorageConfig();
+          
           savedPaths = await saveMediaItemsByCategory(
             this.plugin,
             items,
-            options.storageConfig
+            storageConfig
           );
           
           console.log('[Sync Manager] Saved to vault:', savedPaths);
@@ -149,9 +164,8 @@ export class SyncManager {
     lastSyncTime?: number;
     totalItems?: number;
   } {
-    // This can be extended to store sync history in settings
     return {
-      lastSyncTime: undefined,
+      lastSyncTime: this.plugin.settings.lastSyncTime,
       totalItems: undefined,
     };
   }
