@@ -1,4 +1,3 @@
-// src/sync/index.ts
 // Main entry point for sync module
 
 // Export types
@@ -43,3 +42,18 @@ export {
   transformMALAnimeList,
   transformMALMangaList,
 } from './transformers/mal-transformer';
+
+// Export storage services
+export {
+  saveMediaItem,
+  saveMediaItems,
+  saveMediaItemsByCategory,
+  type StorageConfig,
+} from './storage/storage-service';
+
+// Export sync manager
+export {
+  SyncManager,
+  createSyncManager,
+  type CompleteSyncOptions,
+} from './sync-manager';
