@@ -2,7 +2,11 @@ import { TFile, Notice } from 'obsidian';
 import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../types';
 import type { PropertyMapping, PropertyTemplate } from './property-mapping';
-import { getMappedPropertyName, getPropertyTemplate } from './property-mapping';
+import { 
+  getMappedPropertyName, 
+  getPropertyTemplate, 
+  DEFAULT_PROPERTY_TEMPLATE 
+} from './property-mapping';
 
 /**
  * Storage configuration
@@ -209,13 +213,14 @@ function generateMarkdown(
   config: StorageConfig
 ): string {
   const mapping = config.propertyMapping || {};
-  const template = config.propertyTemplate || {};
   
   // Get the appropriate template for the category
-  const categoryTemplate = getPropertyTemplate(
-    item.category as 'anime' | 'manga',
-    template
-  );
+  const categoryTemplate = config.propertyTemplate 
+    ? getPropertyTemplate(item.category as 'anime' | 'manga', config.propertyTemplate)
+    : getPropertyTemplate(item.category as 'anime' | 'manga', { 
+        anime: [], 
+        manga: [] 
+      } as any);
   
   // Build properties
   const properties = buildFrontmatterProperties(item, mapping, categoryTemplate);
