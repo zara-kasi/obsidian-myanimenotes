@@ -1,98 +1,108 @@
 export interface PropertyMapping {
-  // Basic fields
+  // Basic fields (common to both anime and manga)
   id?: string;
   title?: string;
   category?: string;
   platform?: string;
   
-  // Visual
+  // Visual (common)
   mainPicture?: string;
   pictures?: string;
   
-  // Alternative titles (Obsidian's aliases property)
+  // Alternative titles (Obsidian's aliases property - common)
   aliases?: string;
   
-  // Description
+  // Description (common)
   synopsis?: string;
   
-  // Metadata
+  // Metadata (common)
   mediaType?: string;
   status?: string;
   mean?: string;
   
-  // Genres
+  // Genres (common)
   genres?: string;
+  
+  // Season info (common to both anime and manga)
+  seasonYear?: string;
+  seasonName?: string;
+  
+  // Source material (common to both anime and manga)
+  source?: string;
   
   // Anime-specific
   numEpisodes?: string;
-  startSeasonYear?: string;
-  startSeasonName?: string;
-  source?: string;
+  startSeason?: string;
   
   // Manga-specific
   numVolumes?: string;
   numChapters?: string;
   authors?: string;
   
-  // User list data
+  // User list data (common)
   userStatus?: string;
   userScore?: string;
   numEpisodesWatched?: string;
   numVolumesRead?: string;
   numChaptersRead?: string;
   
-  // Sync metadata
+  // Sync metadata (common)
   lastSynced?: string;
 }
 
 /**
- * Default property mappings based on MAL specification
- * Matches the template from the mapping document
+ * Default property mappings - EXACTLY matching the updated reference document
+ * Note: season_year, season_name, platform, category, and source are now common fields
  */
 export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
-  // Basic fields
+  // Basic fields (common)
   id: 'id',
   title: 'title',
   category: 'category',
   platform: 'platform',
   
-  // Visual
+  // Visual (common)
   mainPicture: 'cover',
   pictures: 'banner',
   
-  // Alternative titles - uses Obsidian's built-in aliases
+  // Alternative titles - uses Obsidian's built-in aliases (common)
   aliases: 'aliases',
   
-  // Description
+  // Description (common)
   synopsis: 'synopsis',
   
-  // Metadata
+  // Metadata (common)
   mediaType: 'type',
   status: 'status',
   mean: 'score',
   
-  // Genres
+  // Genres (common)
   genres: 'genres',
   
-  // Anime-specific (matching document 1)
-  numEpisodes: 'total_episodes',
-  startSeasonYear: 'season_year',
-  startSeasonName: 'season_name',
+  // Season info (common - both anime and manga)
+  seasonYear: 'season_year',
+  seasonName: 'season_name',
+  
+  // Source material (common - both anime and manga)
   source: 'source',
   
-  // Manga-specific (matching document 1)
+  // Anime-specific
+  numEpisodes: 'total_episodes',
+  startSeason: 'start_season',
+  
+  // Manga-specific
   numVolumes: 'total_volumes',
   numChapters: 'total_chapters',
   authors: 'authors',
   
-  // User list data (matching document 1)
+  // User list data (common)
   userStatus: 'list',
   userScore: 'rating',
   numEpisodesWatched: 'episodes',
   numVolumesRead: 'volumes_read',
   numChaptersRead: 'chapters_read',
   
-  // Sync metadata
+  // Sync metadata (common)
   lastSynced: 'last_synced',
 };
 
