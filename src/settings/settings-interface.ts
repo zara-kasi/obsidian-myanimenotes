@@ -19,6 +19,19 @@ export interface CassetteSettings {
   simklAccessToken?: string;
   simklUserInfo?: SimklUserInfo | null;
   simklAuthenticated: boolean;
+  
+  // Storage Settings
+  animeFolder: string;
+  mangaFolder: string;
+  
+  // Sync Settings
+  autoSync: boolean;
+  syncInterval: number; // minutes
+  lastSyncTime?: number;
+  
+  // Template Settings (for future use)
+  useCustomTemplate: boolean;
+  customTemplatePath?: string;
 }
 
 export const DEFAULT_SETTINGS: CassetteSettings = {
@@ -37,4 +50,17 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   simklAccessToken: '',
   simklUserInfo: null,
   simklAuthenticated: false,
+  
+  // Storage defaults
+  animeFolder: 'Cassette/Anime',
+  mangaFolder: 'Cassette/Manga',
+  
+  // Sync defaults
+  autoSync: false,
+  syncInterval: 60, // 1 hour
+  lastSyncTime: undefined,
+  
+  // Template defaults
+  useCustomTemplate: false,
+  customTemplatePath: undefined,
 };
