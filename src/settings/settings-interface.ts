@@ -1,7 +1,7 @@
-// Main settings interface for Cassette plugin
-
 import type { MALUserInfo } from '../auth/mal';
 import type { SimklUserInfo } from '../auth/simkl';
+import type { PropertyMapping, PropertyTemplate } from '../sync/storage/property-mapping';
+import { DEFAULT_PROPERTY_MAPPING, DEFAULT_PROPERTY_TEMPLATE } from '../sync/storage/property-mapping';
 
 export interface CassetteSettings {
   // MAL Authentication
@@ -23,6 +23,11 @@ export interface CassetteSettings {
   // Storage Settings
   animeFolder: string;
   mangaFolder: string;
+  
+  // Property Customization
+  propertyMapping: PropertyMapping;
+  propertyTemplate: PropertyTemplate;
+  useCustomPropertyMapping: boolean;
   
   // Sync Settings
   autoSync: boolean;
@@ -54,6 +59,11 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   // Storage defaults
   animeFolder: 'Cassette/Anime',
   mangaFolder: 'Cassette/Manga',
+  
+  // Property customization defaults
+  propertyMapping: DEFAULT_PROPERTY_MAPPING,
+  propertyTemplate: DEFAULT_PROPERTY_TEMPLATE,
+  useCustomPropertyMapping: false,
   
   // Sync defaults
   autoSync: false,
