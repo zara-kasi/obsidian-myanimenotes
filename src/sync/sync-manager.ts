@@ -30,7 +30,6 @@ export class SyncManager {
       propertyMapping: this.plugin.settings.useCustomPropertyMapping 
         ? this.plugin.settings.propertyMapping 
         : undefined,
-      propertyTemplate: this.plugin.settings.propertyTemplate,
     };
   }
 
