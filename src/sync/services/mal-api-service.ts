@@ -29,7 +29,10 @@ const ANIME_FIELDS = [
   'source',
   
   // Additional pictures
-  'pictures'
+  'pictures',
+  
+  // User list data - REQUIRED for user-specific fields
+  'list_status{status,score,num_episodes_watched,is_rewatching,updated_at}'
 ].join(',');
 
 const MANGA_FIELDS = [
@@ -56,7 +59,10 @@ const MANGA_FIELDS = [
   'authors{first_name,last_name}',
   
   // Additional pictures
-  'pictures'
+  'pictures',
+  
+  // User list data - REQUIRED for user-specific fields
+  'list_status{status,score,num_volumes_read,num_chapters_read,is_rereading,updated_at}'
 ].join(',');
 
 /**
@@ -147,7 +153,7 @@ async function fetchAllPages(
 
 /**
  * Fetches complete anime list for authenticated user
- * Note: User list data (status, score, episodes watched) comes automatically with /users/@me/animelist
+ * Note: User list data (status, score, episodes watched) must be explicitly requested via list_status field
  */
 export async function fetchCompleteMALAnimeList(plugin: CassettePlugin): Promise<any[]> {
   return fetchAllPages(plugin, '/users/@me/animelist', {
@@ -158,7 +164,7 @@ export async function fetchCompleteMALAnimeList(plugin: CassettePlugin): Promise
 
 /**
  * Fetches complete manga list for authenticated user
- * Note: User list data (status, score, volumes/chapters read) comes automatically with /users/@me/mangalist
+ * Note: User list data (status, score, volumes/chapters read) must be explicitly requested via list_status field
  */
 export async function fetchCompleteMALMangaList(plugin: CassettePlugin): Promise<any[]> {
   return fetchAllPages(plugin, '/users/@me/mangalist', {
