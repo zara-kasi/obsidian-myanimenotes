@@ -15,8 +15,7 @@ import {
   transformMALMangaList,
 } from '../transformers/mal-transformer';
 import { isAuthenticated } from '../../auth/mal';
-import { createDebugLogger } from './utils/debug';
-
+import { createDebugLogger, type DebugLogger } from '../utils/debug';
 /**
  * Sync options
  */
