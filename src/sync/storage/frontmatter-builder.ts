@@ -3,17 +3,20 @@
  * 
  * Builds frontmatter properties from media items with cassette_sync as primary key
  * Handles merging with existing frontmatter while preserving user properties
+ * UPDATED: Now includes sanitized genres for Obsidian tags
  */
 
 import type { UniversalMediaItem } from '../types';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName } from './property-mapping';
 import { sanitizeSynopsis } from './file-utils';
+import { sanitizeGenreObjectsForTags } from './file-utils';
 import * as yaml from 'js-yaml';
 
 /**
  * Builds synced frontmatter properties including cassette_sync
  * CRITICAL: cassette_sync is always the first property (primary key)
+ * UPDATED: genres property now contains tag-safe values
  */
 export function buildSyncedFrontmatterProperties(
   item: UniversalMediaItem,
@@ -80,9 +83,14 @@ export function buildSyncedFrontmatterProperties(
   addProperty('status', item.status);
   addProperty('mean', item.mean);
   
-  // Genres
+  // Genres - UPDATED: Now sanitized for Obsidian tags
+  // Converts genres like "Slice of Life" to "slice-of-life"
+  // This allows users to use them as tags directly
   if (item.genres && item.genres.length > 0) {
-    addProperty('genres', item.genres.map(g => g.name));
+    const sanitizedGenres = sanitizeGenreObjectsForTags(item.genres);
+    if (sanitizedGenres.length > 0) {
+      addProperty('genres', sanitizedGenres);
+    }
   }
   
   // Release year (common property - replaces season_year and season_name)
