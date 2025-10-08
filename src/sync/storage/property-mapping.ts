@@ -45,7 +45,7 @@ export interface PropertyMapping {
   
   // Anime-specific
   numEpisodes?: string;
-  startSeason?: string;  // Keeps "winter 2024" format for anime only
+
   
   // Manga-specific
   numVolumes?: string;
@@ -105,8 +105,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   
   // Anime-specific
   numEpisodes: 'total_episodes',
-  startSeason: 'start_season',  // "winter 2024" format for anime
-  
+
   // Manga-specific
   numVolumes: 'total_volumes',
   numChapters: 'total_chapters',
