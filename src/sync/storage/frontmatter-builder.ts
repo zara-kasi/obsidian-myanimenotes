@@ -80,9 +80,12 @@ export function buildSyncedFrontmatterProperties(
     addProperty('genres', item.genres.map(g => g.name));
   }
   
-  // Season info (common to both anime and manga)
-  addProperty('seasonYear', item.startSeason?.year);
-  addProperty('seasonName', item.startSeason?.season);
+  // Release year (common property - replaces season_year and season_name)
+  // For anime: use start_season.year
+  // For manga: use start_season.year (MAL provides this for manga too)
+  if (item.startSeason?.year) {
+    addProperty('released', item.startSeason.year);
+  }
   
   // Source material (common to both anime and manga)
   addProperty('source', item.source);
@@ -162,15 +165,14 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'type',
     'status',
     'genres',
+    'released',      // Replaces season_year and season_name
     'total_episodes',
-    'start_season',
+    'start_season',  // Anime only: "winter 2024" format
     'source',
     'banner',
     'list',
     'rating',
     'episodes',
-    'season_year',
-    'season_name',
     'platform',
     'category',
     'total_volumes',
