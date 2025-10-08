@@ -116,6 +116,7 @@ export interface UniversalMediaItem {
   numVolumes?: number;
   numChapters?: number;
   authors?: UniversalAuthor[];
+  startDate?: string;
   
   // User list data
   userStatus?: UserListStatus;
