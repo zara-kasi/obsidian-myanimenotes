@@ -4,6 +4,8 @@ import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
 
 /**
  * Renders property mapping settings section
+ * 
+ * CHANGE: Removed season_year and season_name, added 'released'
  */
 export function renderPropertyMappingSection(
   container: HTMLElement,
@@ -25,7 +27,7 @@ export function renderPropertyMappingSection(
     return;
   }
   
-  // Common fields (for both anime and manga per updated reference)
+  // Common fields
   const commonFields = [
     { key: 'id', label: 'ID', default: 'id' },
     { key: 'title', label: 'Title', default: 'title' },
@@ -38,8 +40,7 @@ export function renderPropertyMappingSection(
     { key: 'status', label: 'Status', default: 'status' },
     { key: 'mean', label: 'Score (Average)', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
-    { key: 'seasonYear', label: 'Season Year', default: 'season_year' },
-    { key: 'seasonName', label: 'Season Name', default: 'season_name' },
+    { key: 'released', label: 'Released (Year)', default: 'released', desc: 'For anime: start year. For manga: publication year.' },
     { key: 'source', label: 'Source Material', default: 'source' },
     { key: 'userStatus', label: 'List Status', default: 'list' },
     { key: 'userScore', label: 'Rating (My Score)', default: 'rating' },
@@ -48,7 +49,7 @@ export function renderPropertyMappingSection(
   container.createEl('h4', { text: 'Common Fields' });
   
   commonFields.forEach(field => {
-    new Setting(container)
+    const setting = new Setting(container)
       .setName(field.label)
       .addText(text => text
         .setPlaceholder(field.default)
@@ -58,19 +59,24 @@ export function renderPropertyMappingSection(
             value.trim() || field.default;
           await plugin.saveSettings();
         }));
+    
+    // Add description if provided
+    if (field.desc) {
+      setting.setDesc(field.desc);
+    }
   });
   
   // Anime-specific fields
   const animeFields = [
     { key: 'numEpisodes', label: 'Total Episodes', default: 'total_episodes' },
     { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'episodes' },
-    { key: 'startSeason', label: 'Start Season (combined format)', default: 'start_season' },
+    { key: 'startSeason', label: 'Start Season (combined format)', default: 'start_season', desc: 'Format: "winter 2024"' },
   ];
   
   container.createEl('h4', { text: 'Anime-Specific Fields' });
   
   animeFields.forEach(field => {
-    new Setting(container)
+    const setting = new Setting(container)
       .setName(field.label)
       .addText(text => text
         .setPlaceholder(field.default)
@@ -80,6 +86,10 @@ export function renderPropertyMappingSection(
             value.trim() || field.default;
           await plugin.saveSettings();
         }));
+    
+    if (field.desc) {
+      setting.setDesc(field.desc);
+    }
   });
   
   // Manga-specific fields
