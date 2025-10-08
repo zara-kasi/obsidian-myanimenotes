@@ -93,11 +93,17 @@ export function buildSyncedFrontmatterProperties(
     }
   }
   
-  // Release year (common property - replaces season_year and season_name)
+// Release year (common property - replaces season_year and season_name)
   // For anime: use startSeason.year
-  // For manga: use startSeason.year (MAL provides this for manga too)
+  // For manga: extract year from startDate
   if (item.startSeason?.year) {
     addProperty('released', item.startSeason.year);
+  } else if (item.startDate) {
+    // Extract year from ISO date string (format: YYYY-MM-DD)
+    const year = parseInt(item.startDate.split('-')[0]);
+    if (!isNaN(year)) {
+      addProperty('released', year);
+    }
   }
   
   // Source material (common to both anime and manga)
