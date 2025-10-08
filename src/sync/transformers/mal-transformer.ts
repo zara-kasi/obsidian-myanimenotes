@@ -134,8 +134,8 @@ function transformSeason(malSeason: any): UniversalSeason | undefined {
  * Transforms a single MAL anime item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/animelist response
  */
-export function transformMALAnime(malItem: any): UniversalMediaItem {
-  const debug = createDebugLogger(plugin: CassettePlugin, 'MAL Transformer');
+export function transformMALAnime(plugin: CassettePlugin, malItem: any): UniversalMediaItem {
+  const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
@@ -191,8 +191,8 @@ export function transformMALAnime(malItem: any): UniversalMediaItem {
  * Transforms a single MAL manga item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
  */
-export function transformMALManga(malItem: any): UniversalMediaItem {
-  const debug = createDebugLogger(plugin: CassettePlugin, 'MAL Transformer');
+export function transformMALManga(plugin: CassettePlugin, malItem: any): UniversalMediaItem {
+  const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
@@ -248,23 +248,23 @@ export function transformMALManga(malItem: any): UniversalMediaItem {
 /**
  * Transforms an array of MAL anime items
  */
-export function transformMALAnimeList(malItems: any[]): UniversalMediaItem[] {
+export function transformMALAnimeList(plugin: CassettePlugin, malItems: any[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
   }
   
-  return malItems.map(transformMALAnime);
+  return malItems.map(item => transformMALAnime(plugin, item));
 }
 
 /**
  * Transforms an array of MAL manga items
  */
-export function transformMALMangaList(malItems: any[]): UniversalMediaItem[] {
+export function transformMALMangaList(plugin: CassettePlugin, malItems: any[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
   }
   
-  return malItems.map(transformMALManga);
+  return malItems.map(item => transformMALManga(plugin, item));
 }
