@@ -6,6 +6,7 @@ import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
  * Renders property mapping settings section
  * 
  * CHANGE: Removed season_year and season_name, added 'released'
+ * CHANGE: Added 'url' property for platform links
  */
 export function renderPropertyMappingSection(
   container: HTMLElement,
@@ -33,6 +34,7 @@ export function renderPropertyMappingSection(
     { key: 'title', label: 'Title (Main Title)', default: 'title' },
     { key: 'category', label: 'Category (Anime/Manga/Movie/TV)', default: 'category' },
     { key: 'platform', label: 'Platform (MyAnimeList/Simkl)', default: 'platform' },
+    { key: 'url', label: 'URL (Platform link)', default: 'url' },
     { key: 'mainPicture', label: 'Main Picture (cover/poster)', default: 'main_picture' },
     { key: 'pictures', label: 'Additional Pictures (banner/fanart)', default: 'pictures' },
     { key: 'synopsis', label: 'Synopsis', default: 'synopsis' },
