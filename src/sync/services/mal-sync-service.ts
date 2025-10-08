@@ -67,7 +67,7 @@ async function syncAnimeList(
   debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
   
   // Transform to universal format
-  const transformedItems = transformMALAnimeList(rawItems);
+  const transformedItems = transformMALAnimeList(plugin, rawItems);
   
   return transformedItems;
 }
@@ -105,7 +105,7 @@ async function syncMangaList(
   debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
   
   // Transform to universal format
-  const transformedItems = transformMALMangaList(rawItems);
+  const transformedItems = transformMALMangaList(plugin, rawItems);
   
   return transformedItems;
 }
