@@ -1,4 +1,3 @@
-import type CassettePlugin from '../../main';
 import { createDebugLogger } from '../../utils/debug';
 import type {
   UniversalMediaItem,
