@@ -29,22 +29,22 @@ export function renderPropertyMappingSection(
   
   // Common fields
   const commonFields = [
-    { key: 'id', label: 'ID (Media id from API', default: 'id' },
+    { key: 'id', label: 'ID (Media id from API)', default: 'id' },
     { key: 'title', label: 'Title (Main Title)', default: 'title' },
-    { key: 'category', label: 'Category (Anime/Manga/Movie/Tv)', default: 'category' },
+    { key: 'category', label: 'Category (Anime/Manga/Movie/TV)', default: 'category' },
     { key: 'platform', label: 'Platform (MyAnimeList/Simkl)', default: 'platform' },
     { key: 'mainPicture', label: 'Main Picture (cover/poster)', default: 'main_picture' },
     { key: 'pictures', label: 'Additional Pictures (banner/fanart)', default: 'pictures' },
     { key: 'synopsis', label: 'Synopsis', default: 'synopsis' },
-    { key: 'mediaType', label: 'Type (eg: OVA/ONA/Manwha', default: 'type' },
+    { key: 'mediaType', label: 'Type (e.g., OVA/ONA/Manhwa)', default: 'type' },
     { key: 'status', label: 'Status', default: 'status' },
     { key: 'mean', label: 'Average Score by other users', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
     { key: 'released', label: 'Released (Year)', default: 'released' },
-    { key: 'source', label: 'Source Material (eg: Manga)', default: 'source' },
-    { key: 'userStatus', label: 'List Status (eg: Planning)', default: 'list' },
+    { key: 'source', label: 'Source Material (e.g., Manga)', default: 'source' },
+    { key: 'userStatus', label: 'List Status (e.g., Planning)', default: 'list' },
     { key: 'userScore', label: 'Rating (User Score)', default: 'rating' },
-  ];
+];
   
   container.createEl('h4', { text: 'Common Fields' });
   
