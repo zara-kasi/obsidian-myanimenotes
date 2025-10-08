@@ -24,24 +24,22 @@ export default class CassettePlugin extends Plugin {
 
     // Register OAuth protocol handler for MAL
     this.registerObsidianProtocolHandler('cassette-auth/mal', async (params) => {
-      console.log('[Cassette] Received MAL OAuth callback');
       await handleMALRedirect(this, params);
     });
 
     // Register OAuth protocol handler for SIMKL
     this.registerObsidianProtocolHandler('cassette-auth/simkl', async (params) => {
-      console.log('[Cassette] Received SIMKL OAuth callback');
       await handleSimklRedirect(this, params);
     });
 
     // Add commands
     this.addCommands();
 
-    console.log('[Cassette] Plugin loaded');
+    
   }
 
   onunload() {
-    console.log('[Cassette] Plugin unloaded');
+    
   }
 
   async loadSettings() {
