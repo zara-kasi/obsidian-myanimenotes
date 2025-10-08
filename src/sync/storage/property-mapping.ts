@@ -65,9 +65,6 @@ export interface PropertyMapping {
 
 /**
  * Default property mappings
- * 
- * CHANGE: Added cassette_sync with default mapping to 'cassette_sync'
- * CHANGE: Removed seasonYear and seasonName, added 'released'
  */
 export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // Sync identifier (PRIMARY KEY - never change this)
@@ -80,8 +77,8 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   platform: 'platform',
   
   // Visual (common)
-  mainPicture: 'image',
-  pictures: 'banner',
+  mainPicture: 'main_picture',
+  pictures: 'pictures',
   
   // Alternative titles - uses Obsidian's built-in aliases (common)
   aliases: 'aliases',
