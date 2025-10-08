@@ -52,6 +52,29 @@ export class CassetteSettingTab extends PluginSettingTab {
     // ========================================================================
     
     this.renderSyncSection(containerEl);
+   
+   // ========================================================================
+  // Debug Section
+  // ========================================================================
+  
+   
+    new Setting(container)
+    .setName('Debug mode')
+    .setDesc('Enable detailed console logging for troubleshooting. This will output sync operations, API calls, and data transformations to the developer console.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.debugMode)
+      .onChange(async (value) => {
+        this.plugin.settings.debugMode = value;
+        await this.plugin.saveSettings();
+        
+        // Show feedback
+        if (value) {
+          new Notice('Debug mode enabled. Check the developer console (Ctrl+Shift+I) for detailed logs.');
+        } else {
+          new Notice('Debug mode disabled.');
+        }
+      }));
+
 
     // ========================================================================
     // Footer
