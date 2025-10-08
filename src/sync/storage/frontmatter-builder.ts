@@ -8,7 +8,7 @@
 import type { UniversalMediaItem } from '../types';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName } from './property-mapping';
-import { sanitizeSynopsis, formateason } from './file-utils';
+import { sanitizeSynopsis } from './file-utils';
 import * as yaml from 'js-yaml';
 
 /**
@@ -81,10 +81,10 @@ export function buildSyncedFrontmatterProperties(
   }
   
   // Release year (common property - replaces season_year and season_name)
-  // For anime: use start_season.year
-  // For manga: use start_season.year (MAL provides this for manga too)
-  if (item.eason?.year) {
-    addProperty('released', item.eason.year);
+  // For anime: use startSeason.year
+  // For manga: use startSeason.year (MAL provides this for manga too)
+  if (item.startSeason?.year) {
+    addProperty('released', item.startSeason.year);
   }
   
   // Source material (common to both anime and manga)
@@ -94,11 +94,6 @@ export function buildSyncedFrontmatterProperties(
   if (item.category === 'anime') {
     addProperty('numEpisodes', item.numEpisodes);
     addProperty('numEpisodesWatched', item.numEpisodesWatched);
-    
-    // start_season as "season year" format (anime only)
-    if (item.eason) {
-      addProperty('eason', formateason(item.eason));
-    }
   } else if (item.category === 'manga') {
     addProperty('numVolumes', item.numVolumes);
     addProperty('numVolumesRead', item.numVolumesRead);
