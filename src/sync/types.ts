@@ -87,6 +87,7 @@ export interface UniversalMediaItem {
   id: number;
   title: string;
   category: MediaCategory;
+  url?: string; // Platform link (e.g., https://myanimelist.net/anime/123)
   
   // Visual
   mainPicture?: UniversalPicture;
