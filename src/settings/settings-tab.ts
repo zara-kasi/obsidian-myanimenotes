@@ -117,7 +117,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       // Client Secret
       new Setting(container)
         .setName('Client Secret')
-        .setDesc('Your MyAnimeList Client Secret (optional)')
+        .setDesc('Your MyAnimeList Client Secret')
         .addText(text => {
           text
             .setPlaceholder('Enter Client Secret')
