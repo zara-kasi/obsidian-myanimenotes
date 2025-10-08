@@ -1,10 +1,6 @@
 /**
  * Property Mapping with cassette_sync as controlled property
- * 
- * CHANGE: Added cassette_sync as a recognized controlled property
- * CHANGE: Replaced season_year and season_name with 'released' property
- *         - For anime: contains start year from start_season
- *         - For manga: contains publication year
+ * CHANGE: Added 'url' property for platform links
  */
 
 export interface PropertyMapping {
@@ -16,6 +12,7 @@ export interface PropertyMapping {
   title?: string;
   category?: string;
   platform?: string;
+  url?: string; // Platform link (e.g., MyAnimeList page URL)
   
   // Visual (common)
   mainPicture?: string;
@@ -75,6 +72,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   title: 'title',
   category: 'category',
   platform: 'platform',
+  url: 'url',
   
   // Visual (common)
   mainPicture: 'main_picture',
