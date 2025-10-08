@@ -36,6 +36,9 @@ export interface CassetteSettings {
   // Template Settings (for future use)
   useCustomTemplate: boolean;
   customTemplatePath?: string;
+  
+  // Debug Settings
+  debugMode: boolean;
 }
 
 export const DEFAULT_SETTINGS: CassetteSettings = {
@@ -71,4 +74,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   // Template defaults
   useCustomTemplate: false,
   customTemplatePath: undefined,
+  
+  // Debug defaults
+  debugMode: false,
 };
