@@ -9,6 +9,20 @@ import type {
 import { MediaStatus, UserListStatus, MediaCategory } from '../types';
 
 /**
+ * Generates MyAnimeList URL for anime
+ */
+function generateMALAnimeUrl(id: number): string {
+  return `https://myanimelist.net/anime/${id}`;
+}
+
+/**
+ * Generates MyAnimeList URL for manga
+ */
+function generateMALMangaUrl(id: number): string {
+  return `https://myanimelist.net/manga/${id}`;
+}
+
+/**
  * Maps MAL status to universal status
  */
 function mapMALStatus(malStatus: string): MediaStatus {
@@ -132,6 +146,7 @@ export function transformMALAnime(malItem: any): UniversalMediaItem {
     id: node.id,
     title: node.title,
     category: MediaCategory.ANIME,
+    url: generateMALAnimeUrl(node.id),
     
     // Visual
     mainPicture: transformPicture(node.main_picture),
@@ -187,6 +202,7 @@ export function transformMALManga(malItem: any): UniversalMediaItem {
     id: node.id,
     title: node.title,
     category: MediaCategory.MANGA,
+    url: generateMALMangaUrl(node.id),
     
     // Visual
     mainPicture: transformPicture(node.main_picture),
