@@ -1,0 +1,187 @@
+/**
+ * Cassette Sync Manager
+ * 
+ * Handles cassette_sync identifier generation, validation, file lookup,
+ * and concurrency control through in-memory locks.
+ */
+
+import { TFile } from 'obsidian';
+import type CassettePlugin from '../../main';
+import type { UniversalMediaItem } from '../types';
+
+// In-memory lock to prevent concurrent operations on the same cassette_sync ID
+const syncLocks = new Map<string, Promise<void>>();
+
+/**
+ * Validates cassette_sync format: provider:category:id
+ * Example: mal:anime:1245
+ */
+export function validateCassetteSyncFormat(cassetteSync: string): boolean {
+  const pattern = /^[a-z0-9_-]+:[a-z0-9_-]+:[A-Za-z0-9_-]+$/;
+  return pattern.test(cassetteSync);
+}
+
+/**
+ * Generates cassette_sync identifier from media item
+ * Format: provider:category:id (e.g., mal:anime:1245)
+ */
+export function generateCassetteSync(item: UniversalMediaItem): string {
+  const provider = item.platform.toLowerCase();
+  const category = item.category.toLowerCase();
+  const id = String(item.id);
+  
+  const cassetteSync = `${provider}:${category}:${id}`;
+  
+  // Validate format
+  if (!validateCassetteSyncFormat(cassetteSync)) {
+    throw new Error(`Invalid cassette_sync format generated: ${cassetteSync}`);
+  }
+  
+  return cassetteSync;
+}
+
+/**
+ * Acquires an in-memory lock for a cassette_sync ID
+ * Prevents concurrent save operations on the same item
+ */
+export async function acquireSyncLock(cassetteSync: string): Promise<void> {
+  // Wait for any existing lock to release
+  while (syncLocks.has(cassetteSync)) {
+    await syncLocks.get(cassetteSync);
+  }
+  
+  // Create new lock
+  let resolveLock: () => void;
+  const lockPromise = new Promise<void>(resolve => { resolveLock = resolve; });
+  
+  // Store lock with its resolver
+  syncLocks.set(cassetteSync, lockPromise);
+  
+  // Store resolver for later release
+  (lockPromise as any).resolve = resolveLock!;
+}
+
+/**
+ * Releases a lock for a cassette_sync ID
+ */
+export function releaseSyncLock(cassetteSync: string): void {
+  const lock = syncLocks.get(cassetteSync);
+  if (lock) {
+    // Call the resolver to release waiting promises
+    (lock as any).resolve();
+    syncLocks.delete(cassetteSync);
+  }
+}
+
+/**
+ * Finds files by cassette_sync frontmatter property
+ * Returns all files that match the cassette_sync value
+ */
+export async function findFilesByCassetteSync(
+  plugin: CassettePlugin,
+  cassetteSync: string,
+  folderPath: string
+): Promise<TFile[]> {
+  const { vault, metadataCache } = plugin.app;
+  const matchingFiles: TFile[] = [];
+  
+  // Get all markdown files in the target folder
+  const allFiles = vault.getMarkdownFiles();
+  const folderFiles = allFiles.filter(file => file.path.startsWith(folderPath));
+  
+  // Check each file's frontmatter for cassette_sync property
+  for (const file of folderFiles) {
+    const cache = metadataCache.getFileCache(file);
+    const frontmatter = cache?.frontmatter;
+    
+    if (frontmatter && frontmatter.cassette_sync === cassetteSync) {
+      matchingFiles.push(file);
+      console.log(`[CassetteSync] Found file by cassette_sync: ${file.path}`);
+    }
+  }
+  
+  return matchingFiles;
+}
+
+/**
+ * Attempts to find legacy files that might match this item
+ * Uses heuristics: provider-specific ID fields, filename patterns
+ * 
+ * LEGACY DETECTION STRATEGIES:
+ * 1. Check frontmatter for provider-specific ID fields (malId, id, providerId)
+ * 2. Check filename patterns (provider-id, provider-id-*)
+ */
+export async function findLegacyFiles(
+  plugin: CassettePlugin,
+  item: UniversalMediaItem,
+  folderPath: string
+): Promise<TFile[]> {
+  const { vault, metadataCache } = plugin.app;
+  const candidates: TFile[] = [];
+  
+  const allFiles = vault.getMarkdownFiles();
+  const folderFiles = allFiles.filter(file => file.path.startsWith(folderPath));
+  
+  // Strategy 1: Check frontmatter for provider-specific ID fields
+  for (const file of folderFiles) {
+    const cache = metadataCache.getFileCache(file);
+    const frontmatter = cache?.frontmatter;
+    
+    if (!frontmatter) continue;
+    
+    // Skip files that already have cassette_sync (not legacy)
+    if (frontmatter.cassette_sync) continue;
+    
+    // Check for various ID field patterns
+    const idFields = ['malId', 'id', 'providerId', 'external_id'];
+    for (const field of idFields) {
+      if (frontmatter[field] === item.id || frontmatter[field] === String(item.id)) {
+        candidates.push(file);
+        console.log(`[CassetteSync] Legacy candidate found by ${field}: ${file.path}`);
+        break;
+      }
+    }
+  }
+  
+  // Strategy 2: Check filename patterns like provider-id or provider-id-*
+  const provider = item.platform.toLowerCase();
+  const idStr = String(item.id);
+  const filenamePatterns = [
+    new RegExp(`^${provider}-${idStr}\\.md$`),
+    new RegExp(`^${provider}-${idStr}-.*\\.md$`),
+  ];
+  
+  for (const file of folderFiles) {
+    const filename = file.name;
+    
+    // Skip if already identified
+    if (candidates.includes(file)) continue;
+    
+    // Skip files that already have cassette_sync
+    const cache = metadataCache.getFileCache(file);
+    if (cache?.frontmatter?.cassette_sync) continue;
+    
+    if (filenamePatterns.some(pattern => pattern.test(filename))) {
+      candidates.push(file);
+      console.log(`[CassetteSync] Legacy candidate found by filename pattern: ${file.path}`);
+    }
+  }
+  
+  return candidates;
+}
+
+/**
+ * Selects deterministic file from duplicates or candidates
+ * Uses most recent modification time as tiebreaker
+ */
+export function selectDeterministicFile(files: TFile[]): TFile {
+  if (files.length === 0) {
+    throw new Error('No files provided for selection');
+  }
+  
+  // Sort by mtime descending (most recent first)
+  const sorted = [...files].sort((a, b) => b.stat.mtime - a.stat.mtime);
+  
+  console.log(`[CassetteSync] Selected file from ${files.length} candidates: ${sorted[0].path} (most recent)`);
+  return sorted[0];
+}
