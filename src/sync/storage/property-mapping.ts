@@ -2,7 +2,9 @@
  * Property Mapping with cassette_sync as controlled property
  * 
  * CHANGE: Added cassette_sync as a recognized controlled property
- * This ensures it's not accidentally removed during frontmatter operations
+ * CHANGE: Replaced season_year and season_name with 'released' property
+ *         - For anime: contains start year from start_season
+ *         - For manga: contains publication year
  */
 
 export interface PropertyMapping {
@@ -33,16 +35,17 @@ export interface PropertyMapping {
   // Genres (common)
   genres?: string;
   
-  // Season info (common to both anime and manga)
-  seasonYear?: string;
-  seasonName?: string;
+  // Release info (common to both anime and manga)
+  // For anime: start year from start_season
+  // For manga: publication year
+  released?: string;
   
   // Source material (common to both anime and manga)
   source?: string;
   
   // Anime-specific
   numEpisodes?: string;
-  startSeason?: string;
+  startSeason?: string;  // Keeps "winter 2024" format for anime only
   
   // Manga-specific
   numVolumes?: string;
@@ -64,7 +67,7 @@ export interface PropertyMapping {
  * Default property mappings
  * 
  * CHANGE: Added cassette_sync with default mapping to 'cassette_sync'
- * This is the canonical identifier field that must always be present
+ * CHANGE: Removed seasonYear and seasonName, added 'released'
  */
 export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // Sync identifier (PRIMARY KEY - never change this)
@@ -94,16 +97,15 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // Genres (common)
   genres: 'genres',
   
-  // Season info (common - both anime and manga)
-  seasonYear: 'season_year',
-  seasonName: 'season_name',
+  // Release info (common - replaces season_year and season_name)
+  released: 'released',
   
   // Source material (common - both anime and manga)
   source: 'source',
   
   // Anime-specific
   numEpisodes: 'total_episodes',
-  startSeason: 'start_season',
+  startSeason: 'start_season',  // "winter 2024" format for anime
   
   // Manga-specific
   numVolumes: 'total_volumes',
