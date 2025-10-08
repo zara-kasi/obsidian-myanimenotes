@@ -135,7 +135,7 @@ function transformSeason(malSeason: any): UniversalSeason | undefined {
  * IMPORTANT: User list data comes from list_status object in /users/@me/animelist response
  */
 export function transformMALAnime(malItem: any): UniversalMediaItem {
-  const debug = createDebugLogger(plugin:CassettePlugin, 'MAL Transformer');
+  const debug = createDebugLogger(plugin: CassettePlugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
