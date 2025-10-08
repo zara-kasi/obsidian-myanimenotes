@@ -1,6 +1,7 @@
 import { requestUrl } from 'obsidian';
 import type CassettePlugin from '../../main';
 import { ensureValidToken, getAuthHeaders } from '../../auth/mal';
+import { createDebugLogger } from '../../utils/debug';
 
 const MAL_API_BASE = 'https://api.myanimelist.net/v2';
 
@@ -107,6 +108,7 @@ async function fetchAllPages(
   endpoint: string,
   params: Record<string, string> = {}
 ): Promise<any[]> {
+    const debug = createDebugLogger(plugin, 'MAL API');
   const allItems: any[] = [];
   let nextUrl: string | null = null;
   let offset = 0;
@@ -119,14 +121,14 @@ async function fetchAllPages(
       offset: offset.toString()
     };
 
-    console.log(`[MAL API] Fetching ${endpoint} (offset: ${offset})...`);
+    debug.log(`[MAL API] Fetching ${endpoint} (offset: ${offset})...`);
     
     const data = await makeMALRequest(plugin, endpoint, requestParams);
     
     if (data.data && Array.isArray(data.data)) {
       // Log first item to see structure
       if (offset === 0 && data.data.length > 0) {
-        console.log('[MAL API] Sample response structure:', {
+        debug.log('[MAL API] Sample response structure:', {
           hasNode: !!data.data[0].node,
           hasListStatus: !!data.data[0].list_status,
           listStatusKeys: data.data[0].list_status ? Object.keys(data.data[0].list_status) : [],
@@ -147,7 +149,7 @@ async function fetchAllPages(
 
   } while (nextUrl);
 
-  console.log(`[MAL API] Fetched total of ${allItems.length} items from ${endpoint}`);
+  debug.log(`[MAL API] Fetched total of ${allItems.length} items from ${endpoint}`);
   return allItems;
 }
 
