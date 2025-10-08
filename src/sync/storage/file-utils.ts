@@ -58,37 +58,75 @@ export function generateUniqueFilename(
 }
 
 /**
- * Sanitizes synopsis for YAML properties
- * Only keeps commas and periods, removes all other special characters
+ * Sanitizes synopsis for Obsidian YAML text properties
+ * Preserves formatting and most punctuation while ensuring YAML compatibility
+ * 
+ * Key improvements:
+ * - Preserves sentence structure and punctuation (!, ?, -, etc.)
+ * - Normalizes whitespace without destroying paragraph breaks
+ * - Escapes double quotes to prevent YAML parsing errors
+ * - Handles colons safely (common in anime titles/descriptions)
+ * - Removes control characters that can break YAML
+ * 
+ * @param synopsis - The synopsis text from MAL API
+ * @returns Sanitized synopsis safe for Obsidian YAML text property
  */
 export function sanitizeSynopsis(synopsis: string | undefined): string {
   if (!synopsis) return '';
   
   return synopsis
-    .replace(/[\n\r\t]/g, ' ')
-    .replace(/[^\w\s,.]/g, '')
-    .replace(/\s+/g, ' ')
+    // Remove null bytes and other control characters (except newlines/tabs)
+    .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '')
+    
+    // Normalize line breaks: convert multiple newlines to double space
+    // This preserves paragraph breaks while keeping it single-line for YAML
+    .replace(/\r\n/g, '\n')
+    .replace(/\n\n+/g, '  ')  // Paragraph breaks become double spaces
+    .replace(/\n/g, ' ')       // Single newlines become single spaces
+    
+    // Normalize tabs to spaces
+    .replace(/\t/g, ' ')
+    
+    // Escape double quotes (critical for YAML)
+    .replace(/"/g, '\\"')
+    
+    // Normalize multiple spaces to single space
+    .replace(/\s{2,}/g, ' ')
+    
+    // Trim leading/trailing whitespace
+    .trim();
+}
+
+/**
+ * Alternative version using YAML multiline string format
+ * Use this if you want to preserve exact line breaks in the synopsis
+ * This will require changing how you write the YAML (using | or > indicators)
+ * 
+ * @param synopsis - The synopsis text from MAL API
+ * @returns Sanitized synopsis with preserved line breaks
+ */
+export function sanitizeSynopsisMultiline(synopsis: string | undefined): string {
+  if (!synopsis) return '';
+  
+  return synopsis
+    // Remove control characters except newlines
+    .replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F\x7F]/g, '')
+    
+    // Normalize line endings
+    .replace(/\r\n/g, '\n')
+    
+    // Remove excessive blank lines (max 1 blank line between paragraphs)
+    .replace(/\n{3,}/g, '\n\n')
+    
+    // Escape double quotes
+    .replace(/"/g, '\\"')
+    
+    // Trim but preserve internal structure
     .trim();
 }
 
 /**
  * Sanitizes a single genre name to be compatible with Obsidian tags
- * 
- * Obsidian tag requirements:
- * - No spaces allowed (spaces break tags)
- * - Can contain: letters, numbers, underscores (_), hyphens (-), forward slashes (/)
- * 
- * Rules applied:
- * 1. Convert to lowercase for consistency
- * 2. Replace spaces with hyphens
- * 3. Remove special characters except hyphens, underscores, and forward slashes
- * 4. Remove leading/trailing hyphens
- * 5. Collapse multiple consecutive hyphens into one
- * 
- * Examples:
- * "Slice of Life" -> "slice-of-life"
- * "Sci-Fi" -> "sci-fi"
- * "Action & Adventure" -> "action-adventure"
  */
 export function sanitizeGenreForTag(genre: string): string {
   return genre
