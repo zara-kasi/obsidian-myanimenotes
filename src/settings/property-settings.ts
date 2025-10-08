@@ -60,10 +60,6 @@ export function renderPropertyMappingSection(
           await plugin.saveSettings();
         }));
     
-    // Add description if provided
-    if (field.desc) {
-      setting.setDesc(field.desc);
-    }
   });
   
   // Anime-specific fields
@@ -86,9 +82,6 @@ export function renderPropertyMappingSection(
           await plugin.saveSettings();
         }));
     
-    if (field.desc) {
-      setting.setDesc(field.desc);
-    }
   });
   
   // Manga-specific fields
