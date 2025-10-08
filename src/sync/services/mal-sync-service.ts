@@ -1,4 +1,3 @@
-// src/sync/services/mal-sync-service.ts
 // Main service for syncing MAL data
 
 import { Notice } from 'obsidian';
@@ -16,6 +15,7 @@ import {
   transformMALMangaList,
 } from '../transformers/mal-transformer';
 import { isAuthenticated } from '../../auth/mal';
+import { createDebugLogger } from '../utils/debug';
 
 /**
  * Sync options
@@ -45,7 +45,9 @@ async function syncAnimeList(
   plugin: CassettePlugin,
   statuses?: string[]
 ): Promise<UniversalMediaItem[]> {
-  console.log('[MAL Sync] Starting anime sync...');
+  const debug = createDebugLogger(plugin, 'MAL Sync');
+  
+  debug.log('[MAL Sync] Starting anime sync...');
   
   let rawItems: any[] = [];
 
@@ -63,7 +65,7 @@ async function syncAnimeList(
     rawItems = await fetchCompleteMALAnimeList(plugin);
   }
 
-  console.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
+  debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
   
   // Transform to universal format
   const transformedItems = transformMALAnimeList(rawItems);
@@ -81,7 +83,9 @@ async function syncMangaList(
   plugin: CassettePlugin,
   statuses?: string[]
 ): Promise<UniversalMediaItem[]> {
-  console.log('[MAL Sync] Starting manga sync...');
+  const debug = createDebugLogger(plugin, 'MAL Sync');
+  
+  debug.log('[MAL Sync] Starting manga sync...');
   
   let rawItems: any[] = [];
 
@@ -99,7 +103,7 @@ async function syncMangaList(
     rawItems = await fetchCompleteMALMangaList(plugin);
   }
 
-  console.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
+  debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
   
   // Transform to universal format
   const transformedItems = transformMALMangaList(rawItems);
@@ -117,6 +121,7 @@ export async function syncMAL(
   plugin: CassettePlugin,
   options: MALSyncOptions = DEFAULT_SYNC_OPTIONS
 ): Promise<{ items: UniversalMediaItem[]; result: SyncResult }> {
+  const debug = createDebugLogger(plugin, 'MAL Sync');
   const startTime = Date.now();
   const allItems: UniversalMediaItem[] = [];
   const results: SyncItemResult[] = [];
@@ -128,7 +133,7 @@ export async function syncMAL(
       throw new Error('Not authenticated with MyAnimeList');
     }
 
-    new Notice('🔄 Starting MAL sync...', 3000);
+    new Notice('Starting MAL sync...', 1000);
 
     // Sync anime if enabled
     if (options.syncAnime !== false) {
@@ -146,7 +151,7 @@ export async function syncMAL(
           });
         });
         
-        new Notice(`✅ Synced ${animeItems.length} anime items`, 3000);
+        
       } catch (error) {
         const errorMsg = `Failed to sync anime: ${error.message}`;
         console.error('[MAL Sync]', errorMsg);
@@ -171,7 +176,7 @@ export async function syncMAL(
           });
         });
         
-        new Notice(`✅ Synced ${mangaItems.length} manga items`, 3000);
+        
       } catch (error) {
         const errorMsg = `Failed to sync manga: ${error.message}`;
         console.error('[MAL Sync]', errorMsg);
@@ -193,12 +198,11 @@ export async function syncMAL(
     };
 
     if (syncResult.success) {
-      new Notice(`✅ MAL sync completed! Synced ${allItems.length} items`, 4000);
     } else {
       new Notice(`⚠️ MAL sync completed with ${errors.length} errors`, 4000);
     }
 
-    console.log('[MAL Sync] Sync completed:', syncResult);
+    debug.log('[MAL Sync] Sync completed:', syncResult);
     
     return { items: allItems, result: syncResult };
 
