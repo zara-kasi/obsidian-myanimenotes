@@ -164,7 +164,6 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'status',
     'platform',
     'category',
-    'url',
     'released',
     'source',
     'score',
@@ -176,9 +175,10 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'episodes_watched',
     'volumes_read',
     'chapters_read',
-    'id',
     'main_picture',
     'pictures',
+    'url',
+    'id',
     'cassette_sync',
     'last_synced'
   ];
