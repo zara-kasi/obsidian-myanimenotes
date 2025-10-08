@@ -4,6 +4,7 @@ import type { UniversalMediaItem, SyncResult } from './types';
 import { MediaCategory } from './types';
 import { syncMAL, type MALSyncOptions } from './services/mal-sync-service';
 import { saveMediaItemsByCategory, type StorageConfig } from './storage/storage-service';
+import { createDebugLogger, type DebugLogger } from '../utils/debug';
 
 /**
  * Complete sync options
@@ -17,7 +18,10 @@ export interface CompleteSyncOptions extends MALSyncOptions {
  * Sync manager class
  */
 export class SyncManager {
-  constructor(private plugin: CassettePlugin) {}
+  private debug: DebugLogger;
+  constructor(private plugin: CassettePlugin) {
+    this.debug = createDebugLogger(plugin, 'Sync Manager');
+ }
 
   /**
    * Gets storage configuration from plugin settings
@@ -43,7 +47,7 @@ export class SyncManager {
     result: SyncResult;
     savedPaths?: { anime: string[]; manga: string[] };
   }> {
-    console.log('[Sync Manager] Starting MAL sync...', options);
+    this.debug.log('[Sync Manager] Starting MAL sync...', options);
     
     try {
       // Perform sync
@@ -62,7 +66,7 @@ export class SyncManager {
             storageConfig
           );
           
-          console.log('[Sync Manager] Saved to vault:', savedPaths);
+          this.debug.log('[Sync Manager] Saved to vault:', savedPaths);
         } catch (saveError) {
           console.error('[Sync Manager] Failed to save to vault:', saveError);
           new Notice(`⚠️ Synced but failed to save: ${saveError.message}`, 5000);
@@ -87,7 +91,7 @@ export class SyncManager {
     category: MediaCategory,
     saveToVault: boolean = true
   ): Promise<UniversalMediaItem[]> {
-    console.log(`[Sync Manager] Quick sync for ${category}...`);
+    this.debug.log(`[Sync Manager] Quick sync for ${category}...`);
     
     const options: MALSyncOptions = {
       syncAnime: category === MediaCategory.ANIME,
@@ -133,7 +137,7 @@ export class SyncManager {
     status: string,
     saveToVault: boolean = true
   ): Promise<UniversalMediaItem[]> {
-    console.log(`[Sync Manager] Syncing ${category} with status ${status}...`);
+    this.debug.log(`[Sync Manager] Syncing ${category} with status ${status}...`);
     
     const malOptions: MALSyncOptions = {
       syncAnime: category === MediaCategory.ANIME,
