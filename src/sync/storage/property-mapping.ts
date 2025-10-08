@@ -62,7 +62,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   platform: 'platform',
   
   // Visual (common)
-  mainPicture: 'cover',
+  mainPicture: 'image',
   pictures: 'banner',
   
   // Alternative titles - uses Obsidian's built-in aliases (common)
@@ -98,7 +98,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // User list data (common)
   userStatus: 'list',
   userScore: 'rating',
-  numEpisodesWatched: 'episodes',
+  numEpisodesWatched: 'episodes_watched',
   numVolumesRead: 'volumes_read',
   numChaptersRead: 'chapters_read',
   
