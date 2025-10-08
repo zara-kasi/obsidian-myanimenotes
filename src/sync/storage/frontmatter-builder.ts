@@ -8,7 +8,7 @@
 import type { UniversalMediaItem } from '../types';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName } from './property-mapping';
-import { sanitizeSynopsis, formatStartSeason } from './file-utils';
+import { sanitizeSynopsis, formateason } from './file-utils';
 import * as yaml from 'js-yaml';
 
 /**
@@ -83,8 +83,8 @@ export function buildSyncedFrontmatterProperties(
   // Release year (common property - replaces season_year and season_name)
   // For anime: use start_season.year
   // For manga: use start_season.year (MAL provides this for manga too)
-  if (item.startSeason?.year) {
-    addProperty('released', item.startSeason.year);
+  if (item.eason?.year) {
+    addProperty('released', item.eason.year);
   }
   
   // Source material (common to both anime and manga)
@@ -96,8 +96,8 @@ export function buildSyncedFrontmatterProperties(
     addProperty('numEpisodesWatched', item.numEpisodesWatched);
     
     // start_season as "season year" format (anime only)
-    if (item.startSeason) {
-      addProperty('startSeason', formatStartSeason(item.startSeason));
+    if (item.eason) {
+      addProperty('eason', formateason(item.eason));
     }
   } else if (item.category === 'manga') {
     addProperty('numVolumes', item.numVolumes);
@@ -155,31 +155,30 @@ export function mergeFrontmatter(
 export function serializeFrontmatter(frontmatter: Record<string, any>): string {
   // Define property order with cassette_sync first (primary key position)
   const propertyOrder = [
-    'cassette_sync', // CRITICAL: Always first (primary key)
-    'id',
-    'title', 
+    'title',
     'aliases',
-    'cover',
+    'authors',
     'synopsis',
-    'score',
     'type',
     'status',
-    'genres',
-    'released',      // Replaces season_year and season_name
+    'score',
     'total_episodes',
-    'start_season',  // Anime only: "winter 2024" format
-    'source',
-    'banner',
-    'list',
-    'rating',
-    'episodes',
-    'platform',
-    'category',
     'total_volumes',
     'total_chapters',
-    'authors',
+    'list',
+    'rating',
+    'episodes_watched',
     'volumes_read',
     'chapters_read',
+    'platform',
+    'category',
+    'released',
+    'genres',
+    'source',
+    'id',
+    'main_picture',
+    'pictures',
+    'cassette_sync',
     'last_synced'
   ];
   
