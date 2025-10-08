@@ -231,7 +231,7 @@ export function transformMALManga(malItem: any): UniversalMediaItem {
     numVolumes: node.num_volumes,
     numChapters: node.num_chapters,
     authors: transformAuthors(node.authors),
-    
+    startDate: node.start_date,
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/mangalist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
