@@ -72,6 +72,63 @@ export function sanitizeSynopsis(synopsis: string | undefined): string {
 }
 
 /**
+ * Sanitizes a single genre name to be compatible with Obsidian tags
+ * 
+ * Obsidian tag requirements:
+ * - No spaces allowed (spaces break tags)
+ * - Can contain: letters, numbers, underscores (_), hyphens (-), forward slashes (/)
+ * 
+ * Rules applied:
+ * 1. Convert to lowercase for consistency
+ * 2. Replace spaces with hyphens
+ * 3. Remove special characters except hyphens, underscores, and forward slashes
+ * 4. Remove leading/trailing hyphens
+ * 5. Collapse multiple consecutive hyphens into one
+ * 
+ * Examples:
+ * "Slice of Life" -> "slice-of-life"
+ * "Sci-Fi" -> "sci-fi"
+ * "Action & Adventure" -> "action-adventure"
+ */
+export function sanitizeGenreForTag(genre: string): string {
+  return genre
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\s\-\/]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Sanitizes an array of genre names for use as Obsidian tags
+ * Filters out empty results and duplicates
+ */
+export function sanitizeGenresForTags(genres: string[]): string[] {
+  if (!genres || !Array.isArray(genres)) {
+    return [];
+  }
+  
+  const sanitized = genres
+    .map(sanitizeGenreForTag)
+    .filter(tag => tag.length > 0);
+  
+  // Remove duplicates while preserving order
+  return [...new Set(sanitized)];
+}
+
+/**
+ * Sanitizes genres from UniversalGenre objects for use as Obsidian tags
+ */
+export function sanitizeGenreObjectsForTags(genres: Array<{ id: number; name: string }>): string[] {
+  if (!genres || !Array.isArray(genres)) {
+    return [];
+  }
+  
+  return sanitizeGenresForTags(genres.map(g => g.name));
+}
+
+/**
  * Formats start_season as "season year" (e.g., "winter 2024")
  */
 export function formatStartSeason(season?: { year?: number; season?: string }): string | undefined {
