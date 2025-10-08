@@ -52,6 +52,11 @@ export function buildSyncedFrontmatterProperties(
   addProperty('category', item.category);
   addProperty('platform', item.platform);
   
+  // Platform URL (e.g., MyAnimeList page)
+  if (item.url) {
+    addProperty('url', item.url);
+  }
+  
   // Visual
   if (item.mainPicture) {
     addProperty('mainPicture', item.mainPicture.large || item.mainPicture.medium);
@@ -159,6 +164,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'status',
     'platform',
     'category',
+    'url',
     'released',
     'source',
     'score',
