@@ -29,21 +29,21 @@ export function renderPropertyMappingSection(
   
   // Common fields
   const commonFields = [
-    { key: 'id', label: 'ID', default: 'id' },
-    { key: 'title', label: 'Title', default: 'title' },
-    { key: 'category', label: 'Category', default: 'category' },
-    { key: 'platform', label: 'Platform', default: 'platform' },
-    { key: 'mainPicture', label: 'Cover (Main Picture)', default: 'cover' },
-    { key: 'pictures', label: 'Banner (Additional Pictures)', default: 'banner' },
+    { key: 'id', label: 'ID (Media id from API', default: 'id' },
+    { key: 'title', label: 'Title (Main Title)', default: 'title' },
+    { key: 'category', label: 'Category (Anime/Manga/Movie/Tv)', default: 'category' },
+    { key: 'platform', label: 'Platform (MyAnimeList/Simkl)', default: 'platform' },
+    { key: 'mainPicture', label: 'Main Picture (cover/poster)', default: 'main_picture' },
+    { key: 'pictures', label: 'Additional Pictures (banner/fanart)', default: 'pictures' },
     { key: 'synopsis', label: 'Synopsis', default: 'synopsis' },
-    { key: 'mediaType', label: 'Type', default: 'type' },
+    { key: 'mediaType', label: 'Type (eg: OVA/ONA/Manwha', default: 'type' },
     { key: 'status', label: 'Status', default: 'status' },
-    { key: 'mean', label: 'Score (Average)', default: 'score' },
+    { key: 'mean', label: 'Average Score by other users', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
-    { key: 'released', label: 'Released (Year)', default: 'released', desc: 'For anime: start year. For manga: publication year.' },
-    { key: 'source', label: 'Source Material', default: 'source' },
-    { key: 'userStatus', label: 'List Status', default: 'list' },
-    { key: 'userScore', label: 'Rating (My Score)', default: 'rating' },
+    { key: 'released', label: 'Released (Year)', default: 'released' },
+    { key: 'source', label: 'Source Material (eg: Manga)', default: 'source' },
+    { key: 'userStatus', label: 'List Status (eg: Planning)', default: 'list' },
+    { key: 'userScore', label: 'Rating (User Score)', default: 'rating' },
   ];
   
   container.createEl('h4', { text: 'Common Fields' });
@@ -69,8 +69,7 @@ export function renderPropertyMappingSection(
   // Anime-specific fields
   const animeFields = [
     { key: 'numEpisodes', label: 'Total Episodes', default: 'total_episodes' },
-    { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'episodes' },
-    { key: 'startSeason', label: 'Start Season (combined format)', default: 'start_season', desc: 'Format: "winter 2024"' },
+    { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'episodes_watched' },
   ];
   
   container.createEl('h4', { text: 'Anime-Specific Fields' });
