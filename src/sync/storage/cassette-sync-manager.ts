@@ -76,6 +76,12 @@ export function releaseSyncLock(cassetteSync: string): void {
 /**
  * Finds files by cassette_sync frontmatter property
  * Returns all files that match the cassette_sync value
+ * 
+ * IMPORTANT: Searches the ENTIRE VAULT, not just a specific folder
+ * This allows users to:
+ * - Move files between folders without creating duplicates
+ * - Organize files anywhere in their vault
+ * - Rename files without breaking sync
  */
 export async function findFilesByCassetteSync(
   plugin: CassettePlugin,
@@ -85,12 +91,12 @@ export async function findFilesByCassetteSync(
   const { vault, metadataCache } = plugin.app;
   const matchingFiles: TFile[] = [];
   
-  // Get all markdown files in the target folder
+  // CRITICAL: Search ALL markdown files in the ENTIRE VAULT
+  // Not limited to folderPath - this is intentional!
   const allFiles = vault.getMarkdownFiles();
-  const folderFiles = allFiles.filter(file => file.path.startsWith(folderPath));
   
   // Check each file's frontmatter for cassette_sync property
-  for (const file of folderFiles) {
+  for (const file of allFiles) {
     const cache = metadataCache.getFileCache(file);
     const frontmatter = cache?.frontmatter;
     
