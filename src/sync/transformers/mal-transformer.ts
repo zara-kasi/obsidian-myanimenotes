@@ -1,3 +1,5 @@
+import type CassettePlugin from '../../main';
+import { createDebugLogger } from '../../utils/debug';
 import type {
   UniversalMediaItem,
   UniversalPicture,
@@ -7,6 +9,7 @@ import type {
   UniversalSeason
 } from '../types';
 import { MediaStatus, UserListStatus, MediaCategory } from '../types';
+
 
 /**
  * Generates MyAnimeList URL for anime
@@ -132,10 +135,11 @@ function transformSeason(malSeason: any): UniversalSeason | undefined {
  * IMPORTANT: User list data comes from list_status object in /users/@me/animelist response
  */
 export function transformMALAnime(malItem: any): UniversalMediaItem {
+  const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
-  console.log('[MAL Transformer] Processing anime:', {
+  debug.log('[MAL Transformer] Processing anime:', {
     title: node.title,
     hasListStatus: !!listStatus,
     listStatus: listStatus
@@ -188,10 +192,11 @@ export function transformMALAnime(malItem: any): UniversalMediaItem {
  * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
  */
 export function transformMALManga(malItem: any): UniversalMediaItem {
+  const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
-  console.log('[MAL Transformer] Processing manga:', {
+  debug.log('[MAL Transformer] Processing manga:', {
     title: node.title,
     hasListStatus: !!listStatus,
     listStatus: listStatus
