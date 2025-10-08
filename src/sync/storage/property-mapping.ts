@@ -1,4 +1,14 @@
+/**
+ * Property Mapping with cassette_sync as controlled property
+ * 
+ * CHANGE: Added cassette_sync as a recognized controlled property
+ * This ensures it's not accidentally removed during frontmatter operations
+ */
+
 export interface PropertyMapping {
+  // Sync identifier (CRITICAL: Primary key for file lookup)
+  cassetteSync?: string;
+  
   // Basic fields (common to both anime and manga)
   id?: string;
   title?: string;
@@ -51,10 +61,15 @@ export interface PropertyMapping {
 }
 
 /**
- * Default property mappings - EXACTLY matching the updated reference document
- * Note: season_year, season_name, platform, category, and source are now common fields
+ * Default property mappings
+ * 
+ * CHANGE: Added cassette_sync with default mapping to 'cassette_sync'
+ * This is the canonical identifier field that must always be present
  */
 export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
+  // Sync identifier (PRIMARY KEY - never change this)
+  cassetteSync: 'cassette_sync',
+  
   // Basic fields (common)
   id: 'id',
   title: 'title',
