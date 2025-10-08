@@ -6,6 +6,13 @@
  * - file-utils.ts: File operations and sanitization
  * - frontmatter-builder.ts: Builds and merges frontmatter
  * - markdown-generator.ts: Generates markdown content
+ * 
+ * CRITICAL BEHAVIORS:
+ * 1. Sync is based ONLY on cassette_sync frontmatter property, NOT filename
+ * 2. Search scope is the ENTIRE VAULT, not just configured folders
+ * 3. Users can move files anywhere and sync will still find them
+ * 4. Users can rename files and sync will still update the same file
+ * 5. Filename changes DO NOT affect sync behavior
  */
 
 import { Notice } from 'obsidian';
@@ -48,10 +55,19 @@ export interface SyncActionResult {
 /**
  * Main save function with cassette_sync-based lookup
  * 
+ * CRITICAL: Sync is based ONLY on cassette_sync, NOT on filename or folder location
+ * 
+ * HOW IT WORKS:
+ * - Searches the ENTIRE VAULT for files with matching cassette_sync
+ * - Users can move files anywhere - sync will find them
+ * - Users can rename files - sync will still update them
+ * - Filename is ONLY used when creating NEW files
+ * - Once a file has cassette_sync, filename becomes irrelevant
+ * 
  * LOOKUP ORDER:
- * 1. Search by cassette_sync frontmatter (exact match)
+ * 1. Search ENTIRE VAULT by cassette_sync frontmatter (exact match)
  * 2. If multiple found: report duplicates, pick deterministic file
- * 3. If none found: try legacy file detection
+ * 3. If none found: try legacy file detection (only in target folder)
  * 4. If still none: create new file with cassette_sync
  */
 export async function saveMediaItem(
@@ -76,12 +92,14 @@ export async function saveMediaItem(
       await ensureFolderExists(plugin, folderPath);
     }
     
-    // STEP 1: Lookup by cassette_sync frontmatter
+    // STEP 1: Lookup by cassette_sync frontmatter across ENTIRE VAULT
+    // This allows users to move/rename files without breaking sync
     const matchingFiles = await findFilesByCassetteSync(plugin, cassetteSync, folderPath);
     
     if (matchingFiles.length > 1) {
       // DUPLICATE DETECTION: Multiple files with same cassette_sync
       console.warn(`[Storage] Found ${matchingFiles.length} files with cassette_sync: ${cassetteSync}`);
+      console.warn(`[Storage] File locations:`, matchingFiles.map(f => f.path));
       
       const selectedFile = selectDeterministicFile(matchingFiles);
       const existingContent = await vault.read(selectedFile);
@@ -94,14 +112,17 @@ export async function saveMediaItem(
         filePath: selectedFile.path,
         cassetteSync,
         duplicatePaths: matchingFiles.map(f => f.path),
-        message: `Updated ${selectedFile.path} but found ${matchingFiles.length} duplicates`
+        message: `Updated ${selectedFile.path} but found ${matchingFiles.length} duplicates across vault`
       };
     }
     
     if (matchingFiles.length === 1) {
-      // EXACT MATCH: Update existing file
+      // EXACT MATCH: Update existing file (regardless of location or filename)
       const file = matchingFiles[0];
       console.log(`[Storage] Updating existing file: ${file.path}`);
+      console.log(`[Storage] File location: ${file.parent?.path || 'root'}`);
+      console.log(`[Storage] Filename: ${file.name}`);
+      console.log(`[Storage] ✓ Sync based on cassette_sync, NOT filename`);
       
       const existingContent = await vault.read(file);
       const content = generateMarkdownWithCassetteSync(item, config, cassetteSync, existingContent);
@@ -112,12 +133,13 @@ export async function saveMediaItem(
         action: 'updated',
         filePath: file.path,
         cassetteSync,
-        message: `Updated ${file.path}`
+        message: `Updated ${file.path} (filename-independent sync)`
       };
     }
     
     // STEP 2: No cassette_sync match - try legacy file detection
-    console.log(`[Storage] No cassette_sync match, attempting legacy file detection...`);
+    // Note: Legacy detection only looks in target folder since old files wouldn't have been moved
+    console.log(`[Storage] No cassette_sync match in entire vault, attempting legacy file detection in ${folderPath}...`);
     const legacyCandidates = await findLegacyFiles(plugin, item, folderPath);
     
     if (legacyCandidates.length > 0) {
