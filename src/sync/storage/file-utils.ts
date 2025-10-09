@@ -5,6 +5,8 @@
  */
 
 import type CassettePlugin from '../../main';
+import { createDebugLogger } from '../utils/debug';
+
 
 /**
  * Ensures a folder exists, creating it if necessary
@@ -13,12 +15,13 @@ export async function ensureFolderExists(
   plugin: CassettePlugin,
   folderPath: string
 ): Promise<void> {
+  const debug = createDebugLogger(plugin, 'FileUtils');
   const { vault } = plugin.app;
   const folder = vault.getAbstractFileByPath(folderPath);
   
   if (!folder) {
     await vault.createFolder(folderPath);
-    console.log(`[FileUtils] Created folder: ${folderPath}`);
+    debug.log(`[FileUtils] Created folder: ${folderPath}`);
   }
 }
 
@@ -37,10 +40,12 @@ export function sanitizeFilename(filename: string): string {
  * Appends -1, -2, etc. until a unique name is found
  */
 export function generateUniqueFilename(
+  plugin: CassettePlugin,
   vault: any,
   folderPath: string,
   baseFilename: string
 ): string {
+  const debug = createDebugLogger(plugin, 'FileUtils');
   let filename = baseFilename;
   let counter = 1;
   
@@ -51,7 +56,7 @@ export function generateUniqueFilename(
   }
   
   if (counter > 1) {
-    console.log(`[FileUtils] Generated unique filename: ${filename}`);
+    debug.log(`[FileUtils] Generated unique filename: ${filename}`);
   }
   
   return filename;
