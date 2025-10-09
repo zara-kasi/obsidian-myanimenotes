@@ -4,6 +4,8 @@ import { requestUrl } from 'obsidian';
 import type CassettePlugin from '../../main';
 import type { MALTokenResponse } from './types';
 import { MAL_TOKEN_URL, TOKEN_EXPIRY_BUFFER } from './constants';
+import { createDebugLogger } from '../../utils/debug';
+
 
 /**
  * Checks if the current access token is valid
@@ -75,6 +77,7 @@ export async function refreshAccessToken(plugin: CassettePlugin): Promise<void> 
  * @throws Error if not authenticated or refresh fails
  */
 export async function ensureValidToken(plugin: CassettePlugin): Promise<void> {
+  const debug = createDebugLogger(plugin, 'MAL Auth');
   if (!isTokenValid(plugin)) {
     if (!plugin.settings.malRefreshToken) {
       throw new Error('Token expired and no refresh token available. Please re-authenticate.');
@@ -82,7 +85,7 @@ export async function ensureValidToken(plugin: CassettePlugin): Promise<void> {
     
     try {
       await refreshAccessToken(plugin);
-      console.log('[MAL-AUTH] Token automatically refreshed');
+      debug.log('[MAL-AUTH] Token automatically refreshed');
     } catch (e) {
       console.error('[MAL-AUTH] Automatic token refresh failed', e);
       plugin.settings.malAuthenticated = false;
