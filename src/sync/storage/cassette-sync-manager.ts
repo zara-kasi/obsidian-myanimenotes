@@ -90,7 +90,7 @@ export async function findFilesByCassetteSync(
   cassetteSync: string,
   folderPath: string
 ): Promise<TFile[]> {
-  const debug = createDebugLogger(plugin, 'Cassette Sync Manager');
+  const debug = createDebugLogger(plugin, 'CassetteSync');
   const { vault, metadataCache } = plugin.app;
   const matchingFiles: TFile[] = [];
   
@@ -125,7 +125,7 @@ export async function findLegacyFiles(
   item: UniversalMediaItem,
   folderPath: string
 ): Promise<TFile[]> {
-  const debug = createDebugLogger(plugin, 'Cassette Sync Manager');
+  const debug = createDebugLogger(plugin, 'CassetteSync');
   const { vault, metadataCache } = plugin.app;
   const candidates: TFile[] = [];
   
@@ -185,11 +185,11 @@ export async function findLegacyFiles(
  * Uses most recent modification time as tiebreaker
  */
 export function selectDeterministicFile(plugin: CassettePlugin, files: TFile[]): TFile {
+  const debug = createDebugLogger(plugin, 'CassetteSync');
   if (files.length === 0) {
     throw new Error('No files provided for selection');
   }
   
-  const debug = createDebugLogger(plugin, 'Cassette Sync Manager');
   // Sort by mtime descending (most recent first)
   const sorted = [...files].sort((a, b) => b.stat.mtime - a.stat.mtime);
   
