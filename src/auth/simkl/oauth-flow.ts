@@ -7,6 +7,8 @@ import { SIMKL_AUTH_URL, SIMKL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateState } from './utils';
 import { isTokenValid } from './token-manager';
 import { fetchUserInfo } from './user-service';
+import { createDebugLogger } from '../../utils/debug';
+
 
 // Store state temporarily during auth flow
 let authState: SimklAuthState | null = null;
@@ -64,8 +66,9 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
  * @param params Redirect parameters
  */
 export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthParams): Promise<void> {
+  const debug = createDebugLogger(plugin, 'SIMKL Auth');
   try {
-    console.log('[SIMKL Auth] Received OAuth redirect:', params);
+    debug.log('[SIMKL Auth] Received OAuth redirect:', params);
     
     const { code, state } = extractOAuthParams(params);
     
