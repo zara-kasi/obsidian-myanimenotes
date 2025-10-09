@@ -7,6 +7,8 @@ import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateVerifier, generateChallenge, generateState } from './pkce';
 import { isTokenValid } from './token-manager';
 import { fetchUserInfo } from './user-service';
+import { createDebugLogger } from '../../utils/debug';
+
 
 // Store PKCE parameters temporarily during auth flow
 let authState: MALAuthState | null = null;
@@ -63,8 +65,9 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
  * @param params Redirect parameters
  */
 export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthParams): Promise<void> {
+  const debug = createDebugLogger(plugin, 'MAL Auth');
   try {
-    console.log('[MAL Auth] Received OAuth redirect:', params);
+    debug.log('[MAL Auth] Received OAuth redirect:', params);
     
     const { code, state } = extractOAuthParams(params);
     
