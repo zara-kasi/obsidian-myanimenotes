@@ -174,7 +174,7 @@ export async function saveMediaItem(
     const existingByName = vault.getAbstractFileByPath(`${folderPath}/${filename}`);
     if (existingByName) {
       console.log(`[Storage] Filename collision detected, generating unique name`);
-      filename = generateUniqueFilename(vault, folderPath, filename);
+      filename = generateUniqueFilename(plugin, vault, folderPath, filename);
     }
     
     const filePath = `${folderPath}/${filename}`;
