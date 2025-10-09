@@ -8,6 +8,8 @@
 import { TFile } from 'obsidian';
 import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../types';
+import { createDebugLogger } from '../../utils/debug';
+
 
 // In-memory lock to prevent concurrent operations on the same cassette_sync ID
 const syncLocks = new Map<string, Promise<void>>();
@@ -88,6 +90,7 @@ export async function findFilesByCassetteSync(
   cassetteSync: string,
   folderPath: string
 ): Promise<TFile[]> {
+  const debug = createDebugLogger(plugin, 'Cassette Sync Manager');
   const { vault, metadataCache } = plugin.app;
   const matchingFiles: TFile[] = [];
   
@@ -102,7 +105,7 @@ export async function findFilesByCassetteSync(
     
     if (frontmatter && frontmatter.cassette_sync === cassetteSync) {
       matchingFiles.push(file);
-      console.log(`[CassetteSync] Found file by cassette_sync: ${file.path}`);
+      debug.log(`[CassetteSync] Found file by cassette_sync: ${file.path}`);
     }
   }
   
@@ -122,6 +125,7 @@ export async function findLegacyFiles(
   item: UniversalMediaItem,
   folderPath: string
 ): Promise<TFile[]> {
+  const debug = createDebugLogger(plugin, 'Cassette Sync Manager');
   const { vault, metadataCache } = plugin.app;
   const candidates: TFile[] = [];
   
@@ -143,7 +147,7 @@ export async function findLegacyFiles(
     for (const field of idFields) {
       if (frontmatter[field] === item.id || frontmatter[field] === String(item.id)) {
         candidates.push(file);
-        console.log(`[CassetteSync] Legacy candidate found by ${field}: ${file.path}`);
+        debug.log(`[CassetteSync] Legacy candidate found by ${field}: ${file.path}`);
         break;
       }
     }
@@ -169,7 +173,7 @@ export async function findLegacyFiles(
     
     if (filenamePatterns.some(pattern => pattern.test(filename))) {
       candidates.push(file);
-      console.log(`[CassetteSync] Legacy candidate found by filename pattern: ${file.path}`);
+      debug.log(`[CassetteSync] Legacy candidate found by filename pattern: ${file.path}`);
     }
   }
   
@@ -180,14 +184,15 @@ export async function findLegacyFiles(
  * Selects deterministic file from duplicates or candidates
  * Uses most recent modification time as tiebreaker
  */
-export function selectDeterministicFile(files: TFile[]): TFile {
+export function selectDeterministicFile(plugin: CassettePlugin, files: TFile[]): TFile {
   if (files.length === 0) {
     throw new Error('No files provided for selection');
   }
   
+  const debug = createDebugLogger(plugin, 'Cassette Sync Manager');
   // Sort by mtime descending (most recent first)
   const sorted = [...files].sort((a, b) => b.stat.mtime - a.stat.mtime);
   
-  console.log(`[CassetteSync] Selected file from ${files.length} candidates: ${sorted[0].path} (most recent)`);
+  debug.log(`[CassetteSync] Selected file from ${files.length} candidates: ${sorted[0].path} (most recent)`);
   return sorted[0];
 }
