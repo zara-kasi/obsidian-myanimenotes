@@ -208,8 +208,6 @@ export async function saveMediaItems(
   const debug = createDebugLogger(plugin, 'Storage');
   const results: SyncActionResult[] = [];
   
-  new Notice(`💾 Saving ${items.length} items...`, 2000);
-  
   for (const item of items) {
     try {
       const result = await saveMediaItem(plugin, item, config);
@@ -227,8 +225,6 @@ export async function saveMediaItems(
       new Notice(`❌ Failed to save: ${item.title}`, 3000);
     }
   }
-  
-  new Notice(`✅ Saved ${results.length} items to vault`, 3000);
   
   return results;
 }
