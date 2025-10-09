@@ -17,6 +17,12 @@ export default class CassettePlugin extends Plugin {
 
     // Initialize sync manager
     this.syncManager = createSyncManager(this);
+    
+    // Add ribbon icon for sync
+    this.addRibbonIcon('refresh-cw', 'Cassette sync all', async (evt: MouseEvent) => {
+     if (!this.syncManager) return;
+  await this.syncManager.syncFromMAL();
+    });
 
     // Add settings tab
     this.settingsTab = new CassetteSettingTab(this.app, this);
