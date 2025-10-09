@@ -103,7 +103,7 @@ export async function saveMediaItem(
       
       const selectedFile = selectDeterministicFile(plugin, matchingFiles);
       const existingContent = await vault.read(selectedFile);
-      const content = generateMarkdownWithCassetteSync(item, config, cassetteSync, existingContent);
+      const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
       
       await vault.modify(selectedFile, content);
       
@@ -125,7 +125,7 @@ export async function saveMediaItem(
       console.log(`[Storage] ✓ Sync based on cassette_sync, NOT filename`);
       
       const existingContent = await vault.read(file);
-      const content = generateMarkdownWithCassetteSync(item, config, cassetteSync, existingContent);
+      const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
       
       await vault.modify(file, content);
       
@@ -151,7 +151,7 @@ export async function saveMediaItem(
       console.log(`[Storage] Migrating legacy file: ${selectedFile.path}`);
       
       const existingContent = await vault.read(selectedFile);
-      const content = generateMarkdownWithCassetteSync(item, config, cassetteSync, existingContent);
+      const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
       
       await vault.modify(selectedFile, content);
       
@@ -178,7 +178,7 @@ export async function saveMediaItem(
     }
     
     const filePath = `${folderPath}/${filename}`;
-    const content = generateMarkdownWithCassetteSync(item, config, cassetteSync);
+    const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync);
     
     await vault.create(filePath, content);
     
