@@ -101,7 +101,7 @@ export async function saveMediaItem(
       console.warn(`[Storage] Found ${matchingFiles.length} files with cassette_sync: ${cassetteSync}`);
       console.warn(`[Storage] File locations:`, matchingFiles.map(f => f.path));
       
-      const selectedFile = selectDeterministicFile(matchingFiles);
+      const selectedFile = selectDeterministicFile(plugin, matchingFiles);
       const existingContent = await vault.read(selectedFile);
       const content = generateMarkdownWithCassetteSync(item, config, cassetteSync, existingContent);
       
@@ -147,7 +147,7 @@ export async function saveMediaItem(
         console.warn(`[Storage] Found ${legacyCandidates.length} legacy candidates for ${cassetteSync}`);
       }
       
-      const selectedFile = selectDeterministicFile(legacyCandidates);
+      const selectedFile = selectDeterministicFile(plugin, legacyCandidates);
       console.log(`[Storage] Migrating legacy file: ${selectedFile.path}`);
       
       const existingContent = await vault.read(selectedFile);
