@@ -6,6 +6,8 @@ import { CassetteSettings, DEFAULT_SETTINGS } from './settings/settings-interfac
 import { handleOAuthRedirect as handleMALRedirect } from './auth/mal';
 import { handleOAuthRedirect as handleSimklRedirect } from './auth/simkl';
 import { SyncManager, createSyncManager, MediaCategory } from './sync';
+import { AutoSyncManager, createAutoSyncManager } from './sync/auto-sync-manager'; 
+
 
 export default class CassettePlugin extends Plugin {
   settings: CassetteSettings;
