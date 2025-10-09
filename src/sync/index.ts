@@ -51,3 +51,5 @@ export {
 // Export sync manager
 export type { CompleteSyncOptions } from './sync-manager';
 export { SyncManager, createSyncManager } from './sync-manager';
+// Export auto-sync manager
+export { AutoSyncManager, createAutoSyncManager } from './auto-sync-manager';
