@@ -4,7 +4,7 @@
  * Generates complete markdown files with frontmatter and body content
  * Handles parsing existing files and preserving user content
  */
-
+import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../types';
 import type { StorageConfig } from './storage-service';
 import { DEFAULT_PROPERTY_MAPPING } from './property-mapping';
@@ -14,6 +14,8 @@ import {
   serializeFrontmatter 
 } from './frontmatter-builder';
 import * as yaml from 'js-yaml';
+import { createDebugLogger } from '../../utils/debug';
+
 
 /**
  * Parses existing file content to extract frontmatter and body
@@ -77,11 +79,13 @@ export function parseExistingFile(content: string): {
  * - Existing files without frontmatter: Adds frontmatter, preserves entire content as body
  */
 export function generateMarkdownWithCassetteSync(
+  plugin: CassettePlugin,
   item: UniversalMediaItem,
   config: StorageConfig,
   cassetteSync: string,
   existingContent?: string
 ): string {
+  const debug = createDebugLogger(plugin, 'Markdown');
   const mapping = config.propertyMapping || DEFAULT_PROPERTY_MAPPING;
   
   // Build synced properties (controlled by sync system) with cassette_sync
@@ -97,18 +101,18 @@ export function generateMarkdownWithCassetteSync(
       // Merge: preserve existing frontmatter + user body
       finalFrontmatter = mergeFrontmatter(parsed.frontmatter, syncedProperties);
       body = parsed.body; // Preserve existing body exactly
-      console.log('[Markdown] Merged frontmatter with cassette_sync and preserved body');
+      debug.log('[Markdown] Merged frontmatter with cassette_sync and preserved body');
     } else {
       // File exists but has no valid frontmatter structure
       // Treat entire content as body and add new frontmatter
       finalFrontmatter = syncedProperties;
       body = existingContent; // Preserve entire content as body
-      console.log('[Markdown] No existing frontmatter found, added cassette_sync frontmatter and preserved content as body');
+      debug.log('[Markdown] No existing frontmatter found, added cassette_sync frontmatter and preserved content as body');
     }
   } else {
     // New file: use synced properties only
     finalFrontmatter = syncedProperties;
-    console.log('[Markdown] Creating new file with cassette_sync frontmatter');
+    debug.log('[Markdown] Creating new file with cassette_sync frontmatter');
   }
   
   // Serialize frontmatter to YAML
