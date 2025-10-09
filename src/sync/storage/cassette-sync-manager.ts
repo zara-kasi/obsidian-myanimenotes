@@ -183,7 +183,9 @@ export async function findLegacyFiles(
  * Selects deterministic file from duplicates or candidates
  * Uses most recent modification time as tiebreaker
  */
-export function selectDeterministicFile(files: TFile[]): TFile {
+export function selectDeterministicFile(plugin: CassettePlugin, files: TFile[]): TFile {  
+  const debug = createDebugLogger(plugin, 'CassetteSync');
+  
   if (files.length === 0) {
     throw new Error('No files provided for selection');
   }
@@ -191,6 +193,6 @@ export function selectDeterministicFile(files: TFile[]): TFile {
   // Sort by mtime descending (most recent first)
   const sorted = [...files].sort((a, b) => b.stat.mtime - a.stat.mtime);
   
-  console.log(`[CassetteSync] Selected file from ${files.length} candidates: ${sorted[0].path} (most recent)`);
+  debug.log(`[CassetteSync] Selected file from ${files.length} candidates: ${sorted[0].path} (most recent)`);
   return sorted[0];
 }
