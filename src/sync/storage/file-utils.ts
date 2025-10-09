@@ -5,7 +5,7 @@
  */
 
 import type CassettePlugin from '../../main';
-import { createDebugLogger } from '../utils/debug';
+import { createDebugLogger } from '../../utils/debug';
 
 
 /**
