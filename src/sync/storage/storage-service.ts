@@ -30,6 +30,7 @@ import {
 } from './cassette-sync-manager';
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
 import { generateMarkdownWithCassetteSync } from './markdown-generator';
+import { createDebugLogger } from '../../utils/debug';
 
 /**
  * Storage configuration
@@ -75,11 +76,12 @@ export async function saveMediaItem(
   item: UniversalMediaItem,
   config: StorageConfig
 ): Promise<SyncActionResult> {
+  const debug = createDebugLogger(plugin, 'Storage');
   const { vault } = plugin.app;
   
   // Generate cassette_sync identifier (format: provider:category:id)
   const cassetteSync = generateCassetteSync(item);
-  console.log(`[Storage] Processing item with cassette_sync: ${cassetteSync}`);
+  debug.log(`[Storage] Processing item with cassette_sync: ${cassetteSync}`);
   
   // Acquire lock to prevent concurrent operations on same ID
   await acquireSyncLock(cassetteSync);
@@ -119,10 +121,10 @@ export async function saveMediaItem(
     if (matchingFiles.length === 1) {
       // EXACT MATCH: Update existing file (regardless of location or filename)
       const file = matchingFiles[0];
-      console.log(`[Storage] Updating existing file: ${file.path}`);
-      console.log(`[Storage] File location: ${file.parent?.path || 'root'}`);
-      console.log(`[Storage] Filename: ${file.name}`);
-      console.log(`[Storage] ✓ Sync based on cassette_sync, NOT filename`);
+      debug.log(`[Storage] Updating existing file: ${file.path}`);
+      debug.log(`[Storage] File location: ${file.parent?.path || 'root'}`);
+      debug.log(`[Storage] Filename: ${file.name}`);
+      debug.log(`[Storage] ✓ Sync based on cassette_sync, NOT filename`);
       
       const existingContent = await vault.read(file);
       const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
@@ -139,7 +141,7 @@ export async function saveMediaItem(
     
     // STEP 2: No cassette_sync match - try legacy file detection
     // Note: Legacy detection only looks in target folder since old files wouldn't have been moved
-    console.log(`[Storage] No cassette_sync match in entire vault, attempting legacy file detection in ${folderPath}...`);
+    debug.log(`[Storage] No cassette_sync match in entire vault, attempting legacy file detection in ${folderPath}...`);
     const legacyCandidates = await findLegacyFiles(plugin, item, folderPath);
     
     if (legacyCandidates.length > 0) {
@@ -148,7 +150,7 @@ export async function saveMediaItem(
       }
       
       const selectedFile = selectDeterministicFile(plugin, legacyCandidates);
-      console.log(`[Storage] Migrating legacy file: ${selectedFile.path}`);
+      debug.log(`[Storage] Migrating legacy file: ${selectedFile.path}`);
       
       const existingContent = await vault.read(selectedFile);
       const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
@@ -165,7 +167,7 @@ export async function saveMediaItem(
     }
     
     // STEP 3: No existing file - create new file
-    console.log(`[Storage] Creating new file for ${cassetteSync}`);
+    debug.log(`[Storage] Creating new file for ${cassetteSync}`);
     
     const sanitizedTitle = item.title.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
     let filename = `${sanitizedTitle}.md`;
@@ -173,7 +175,7 @@ export async function saveMediaItem(
     // Check for filename collision and generate unique name if needed
     const existingByName = vault.getAbstractFileByPath(`${folderPath}/${filename}`);
     if (existingByName) {
-      console.log(`[Storage] Filename collision detected, generating unique name`);
+      debug.log(`[Storage] Filename collision detected, generating unique name`);
       filename = generateUniqueFilename(plugin, vault, folderPath, filename);
     }
     
@@ -217,7 +219,7 @@ export async function saveMediaItems(
         console.warn(`[Storage] ${result.message}`);
         new Notice(`⚠️ Duplicates found: ${item.title}`, 3000);
       } else if (result.action === 'linked-legacy') {
-        console.log(`[Storage] ${result.message}`);
+        debug.log(`[Storage] ${result.message}`);
       }
     } catch (error) {
       console.error(`[Storage] Failed to save ${item.title}:`, error);
@@ -245,13 +247,11 @@ export async function saveMediaItemsByCategory(
   const mangaItems = items.filter(item => item.category === 'manga');
   
   if (animeItems.length > 0) {
-    new Notice(`💾 Saving ${animeItems.length} anime items...`, 2000);
     const results = await saveMediaItems(plugin, animeItems, config);
     animePaths.push(...results.map(r => r.filePath));
   }
   
   if (mangaItems.length > 0) {
-    new Notice(`💾 Saving ${mangaItems.length} manga items...`, 2000);
     const results = await saveMediaItems(plugin, mangaItems, config);
     mangaPaths.push(...results.map(r => r.filePath));
   }
