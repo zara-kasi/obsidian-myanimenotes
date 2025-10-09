@@ -205,6 +205,7 @@ export async function saveMediaItems(
   items: UniversalMediaItem[],
   config: StorageConfig
 ): Promise<SyncActionResult[]> {
+  const debug = createDebugLogger(plugin, 'Storage');
   const results: SyncActionResult[] = [];
   
   new Notice(`💾 Saving ${items.length} items...`, 2000);
