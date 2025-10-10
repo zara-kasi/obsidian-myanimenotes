@@ -106,6 +106,12 @@ export function buildSyncedFrontmatterProperties(
   if (item.category === 'anime') {
     addProperty('numEpisodes', item.numEpisodes);
     addProperty('numEpisodesWatched', item.numEpisodesWatched);
+    addProperty('airingStartDate', item.airingStartDate);
+    addProperty('airingEndDate', item.airingEndDate);
+    addProperty('studios', item.studios);
+    addProperty('duration', item.duration);
+    addProperty('userStartDate', item.userStartDate);
+    addProperty('userFinishDate', item.userFinishDate);
   } else if (item.category === 'manga') {
     addProperty('numVolumes', item.numVolumes);
     addProperty('numVolumesRead', item.numVolumesRead);
@@ -165,16 +171,21 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'title',
     'aliases',
     'list',
-    'rating',
     'eps_seen',
-    'total_eps',
-    'score',
+    'rating',
+    'started',    
+    'finished',
     'type',
+    'episodes',
+    'status',
+    'released',
+    'ended',
+    'studios',
     'origin',
     'genres',
-    'status',
+    'duration',
+    'score',
     'description',
-    'released',
     'image',
     'source',
     'platform',
