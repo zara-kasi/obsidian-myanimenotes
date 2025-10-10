@@ -65,7 +65,7 @@ export function renderPropertyMappingSection(
   
   // Anime-specific fields
   const animeFields = [
-    { key: 'numEpisodes', label: 'Total Episodes', default: 'total_eps' },
+    { key: 'numEpisodes', label: 'Total Episodes', default: 'episodes' },
     { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'eps_seen' },
   ];
   
