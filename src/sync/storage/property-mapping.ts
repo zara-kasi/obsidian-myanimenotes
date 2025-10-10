@@ -93,8 +93,8 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // Release info (common - replaces season_year and season_name)
   released: 'released',
   
-  // Source material (common - both anime and manga)
-  source: 'source',
+  // Origin material (common - both anime and manga)
+  source: 'origin',
   
   // Anime-specific
   numEpisodes: 'total_episodes',
