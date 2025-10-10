@@ -186,7 +186,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'released',
     'id',
     'cassette_sync',
-    'last_synced'
+    'updated'
   ];
   
   // Create ordered object
