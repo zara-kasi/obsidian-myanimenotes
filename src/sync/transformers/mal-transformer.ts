@@ -170,16 +170,22 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
     // Genres
     genres: transformGenres(node.genres),
     
-    // Anime-specific
+   // Anime-specific
     numEpisodes: node.num_episodes,
     startSeason: transformSeason(node.start_season),
     source: node.source,
+    airingStartDate: node.start_date,   
+    airingEndDate: node.end_date, 
+    studios: transformStudios(node.studios),    
+    duration: convertDurationToMinutes(node.average_episode_duration), 
     
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/animelist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
     userScore: listStatus?.score || 0,
     numEpisodesWatched: listStatus?.num_episodes_watched || 0,
+    userStartDate: listStatus?.start_date,      
+    userFinishDate: listStatus?.finish_date,    
     
     // Platform metadata
     platform: 'mal',
@@ -243,6 +249,23 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     platform: 'mal',
     lastSynced: Date.now()
   };
+}
+
+/**
+ * Transforms MAL studios array
+ */
+function transformStudios(malStudios: any[]): string[] {
+  if (!malStudios || !Array.isArray(malStudios)) return [];
+  
+  return malStudios.map(studio => studio.name).filter(Boolean);
+}
+
+/**
+ * Converts duration from seconds to minutes (rounded)
+ */
+function convertDurationToMinutes(seconds: number | undefined): number | undefined {
+  if (!seconds) return undefined;
+  return Math.round(seconds / 60);
 }
 
 /**
