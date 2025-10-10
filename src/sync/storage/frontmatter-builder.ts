@@ -99,8 +99,8 @@ export function buildSyncedFrontmatterProperties(
     }
   }
   
-  // Source material (common to both anime and manga)
-  addProperty('source', item.source);
+  // Origin material (common to both anime and manga)
+  addProperty('origin', item.source);
   
   // Category-specific fields
   if (item.category === 'anime') {
@@ -173,7 +173,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'type',
     'status',
     'genres',
-    'source',
+    'origin',
     'total_episodes',
     'total_chapters',
     'total_volumes',
