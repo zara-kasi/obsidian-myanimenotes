@@ -1,5 +1,5 @@
 /**
- * Property Mapping with cassette_sync as controlled property
+ * Property Mapping with cassette as controlled property
  * CHANGE: Added 'url' property for platform links
  */
 
@@ -64,7 +64,7 @@ export interface PropertyMapping {
  */
 export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // Sync identifier (PRIMARY KEY - never change this)
-  cassetteSync: 'cassette_sync',
+  cassetteSync: 'cassette',
   
   // Basic fields (common)
   id: 'id',
