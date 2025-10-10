@@ -28,9 +28,13 @@ const ANIME_FIELDS = [
   'num_episodes',
   'start_season',
   'source',
+  'start_date', 
+  'end_date', 
+  'average_episode_duration', 
+  'studios',           
   
   // User list data - REQUIRED for user-specific fields
-  'list_status{status,score,num_episodes_watched,is_rewatching,updated_at}'
+ 'list_status{status,score,num_episodes_watched,is_rewatching,updated_at,start_date,finish_date}' 
 ].join(',');
 
 const MANGA_FIELDS = [
