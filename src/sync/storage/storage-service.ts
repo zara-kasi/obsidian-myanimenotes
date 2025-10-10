@@ -2,13 +2,13 @@
  * Storage Service - Main entry point
  * 
  * ARCHITECTURE:
- * - cassette-sync-manager.ts: Handles cassette_sync lookup and locking
+ * - cassette-sync-manager.ts: Handles cassette lookup and locking
  * - file-utils.ts: File operations and sanitization
  * - frontmatter-builder.ts: Builds and merges frontmatter
  * - markdown-generator.ts: Generates markdown content
  * 
  * CRITICAL BEHAVIORS:
- * 1. Sync is based ONLY on cassette_sync frontmatter property, NOT filename
+ * 1. Sync is based ONLY on cassette frontmatter property, NOT filename
  * 2. Search scope is the ENTIRE VAULT, not just configured folders
  * 3. Users can move files anywhere and sync will still find them
  * 4. Users can rename files and sync will still update the same file
@@ -54,22 +54,22 @@ export interface SyncActionResult {
 }
 
 /**
- * Main save function with cassette_sync-based lookup
+ * Main save function with cassette-based lookup
  * 
- * CRITICAL: Sync is based ONLY on cassette_sync, NOT on filename or folder location
+ * CRITICAL: Sync is based ONLY on cassette, NOT on filename or folder location
  * 
  * HOW IT WORKS:
- * - Searches the ENTIRE VAULT for files with matching cassette_sync
+ * - Searches the ENTIRE VAULT for files with matching cassette
  * - Users can move files anywhere - sync will find them
  * - Users can rename files - sync will still update them
  * - Filename is ONLY used when creating NEW files
- * - Once a file has cassette_sync, filename becomes irrelevant
+ * - Once a file has cassette, filename becomes irrelevant
  * 
  * LOOKUP ORDER:
- * 1. Search ENTIRE VAULT by cassette_sync frontmatter (exact match)
+ * 1. Search ENTIRE VAULT by cassette frontmatter (exact match)
  * 2. If multiple found: report duplicates, pick deterministic file
  * 3. If none found: try legacy file detection (only in target folder)
- * 4. If still none: create new file with cassette_sync
+ * 4. If still none: create new file with cassette
  */
 export async function saveMediaItem(
   plugin: CassettePlugin,
@@ -79,9 +79,9 @@ export async function saveMediaItem(
   const debug = createDebugLogger(plugin, 'Storage');
   const { vault } = plugin.app;
   
-  // Generate cassette_sync identifier (format: provider:category:id)
+  // Generate cassette identifier (format: provider:category:id)
   const cassetteSync = generateCassetteSync(item);
-  debug.log(`[Storage] Processing item with cassette_sync: ${cassetteSync}`);
+  debug.log(`[Storage] Processing item with cassette: ${cassetteSync}`);
   
   // Acquire lock to prevent concurrent operations on same ID
   await acquireSyncLock(cassetteSync);
@@ -94,13 +94,13 @@ export async function saveMediaItem(
       await ensureFolderExists(plugin, folderPath);
     }
     
-    // STEP 1: Lookup by cassette_sync frontmatter across ENTIRE VAULT
+    // STEP 1: Lookup by cassette frontmatter across ENTIRE VAULT
     // This allows users to move/rename files without breaking sync
     const matchingFiles = await findFilesByCassetteSync(plugin, cassetteSync, folderPath);
     
     if (matchingFiles.length > 1) {
-      // DUPLICATE DETECTION: Multiple files with same cassette_sync
-      console.warn(`[Storage] Found ${matchingFiles.length} files with cassette_sync: ${cassetteSync}`);
+      // DUPLICATE DETECTION: Multiple files with same cassette
+      console.warn(`[Storage] Found ${matchingFiles.length} files with cassette: ${cassetteSync}`);
       console.warn(`[Storage] File locations:`, matchingFiles.map(f => f.path));
       
       const selectedFile = selectDeterministicFile(plugin, matchingFiles);
@@ -124,7 +124,7 @@ export async function saveMediaItem(
       debug.log(`[Storage] Updating existing file: ${file.path}`);
       debug.log(`[Storage] File location: ${file.parent?.path || 'root'}`);
       debug.log(`[Storage] Filename: ${file.name}`);
-      debug.log(`[Storage] ✓ Sync based on cassette_sync, NOT filename`);
+      debug.log(`[Storage] ✓ Sync based on cassette, NOT filename`);
       
       const existingContent = await vault.read(file);
       const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
@@ -139,9 +139,9 @@ export async function saveMediaItem(
       };
     }
     
-    // STEP 2: No cassette_sync match - try legacy file detection
+    // STEP 2: No cassette match - try legacy file detection
     // Note: Legacy detection only looks in target folder since old files wouldn't have been moved
-    debug.log(`[Storage] No cassette_sync match in entire vault, attempting legacy file detection in ${folderPath}...`);
+    debug.log(`[Storage] No cassette match in entire vault, attempting legacy file detection in ${folderPath}...`);
     const legacyCandidates = await findLegacyFiles(plugin, item, folderPath);
     
     if (legacyCandidates.length > 0) {
@@ -162,7 +162,7 @@ export async function saveMediaItem(
         filePath: selectedFile.path,
         cassetteSync,
         duplicatePaths: legacyCandidates.length > 1 ? legacyCandidates.map(f => f.path) : undefined,
-        message: `Migrated legacy file ${selectedFile.path} (added cassette_sync)`
+        message: `Migrated legacy file ${selectedFile.path} (added cassette)`
       };
     }
     
