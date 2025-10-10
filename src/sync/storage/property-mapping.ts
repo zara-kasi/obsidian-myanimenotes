@@ -41,6 +41,12 @@ export interface PropertyMapping {
   
   // Anime-specific
   numEpisodes?: string;
+  airingStartDate?: string; 
+  airingEndDate?: string; 
+  studios?: string;
+  duration?: string;  
+  userStartDate?: string;
+  userFinishDate?: string;
 
   
   // Manga-specific
@@ -97,7 +103,13 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   source: 'origin',
   
   // Anime-specific
-  numEpisodes: 'total_eps',
+  numEpisodes: 'episodes',
+  airingStartDate: 'released',
+  airingEndDate: 'ended', 
+  studios: 'studios',   
+  duration: 'duration',     
+  userStartDate: 'started',   
+  userFinishDate: 'finished',
 
   // Manga-specific
   numVolumes: 'total_volumes',
