@@ -1,7 +1,7 @@
 /**
  * Frontmatter Builder
  * 
- * Builds frontmatter properties from media items with cassette_sync as primary key
+ * Builds frontmatter properties from media items with cassette as primary key
  * Handles merging with existing frontmatter while preserving user properties
  * UPDATED: Now includes sanitized genres for Obsidian tags
  */
@@ -14,8 +14,8 @@ import { sanitizeGenreObjectsForTags } from './file-utils';
 import * as yaml from 'js-yaml';
 
 /**
- * Builds synced frontmatter properties including cassette_sync
- * CRITICAL: cassette_sync is always the first property (primary key)
+ * Builds synced frontmatter properties including cassette
+ * CRITICAL: cassette is always the first property (primary key)
  * UPDATED: genres property now contains tag-safe values
  */
 export function buildSyncedFrontmatterProperties(
@@ -25,8 +25,8 @@ export function buildSyncedFrontmatterProperties(
 ): Record<string, any> {
   const properties: Record<string, any> = {};
   
-  // CRITICAL: Add cassette_sync as the first property (primary key)
-  properties.cassette_sync = cassetteSync;
+  // CRITICAL: Add cassette as the first property (primary key)
+  properties.cassette = cassetteSync;
   
   const addProperty = (key: keyof PropertyMapping, value: any) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -157,10 +157,10 @@ export function mergeFrontmatter(
 
 /**
  * Serializes frontmatter to YAML string with consistent formatting
- * cassette_sync is always positioned first as the primary key
+ * cassette is always positioned first as the primary key
  */
 export function serializeFrontmatter(frontmatter: Record<string, any>): string {
-  // Define property order with cassette_sync first (primary key position)
+  // Define property order with cassette first (primary key position)
   const propertyOrder = [
     'title',
     'aliases',
@@ -185,7 +185,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'category',
     'released',
     'id',
-    'cassette_sync',
+    'cassette',
     'updated'
   ];
   
