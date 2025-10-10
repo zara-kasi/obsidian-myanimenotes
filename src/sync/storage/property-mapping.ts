@@ -80,7 +80,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   aliases: 'aliases',
   
   // Description (common)
-  synopsis: 'synopsis',
+  synopsis: 'description',
   
   // Metadata (common)
   mediaType: 'type',
