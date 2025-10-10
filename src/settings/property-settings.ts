@@ -67,6 +67,12 @@ export function renderPropertyMappingSection(
   const animeFields = [
     { key: 'numEpisodes', label: 'Total Episodes', default: 'episodes' },
     { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'eps_seen' },
+    { key: 'airingStartDate', label: 'Airing Start Date', default: 'released' },  
+    { key: 'airingEndDate', label: 'Airing End Date', default: 'ended' }, 
+    { key: 'studios', label: 'Studios', default: 'studios' },                   
+    { key: 'duration', label: 'Episode Duration (minutes)', default: 'duration' },  
+    { key: 'userStartDate', label: 'Date Started Watching', default: 'started' },   
+    { key: 'userFinishDate', label: 'Date Finished Watching', default: 'finished' },
   ];
   
   container.createEl('h4', { text: 'Anime-Specific Fields' });
