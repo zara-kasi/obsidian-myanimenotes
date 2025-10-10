@@ -97,7 +97,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   source: 'origin',
   
   // Anime-specific
-  numEpisodes: 'total_episodes',
+  numEpisodes: 'total_eps',
 
   // Manga-specific
   numVolumes: 'total_volumes',
@@ -107,7 +107,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // User list data (common)
   userStatus: 'list',
   userScore: 'rating',
-  numEpisodesWatched: 'episodes_watched',
+  numEpisodesWatched: 'eps_seen',
   numVolumesRead: 'volumes_read',
   numChaptersRead: 'chapters_read',
   
