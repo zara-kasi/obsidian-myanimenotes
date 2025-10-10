@@ -192,7 +192,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'category',
     'id',
     'cassette',
-    'updated',
+    'synced',
     'total_chapters',
     'total_volumes',
     'chapters_read',
