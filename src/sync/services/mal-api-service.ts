@@ -29,9 +29,6 @@ const ANIME_FIELDS = [
   'start_season',
   'source',
   
-  // Additional pictures
-  'pictures',
-  
   // User list data - REQUIRED for user-specific fields
   'list_status{status,score,num_episodes_watched,is_rewatching,updated_at}'
 ].join(',');
@@ -59,8 +56,6 @@ const MANGA_FIELDS = [
   'num_chapters',
   'authors{first_name,last_name}',
   'start_date',
-  // Additional pictures
-  'pictures',
   
   // User list data - REQUIRED for user-specific fields
   'list_status{status,score,num_volumes_read,num_chapters_read}'
