@@ -65,13 +65,6 @@ export function buildSyncedFrontmatterProperties(
     addProperty('mainPicture', item.mainPicture.large || item.mainPicture.medium);
   }
   
-  // Banner (additional pictures) - use first additional picture if available
-  if (item.pictures && item.pictures.length > 0) {
-    const bannerUrl = item.pictures[0].large || item.pictures[0].medium;
-    if (bannerUrl) {
-      addProperty('pictures', bannerUrl);
-    }
-  }
   
   // Synopsis (sanitized - only commas and periods allowed)
   if (item.synopsis) {
