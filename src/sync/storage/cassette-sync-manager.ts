@@ -1,7 +1,7 @@
 /**
  * Cassette Sync Manager
  * 
- * Handles cassette_sync identifier generation, validation, file lookup,
+ * Handles cassette identifier generation, validation, file lookup,
  * and concurrency control through in-memory locks.
  */
 
@@ -10,11 +10,11 @@ import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../types';
 import { createDebugLogger } from '../../utils/debug';
 
-// In-memory lock to prevent concurrent operations on the same cassette_sync ID
+// In-memory lock to prevent concurrent operations on the same cassette ID
 const syncLocks = new Map<string, Promise<void>>();
 
 /**
- * Validates cassette_sync format: provider:category:id
+ * Validates cassette format: provider:category:id
  * Example: mal:anime:1245
  */
 export function validateCassetteSyncFormat(cassetteSync: string): boolean {
@@ -23,7 +23,7 @@ export function validateCassetteSyncFormat(cassetteSync: string): boolean {
 }
 
 /**
- * Generates cassette_sync identifier from media item
+ * Generates cassette identifier from media item
  * Format: provider:category:id (e.g., mal:anime:1245)
  */
 export function generateCassetteSync(item: UniversalMediaItem): string {
@@ -35,14 +35,14 @@ export function generateCassetteSync(item: UniversalMediaItem): string {
   
   // Validate format
   if (!validateCassetteSyncFormat(cassetteSync)) {
-    throw new Error(`Invalid cassette_sync format generated: ${cassetteSync}`);
+    throw new Error(`Invalid cassette format generated: ${cassetteSync}`);
   }
   
   return cassetteSync;
 }
 
 /**
- * Acquires an in-memory lock for a cassette_sync ID
+ * Acquires an in-memory lock for a cassette ID
  * Prevents concurrent save operations on the same item
  */
 export async function acquireSyncLock(cassetteSync: string): Promise<void> {
@@ -63,7 +63,7 @@ export async function acquireSyncLock(cassetteSync: string): Promise<void> {
 }
 
 /**
- * Releases a lock for a cassette_sync ID
+ * Releases a lock for a cassette ID
  */
 export function releaseSyncLock(cassetteSync: string): void {
   const lock = syncLocks.get(cassetteSync);
@@ -75,8 +75,8 @@ export function releaseSyncLock(cassetteSync: string): void {
 }
 
 /**
- * Finds files by cassette_sync frontmatter property
- * Returns all files that match the cassette_sync value
+ * Finds files by cassette frontmatter property
+ * Returns all files that match the cassette value
  * 
  * IMPORTANT: Searches the ENTIRE VAULT, not just a specific folder
  * This allows users to:
@@ -97,14 +97,14 @@ export async function findFilesByCassetteSync(
   // Not limited to folderPath - this is intentional!
   const allFiles = vault.getMarkdownFiles();
   
-  // Check each file's frontmatter for cassette_sync property
+  // Check each file's frontmatter for cassette property
   for (const file of allFiles) {
     const cache = metadataCache.getFileCache(file);
     const frontmatter = cache?.frontmatter;
     
-    if (frontmatter && frontmatter.cassette_sync === cassetteSync) {
+    if (frontmatter && frontmatter.cassette === cassetteSync) {
       matchingFiles.push(file);
-      debug.log(`[CassetteSync] Found file by cassette_sync: ${file.path}`);
+      debug.log(`[CassetteSync] Found file by cassette: ${file.path}`);
     }
   }
   
@@ -138,8 +138,8 @@ export async function findLegacyFiles(
     
     if (!frontmatter) continue;
     
-    // Skip files that already have cassette_sync (not legacy)
-    if (frontmatter.cassette_sync) continue;
+    // Skip files that already have cassette (not legacy)
+    if (frontmatter.cassette) continue;
     
     // Check for various ID field patterns
     const idFields = ['malId', 'id', 'providerId', 'external_id'];
@@ -166,9 +166,9 @@ export async function findLegacyFiles(
     // Skip if already identified
     if (candidates.includes(file)) continue;
     
-    // Skip files that already have cassette_sync
+    // Skip files that already have cassette
     const cache = metadataCache.getFileCache(file);
-    if (cache?.frontmatter?.cassette_sync) continue;
+    if (cache?.frontmatter?.cassette) continue;
     
     if (filenamePatterns.some(pattern => pattern.test(filename))) {
       candidates.push(file);
