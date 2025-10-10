@@ -36,7 +36,6 @@ export function renderPropertyMappingSection(
     { key: 'platform', label: 'Platform (MyAnimeList/Simkl)', default: 'platform' },
     { key: 'url', label: 'URL (Platform link)', default: 'url' },
     { key: 'mainPicture', label: 'Main Picture (cover/poster)', default: 'main_picture' },
-    { key: 'pictures', label: 'Additional Pictures (banner/fanart)', default: 'pictures' },
     { key: 'synopsis', label: 'Synopsis', default: 'synopsis' },
     { key: 'mediaType', label: 'Type (e.g., OVA/ONA/Manhwa)', default: 'type' },
     { key: 'status', label: 'Status', default: 'status' },
