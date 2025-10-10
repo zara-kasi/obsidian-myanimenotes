@@ -180,7 +180,6 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'synopsis',
     'score',
     'main_picture',
-    'pictures',
     'url',
     'platform',
     'category',
