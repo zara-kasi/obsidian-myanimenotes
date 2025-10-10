@@ -71,10 +71,10 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   title: 'title',
   category: 'category',
   platform: 'platform',
-  url: 'url',
+  url: 'source',
   
   // Visual (common)
-  mainPicture: 'main_picture',
+  mainPicture: 'image',
   
   // Alternative titles - uses Obsidian's built-in aliases (common)
   aliases: 'aliases',
