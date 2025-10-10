@@ -45,6 +45,7 @@ export function renderPropertyMappingSection(
     { key: 'source', label: 'Original Material (e.g., Manga)', default: 'origin' },
     { key: 'userStatus', label: 'List Status (e.g., Planning)', default: 'list' },
     { key: 'userScore', label: 'Rating (User Score)', default: 'rating' },
+    { key: 'lastSynced', label: 'Last Sync Timestamp', default: 'synced' },
 ];
   
   container.createEl('h4', { text: 'Common Fields' });
