@@ -112,7 +112,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   numChaptersRead: 'chapters_read',
   
   // Sync metadata (common)
-  lastSynced: 'last_synced',
+  lastSynced: 'updated',
 };
 
 /**
