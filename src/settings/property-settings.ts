@@ -42,7 +42,7 @@ export function renderPropertyMappingSection(
     { key: 'mean', label: 'Average Score by other users', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
     { key: 'released', label: 'Released (Year)', default: 'released' },
-    { key: 'source', label: 'Origin Material (e.g., Manga)', default: 'origin' },
+    { key: 'source', label: 'Original Material (e.g., Manga)', default: 'origin' },
     { key: 'userStatus', label: 'List Status (e.g., Planning)', default: 'list' },
     { key: 'userScore', label: 'Rating (User Score)', default: 'rating' },
 ];
