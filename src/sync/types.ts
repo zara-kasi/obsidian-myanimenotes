@@ -111,6 +111,10 @@ export interface UniversalMediaItem {
   numEpisodes?: number;
   startSeason?: UniversalSeason;
   source?: string; // manga, light_novel, etc.
+  airingStartDate?: string;    // when anime started airing (YYYY-MM-DD)
+  airingEndDate?: string;      //  when anime finished airing (YYYY-MM-DD)
+  studios?: string[];          // production studios
+  duration?: number;
   
   // Manga-specific
   numVolumes?: number;
@@ -121,6 +125,8 @@ export interface UniversalMediaItem {
   // User list data
   userStatus?: UserListStatus;
   userScore?: number; // 0-10
+  userStartDate?: string;      // when user started watching (YYYY-MM-DD)
+  userFinishDate?: string;     //  when user finished watching (YYYY-MM-DD)
   numEpisodesWatched?: number; // For anime
   numVolumesRead?: number; // For manga
   numChaptersRead?: number; // For manga
