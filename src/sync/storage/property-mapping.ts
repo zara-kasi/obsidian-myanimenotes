@@ -16,7 +16,6 @@ export interface PropertyMapping {
   
   // Visual (common)
   mainPicture?: string;
-  pictures?: string;
   
   // Alternative titles (Obsidian's aliases property - common)
   aliases?: string;
@@ -76,7 +75,6 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   
   // Visual (common)
   mainPicture: 'main_picture',
-  pictures: 'pictures',
   
   // Alternative titles - uses Obsidian's built-in aliases (common)
   aliases: 'aliases',
