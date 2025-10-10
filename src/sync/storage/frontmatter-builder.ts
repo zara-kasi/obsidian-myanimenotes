@@ -100,7 +100,7 @@ export function buildSyncedFrontmatterProperties(
   }
   
   // Origin material (common to both anime and manga)
-  addProperty('origin', item.source);
+  addProperty('source', item.source);
   
   // Category-specific fields
   if (item.category === 'anime') {
