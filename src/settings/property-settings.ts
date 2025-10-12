@@ -43,8 +43,13 @@ export function renderPropertyMappingSection(
     { key: 'genres', label: 'Genres', default: 'genres' },
     { key: 'released', label: 'Released (Year)', default: 'released' },
     { key: 'source', label: 'Original Material (e.g., Manga)', default: 'origin' },
+    { key: 'releasedStart', label: 'Publication/Airing Start Date', default: 'released' },
+    { key: 'releasedEnd', label: 'Publication/Airing End Date', default: 'ended' },  
     { key: 'userStatus', label: 'List Status (e.g., Planning)', default: 'list' },
     { key: 'userScore', label: 'Rating (User Score)', default: 'rating' },
+    { key: 'userStartDate', label: 'Date Started (User)', default: 'started' },     
+    { key: 'userFinishDate', label: 'Date Finished (User)', default: 'finished' },        
+    
     { key: 'lastSynced', label: 'Last Sync Timestamp', default: 'synced' },
 ];
   
@@ -68,12 +73,8 @@ export function renderPropertyMappingSection(
   const animeFields = [
     { key: 'numEpisodes', label: 'Total Episodes', default: 'episodes' },
     { key: 'numEpisodesWatched', label: 'Episodes Watched', default: 'eps_seen' },
-    { key: 'airingStartDate', label: 'Airing Start Date', default: 'released' },  
-    { key: 'airingEndDate', label: 'Airing End Date', default: 'ended' }, 
     { key: 'studios', label: 'Studios', default: 'studios' },                   
-    { key: 'duration', label: 'Episode Duration (minutes)', default: 'duration' },  
-    { key: 'userStartDate', label: 'Date Started Watching', default: 'started' },   
-    { key: 'userFinishDate', label: 'Date Finished Watching', default: 'finished' },
+    { key: 'duration', label: 'Episode Duration (minutes)', default: 'duration' },
   ];
   
   container.createEl('h4', { text: 'Anime-Specific Fields' });
@@ -98,12 +99,8 @@ export function renderPropertyMappingSection(
     { key: 'numVolumesRead', label: 'Volumes Read', default: 'volumes_read' },
     { key: 'numChapters', label: 'Total Chapters', default: 'total_chapters' },
     { key: 'numChaptersRead', label: 'Chapters Read', default: 'chapters_read' },
-    { key: 'mangaStartDate', label: 'Publication Start Date', default: 'released' },
-    { key: 'mangaEndDate', label: 'Publication End Date', default: 'ended' },
     { key: 'serializations', label: 'Serialization Magazine', default: 'serialization' },
     { key: 'authors', label: 'Authors', default: 'authors' },
-    { key: 'userStartDate', label: 'Date Started Reading', default: 'started' },
-    { key: 'userFinishDate', label: 'Date Finished Reading', default: 'finished' },
   ];
   
   container.createEl('h4', { text: 'Manga-Specific Fields' });
