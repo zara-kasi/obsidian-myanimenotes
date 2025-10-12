@@ -31,18 +31,14 @@ export interface PropertyMapping {
   // Genres (common)
   genres?: string;
   
-  // Release info (common to both anime and manga)
-  // For anime: start year from start_season
-  // For manga: publication year
-  released?: string;
-  
+    // Publication/Airing dates (UNIFIED - common to both anime and manga)
+  releasedStart?: string;  // Maps to 'released'
+  releasedEnd?: string;    // Maps to 'ended'
   // Source material (common to both anime and manga)
   source?: string;
   
   // Anime-specific
   numEpisodes?: string;
-  airingStartDate?: string; 
-  airingEndDate?: string; 
   studios?: string;
   duration?: string;  
   userStartDate?: string;
@@ -54,9 +50,6 @@ export interface PropertyMapping {
   numChapters?: string;
   authors?: string;
   serializations?: string;
-  mangaStartDate?: string;
-  mangaEndDate?: string;
-  // User list data (common)
   userStatus?: string;
   userScore?: string;
   numEpisodesWatched?: string;
@@ -97,29 +90,24 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   
   // Genres (common)
   genres: 'genres',
-  
-  // Release info (common - replaces season_year and season_name)
-  released: 'released',
+  // Publication/Airing dates (UNIFIED - common)
+  releasedStart: 'released',
+  releasedEnd: 'ended',
   
   // Origin material (common - both anime and manga)
   source: 'origin',
   
   // Anime-specific
   numEpisodes: 'episodes',
-  airingStartDate: 'released',
-  airingEndDate: 'ended', 
   studios: 'studios',   
-  duration: 'duration',     
-  userStartDate: 'started',   
-  userFinishDate: 'finished',
+  duration: 'duration',
 
   // Manga-specific
   numVolumes: 'total_volumes',
   numChapters: 'total_chapters',
   authors: 'authors',
   serializations: 'serialization',
-  mangaStartDate: 'released',   
-  mangaEndDate: 'ended',
+
   
   // User list data (common)
   userStatus: 'list',
@@ -127,6 +115,8 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   numEpisodesWatched: 'eps_seen',
   numVolumesRead: 'volumes_read',
   numChaptersRead: 'chapters_read',
+  userStartDate: 'started',   
+  userFinishDate: 'finished',
   
   // Sync metadata (common)
   lastSynced: 'synced',
