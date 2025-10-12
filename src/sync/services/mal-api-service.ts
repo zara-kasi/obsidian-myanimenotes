@@ -61,7 +61,7 @@ const MANGA_FIELDS = [
   'authors{first_name,last_name}',
   'start_date',
   'end_date',
-  'serializations{name}',
+  'serialization{node{name}}',
   
   // User list data - REQUIRED for user-specific fields
   'list_status{status,score,num_volumes_read,num_chapters_read,start_date,finish_date}'
