@@ -169,13 +169,13 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
     
     // Genres
     genres: transformGenres(node.genres),
+    // Airing dates 
+    releasedStart: node.start_date,
+    releasedEnd: node.end_date,
     
    // Anime-specific
     numEpisodes: node.num_episodes,
-    startSeason: transformSeason(node.start_season),
-    source: node.source,
-    airingStartDate: node.start_date,   
-    airingEndDate: node.end_date, 
+    source: node.source, 
     studios: transformStudios(node.studios),    
     duration: convertDurationToMinutes(node.average_episode_duration), 
     
@@ -232,13 +232,14 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     
     // Genres
     genres: transformGenres(node.genres),
+   // Publication dates 
+    releasedStart: node.start_date,
+    releasedEnd: node.end_date,
     
     // Manga-specific
     numVolumes: node.num_volumes,
     numChapters: node.num_chapters,
-    authors: transformAuthors(node.authors),
-    startDate: node.start_date,
-    endDate: node.end_date,       
+    authors: transformAuthors(node.authors),     
     serializations: transformSerializations(node.serialization),  
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/mangalist endpoint
