@@ -238,12 +238,16 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     numChapters: node.num_chapters,
     authors: transformAuthors(node.authors),
     startDate: node.start_date,
+    endDate: node.end_date,       
+    serializations: transformSerializations(node.serialization),  
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/mangalist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
     userScore: listStatus?.score || 0,
     numVolumesRead: listStatus?.num_volumes_read || 0,
     numChaptersRead: listStatus?.num_chapters_read || 0,
+    userStartDate: listStatus?.start_date,  
+    userFinishDate: listStatus?.finish_date,  
     
     // Platform metadata
     platform: 'mal',
@@ -266,6 +270,15 @@ function transformStudios(malStudios: any[]): string[] {
 function convertDurationToMinutes(seconds: number | undefined): number | undefined {
   if (!seconds) return undefined;
   return Math.round(seconds / 60);
+}
+
+/**
+ * Transforms MAL serialization array
+ */
+function transformSerializations(malSerializations: any[]): string[] {
+  if (!malSerializations || !Array.isArray(malSerializations)) return [];
+  
+  return malSerializations.map(s => s.name).filter(Boolean);
 }
 
 /**
