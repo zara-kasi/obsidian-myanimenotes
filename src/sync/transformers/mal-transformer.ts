@@ -202,10 +202,11 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
-  debug.log('[MAL Transformer] Processing manga:', {
+  debug.log('[MAL Transformer] Serialization raw data:', {
     title: node.title,
-    hasListStatus: !!listStatus,
-    listStatus: listStatus
+    serialization: node.serialization,
+    serializationType: typeof node.serialization,
+    isArray: Array.isArray(node.serialization)
   });
 
   return {
