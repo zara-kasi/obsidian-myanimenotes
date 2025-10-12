@@ -103,8 +103,8 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   duration: 'duration',
 
   // Manga-specific
-  numVolumes: 'total_volumes',
-  numChapters: 'total_chapters',
+  numVolumes: 'volumes',
+  numChapters: 'chapters',
   authors: 'authors',
   serializations: 'serialization',
 
@@ -113,8 +113,8 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   userStatus: 'list',
   userScore: 'rating',
   numEpisodesWatched: 'eps_seen',
-  numVolumesRead: 'volumes_read',
-  numChaptersRead: 'chapters_read',
+  numVolumesRead: 'vol_read',
+  numChaptersRead: 'chap_read',
   userStartDate: 'started',   
   userFinishDate: 'finished',
   
