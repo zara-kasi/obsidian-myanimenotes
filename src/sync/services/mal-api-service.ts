@@ -170,6 +170,8 @@ export async function fetchCompleteMALAnimeList(plugin: CassettePlugin): Promise
  * Note: User list data (status, score, volumes/chapters read) must be explicitly requested via list_status field
  */
 export async function fetchCompleteMALMangaList(plugin: CassettePlugin): Promise<any[]> {
+  const debug = createDebugLogger(plugin, 'MAL API');
+  debug.log('[MAL API] Requesting manga with fields:', MANGA_FIELDS);
   return fetchAllPages(plugin, '/users/@me/mangalist', {
     fields: MANGA_FIELDS,
     nsfw: 'true'
