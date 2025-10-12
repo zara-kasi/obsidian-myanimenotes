@@ -5,8 +5,6 @@ import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
 /**
  * Renders property mapping settings section
  * 
- * CHANGE: Removed season_year and season_name, added 'released'
- * CHANGE: Added 'url' property for platform links
  */
 export function renderPropertyMappingSection(
   container: HTMLElement,
