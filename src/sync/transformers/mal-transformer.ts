@@ -241,7 +241,7 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     numVolumes: node.num_volumes,
     numChapters: node.num_chapters,
     authors: transformAuthors(node.authors),     
-    serializations: transformSerializations(node.serialization),
+    serializations: transformSerializations(node.serialization), 
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/mangalist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
@@ -275,32 +275,12 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
 }
 
 /**
- * Transforms MAL serialization data
- * Handles both single object and array responses
+ * Transforms MAL serialization array
  */
-function transformSerializations(malSerializations: any): string[] {
-  // Handle null/undefined
-  if (!malSerializations) return [];
+function transformSerializations(malSerializations: any[]): string[] {
+  if (!malSerializations || !Array.isArray(malSerializations)) return [];
   
-  // Handle single object (convert to array)
-  const serializationArray = Array.isArray(malSerializations) 
-    ? malSerializations 
-    : [malSerializations];
-  
-  // Extract names from the array
-  return serializationArray
-    .map(s => {
-      // MAL API v2 structure: { node: { name: "Magazine Name" } }
-      if (s?.node?.name) {
-        return s.node.name;
-      }
-      // Direct name property (fallback)
-      if (s?.name) {
-        return s.name;
-      }
-      return null;
-    })
-    .filter(Boolean) as string[];
+  return malSerializations.map(s => s.name).filter(Boolean);
 }
 
 /**
