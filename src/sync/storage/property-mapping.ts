@@ -53,7 +53,9 @@ export interface PropertyMapping {
   numVolumes?: string;
   numChapters?: string;
   authors?: string;
-  
+  serializations?: string;
+  mangaStartDate?: string;
+  mangaEndDate?: string;
   // User list data (common)
   userStatus?: string;
   userScore?: string;
@@ -115,6 +117,9 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   numVolumes: 'total_volumes',
   numChapters: 'total_chapters',
   authors: 'authors',
+  serializations: 'serialization',
+  mangaStartDate: 'released',   
+  mangaEndDate: 'ended',
   
   // User list data (common)
   userStatus: 'list',
