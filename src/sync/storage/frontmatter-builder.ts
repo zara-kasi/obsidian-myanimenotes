@@ -87,34 +87,26 @@ export function buildSyncedFrontmatterProperties(
   }
   
   
-  // Origin material (common to both anime and manga)
+// Origin material (common to both anime and manga)
   addProperty('source', item.source);
+  
+  // Publication/Airing dates (UNIFIED - common to both anime and manga)
+  addProperty('releasedStart', item.releasedStart);
+  addProperty('releasedEnd', item.releasedEnd);
   
   // Category-specific fields
   if (item.category === 'anime') {
     addProperty('numEpisodes', item.numEpisodes);
     addProperty('numEpisodesWatched', item.numEpisodesWatched);
-    addProperty('airingStartDate', item.airingStartDate);
-    addProperty('airingEndDate', item.airingEndDate);
     addProperty('studios', item.studios);
     addProperty('duration', item.duration);
-    addProperty('userStartDate', item.userStartDate);
-    addProperty('userFinishDate', item.userFinishDate);
-} else if (item.category === 'manga') {
+  } else if (item.category === 'manga') {
     addProperty('numVolumes', item.numVolumes);
     addProperty('numVolumesRead', item.numVolumesRead);
     addProperty('numChapters', item.numChapters);
     addProperty('numChaptersRead', item.numChaptersRead);
     
-    // Manga publication dates (FULL DATE version)
-    if (item.startDate) {
-  addProperty('mangaStartDate', item.startDate);  // Full date: YYYY-MM-DD
-}
-    if (item.endDate) {
-  addProperty('mangaEndDate', item.endDate);      // Full date: YYYY-MM-DD
-}
-    
-    // Serialization
+    // Serialization (manga only)
     if (item.serializations && item.serializations.length > 0) {
       addProperty('serializations', item.serializations);
     }
@@ -128,11 +120,15 @@ export function buildSyncedFrontmatterProperties(
         addProperty('authors', authorNames);
       }
     }
-    
-    // User dates for manga (FIXED - these were missing!)
-    addProperty('userStartDate', item.userStartDate);
-    addProperty('userFinishDate', item.userFinishDate);
   }
+  
+  // User list data (COMMON to both anime and manga)
+  addProperty('userStatus', item.userStatus);
+  if (item.userScore !== undefined && item.userScore > 0) {
+    addProperty('userScore', item.userScore);
+  }
+  addProperty('userStartDate', item.userStartDate);
+  addProperty('userFinishDate', item.userFinishDate);
 
   // User list data
   addProperty('userStatus', item.userStatus);
@@ -177,17 +173,23 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'aliases',
     'list',
     'eps_seen',
+    'chap_read',
+    'vol_read',
     'rating',
     'started',    
     'finished',
     'type',
     'episodes',
+    'chapters',
+    'volumes',
     'status',
     'released',
     'ended',
     'studios',
     'origin',
     'genres',
+    'serialization',
+    'authors',
     'duration',
     'score',
     'description',
@@ -198,11 +200,6 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'id',
     'cassette',
     'synced',
-    'total_chapters',
-    'total_volumes',
-    'chapters_read',
-    'volumes_read',
-    'authors',
   ];
   
   // Create ordered object
