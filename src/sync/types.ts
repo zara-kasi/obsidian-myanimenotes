@@ -106,13 +106,14 @@ export interface UniversalMediaItem {
   
   // Genres
   genres?: UniversalGenre[];
+    // Publication/Airing dates (UNIFIED - common to both anime and manga)
+  releasedStart?: string;  // When media started (YYYY-MM-DD)
+  releasedEnd?: string;    // When media ended (YYYY-MM-DD)
   
   // Anime-specific
   numEpisodes?: number;
   startSeason?: UniversalSeason;
   source?: string; // manga, light_novel, etc.
-  airingStartDate?: string;    // when anime started airing (YYYY-MM-DD)
-  airingEndDate?: string;      //  when anime finished airing (YYYY-MM-DD)
   studios?: string[];          // production studios
   duration?: number;
   
@@ -120,8 +121,6 @@ export interface UniversalMediaItem {
   numVolumes?: number;
   numChapters?: number;
   authors?: UniversalAuthor[];
-  startDate?: string;
-  endDate?: string;
   serializations?: string[];
   
   // User list data
