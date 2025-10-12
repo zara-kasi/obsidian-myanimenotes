@@ -106,19 +106,13 @@ export function buildSyncedFrontmatterProperties(
     addProperty('numChapters', item.numChapters);
     addProperty('numChaptersRead', item.numChaptersRead);
     
-    // Manga publication dates
+    // Manga publication dates (FULL DATE version)
     if (item.startDate) {
-      const year = parseInt(item.startDate.split('-')[0]);
-      if (!isNaN(year)) {
-        addProperty('mangaStartDate', year);  // Maps to 'released' property
-      }
-    }
+  addProperty('mangaStartDate', item.startDate);  // Full date: YYYY-MM-DD
+}
     if (item.endDate) {
-      const year = parseInt(item.endDate.split('-')[0]);
-      if (!isNaN(year)) {
-        addProperty('mangaEndDate', year);    // Maps to 'ended' property
-      }
-    }
+  addProperty('mangaEndDate', item.endDate);      // Full date: YYYY-MM-DD
+}
     
     // Serialization
     if (item.serializations && item.serializations.length > 0) {
