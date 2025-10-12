@@ -274,22 +274,32 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
 }
 
 /**
- * Transforms MAL serialization array
+ * Transforms MAL serialization data
+ * Handles both single object and array responses
  */
- function transformSerializations(malSerializations: any[]): string[] {
-  if (!malSerializations || !Array.isArray(malSerializations)) return [];
+function transformSerializations(malSerializations: any): string[] {
+  // Handle null/undefined
+  if (!malSerializations) return [];
   
-  // The API returns serialization as an array with nested node structure
-  return malSerializations
+  // Handle single object (convert to array)
+  const serializationArray = Array.isArray(malSerializations) 
+    ? malSerializations 
+    : [malSerializations];
+  
+  // Extract names from the array
+  return serializationArray
     .map(s => {
       // MAL API v2 structure: { node: { name: "Magazine Name" } }
-      if (s.node && s.node.name) {
+      if (s?.node?.name) {
         return s.node.name;
       }
-      // Fallback for edge cases
-      return s.name || null;
+      // Direct name property (fallback)
+      if (s?.name) {
+        return s.name;
+      }
+      return null;
     })
-    .filter(Boolean);
+    .filter(Boolean) as string[];
 }
 
 /**
