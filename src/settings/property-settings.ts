@@ -36,7 +36,7 @@ export function renderPropertyMappingSection(
     { key: 'mainPicture', label: 'Image (cover/poster)', default: 'image' },
     { key: 'synopsis', label: 'Description/Synopsis', default: 'description' },
     { key: 'mediaType', label: 'Type (e.g., OVA/ONA/Manhwa)', default: 'type' },
-    { key: 'status', label: 'Status', default: 'status' },
+    { key: 'status', label: 'Status (e.g., currently_releasing)', default: 'status' },
     { key: 'mean', label: 'Average Score by other users', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
     { key: 'source', label: 'Original Material (e.g., Manga)', default: 'origin' },
