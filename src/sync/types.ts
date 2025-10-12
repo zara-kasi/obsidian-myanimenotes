@@ -121,6 +121,8 @@ export interface UniversalMediaItem {
   numChapters?: number;
   authors?: UniversalAuthor[];
   startDate?: string;
+  endDate?: string;
+  serializations?: string[];
   
   // User list data
   userStatus?: UserListStatus;
