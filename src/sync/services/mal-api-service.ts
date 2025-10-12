@@ -60,9 +60,11 @@ const MANGA_FIELDS = [
   'num_chapters',
   'authors{first_name,last_name}',
   'start_date',
+  'end_date',
+  'serialization{name}',
   
   // User list data - REQUIRED for user-specific fields
-  'list_status{status,score,num_volumes_read,num_chapters_read}'
+  'list_status{status,score,num_volumes_read,num_chapters_read,start_date,finish_date}'
 ].join(',');
 
 /**
