@@ -112,11 +112,30 @@ export function buildSyncedFrontmatterProperties(
     addProperty('duration', item.duration);
     addProperty('userStartDate', item.userStartDate);
     addProperty('userFinishDate', item.userFinishDate);
-  } else if (item.category === 'manga') {
+} else if (item.category === 'manga') {
     addProperty('numVolumes', item.numVolumes);
     addProperty('numVolumesRead', item.numVolumesRead);
     addProperty('numChapters', item.numChapters);
     addProperty('numChaptersRead', item.numChaptersRead);
+    
+    // Manga publication dates
+    if (item.startDate) {
+      const year = parseInt(item.startDate.split('-')[0]);
+      if (!isNaN(year)) {
+        addProperty('mangaStartDate', year);  // Maps to 'released' property
+      }
+    }
+    if (item.endDate) {
+      const year = parseInt(item.endDate.split('-')[0]);
+      if (!isNaN(year)) {
+        addProperty('mangaEndDate', year);    // Maps to 'ended' property
+      }
+    }
+    
+    // Serialization
+    if (item.serializations && item.serializations.length > 0) {
+      addProperty('serializations', item.serializations);
+    }
     
     // Authors (manga only)
     if (item.authors && item.authors.length > 0) {
@@ -127,8 +146,12 @@ export function buildSyncedFrontmatterProperties(
         addProperty('authors', authorNames);
       }
     }
+    
+    // User dates for manga (FIXED - these were missing!)
+    addProperty('userStartDate', item.userStartDate);
+    addProperty('userFinishDate', item.userFinishDate);
   }
-  
+
   // User list data
   addProperty('userStatus', item.userStatus);
   if (item.userScore !== undefined && item.userScore > 0) {
