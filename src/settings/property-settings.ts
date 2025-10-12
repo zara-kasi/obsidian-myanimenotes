@@ -5,8 +5,6 @@ import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
 /**
  * Renders property mapping settings section
  * 
- * CHANGE: Removed season_year and season_name, added 'released'
- * CHANGE: Added 'url' property for platform links
  */
 export function renderPropertyMappingSection(
   container: HTMLElement,
@@ -41,7 +39,6 @@ export function renderPropertyMappingSection(
     { key: 'status', label: 'Status', default: 'status' },
     { key: 'mean', label: 'Average Score by other users', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
-    { key: 'released', label: 'Released (Year)', default: 'released' },
     { key: 'source', label: 'Original Material (e.g., Manga)', default: 'origin' },
     { key: 'releasedStart', label: 'Publication/Airing Start Date', default: 'released' },
     { key: 'releasedEnd', label: 'Publication/Airing End Date', default: 'ended' },  
