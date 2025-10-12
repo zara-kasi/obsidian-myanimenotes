@@ -279,7 +279,7 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
 function transformSerializations(malSerializations: any[]): string[] {
   if (!malSerializations || !Array.isArray(malSerializations)) return [];
   
-  return malSerializations.map(s => s.name).filter(Boolean);
+  return malSerializations.map(s => s.node?.name || s.name).filter(Boolean);
 }
 
 /**
