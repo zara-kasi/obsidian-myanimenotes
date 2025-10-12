@@ -240,7 +240,7 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     numVolumes: node.num_volumes,
     numChapters: node.num_chapters,
     authors: transformAuthors(node.authors),     
-    serializations: transformSerializations(node.serialization),  
+    serializations: transformSerializations(node.serializations),  
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/mangalist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
@@ -276,7 +276,7 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
 /**
  * Transforms MAL serialization array
  */
-function transformSerializations(malSerializations: any[]): string[] {
+ function transformSerializations(malSerializations: any[]): string[] {
   if (!malSerializations || !Array.isArray(malSerializations)) return [];
   
   return malSerializations.map(s => s.node?.name || s.name).filter(Boolean);
