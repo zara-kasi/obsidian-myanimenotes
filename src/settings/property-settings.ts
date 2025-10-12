@@ -98,7 +98,12 @@ export function renderPropertyMappingSection(
     { key: 'numVolumesRead', label: 'Volumes Read', default: 'volumes_read' },
     { key: 'numChapters', label: 'Total Chapters', default: 'total_chapters' },
     { key: 'numChaptersRead', label: 'Chapters Read', default: 'chapters_read' },
+    { key: 'mangaStartDate', label: 'Publication Start (Year)', default: 'released' },
+    { key: 'mangaEndDate', label: 'Publication End (Year)', default: 'ended' },
+    { key: 'serializations', label: 'Serialization Magazine', default: 'serialization' },
     { key: 'authors', label: 'Authors', default: 'authors' },
+    { key: 'userStartDate', label: 'Date Started Reading', default: 'started' },
+    { key: 'userFinishDate', label: 'Date Finished Reading', default: 'finished' },
   ];
   
   container.createEl('h4', { text: 'Manga-Specific Fields' });
