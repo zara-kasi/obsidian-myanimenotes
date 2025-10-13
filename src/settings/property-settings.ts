@@ -39,7 +39,6 @@ export function renderPropertyMappingSection(
     { key: 'status', label: 'Status (e.g., currently_releasing)', default: 'status' },
     { key: 'mean', label: 'Average Score by other users', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
-    { key: 'related', label: 'Related Media', default: 'related' },
     { key: 'source', label: 'Original Material (e.g., Manga)', default: 'origin' },
     { key: 'releasedStart', label: 'Publication/Airing Start Date', default: 'released' },
     { key: 'releasedEnd', label: 'Publication/Airing End Date', default: 'ended' },  
@@ -97,7 +96,6 @@ export function renderPropertyMappingSection(
     { key: 'numVolumesRead', label: 'Volumes Read', default: 'vol_read' },
     { key: 'numChapters', label: 'Total Chapters', default: 'chapters' },
     { key: 'numChaptersRead', label: 'Chapters Read', default: 'chap_read' },
-    { key: 'serializations', label: 'Serialization Magazine', default: 'serialization' },
     { key: 'authors', label: 'Authors', default: 'authors' },
   ];
   
