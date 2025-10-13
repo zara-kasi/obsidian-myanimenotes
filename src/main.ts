@@ -1,5 +1,3 @@
-// Main plugin entry point with sync support
-
 import { Plugin } from 'obsidian';
 import { CassetteSettingTab } from './settings';
 import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
