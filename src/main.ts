@@ -3,8 +3,8 @@
 import { Plugin } from 'obsidian';
 import { CassetteSettingTab } from './settings/settings-tab';
 import { CassetteSettings, DEFAULT_SETTINGS } from './settings/settings-interface';
-import { handleOAuthRedirect as handleMALRedirect } from './auth/mal';
-import { handleOAuthRedirect as handleSimklRedirect } from './auth/simkl';
+import { handleOAuthRedirect as handleMALRedirect } from './api/mal/auth';
+import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl/auth';
 import { SyncManager, createSyncManager, MediaCategory } from './sync';
 import { AutoSyncManager, createAutoSyncManager } from './sync/auto-sync-manager'; 
 
