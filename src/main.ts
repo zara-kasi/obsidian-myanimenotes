@@ -1,13 +1,13 @@
 // Main plugin entry point with sync support
 
 import { Plugin } from 'obsidian';
-import { CassetteSettingTab } from './settings/settings-tab';
-import { CassetteSettings, DEFAULT_SETTINGS } from './settings/settings-interface';
-import { handleOAuthRedirect as handleMALRedirect } from './api/mal/auth';
-import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl/auth';
+import { CassetteSettingTab } from './settings';
+import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
+import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
+import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
 import { SyncManager, createSyncManager } from './sync';
 import { MediaCategory } from '../models';
-import { AutoSyncManager, createAutoSyncManager } from './sync/auto-sync-manager'; 
+import { AutoSyncManager, createAutoSyncManager } from './sync'; 
 
 
 export default class CassettePlugin extends Plugin {
