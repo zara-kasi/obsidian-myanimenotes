@@ -1,7 +1,7 @@
 // Logout and session cleanup
 
 import { Notice } from 'obsidian';
-import type CassettePlugin from '../../main';
+import type CassettePlugin from '../../../main';
 
 /**
  * Clears all authentication data and credentials
