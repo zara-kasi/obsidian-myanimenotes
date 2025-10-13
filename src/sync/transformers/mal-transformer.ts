@@ -288,12 +288,23 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
 }
 
 /**
- * Transforms MAL serialization array
+ * Transforms MAL serialization data
+ * MAL API returns a single serialization object (not an array)
  */
-function transformSerializations(malSerializations: any[]): string[] {
-  if (!malSerializations || !Array.isArray(malSerializations)) return [];
+function transformSerializations(malSerialization: any): string[] {
+  // Handle null/undefined
+  if (!malSerialization) return [];
   
-  return malSerializations.map(s => s.name).filter(Boolean);
+  // Handle if it's already an array (backwards compatibility)
+  if (Array.isArray(malSerialization)) {
+    return malSerialization
+      .map(s => s.node?.name || s.name)
+      .filter(Boolean);
+  }
+  
+  // Handle single serialization object (expected format)
+  const name = malSerialization.node?.name || malSerialization.name;
+  return name ? [name] : [];
 }
 
 /**
