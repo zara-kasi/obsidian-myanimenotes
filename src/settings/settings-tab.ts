@@ -1,8 +1,8 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import CassettePlugin from '../main';
-import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../auth/mal';
-import { startAuthFlow as startSimklAuth, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../auth/simkl';
-import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
+import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
+import { startAuthFlow as startSimklAuth, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../api/simkl';
+import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 import { renderPropertyMappingSection } from './property-settings';
 
 export class CassetteSettingTab extends PluginSettingTab {

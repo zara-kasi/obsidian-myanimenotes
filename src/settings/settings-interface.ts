@@ -1,7 +1,7 @@
-import type { MALUserInfo } from '../auth/mal';
-import type { SimklUserInfo } from '../auth/simkl';
-import type { PropertyMapping } from '../sync/storage/property-mapping';
-import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
+import type { MALUserInfo } from '../api/mal';
+import type { SimklUserInfo } from '../api/simkl';
+import type { PropertyMapping } from '../storage/markdown';
+import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 
 export interface CassetteSettings {
   // MAL Authentication

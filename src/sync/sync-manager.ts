@@ -1,10 +1,10 @@
 import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
-import type { UniversalMediaItem, SyncResult } from './types';
-import { MediaCategory } from './types';
-import { syncMAL, type MALSyncOptions } from './services/mal-sync-service';
-import { saveMediaItemsByCategory, type StorageConfig } from './storage/storage-service';
-import { createDebugLogger, type DebugLogger } from '../utils/debug';
+import type { UniversalMediaItem, SyncResult } from '../models';
+import { MediaCategory } from '../models';
+import { syncMAL, type MALSyncOptions } from './mal-sync-service';
+import { saveMediaItemsByCategory, type StorageConfig } from '../storage';
+import { createDebugLogger, type DebugLogger } from '../utils';
 
 /**
  * Complete sync options

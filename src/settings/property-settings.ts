@@ -1,6 +1,6 @@
 import { Setting } from 'obsidian';
 import type CassettePlugin from '../main';
-import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
+import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 
 /**
  * Renders property mapping settings section
