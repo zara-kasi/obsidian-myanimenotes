@@ -1,7 +1,7 @@
 import { requestUrl } from 'obsidian';
 import type CassettePlugin from '../../main';
-import { ensureValidToken, getAuthHeaders } from '../../auth/mal';
-import { createDebugLogger } from '../../utils/debug';
+import { ensureValidToken, getAuthHeaders } from './auth';
+import { createDebugLogger } from '../../utils';
 
 const MAL_API_BASE = 'https://api.myanimelist.net/v2';
 
