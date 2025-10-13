@@ -119,15 +119,23 @@ function transformAuthors(malAuthors: any[]): UniversalAuthor[] {
 }
 
 /**
- * Transforms MAL start season (for anime)
+ * Transforms MAL related anime/manga
  */
-function transformSeason(malSeason: any): UniversalSeason | undefined {
-  if (!malSeason) return undefined;
+function transformRelatedMedia(malRelated: any): UniversalRelatedMedia[] {
+  if (!malRelated || !Array.isArray(malRelated)) return [];
   
-  return {
-    year: malSeason.year,
-    season: malSeason.season
-  };
+  const related: UniversalRelatedMedia[] = [];
+  
+  malRelated.forEach(relation => {
+    if (!relation.node?.title) return; // Skip if no title
+    
+    related.push({
+      title: relation.node.title,
+      relationshipType: relation.relation_type || 'unknown'
+    });
+  });
+  
+  return related;
 }
 
 /**
@@ -178,6 +186,9 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
     source: node.source, 
     studios: transformStudios(node.studios),    
     duration: convertDurationToMinutes(node.average_episode_duration), 
+    
+    // Related media
+    related: transformRelatedMedia(node.related_anime),
     
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/animelist endpoint
@@ -242,6 +253,8 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     numChapters: node.num_chapters,
     authors: transformAuthors(node.authors),     
     serializations: transformSerializations(node.serialization), 
+    // Related media
+    related: transformRelatedMedia(node.related_manga),
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/mangalist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
