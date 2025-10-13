@@ -39,6 +39,7 @@ export function renderPropertyMappingSection(
     { key: 'status', label: 'Status (e.g., currently_releasing)', default: 'status' },
     { key: 'mean', label: 'Average Score by other users', default: 'score' },
     { key: 'genres', label: 'Genres', default: 'genres' },
+    { key: 'related', label: 'Related Media', default: 'related' },
     { key: 'source', label: 'Original Material (e.g., Manga)', default: 'origin' },
     { key: 'releasedStart', label: 'Publication/Airing Start Date', default: 'released' },
     { key: 'releasedEnd', label: 'Publication/Airing End Date', default: 'ended' },  
