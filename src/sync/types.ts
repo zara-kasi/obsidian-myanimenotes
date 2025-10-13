@@ -71,13 +71,7 @@ export interface UniversalAuthor {
   role?: string;
 }
 
-/**
- * Universal related media item
- */
-export interface UniversalRelatedMedia {
-  title: string;
-  relationshipType: string; // sequel, prequel, adaptation, etc.
-}
+
 
 /**
  * Universal media item (normalized structure)
@@ -110,9 +104,7 @@ export interface UniversalMediaItem {
   releasedStart?: string;  // When media started (YYYY-MM-DD)
   releasedEnd?: string;    // When media ended (YYYY-MM-DD)
   
-  // Related media (common to both anime and manga)
-  related?: UniversalRelatedMedia[];
-  
+
   // Anime-specific
   numEpisodes?: number;
   source?: string; // manga, light_novel, etc.
@@ -123,7 +115,7 @@ export interface UniversalMediaItem {
   numVolumes?: number;
   numChapters?: number;
   authors?: UniversalAuthor[];
-  serializations?: string[];
+  
   
   // User list data
   userStatus?: UserListStatus;
