@@ -1,7 +1,7 @@
 // SIMKL logout and session cleanup
 
 import { Notice } from 'obsidian';
-import type CassettePlugin from '../../main';
+import type CassettePlugin from '../../../main';
 
 /**
  * Clears all SIMKL authentication data and credentials
