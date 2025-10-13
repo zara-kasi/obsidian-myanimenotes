@@ -1,10 +1,10 @@
 // Token validation, refresh, and management
 
 import { requestUrl } from 'obsidian';
-import type CassettePlugin from '../../main';
+import type CassettePlugin from '../../../main';
 import type { MALTokenResponse } from './types';
 import { MAL_TOKEN_URL, TOKEN_EXPIRY_BUFFER } from './constants';
-import { createDebugLogger } from '../../utils/debug';
+import { createDebugLogger } from '../../../utils';
 
 
 /**
