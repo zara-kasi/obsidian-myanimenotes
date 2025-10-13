@@ -1,25 +1,8 @@
-/**
- * Storage Service - Main entry point
- * 
- * ARCHITECTURE:
- * - cassette-sync-manager.ts: Handles cassette lookup and locking
- * - file-utils.ts: File operations and sanitization
- * - frontmatter-builder.ts: Builds and merges frontmatter
- * - markdown-generator.ts: Generates markdown content
- * 
- * CRITICAL BEHAVIORS:
- * 1. Sync is based ONLY on cassette frontmatter property, NOT filename
- * 2. Search scope is the ENTIRE VAULT, not just configured folders
- * 3. Users can move files anywhere and sync will still find them
- * 4. Users can rename files and sync will still update the same file
- * 5. Filename changes DO NOT affect sync behavior
- */
-
 import { Notice } from 'obsidian';
-import type CassettePlugin from '../../main';
-import type { UniversalMediaItem } from '../types';
-import type { PropertyMapping } from './property-mapping';
-import { DEFAULT_PROPERTY_MAPPING } from './property-mapping';
+import type CassettePlugin from '../main';
+import type { UniversalMediaItem } from '../models';
+import type { PropertyMapping } from './markdown';
+import { DEFAULT_PROPERTY_MAPPING } from './markdown';
 import { 
   generateCassetteSync, 
   findFilesByCassetteSync, 
@@ -27,10 +10,10 @@ import {
   selectDeterministicFile,
   acquireSyncLock,
   releaseSyncLock
-} from './cassette-sync-manager';
+} from './cassette';
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
-import { generateMarkdownWithCassetteSync } from './markdown-generator';
-import { createDebugLogger } from '../../utils/debug';
+import { generateMarkdownWithCassetteSync } from './markdown';
+import { createDebugLogger } from '../utils';
 
 /**
  * Storage configuration
