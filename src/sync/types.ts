@@ -72,11 +72,11 @@ export interface UniversalAuthor {
 }
 
 /**
- * Universal start season (for anime)
+ * Universal related media item
  */
-export interface UniversalSeason {
-  year: number;
-  season: string; // winter, spring, summer, fall
+export interface UniversalRelatedMedia {
+  title: string;
+  relationshipType: string; // sequel, prequel, adaptation, etc.
 }
 
 /**
@@ -109,6 +109,9 @@ export interface UniversalMediaItem {
     // Publication/Airing dates (UNIFIED - common to both anime and manga)
   releasedStart?: string;  // When media started (YYYY-MM-DD)
   releasedEnd?: string;    // When media ended (YYYY-MM-DD)
+  
+  // Related media (common to both anime and manga)
+  related?: UniversalRelatedMedia[];
   
   // Anime-specific
   numEpisodes?: number;
