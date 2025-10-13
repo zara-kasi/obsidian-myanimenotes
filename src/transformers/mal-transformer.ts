@@ -1,5 +1,5 @@
 import type CassettePlugin from '../main';
-import { createDebugLogger } from '../../utils';
+import { createDebugLogger } from '../utils';
 import type {
   UniversalMediaItem,
   UniversalPicture,
