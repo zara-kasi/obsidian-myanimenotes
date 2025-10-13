@@ -1,7 +1,7 @@
 // User information management
 
 import { requestUrl } from 'obsidian';
-import type CassettePlugin from '../../main';
+import type CassettePlugin from '../../../main';
 import type { MALUserInfo } from './types';
 import { MAL_USER_URL } from './constants';
 
