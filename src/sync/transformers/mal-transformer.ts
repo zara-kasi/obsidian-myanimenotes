@@ -6,7 +6,7 @@ import type {
   UniversalAlternativeTitles,
   UniversalGenre,
   UniversalAuthor,
-  UniversalSeason
+  UniversalRelatedMedia,
 } from '../types';
 import { MediaStatus, UserListStatus, MediaCategory } from '../types';
 
