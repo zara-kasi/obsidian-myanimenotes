@@ -10,20 +10,3 @@ export type { MALSyncOptions } from './mal-sync-service';
 
 // Auto-sync manager
 export { AutoSyncManager, createAutoSyncManager } from './auto-sync-manager';
-
-// Types and enums
-export {
-  MediaStatus,
-  UserListStatus,
-  MediaCategory,
-} from './types';
-
-export type {
-  UniversalMediaItem,
-  UniversalPicture,
-  UniversalAlternativeTitles,
-  UniversalGenre,
-  UniversalAuthor,
-  SyncItemResult,
-  SyncResult,
-} from './types';
