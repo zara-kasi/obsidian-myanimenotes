@@ -85,20 +85,6 @@ export function buildSyncedFrontmatterProperties(
     }
   }
   
-  // Related media - convert to Obsidian wiki links
-  if (item.related && item.related.length > 0) {
-    const relatedLinks = item.related
-      .map(rel => {
-        const sanitizedTitle = sanitizeFilename(rel.title);
-        return sanitizedTitle ? `[[${sanitizedTitle}]]` : null;
-      })
-      .filter(Boolean); // Remove any null entries
-    
-    if (relatedLinks.length > 0) {
-      addProperty('related', relatedLinks);
-    }
-  }
-  
   
 // Origin material (common to both anime and manga)
   addProperty('source', item.source);
@@ -119,10 +105,6 @@ export function buildSyncedFrontmatterProperties(
     addProperty('numChapters', item.numChapters);
     addProperty('numChaptersRead', item.numChaptersRead);
     
-    // Serialization (manga only)
-    if (item.serializations && item.serializations.length > 0) {
-      addProperty('serializations', item.serializations);
-    }
     
     // Authors (manga only)
     if (item.authors && item.authors.length > 0) {
@@ -201,8 +183,6 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'studios',
     'origin',
     'genres',
-    'related',
-    'serialization',
     'authors',
     'duration',
     'score',
