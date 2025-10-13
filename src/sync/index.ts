@@ -5,7 +5,6 @@ export type {
   UniversalAlternativeTitles,
   UniversalGenre,
   UniversalAuthor,
-  UniversalSeason,
   SyncItemResult,
   SyncResult,
 } from './types';
