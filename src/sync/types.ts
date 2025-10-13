@@ -115,7 +115,6 @@ export interface UniversalMediaItem {
   
   // Anime-specific
   numEpisodes?: number;
-  startSeason?: UniversalSeason;
   source?: string; // manga, light_novel, etc.
   studios?: string[];          // production studios
   duration?: number;
