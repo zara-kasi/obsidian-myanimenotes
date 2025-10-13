@@ -13,11 +13,11 @@ export {
 } from './storage-service';
 
 // Property mapping
-export type { PropertyMapping } from './property-mapping';
+export type { PropertyMapping } from './markdown';
 export { 
   DEFAULT_PROPERTY_MAPPING, 
   getMappedPropertyName 
-} from './property-mapping';
+} from './markdown';
 
 // Cassette sync utilities (internal, but exported for testing/advanced use)
 export {
@@ -26,7 +26,7 @@ export {
   findFilesByCassetteSync,
   findLegacyFiles,
   selectDeterministicFile
-} from './cassette-sync-manager';
+} from './cassette';
 
 // File utilities (internal, but exported for testing/advanced use)
 export {
@@ -42,10 +42,10 @@ export {
   buildSyncedFrontmatterProperties,
   mergeFrontmatter,
   serializeFrontmatter
-} from './frontmatter-builder';
+} from './markdown';
 
 // Markdown generation (internal, but exported for testing/advanced use)
 export {
   parseExistingFile,
   generateMarkdownWithCassetteSync
-} from './markdown-generator';
+} from './markdown';
