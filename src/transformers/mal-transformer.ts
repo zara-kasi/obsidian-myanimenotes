@@ -1,13 +1,13 @@
-import type CassettePlugin from '../../main';
-import { createDebugLogger } from '../../utils/debug';
+import type CassettePlugin from '../main';
+import { createDebugLogger } from '../../utils';
 import type {
   UniversalMediaItem,
   UniversalPicture,
   UniversalAlternativeTitles,
   UniversalGenre,
   UniversalAuthor,
-} from '../types';
-import { MediaStatus, UserListStatus, MediaCategory } from '../types';
+} from '../models';
+import { MediaStatus, UserListStatus, MediaCategory } from '../models';
 
 
 /**
