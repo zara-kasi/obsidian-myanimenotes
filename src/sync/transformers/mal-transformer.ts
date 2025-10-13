@@ -6,7 +6,6 @@ import type {
   UniversalAlternativeTitles,
   UniversalGenre,
   UniversalAuthor,
-  UniversalRelatedMedia,
 } from '../types';
 import { MediaStatus, UserListStatus, MediaCategory } from '../types';
 
@@ -118,25 +117,6 @@ function transformAuthors(malAuthors: any[]): UniversalAuthor[] {
   }));
 }
 
-/**
- * Transforms MAL related anime/manga
- */
-function transformRelatedMedia(malRelated: any): UniversalRelatedMedia[] {
-  if (!malRelated || !Array.isArray(malRelated)) return [];
-  
-  const related: UniversalRelatedMedia[] = [];
-  
-  malRelated.forEach(relation => {
-    if (!relation.node?.title) return; // Skip if no title
-    
-    related.push({
-      title: relation.node.title,
-      relationshipType: relation.relation_type || 'unknown'
-    });
-  });
-  
-  return related;
-}
 
 /**
  * Transforms a single MAL anime item to universal format
@@ -187,8 +167,7 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
     studios: transformStudios(node.studios),    
     duration: convertDurationToMinutes(node.average_episode_duration), 
     
-    // Related media
-    related: transformRelatedMedia(node.related_anime),
+
     
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/animelist endpoint
@@ -213,12 +192,6 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
-  debug.log('[MAL Transformer] Serialization raw data:', {
-    title: node.title,
-    serialization: node.serialization,
-    serializationType: typeof node.serialization,
-    isArray: Array.isArray(node.serialization)
-  });
 
   return {
     // Basic info
@@ -252,9 +225,8 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     numVolumes: node.num_volumes,
     numChapters: node.num_chapters,
     authors: transformAuthors(node.authors),     
-    serializations: transformSerializations(node.serialization), 
-    // Related media
-    related: transformRelatedMedia(node.related_manga),
+    
+
     // User list data - THIS IS THE KEY PART
     // list_status is returned by /users/@me/mangalist endpoint
     userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
@@ -287,25 +259,6 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
   return Math.round(seconds / 60);
 }
 
-/**
- * Transforms MAL serialization data
- * MAL API returns a single serialization object (not an array)
- */
-function transformSerializations(malSerialization: any): string[] {
-  // Handle null/undefined
-  if (!malSerialization) return [];
-  
-  // Handle if it's already an array (backwards compatibility)
-  if (Array.isArray(malSerialization)) {
-    return malSerialization
-      .map(s => s.node?.name || s.name)
-      .filter(Boolean);
-  }
-  
-  // Handle single serialization object (expected format)
-  const name = malSerialization.node?.name || malSerialization.name;
-  return name ? [name] : [];
-}
 
 /**
  * Transforms an array of MAL anime items
