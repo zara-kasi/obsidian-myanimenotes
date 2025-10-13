@@ -1,6 +1,6 @@
 // SIMKL token validation and management
 
-import type CassettePlugin from '../../main';
+import type CassettePlugin from '../../../main';
 
 /**
  * Checks if the current access token is valid
