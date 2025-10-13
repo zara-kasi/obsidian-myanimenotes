@@ -4,8 +4,8 @@
  * Generates complete markdown files with frontmatter and body content
  * Handles parsing existing files and preserving user content
  */
-import type CassettePlugin from '../main';
-import type { UniversalMediaItem } from '../models';
+import type CassettePlugin from '../../main';
+import type { UniversalMediaItem } from '../../models';
 import type { StorageConfig } from '../storage-service';
 import { DEFAULT_PROPERTY_MAPPING } from './property-mapping';
 import { 
