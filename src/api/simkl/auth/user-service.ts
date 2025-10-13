@@ -1,7 +1,7 @@
 // SIMKL user information management
 
 import { requestUrl } from 'obsidian';
-import type CassettePlugin from '../../main';
+import type CassettePlugin from '../../../main';
 import type { SimklUserInfo } from './types';
 import { SIMKL_USER_URL } from './constants';
 import { getAuthHeaders } from './token-manager';
