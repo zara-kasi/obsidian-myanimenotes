@@ -1,5 +1,4 @@
-import type { MALUserInfo } from '../auth/mal';
-import type { SimklUserInfo } from '../auth/simkl';
+import type { MALUserInfo, SimklUserInfo } from '../api';
 import type { PropertyMapping } from '../sync/storage/property-mapping';
 import { DEFAULT_PROPERTY_MAPPING } from '../sync/storage/property-mapping';
 
