@@ -9,8 +9,7 @@
 import type { UniversalMediaItem } from '../types';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName } from './property-mapping';
-import { sanitizeSynopsis } from './file-utils';
-import { sanitizeGenreObjectsForTags } from './file-utils';
+import { sanitizeSynopsis, sanitizeGenreObjectsForTags, sanitizeFilename } from './file-utils';
 import * as yaml from 'js-yaml';
 
 /**
@@ -83,6 +82,20 @@ export function buildSyncedFrontmatterProperties(
     const sanitizedGenres = sanitizeGenreObjectsForTags(item.genres);
     if (sanitizedGenres.length > 0) {
       addProperty('genres', sanitizedGenres);
+    }
+  }
+  
+  // Related media - convert to Obsidian wiki links
+  if (item.related && item.related.length > 0) {
+    const relatedLinks = item.related
+      .map(rel => {
+        const sanitizedTitle = sanitizeFilename(rel.title);
+        return sanitizedTitle ? `[[${sanitizedTitle}]]` : null;
+      })
+      .filter(Boolean); // Remove any null entries
+    
+    if (relatedLinks.length > 0) {
+      addProperty('related', relatedLinks);
     }
   }
   
@@ -188,6 +201,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'studios',
     'origin',
     'genres',
+    'related',
     'serialization',
     'authors',
     'duration',
