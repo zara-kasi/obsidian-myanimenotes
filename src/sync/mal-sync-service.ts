@@ -1,21 +1,21 @@
 // Main service for syncing MAL data
 
 import { Notice } from 'obsidian';
-import type CassettePlugin from '../../main';
-import type { UniversalMediaItem, SyncResult, SyncItemResult } from '../types';
-import { MediaCategory } from '../types';
+import type CassettePlugin from '../main';
+import type { UniversalMediaItem, SyncResult, SyncItemResult } from '../models';
+import { MediaCategory } from '../models';
 import {
   fetchCompleteMALAnimeList,
   fetchCompleteMALMangaList,
   fetchMALAnimeByStatus,
   fetchMALMangaByStatus,
-} from './mal-api-service';
+  isAuthenticated,
+} from '../api/mal';
 import {
   transformMALAnimeList,
   transformMALMangaList,
-} from '../transformers/mal-transformer';
-import { isAuthenticated } from '../../auth/mal';
-import { createDebugLogger } from '../../utils/debug';
+} from '../transformers';
+import { createDebugLogger } from '../utils';
 /**
  * Sync options
  */
