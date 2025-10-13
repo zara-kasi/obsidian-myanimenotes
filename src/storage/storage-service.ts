@@ -2,7 +2,7 @@ import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem } from '../models';
 import type { PropertyMapping } from './markdown';
-import { DEFAULT_PROPERTY_MAPPING } from './markdown';
+import { DEFAULT_PROPERTY_MAPPING, generateMarkdownWithCassetteSync } from './markdown';
 import { 
   generateCassetteSync, 
   findFilesByCassetteSync, 
@@ -12,7 +12,6 @@ import {
   releaseSyncLock
 } from './cassette';
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
-import { generateMarkdownWithCassetteSync } from './markdown';
 import { createDebugLogger } from '../utils';
 
 /**
