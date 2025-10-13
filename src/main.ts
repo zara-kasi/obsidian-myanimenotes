@@ -4,7 +4,7 @@ import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
 import { SyncManager, createSyncManager } from './sync';
-import { MediaCategory } from '../models';
+import { MediaCategory } from './models';
 import { AutoSyncManager, createAutoSyncManager } from './sync'; 
 
 
