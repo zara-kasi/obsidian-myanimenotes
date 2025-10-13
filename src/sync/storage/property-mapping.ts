@@ -31,6 +31,9 @@ export interface PropertyMapping {
   // Genres (common)
   genres?: string;
   
+  // Related media (common)
+  related?: string;
+  
     // Publication/Airing dates (UNIFIED - common to both anime and manga)
   releasedStart?: string;  // Maps to 'released'
   releasedEnd?: string;    // Maps to 'ended'
@@ -90,6 +93,10 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   
   // Genres (common)
   genres: 'genres',
+  
+  // Related media (common)
+  related: 'related',
+  
   // Publication/Airing dates (UNIFIED - common)
   releasedStart: 'released',
   releasedEnd: 'ended',
