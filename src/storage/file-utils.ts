@@ -4,8 +4,8 @@
  * Helper functions for file operations, path handling, and sanitization
  */
 
-import type CassettePlugin from '../../main';
-import { createDebugLogger } from '../../utils/debug';
+import type CassettePlugin from '../main';
+import { createDebugLogger } from '../utils';
 
 
 /**
