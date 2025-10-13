@@ -34,7 +34,7 @@ const ANIME_FIELDS = [
   'studios',           
   
   // Related media
-  'related_anime',
+  'related_anime{node{id,title},relation_type,relation_type_formatted}',
   // User list data - REQUIRED for user-specific fields
  'list_status{status,score,num_episodes_watched,is_rewatching,updated_at,start_date,finish_date}' 
 ].join(',');
@@ -63,10 +63,10 @@ const MANGA_FIELDS = [
   'authors{first_name,last_name}',
   'start_date',
   'end_date',
-  'serialization{name}',
+  'serialization{node{id,name}}',
   
   // Related media
-  'related_manga',
+  'related_manga{node{id,title},relation_type,relation_type_formatted}',
   
   // User list data - REQUIRED for user-specific fields
   'list_status{status,score,num_volumes_read,num_chapters_read,start_date,finish_date}'
