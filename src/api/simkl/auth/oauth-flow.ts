@@ -1,13 +1,13 @@
 // SIMKL OAuth 2.0 authorization flow
 
 import { Notice, requestUrl } from 'obsidian';
-import type CassettePlugin from '../../main';
+import type CassettePlugin from '../../../main';
 import type { SimklAuthState, SimklTokenResponse, OAuthParams } from './types';
 import { SIMKL_AUTH_URL, SIMKL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateState } from './utils';
 import { isTokenValid } from './token-manager';
 import { fetchUserInfo } from './user-service';
-import { createDebugLogger } from '../../utils/debug';
+import { createDebugLogger } from '../../../utils';
 
 
 // Store state temporarily during auth flow
