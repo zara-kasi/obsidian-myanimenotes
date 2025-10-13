@@ -1,5 +1,5 @@
-import type { MALUserInfo } from '../api/mal/auth';
-import type { SimklUserInfo } from '../api/simkl/auth';
+import type { MALUserInfo } from '../api/mal';
+import type { SimklUserInfo } from '../api/simkl';
 import type { PropertyMapping } from '../storage/markdown';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 
