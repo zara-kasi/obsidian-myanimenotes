@@ -31,8 +31,6 @@ export interface PropertyMapping {
   // Genres (common)
   genres?: string;
   
-  // Related media (common)
-  related?: string;
   
     // Publication/Airing dates (UNIFIED - common to both anime and manga)
   releasedStart?: string;  // Maps to 'released'
@@ -52,7 +50,6 @@ export interface PropertyMapping {
   numVolumes?: string;
   numChapters?: string;
   authors?: string;
-  serializations?: string;
   userStatus?: string;
   userScore?: string;
   numEpisodesWatched?: string;
@@ -94,8 +91,6 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // Genres (common)
   genres: 'genres',
   
-  // Related media (common)
-  related: 'related',
   
   // Publication/Airing dates (UNIFIED - common)
   releasedStart: 'released',
@@ -113,7 +108,6 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   numVolumes: 'volumes',
   numChapters: 'chapters',
   authors: 'authors',
-  serializations: 'serialization',
 
   
   // User list data (common)
