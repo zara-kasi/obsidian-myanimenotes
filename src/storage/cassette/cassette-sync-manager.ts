@@ -7,8 +7,8 @@
 
 import { TFile } from 'obsidian';
 import type CassettePlugin from '../../main';
-import type { UniversalMediaItem } from '../types';
-import { createDebugLogger } from '../../utils/debug';
+import type { UniversalMediaItem } from '../../models';
+import { createDebugLogger } from '../../utils';
 
 
 /**
