@@ -166,7 +166,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
   const propertyOrder = [
     'title',
     'aliases',
-    'status',
+    'list',
     'eps_seen',
     'chap_read',
     'vol_read',
