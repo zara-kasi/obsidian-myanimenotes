@@ -84,7 +84,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   synopsis: 'description',
   
   // Metadata (common)
-  mediaType: 'type',
+  mediaType: 'media',
   status: 'status',
   mean: 'score',
   
