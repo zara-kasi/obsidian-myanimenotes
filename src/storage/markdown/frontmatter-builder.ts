@@ -173,7 +173,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'rating',
     'started',    
     'finished',
-    'type',
+    'media',
     'episodes',
     'chapters',
     'volumes',
