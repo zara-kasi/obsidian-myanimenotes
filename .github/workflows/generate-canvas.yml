@@ -1,7 +1,6 @@
 name: Generate Code Map Canvas
 
 on:
-  # Run on every push to main branch
   push:
     branches:
       - main
@@ -10,18 +9,13 @@ on:
       - 'src/**/*.tsx'
       - 'main.ts'
   
-  # Run on pull requests
   pull_request:
     branches:
       - main
   
-  # Run on a schedule (every day at midnight UTC)
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight
-    # - cron: '0 */6 * * *'  # Every 6 hours
-    # - cron: '0 0 * * 0'  # Weekly on Sunday
+    - cron: '0 0 * * *'
   
-  # Allow manual trigger
   workflow_dispatch:
 
 jobs:
@@ -29,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: write  # Explicit permission to write
+      contents: write
     
     steps:
       - name: Checkout repository
@@ -52,9 +46,9 @@ jobs:
           ls -la src/ || echo "src/ directory not found"
           echo ""
           echo "=== Looking for main.ts ==="
-          find . -name "main.ts" -type f
+          find . -name "*.ts" -type f | head -20
       
-      - name: Create canvas generator script
+      - name: Create enhanced canvas generator
         run: |
           cat > ts-to-canvas.js << 'EOF'
           #!/usr/bin/env node
@@ -63,16 +57,17 @@ jobs:
           const path = require('path');
 
           const CONFIG = {
-            nodeWidth: 280,
-            nodeHeight: 120,
-            horizontalSpacing: 380,
-            verticalSpacing: 180,
+            nodeWidth: 300,
+            nodeHeight: 140,
+            horizontalSpacing: 400,
+            verticalSpacing: 200,
             colors: {
-              entryPoint: '#991b1b',  // Dark red for entry point
+              entryPoint: '#991b1b',
               file: '#1e3a8a',
               function: '#15803d',
               class: '#9333ea',
-              interface: '#ea580c'
+              interface: '#ea580c',
+              type: '#0891b2'
             }
           };
 
@@ -89,38 +84,59 @@ jobs:
                 exports: [],
                 functions: [],
                 classes: [],
-                interfaces: []
+                interfaces: [],
+                types: [],
+                variables: [],
+                functionCalls: new Set(),
+                classCalls: new Set()
               };
 
-              // Extract imports
-              const importRegex = /import\s+(?:{[^}]+}|[\w\s,*]+)\s+from\s+['"]([^'"]+)['"]/g;
-              let match;
-              while ((match = importRegex.exec(content)) !== null) {
-                structure.imports.push(match[1]);
-              }
+              // Extract ALL imports including destructured
+              const importPatterns = [
+                /import\s+{([^}]+)}\s+from\s+['"]([^'"]+)['"]/g,  // import { x } from 'y'
+                /import\s+(\w+)\s+from\s+['"]([^'"]+)['"]/g,      // import x from 'y'
+                /import\s+\*\s+as\s+(\w+)\s+from\s+['"]([^'"]+)['"]/g, // import * as x from 'y'
+                /import\s+['"]([^'"]+)['"]/g,                      // import 'y'
+              ];
 
-              // Extract require statements too
+              importPatterns.forEach(regex => {
+                let match;
+                while ((match = regex.exec(content)) !== null) {
+                  const modulePath = match[match.length - 1];
+                  structure.imports.push(modulePath);
+                }
+              });
+
+              // Also check require statements
               const requireRegex = /require\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
+              let match;
               while ((match = requireRegex.exec(content)) !== null) {
                 structure.imports.push(match[1]);
               }
 
-              // Extract functions
-              const funcRegex = /(?:export\s+)?(?:async\s+)?function\s+(\w+)/g;
-              while ((match = funcRegex.exec(content)) !== null) {
-                structure.functions.push(match[1]);
-              }
+              // Extract function declarations (more patterns)
+              const functionPatterns = [
+                /(?:export\s+)?(?:async\s+)?function\s+(\w+)/g,
+                /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g,
+                /(\w+)\s*:\s*\([^)]*\)\s*=>/g,  // object method arrow functions
+              ];
 
-              // Extract arrow functions
-              const arrowRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g;
-              while ((match = arrowRegex.exec(content)) !== null) {
-                structure.functions.push(match[1]);
-              }
+              functionPatterns.forEach(regex => {
+                let match;
+                while ((match = regex.exec(content)) !== null) {
+                  if (match[1] && !structure.functions.includes(match[1])) {
+                    structure.functions.push(match[1]);
+                  }
+                }
+              });
 
-              // Extract classes
-              const classRegex = /(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/g;
+              // Extract classes with more detail
+              const classRegex = /(?:export\s+)?(?:abstract\s+)?class\s+(\w+)(?:\s+extends\s+(\w+))?/g;
               while ((match = classRegex.exec(content)) !== null) {
                 structure.classes.push(match[1]);
+                if (match[2]) {
+                  structure.classCalls.add(match[2]); // Track inheritance
+                }
               }
 
               // Extract interfaces
@@ -129,6 +145,40 @@ jobs:
                 structure.interfaces.push(match[1]);
               }
 
+              // Extract type aliases
+              const typeRegex = /(?:export\s+)?type\s+(\w+)\s*=/g;
+              while ((match = typeRegex.exec(content)) !== null) {
+                structure.types.push(match[1]);
+              }
+
+              // Extract exported variables/constants
+              const varRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)(?:\s*:\s*\w+)?\s*=/g;
+              while ((match = varRegex.exec(content)) !== null) {
+                if (!structure.functions.includes(match[1])) {
+                  structure.variables.push(match[1]);
+                }
+              }
+
+              // Detect function calls (this finds usage relationships)
+              structure.functions.forEach(func => {
+                const callRegex = new RegExp(`\\b${func}\\s*\\(`, 'g');
+                if (callRegex.test(content)) {
+                  structure.functionCalls.add(func);
+                }
+              });
+
+              // Detect class instantiations
+              structure.classes.forEach(cls => {
+                const newRegex = new RegExp(`new\\s+${cls}\\s*\\(`, 'g');
+                if (newRegex.test(content)) {
+                  structure.classCalls.add(cls);
+                }
+              });
+
+              // Convert Sets to Arrays
+              structure.functionCalls = Array.from(structure.functionCalls);
+              structure.classCalls = Array.from(structure.classCalls);
+
               return structure;
             } catch (error) {
               console.error(`Error parsing ${filePath}:`, error.message);
@@ -136,8 +186,8 @@ jobs:
             }
           }
 
-          function resolveImportPath(importPath, fromFile, baseDir) {
-            // Skip external packages
+          function resolveImportPath(importPath, fromFile, allFiles) {
+            // Skip node_modules and external packages
             if (!importPath.startsWith('.') && !importPath.startsWith('/')) {
               return null;
             }
@@ -145,12 +195,17 @@ jobs:
             const fromDir = path.dirname(fromFile);
             let resolved = path.resolve(fromDir, importPath);
 
-            // Try different extensions
-            const extensions = ['.ts', '.tsx', '.js', '.jsx', ''];
+            // Try exact match first
+            if (allFiles.has(resolved)) {
+              return resolved;
+            }
+
+            // Try with extensions
+            const extensions = ['.ts', '.tsx', '.js', '.jsx'];
             for (const ext of extensions) {
-              const testPath = resolved + ext;
-              if (fs.existsSync(testPath) && fs.statSync(testPath).isFile()) {
-                return testPath;
+              const withExt = resolved + ext;
+              if (allFiles.has(withExt)) {
+                return withExt;
               }
             }
 
@@ -158,11 +213,10 @@ jobs:
             const indexPaths = [
               path.join(resolved, 'index.ts'),
               path.join(resolved, 'index.tsx'),
-              path.join(resolved, 'index.js')
             ];
             
             for (const indexPath of indexPaths) {
-              if (fs.existsSync(indexPath)) {
+              if (allFiles.has(indexPath)) {
                 return indexPath;
               }
             }
@@ -170,54 +224,92 @@ jobs:
             return null;
           }
 
-          function traverseFromEntry(entryPoint, baseDir) {
-            const visited = new Set();
-            const fileMap = new Map();
-            const queue = [entryPoint];
+          function findAllTypeScriptFiles(dir, fileSet = new Set()) {
+            if (!fs.existsSync(dir)) return fileSet;
+            
+            const items = fs.readdirSync(dir);
 
-            console.log(`Starting traversal from entry point: ${entryPoint}`);
+            items.forEach(item => {
+              const fullPath = path.join(dir, item);
+              const stat = fs.statSync(fullPath);
 
-            while (queue.length > 0) {
-              const currentFile = queue.shift();
-              
-              if (visited.has(currentFile)) continue;
-              visited.add(currentFile);
-
-              const fileInfo = parseTypeScriptFile(currentFile);
-              if (!fileInfo) continue;
-
-              fileInfo.relativePath = path.relative(baseDir, currentFile);
-              fileMap.set(currentFile, fileInfo);
-
-              console.log(`  Analyzed: ${fileInfo.relativePath} (${fileInfo.imports.length} imports)`);
-
-              // Queue imported files
-              for (const imp of fileInfo.imports) {
-                const resolvedPath = resolveImportPath(imp, currentFile, baseDir);
-                if (resolvedPath && !visited.has(resolvedPath)) {
-                  queue.push(resolvedPath);
+              if (stat.isDirectory()) {
+                if (!['node_modules', '.git', 'dist', 'build', '.github'].includes(item)) {
+                  findAllTypeScriptFiles(fullPath, fileSet);
                 }
+              } else if (item.endsWith('.ts') || item.endsWith('.tsx')) {
+                fileSet.add(path.resolve(fullPath));
               }
-            }
+            });
 
-            console.log(`Total files analyzed: ${fileMap.size}`);
-            return fileMap;
+            return fileSet;
+          }
+
+          function analyzeProject(entryPoint, projectRoot) {
+            console.log(`Scanning project from: ${projectRoot}`);
+            
+            // Find ALL TypeScript files in the project
+            const allFiles = findAllTypeScriptFiles(projectRoot);
+            console.log(`Found ${allFiles.size} total TypeScript files`);
+
+            // Parse all files
+            const fileMap = new Map();
+            const importGraph = new Map();
+
+            allFiles.forEach(filePath => {
+              const fileInfo = parseTypeScriptFile(filePath);
+              if (!fileInfo) return;
+
+              fileInfo.relativePath = path.relative(projectRoot, filePath);
+              fileMap.set(filePath, fileInfo);
+
+              console.log(`  📄 ${fileInfo.relativePath}`);
+              console.log(`     Functions: ${fileInfo.functions.length}, Classes: ${fileInfo.classes.length}, Imports: ${fileInfo.imports.length}`);
+            });
+
+            // Build import graph
+            fileMap.forEach((fileInfo, filePath) => {
+              const dependencies = [];
+              
+              fileInfo.imports.forEach(imp => {
+                const resolved = resolveImportPath(imp, filePath, allFiles);
+                if (resolved && fileMap.has(resolved)) {
+                  dependencies.push(resolved);
+                }
+              });
+
+              importGraph.set(filePath, dependencies);
+            });
+
+            console.log(`\nImport connections: ${Array.from(importGraph.values()).reduce((sum, deps) => sum + deps.length, 0)}`);
+
+            return { fileMap, importGraph };
           }
 
           function createFileNode(fileInfo, x, y, id, isEntryPoint = false) {
-            const funcsPreview = fileInfo.functions.length > 0 
-              ? fileInfo.functions.slice(0, 3).join(', ') + (fileInfo.functions.length > 3 ? '...' : '')
-              : 'none';
+            const parts = [];
             
-            const classesPreview = fileInfo.classes.length > 0
-              ? fileInfo.classes.slice(0, 2).join(', ') + (fileInfo.classes.length > 2 ? '...' : '')
-              : 'none';
+            if (fileInfo.functions.length > 0) {
+              const preview = fileInfo.functions.slice(0, 4).join(', ');
+              parts.push(`⚡ ${preview}${fileInfo.functions.length > 4 ? '...' : ''}`);
+            }
+            
+            if (fileInfo.classes.length > 0) {
+              const preview = fileInfo.classes.slice(0, 3).join(', ');
+              parts.push(`🏛️ ${preview}${fileInfo.classes.length > 3 ? '...' : ''}`);
+            }
+
+            if (fileInfo.interfaces.length > 0) {
+              parts.push(`📋 ${fileInfo.interfaces.length} interfaces`);
+            }
+
+            if (fileInfo.types.length > 0) {
+              parts.push(`🔷 ${fileInfo.types.length} types`);
+            }
 
             const emoji = isEntryPoint ? '🚀' : '📄';
-            const label = `${emoji} **${fileInfo.relativePath}**\n\n` +
-              `**Functions:** ${funcsPreview}\n` +
-              `**Classes:** ${classesPreview}\n` +
-              `**Imports:** ${fileInfo.imports.length}`;
+            const label = `${emoji} **${fileInfo.relativePath}**\n\n` + 
+                         (parts.length > 0 ? parts.join('\n') : 'Exports: ' + (fileInfo.variables.length || 0));
 
             return {
               id,
@@ -231,42 +323,43 @@ jobs:
             };
           }
 
-          function createEdge(fromId, toId, edgeId) {
+          function createEdge(fromId, toId, edgeId, label = '') {
             return {
               id: edgeId,
               fromNode: fromId,
               toNode: toId,
               color: '#6b7280',
-              fromSide: 'right',
-              toSide: 'left'
+              label: label
             };
           }
 
-          function generateCanvas(entryPoint, baseDir) {
+          function generateCanvas(entryPoint, projectRoot) {
             if (!fs.existsSync(entryPoint)) {
               console.error(`Entry point not found: ${entryPoint}`);
               return { nodes: [], edges: [] };
             }
 
-            const fileMap = traverseFromEntry(entryPoint, baseDir);
+            const { fileMap, importGraph } = analyzeProject(entryPoint, projectRoot);
+            
+            if (fileMap.size === 0) {
+              console.error('No TypeScript files found!');
+              return { nodes: [], edges: [] };
+            }
+
             const nodes = [];
             const edges = [];
             let nodeId = 1;
             let edgeId = 1;
 
-            if (fileMap.size === 0) {
-              console.error('No files found to analyze!');
-              return { nodes: [], edges: [] };
-            }
-
-            // Create a map for node IDs
             const fileToNodeId = new Map();
             const files = Array.from(fileMap.entries());
 
-            // Position nodes in a grid
+            // Create nodes with better layout
+            const cols = Math.ceil(Math.sqrt(files.length));
+            
             files.forEach(([filePath, fileInfo], index) => {
-              const col = index % 4;
-              const row = Math.floor(index / 4);
+              const col = index % cols;
+              const row = Math.floor(index / cols);
               const x = col * CONFIG.horizontalSpacing;
               const y = row * (CONFIG.verticalSpacing + CONFIG.nodeHeight);
 
@@ -277,33 +370,38 @@ jobs:
               nodes.push(createFileNode(fileInfo, x, y, id, isEntry));
             });
 
-            // Create edges for imports
-            files.forEach(([filePath, fileInfo]) => {
+            // Create edges from import graph
+            let connectionCount = 0;
+            importGraph.forEach((dependencies, filePath) => {
               const fromId = fileToNodeId.get(filePath);
               
-              fileInfo.imports.forEach(imp => {
-                const resolvedPath = resolveImportPath(imp, filePath, baseDir);
-                if (resolvedPath && fileToNodeId.has(resolvedPath)) {
-                  const toId = fileToNodeId.get(resolvedPath);
+              dependencies.forEach(depPath => {
+                const toId = fileToNodeId.get(depPath);
+                if (toId) {
                   edges.push(createEdge(fromId, toId, `edge-${edgeId++}`));
+                  connectionCount++;
                 }
               });
             });
 
-            // Add metadata node
+            console.log(`\n✅ Created ${nodes.length} nodes and ${edges.length} connections`);
+
+            // Metadata node
             const metaNode = {
               id: `node-${nodeId++}`,
               type: 'text',
               x: 0,
               y: -250,
-              width: 350,
-              height: 140,
+              width: 380,
+              height: 160,
               color: '#064e3b',
               text: `# 🗺️ Code Structure Map\n\n` +
-                    `**Entry Point:** ${path.basename(entryPoint)}\n` +
-                    `**Total Files:** ${fileMap.size}\n` +
-                    `**Connections:** ${edges.length}\n` +
-                    `**Generated:** ${new Date().toISOString().split('T')[0]}`
+                    `**Entry:** ${path.basename(entryPoint)}\n` +
+                    `**Files:** ${fileMap.size}\n` +
+                    `**Connections:** ${connectionCount}\n` +
+                    `**Functions:** ${Array.from(fileMap.values()).reduce((sum, f) => sum + f.functions.length, 0)}\n` +
+                    `**Classes:** ${Array.from(fileMap.values()).reduce((sum, f) => sum + f.classes.length, 0)}\n` +
+                    `**Updated:** ${new Date().toISOString().split('T')[0]}`
             };
             nodes.unshift(metaNode);
 
@@ -315,32 +413,27 @@ jobs:
             
             if (args.length < 2) {
               console.log('Usage: node ts-to-canvas.js <entry-point-file> <output-canvas-file>');
-              console.log('Example: node ts-to-canvas.js ./src/main.ts ./code-map.canvas');
               process.exit(1);
             }
 
             const entryPoint = path.resolve(args[0]);
             const outputFile = path.resolve(args[1]);
-            const baseDir = path.dirname(entryPoint);
+            const projectRoot = path.dirname(entryPoint);
 
-            console.log('=== Canvas Generator ===');
+            console.log('=== Enhanced Canvas Generator ===');
             console.log(`Entry Point: ${entryPoint}`);
-            console.log(`Output File: ${outputFile}`);
-            console.log(`Base Dir: ${baseDir}`);
-            console.log('');
+            console.log(`Project Root: ${projectRoot}`);
+            console.log(`Output: ${outputFile}\n`);
 
-            const canvas = generateCanvas(entryPoint, baseDir);
+            const canvas = generateCanvas(entryPoint, projectRoot);
             
             if (canvas.nodes.length === 0) {
-              console.error('ERROR: No nodes generated! Canvas will be empty.');
+              console.error('ERROR: No nodes generated!');
               process.exit(1);
             }
 
-            console.log('');
-            console.log(`✅ Generated ${canvas.nodes.length} nodes and ${canvas.edges.length} edges`);
-            
             fs.writeFileSync(outputFile, JSON.stringify(canvas, null, 2));
-            console.log(`✅ Canvas file created: ${outputFile}`);
+            console.log(`\n✅ Canvas saved to: ${outputFile}`);
           }
 
           main();
@@ -359,26 +452,32 @@ jobs:
             echo "✅ Found main.ts at root"
           else
             echo "❌ ERROR: main.ts not found!"
-            find . -name "main.ts" -type f || echo "No main.ts found anywhere"
+            find . -name "*.ts" -type f | head -10
             exit 1
           fi
       
       - name: Generate Canvas file
         run: |
-          echo "Generating canvas from entry point: ${{ steps.find_main.outputs.main_path }}"
+          echo "Generating enhanced canvas..."
           node ts-to-canvas.js ${{ steps.find_main.outputs.main_path }} ./code-map.canvas
       
-      - name: Verify Canvas was created
+      - name: Verify Canvas
         run: |
           if [ ! -f "./code-map.canvas" ]; then
-            echo "❌ ERROR: Canvas file was not created!"
+            echo "❌ Canvas file not created!"
             exit 1
           fi
-          echo "✅ Canvas file exists"
-          echo "File size: $(wc -c < ./code-map.canvas) bytes"
-          echo ""
-          echo "First 500 characters:"
-          head -c 500 ./code-map.canvas
+          
+          echo "✅ Canvas file created"
+          echo "Size: $(wc -c < ./code-map.canvas) bytes"
+          
+          # Check if it has actual content
+          node_count=$(grep -o '"type"' ./code-map.canvas | wc -l)
+          echo "Nodes found: $node_count"
+          
+          if [ "$node_count" -lt 2 ]; then
+            echo "⚠️ WARNING: Very few nodes detected!"
+          fi
       
       - name: Create docs directory
         run: mkdir -p docs
@@ -386,65 +485,12 @@ jobs:
       - name: Move Canvas to docs
         run: |
           cp ./code-map.canvas docs/code-map.canvas
-          echo "✅ Copied canvas to docs/"
           ls -lh docs/
-      
-      - name: Generate README for the canvas
-        run: |
-          cat > docs/README.md << 'EOF'
-          # 🗺️ Code Structure Map
-
-          This directory contains an automatically generated visual map of the codebase.
-
-          ## Files
-
-          - **code-map.canvas** - Obsidian Canvas file showing code structure and dependencies
-
-          ## How to Use
-
-          1. **Download** `code-map.canvas` 
-          2. **Place it** in your Obsidian vault
-          3. **Open it** with Obsidian's Canvas plugin
-
-          You'll see:
-          - 🚀 **Red node** = Entry point (main.ts)
-          - 📄 **Blue nodes** = Other TypeScript files
-          - ➡️ **Arrows** = Import dependencies
-
-          ## Features
-
-          - Shows which files import from which
-          - Starts from main.ts and follows all imports
-          - Only includes files actually used in your project
-          - Color-coded for easy navigation
-
-          ## Automatic Updates
-
-          This map is automatically regenerated:
-          - ✅ On every push to main branch (when .ts files change)
-          - ✅ Daily at midnight UTC
-          - ✅ On pull requests
-          - ✅ Manually from GitHub Actions tab
-
-          ---
-
-          **Last updated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          
-          **Entry point:** ${{ steps.find_main.outputs.main_path }}
-          EOF
-      
-      - name: Debug - Show what will be committed
-        run: |
-          echo "=== Files to be committed ==="
-          git status
-          echo ""
-          echo "=== Docs directory contents ==="
-          ls -lah docs/
       
       - name: Check for changes
         id: check_changes
         run: |
-          git add docs/
+          git add docs/code-map.canvas
           if git diff --staged --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "ℹ️ No changes detected"
@@ -453,20 +499,15 @@ jobs:
             echo "✅ Changes detected"
           fi
       
-      - name: Commit and push if changed
+      - name: Commit and push
         if: steps.check_changes.outputs.changed == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -m "🗺️ Auto-update code map canvas [skip ci]"
+          git commit -m "🗺️ Update code map [skip ci]"
           git push
       
-      - name: No changes message
-        if: steps.check_changes.outputs.changed == 'false'
-        run: |
-          echo "ℹ️ Canvas file unchanged - no commit needed"
-      
-      - name: Upload Canvas as artifact
+      - name: Upload Canvas artifact
         uses: actions/upload-artifact@v4
         with:
           name: code-map-canvas
@@ -475,14 +516,12 @@ jobs:
       
       - name: Summary
         run: |
-          echo "## 🗺️ Code Map Generated Successfully! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "## 🗺️ Code Map Generated! 🎉" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 Statistics" >> $GITHUB_STEP_SUMMARY
-          echo "- **Entry Point:** ${{ steps.find_main.outputs.main_path }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Canvas Location:** \`docs/code-map.canvas\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **File Size:** $(wc -c < docs/code-map.canvas) bytes" >> $GITHUB_STEP_SUMMARY
+          node_count=$(grep -o '"type"' docs/code-map.canvas | wc -l)
+          edge_count=$(grep -o '"fromNode"' docs/code-map.canvas | wc -l)
+          echo "- **Nodes:** $node_count" >> $GITHUB_STEP_SUMMARY
+          echo "- **Connections:** $edge_count" >> $GITHUB_STEP_SUMMARY
+          echo "- **Location:** \`docs/code-map.canvas\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📥 How to Access" >> $GITHUB_STEP_SUMMARY
-          echo "1. Download from [\`docs/code-map.canvas\`](../blob/main/docs/code-map.canvas)" >> $GITHUB_STEP_SUMMARY
-          echo "2. Or download from [Artifacts](#artifacts) below" >> $GITHUB_STEP_SUMMARY
-          echo "3. Open in Obsidian Canvas" >> $GITHUB_STEP_SUMMARY
+          echo "Download from the Artifacts section below ⬇️" >> $GITHUB_STEP_SUMMARY
