@@ -111,7 +111,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
 
   
   // User list data (common)
-  userStatus: 'status',
+  userStatus: 'list',
   userScore: 'rating',
   numEpisodesWatched: 'eps_seen',
   numVolumesRead: 'vol_read',
