@@ -6,8 +6,8 @@
 export enum MediaStatus {
   // Anime/Manga production status
   FINISHED = 'finished',
-  CURRENTLY_RELEASING = 'currently_releasing',
-  NOT_YET_RELEASED = 'not_yet_released',
+  CURRENTLY_RELEASING = 'ongoing',
+  NOT_YET_RELEASED = 'upcoming',
 }
 
 /**
@@ -16,15 +16,15 @@ export enum MediaStatus {
 export enum UserListStatus {
   // For Anime
   WATCHING = 'watching',
-  PLAN_TO_WATCH = 'plan_to_watch',
+  PLAN_TO_WATCH = 'planning',
   
   // For Manga
   READING = 'reading',
-  PLAN_TO_READ = 'plan_to_read',
+  PLAN_TO_READ = 'planning',
   
   // Common
   COMPLETED = 'completed',
-  ON_HOLD = 'on_hold',
+  ON_HOLD = 'on-hold',
   DROPPED = 'dropped',
 }
 
