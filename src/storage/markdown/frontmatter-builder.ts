@@ -177,7 +177,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'episodes',
     'chapters',
     'volumes',
-    'status',
+    'state',
     'released',
     'ended',
     'studios',
