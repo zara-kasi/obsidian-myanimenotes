@@ -1,0 +1,347 @@
+name: Generate Code Map Canvas
+
+on:
+  # Run on every push to main branch
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.tsx'
+  
+  # Run on pull requests
+  pull_request:
+    branches:
+      - main
+  
+  # Run on a schedule (every day at midnight UTC)
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight
+    # - cron: '0 */6 * * *'  # Every 6 hours
+    # - cron: '0 0 * * 0'  # Weekly on Sunday
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  generate-canvas:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Get full history for better analysis
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Create canvas generator script
+        run: |
+          cat > ts-to-canvas.js << 'EOF'
+          #!/usr/bin/env node
+
+          /**
+           * TypeScript to Obsidian Canvas Generator
+           * GitHub Actions Compatible Version
+           */
+
+          const fs = require('fs');
+          const path = require('path');
+
+          const CONFIG = {
+            nodeWidth: 250,
+            nodeHeight: 100,
+            horizontalSpacing: 350,
+            verticalSpacing: 150,
+            colors: {
+              file: '#1e3a8a',
+              function: '#15803d',
+              class: '#9333ea',
+              import: '#dc2626',
+              interface: '#ea580c'
+            }
+          };
+
+          function parseTypeScriptFile(filePath) {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            const fileName = path.basename(filePath);
+            
+            const structure = {
+              fileName,
+              filePath,
+              relativePath: filePath,
+              imports: [],
+              exports: [],
+              functions: [],
+              classes: [],
+              interfaces: []
+            };
+
+            const importRegex = /import\s+(?:{[^}]+}|[\w\s,]+)\s+from\s+['"]([^'"]+)['"]/g;
+            let match;
+            while ((match = importRegex.exec(content)) !== null) {
+              structure.imports.push(match[1]);
+            }
+
+            const funcRegex = /(?:export\s+)?(?:async\s+)?function\s+(\w+)/g;
+            while ((match = funcRegex.exec(content)) !== null) {
+              structure.functions.push(match[1]);
+            }
+
+            const arrowRegex = /(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g;
+            while ((match = arrowRegex.exec(content)) !== null) {
+              structure.functions.push(match[1]);
+            }
+
+            const classRegex = /(?:export\s+)?class\s+(\w+)/g;
+            while ((match = classRegex.exec(content)) !== null) {
+              structure.classes.push(match[1]);
+            }
+
+            const interfaceRegex = /(?:export\s+)?interface\s+(\w+)/g;
+            while ((match = interfaceRegex.exec(content)) !== null) {
+              structure.interfaces.push(match[1]);
+            }
+
+            return structure;
+          }
+
+          function findTypeScriptFiles(dir, baseDir = dir, fileList = []) {
+            const files = fs.readdirSync(dir);
+
+            files.forEach(file => {
+              const filePath = path.join(dir, file);
+              const stat = fs.statSync(filePath);
+
+              if (stat.isDirectory()) {
+                if (!['node_modules', '.git', 'dist', 'build', '.github'].includes(file)) {
+                  findTypeScriptFiles(filePath, baseDir, fileList);
+                }
+              } else if (file.endsWith('.ts') || file.endsWith('.tsx')) {
+                fileList.push({
+                  absolute: filePath,
+                  relative: path.relative(baseDir, filePath)
+                });
+              }
+            });
+
+            return fileList;
+          }
+
+          function createFileNode(fileInfo, x, y, id) {
+            const funcs = fileInfo.functions.slice(0, 5).join(', ') || 'none';
+            const classes = fileInfo.classes.slice(0, 3).join(', ') || 'none';
+            
+            const label = `📄 **${fileInfo.relativePath}**\n\n` +
+              `**Functions:** ${funcs}\n` +
+              `**Classes:** ${classes}\n` +
+              `**Imports:** ${fileInfo.imports.length}`;
+
+            return {
+              id,
+              type: 'text',
+              x,
+              y,
+              width: CONFIG.nodeWidth,
+              height: CONFIG.nodeHeight + 20,
+              color: CONFIG.colors.file,
+              text: label
+            };
+          }
+
+          function createEdge(fromId, toId, edgeId, label = '') {
+            return {
+              id: edgeId,
+              fromNode: fromId,
+              toNode: toId,
+              label,
+              color: '#6b7280'
+            };
+          }
+
+          function generateCanvas(sourceDir) {
+            const files = findTypeScriptFiles(sourceDir, sourceDir);
+            const nodes = [];
+            const edges = [];
+            let nodeId = 1;
+            let edgeId = 1;
+            
+            const fileNodeMap = new Map();
+            const importMap = new Map();
+
+            console.log(`Found ${files.length} TypeScript files`);
+
+            files.forEach((file, index) => {
+              const fileInfo = parseTypeScriptFile(file.absolute);
+              fileInfo.relativePath = file.relative;
+              
+              const col = index % 5;
+              const row = Math.floor(index / 5);
+              const x = col * CONFIG.horizontalSpacing;
+              const y = row * (CONFIG.verticalSpacing + CONFIG.nodeHeight + 50);
+
+              const fileNodeId = `node-${nodeId++}`;
+              const fileNode = createFileNode(fileInfo, x, y, fileNodeId);
+              nodes.push(fileNode);
+              
+              fileNodeMap.set(file.absolute, {
+                id: fileNodeId,
+                info: fileInfo,
+                x,
+                y
+              });
+
+              fileInfo.imports.forEach(imp => {
+                if (!importMap.has(file.absolute)) {
+                  importMap.set(file.absolute, []);
+                }
+                importMap.get(file.absolute).push(imp);
+              });
+            });
+
+            fileNodeMap.forEach((fromData, fromPath) => {
+              const imports = importMap.get(fromPath) || [];
+              
+              imports.forEach(importPath => {
+                if (importPath.startsWith('.')) {
+                  const dir = path.dirname(fromPath);
+                  let resolvedPath = path.resolve(dir, importPath);
+                  
+                  if (!resolvedPath.endsWith('.ts') && !resolvedPath.endsWith('.tsx')) {
+                    if (fs.existsSync(resolvedPath + '.ts')) {
+                      resolvedPath = resolvedPath + '.ts';
+                    } else if (fs.existsSync(resolvedPath + '.tsx')) {
+                      resolvedPath = resolvedPath + '.tsx';
+                    } else if (fs.existsSync(path.join(resolvedPath, 'index.ts'))) {
+                      resolvedPath = path.join(resolvedPath, 'index.ts');
+                    }
+                  }
+
+                  if (resolvedPath && fileNodeMap.has(resolvedPath)) {
+                    const toData = fileNodeMap.get(resolvedPath);
+                    edges.push(createEdge(
+                      fromData.id,
+                      toData.id,
+                      `edge-${edgeId++}`,
+                      ''
+                    ));
+                  }
+                }
+              });
+            });
+
+            // Add metadata node
+            const metaNode = {
+              id: `node-${nodeId++}`,
+              type: 'text',
+              x: 0,
+              y: -200,
+              width: 300,
+              height: 120,
+              color: '#064e3b',
+              text: `# Code Map\n\n**Files:** ${files.length}\n**Connections:** ${edges.length}\n**Generated:** ${new Date().toISOString().split('T')[0]}`
+            };
+            nodes.unshift(metaNode);
+
+            return { nodes, edges };
+          }
+
+          function main() {
+            const sourceDir = process.argv[2] || './src';
+            const outputFile = process.argv[3] || './code-map.canvas';
+
+            if (!fs.existsSync(sourceDir)) {
+              console.error(`Error: Source directory not found: ${sourceDir}`);
+              process.exit(1);
+            }
+
+            console.log('Analyzing TypeScript files...');
+            const canvas = generateCanvas(sourceDir);
+            
+            console.log(`Generated ${canvas.nodes.length} nodes and ${canvas.edges.length} edges`);
+            
+            fs.writeFileSync(outputFile, JSON.stringify(canvas, null, 2));
+            console.log(`✅ Canvas file created: ${outputFile}`);
+          }
+
+          main();
+          EOF
+          
+          chmod +x ts-to-canvas.js
+      
+      - name: Generate Canvas file
+        run: |
+          node ts-to-canvas.js ./src ./code-map.canvas
+      
+      - name: Create docs directory if it doesn't exist
+        run: mkdir -p docs
+      
+      - name: Move Canvas to docs
+        run: mv code-map.canvas docs/code-map.canvas
+      
+      - name: Generate README for the canvas
+        run: |
+          cat > docs/README.md << 'EOF'
+          # Code Structure Map
+
+          This directory contains an automatically generated visual map of the codebase.
+
+          ## Files
+
+          - `code-map.canvas` - Obsidian Canvas file showing code structure and dependencies
+
+          ## How to Use
+
+          1. Download `code-map.canvas`
+          2. Place it in your Obsidian vault
+          3. Open it with Obsidian's Canvas plugin
+
+          ## Automatic Updates
+
+          This map is automatically regenerated:
+          - On every push to main branch
+          - Daily at midnight UTC
+          - On pull requests
+          - Can be manually triggered from GitHub Actions tab
+
+          Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          EOF
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --quiet docs/code-map.canvas || echo "changed=true" >> $GITHUB_OUTPUT
+      
+      - name: Commit and push if changed
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/code-map.canvas docs/README.md
+          git commit -m "🗺️ Auto-update code map canvas [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Canvas as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-map-canvas
+          path: docs/code-map.canvas
+          retention-days: 90
+      
+      - name: Create release asset (optional)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: code-map-latest
+          files: docs/code-map.canvas
+          body: |
+            Automatically generated code structure map.
+            Download and open in Obsidian Canvas to visualize the codebase.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
