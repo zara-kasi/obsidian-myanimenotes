@@ -42,7 +42,7 @@ export function renderPropertyMappingSection(
     { key: 'source', label: 'Original Material (e.g., Manga)', default: 'origin' },
     { key: 'releasedStart', label: 'Publication/Airing Start Date', default: 'released' },
     { key: 'releasedEnd', label: 'Publication/Airing End Date', default: 'ended' },  
-    { key: 'userStatus', label: 'User List Status (e.g., Planning)', default: 'status' },
+    { key: 'userStatus', label: 'List Status (e.g., Planning)', default: 'list' },
     { key: 'userScore', label: 'Rating (User Score)', default: 'rating' },
     { key: 'userStartDate', label: 'Date Started (User)', default: 'started' },     
     { key: 'userFinishDate', label: 'Date Finished (User)', default: 'finished' },        
