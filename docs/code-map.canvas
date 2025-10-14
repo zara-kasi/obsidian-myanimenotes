@@ -1,0 +1,52 @@
+{
+  "nodes": [
+    {
+      "id": "node-3",
+      "type": "text",
+      "x": 0,
+      "y": -250,
+      "width": 350,
+      "height": 140,
+      "color": "#064e3b",
+      "text": "# 🗺️ Code Structure Map\n\n**Entry Point:** main.ts\n**Total Files:** 2\n**Connections:** 2\n**Generated:** 2025-10-14"
+    },
+    {
+      "id": "node-1",
+      "type": "text",
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 120,
+      "color": "#991b1b",
+      "text": "🚀 **main.ts**\n\n**Functions:** returns, will, will\n**Classes:** CassettePlugin\n**Imports:** 2"
+    },
+    {
+      "id": "node-2",
+      "type": "text",
+      "x": 380,
+      "y": 0,
+      "width": 280,
+      "height": 120,
+      "color": "#1e3a8a",
+      "text": "📄 **settings.ts**\n\n**Functions:** section\n**Classes:** CassetteSettingTab\n**Imports:** 3"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "fromNode": "node-1",
+      "toNode": "node-2",
+      "color": "#6b7280",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "edge-2",
+      "fromNode": "node-2",
+      "toNode": "node-1",
+      "color": "#6b7280",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ]
+}
