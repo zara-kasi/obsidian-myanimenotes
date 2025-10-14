@@ -8,6 +8,7 @@ on:
     paths:
       - 'src/**/*.ts'
       - 'src/**/*.tsx'
+      - 'main.ts'
   
   # Run on pull requests
   pull_request:
@@ -27,117 +28,195 @@ jobs:
   generate-canvas:
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: write  # Explicit permission to write
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Get full history for better analysis
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
       
+      - name: Debug - List files
+        run: |
+          echo "=== Repository Structure ==="
+          ls -la
+          echo ""
+          echo "=== Source Directory ==="
+          ls -la src/ || echo "src/ directory not found"
+          echo ""
+          echo "=== Looking for main.ts ==="
+          find . -name "main.ts" -type f
+      
       - name: Create canvas generator script
         run: |
           cat > ts-to-canvas.js << 'EOF'
           #!/usr/bin/env node
 
-          /**
-           * TypeScript to Obsidian Canvas Generator
-           * GitHub Actions Compatible Version
-           */
-
           const fs = require('fs');
           const path = require('path');
 
           const CONFIG = {
-            nodeWidth: 250,
-            nodeHeight: 100,
-            horizontalSpacing: 350,
-            verticalSpacing: 150,
+            nodeWidth: 280,
+            nodeHeight: 120,
+            horizontalSpacing: 380,
+            verticalSpacing: 180,
             colors: {
+              entryPoint: '#991b1b',  // Dark red for entry point
               file: '#1e3a8a',
               function: '#15803d',
               class: '#9333ea',
-              import: '#dc2626',
               interface: '#ea580c'
             }
           };
 
           function parseTypeScriptFile(filePath) {
-            const content = fs.readFileSync(filePath, 'utf-8');
-            const fileName = path.basename(filePath);
-            
-            const structure = {
-              fileName,
-              filePath,
-              relativePath: filePath,
-              imports: [],
-              exports: [],
-              functions: [],
-              classes: [],
-              interfaces: []
-            };
+            try {
+              const content = fs.readFileSync(filePath, 'utf-8');
+              const fileName = path.basename(filePath);
+              
+              const structure = {
+                fileName,
+                filePath,
+                relativePath: filePath,
+                imports: [],
+                exports: [],
+                functions: [],
+                classes: [],
+                interfaces: []
+              };
 
-            const importRegex = /import\s+(?:{[^}]+}|[\w\s,]+)\s+from\s+['"]([^'"]+)['"]/g;
-            let match;
-            while ((match = importRegex.exec(content)) !== null) {
-              structure.imports.push(match[1]);
-            }
-
-            const funcRegex = /(?:export\s+)?(?:async\s+)?function\s+(\w+)/g;
-            while ((match = funcRegex.exec(content)) !== null) {
-              structure.functions.push(match[1]);
-            }
-
-            const arrowRegex = /(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g;
-            while ((match = arrowRegex.exec(content)) !== null) {
-              structure.functions.push(match[1]);
-            }
-
-            const classRegex = /(?:export\s+)?class\s+(\w+)/g;
-            while ((match = classRegex.exec(content)) !== null) {
-              structure.classes.push(match[1]);
-            }
-
-            const interfaceRegex = /(?:export\s+)?interface\s+(\w+)/g;
-            while ((match = interfaceRegex.exec(content)) !== null) {
-              structure.interfaces.push(match[1]);
-            }
-
-            return structure;
-          }
-
-          function findTypeScriptFiles(dir, baseDir = dir, fileList = []) {
-            const files = fs.readdirSync(dir);
-
-            files.forEach(file => {
-              const filePath = path.join(dir, file);
-              const stat = fs.statSync(filePath);
-
-              if (stat.isDirectory()) {
-                if (!['node_modules', '.git', 'dist', 'build', '.github'].includes(file)) {
-                  findTypeScriptFiles(filePath, baseDir, fileList);
-                }
-              } else if (file.endsWith('.ts') || file.endsWith('.tsx')) {
-                fileList.push({
-                  absolute: filePath,
-                  relative: path.relative(baseDir, filePath)
-                });
+              // Extract imports
+              const importRegex = /import\s+(?:{[^}]+}|[\w\s,*]+)\s+from\s+['"]([^'"]+)['"]/g;
+              let match;
+              while ((match = importRegex.exec(content)) !== null) {
+                structure.imports.push(match[1]);
               }
-            });
 
-            return fileList;
+              // Extract require statements too
+              const requireRegex = /require\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
+              while ((match = requireRegex.exec(content)) !== null) {
+                structure.imports.push(match[1]);
+              }
+
+              // Extract functions
+              const funcRegex = /(?:export\s+)?(?:async\s+)?function\s+(\w+)/g;
+              while ((match = funcRegex.exec(content)) !== null) {
+                structure.functions.push(match[1]);
+              }
+
+              // Extract arrow functions
+              const arrowRegex = /(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g;
+              while ((match = arrowRegex.exec(content)) !== null) {
+                structure.functions.push(match[1]);
+              }
+
+              // Extract classes
+              const classRegex = /(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/g;
+              while ((match = classRegex.exec(content)) !== null) {
+                structure.classes.push(match[1]);
+              }
+
+              // Extract interfaces
+              const interfaceRegex = /(?:export\s+)?interface\s+(\w+)/g;
+              while ((match = interfaceRegex.exec(content)) !== null) {
+                structure.interfaces.push(match[1]);
+              }
+
+              return structure;
+            } catch (error) {
+              console.error(`Error parsing ${filePath}:`, error.message);
+              return null;
+            }
           }
 
-          function createFileNode(fileInfo, x, y, id) {
-            const funcs = fileInfo.functions.slice(0, 5).join(', ') || 'none';
-            const classes = fileInfo.classes.slice(0, 3).join(', ') || 'none';
+          function resolveImportPath(importPath, fromFile, baseDir) {
+            // Skip external packages
+            if (!importPath.startsWith('.') && !importPath.startsWith('/')) {
+              return null;
+            }
+
+            const fromDir = path.dirname(fromFile);
+            let resolved = path.resolve(fromDir, importPath);
+
+            // Try different extensions
+            const extensions = ['.ts', '.tsx', '.js', '.jsx', ''];
+            for (const ext of extensions) {
+              const testPath = resolved + ext;
+              if (fs.existsSync(testPath) && fs.statSync(testPath).isFile()) {
+                return testPath;
+              }
+            }
+
+            // Try index files
+            const indexPaths = [
+              path.join(resolved, 'index.ts'),
+              path.join(resolved, 'index.tsx'),
+              path.join(resolved, 'index.js')
+            ];
             
-            const label = `📄 **${fileInfo.relativePath}**\n\n` +
-              `**Functions:** ${funcs}\n` +
-              `**Classes:** ${classes}\n` +
+            for (const indexPath of indexPaths) {
+              if (fs.existsSync(indexPath)) {
+                return indexPath;
+              }
+            }
+
+            return null;
+          }
+
+          function traverseFromEntry(entryPoint, baseDir) {
+            const visited = new Set();
+            const fileMap = new Map();
+            const queue = [entryPoint];
+
+            console.log(`Starting traversal from entry point: ${entryPoint}`);
+
+            while (queue.length > 0) {
+              const currentFile = queue.shift();
+              
+              if (visited.has(currentFile)) continue;
+              visited.add(currentFile);
+
+              const fileInfo = parseTypeScriptFile(currentFile);
+              if (!fileInfo) continue;
+
+              fileInfo.relativePath = path.relative(baseDir, currentFile);
+              fileMap.set(currentFile, fileInfo);
+
+              console.log(`  Analyzed: ${fileInfo.relativePath} (${fileInfo.imports.length} imports)`);
+
+              // Queue imported files
+              for (const imp of fileInfo.imports) {
+                const resolvedPath = resolveImportPath(imp, currentFile, baseDir);
+                if (resolvedPath && !visited.has(resolvedPath)) {
+                  queue.push(resolvedPath);
+                }
+              }
+            }
+
+            console.log(`Total files analyzed: ${fileMap.size}`);
+            return fileMap;
+          }
+
+          function createFileNode(fileInfo, x, y, id, isEntryPoint = false) {
+            const funcsPreview = fileInfo.functions.length > 0 
+              ? fileInfo.functions.slice(0, 3).join(', ') + (fileInfo.functions.length > 3 ? '...' : '')
+              : 'none';
+            
+            const classesPreview = fileInfo.classes.length > 0
+              ? fileInfo.classes.slice(0, 2).join(', ') + (fileInfo.classes.length > 2 ? '...' : '')
+              : 'none';
+
+            const emoji = isEntryPoint ? '🚀' : '📄';
+            const label = `${emoji} **${fileInfo.relativePath}**\n\n` +
+              `**Functions:** ${funcsPreview}\n` +
+              `**Classes:** ${classesPreview}\n` +
               `**Imports:** ${fileInfo.imports.length}`;
 
             return {
@@ -146,89 +225,67 @@ jobs:
               x,
               y,
               width: CONFIG.nodeWidth,
-              height: CONFIG.nodeHeight + 20,
-              color: CONFIG.colors.file,
+              height: CONFIG.nodeHeight,
+              color: isEntryPoint ? CONFIG.colors.entryPoint : CONFIG.colors.file,
               text: label
             };
           }
 
-          function createEdge(fromId, toId, edgeId, label = '') {
+          function createEdge(fromId, toId, edgeId) {
             return {
               id: edgeId,
               fromNode: fromId,
               toNode: toId,
-              label,
-              color: '#6b7280'
+              color: '#6b7280',
+              fromSide: 'right',
+              toSide: 'left'
             };
           }
 
-          function generateCanvas(sourceDir) {
-            const files = findTypeScriptFiles(sourceDir, sourceDir);
+          function generateCanvas(entryPoint, baseDir) {
+            if (!fs.existsSync(entryPoint)) {
+              console.error(`Entry point not found: ${entryPoint}`);
+              return { nodes: [], edges: [] };
+            }
+
+            const fileMap = traverseFromEntry(entryPoint, baseDir);
             const nodes = [];
             const edges = [];
             let nodeId = 1;
             let edgeId = 1;
-            
-            const fileNodeMap = new Map();
-            const importMap = new Map();
 
-            console.log(`Found ${files.length} TypeScript files`);
+            if (fileMap.size === 0) {
+              console.error('No files found to analyze!');
+              return { nodes: [], edges: [] };
+            }
 
-            files.forEach((file, index) => {
-              const fileInfo = parseTypeScriptFile(file.absolute);
-              fileInfo.relativePath = file.relative;
-              
-              const col = index % 5;
-              const row = Math.floor(index / 5);
+            // Create a map for node IDs
+            const fileToNodeId = new Map();
+            const files = Array.from(fileMap.entries());
+
+            // Position nodes in a grid
+            files.forEach(([filePath, fileInfo], index) => {
+              const col = index % 4;
+              const row = Math.floor(index / 4);
               const x = col * CONFIG.horizontalSpacing;
-              const y = row * (CONFIG.verticalSpacing + CONFIG.nodeHeight + 50);
+              const y = row * (CONFIG.verticalSpacing + CONFIG.nodeHeight);
 
-              const fileNodeId = `node-${nodeId++}`;
-              const fileNode = createFileNode(fileInfo, x, y, fileNodeId);
-              nodes.push(fileNode);
+              const isEntry = filePath === entryPoint;
+              const id = `node-${nodeId++}`;
               
-              fileNodeMap.set(file.absolute, {
-                id: fileNodeId,
-                info: fileInfo,
-                x,
-                y
-              });
-
-              fileInfo.imports.forEach(imp => {
-                if (!importMap.has(file.absolute)) {
-                  importMap.set(file.absolute, []);
-                }
-                importMap.get(file.absolute).push(imp);
-              });
+              fileToNodeId.set(filePath, id);
+              nodes.push(createFileNode(fileInfo, x, y, id, isEntry));
             });
 
-            fileNodeMap.forEach((fromData, fromPath) => {
-              const imports = importMap.get(fromPath) || [];
+            // Create edges for imports
+            files.forEach(([filePath, fileInfo]) => {
+              const fromId = fileToNodeId.get(filePath);
               
-              imports.forEach(importPath => {
-                if (importPath.startsWith('.')) {
-                  const dir = path.dirname(fromPath);
-                  let resolvedPath = path.resolve(dir, importPath);
-                  
-                  if (!resolvedPath.endsWith('.ts') && !resolvedPath.endsWith('.tsx')) {
-                    if (fs.existsSync(resolvedPath + '.ts')) {
-                      resolvedPath = resolvedPath + '.ts';
-                    } else if (fs.existsSync(resolvedPath + '.tsx')) {
-                      resolvedPath = resolvedPath + '.tsx';
-                    } else if (fs.existsSync(path.join(resolvedPath, 'index.ts'))) {
-                      resolvedPath = path.join(resolvedPath, 'index.ts');
-                    }
-                  }
-
-                  if (resolvedPath && fileNodeMap.has(resolvedPath)) {
-                    const toData = fileNodeMap.get(resolvedPath);
-                    edges.push(createEdge(
-                      fromData.id,
-                      toData.id,
-                      `edge-${edgeId++}`,
-                      ''
-                    ));
-                  }
+              fileInfo.imports.forEach(imp => {
+                const resolvedPath = resolveImportPath(imp, filePath, baseDir);
+                if (resolvedPath && fileToNodeId.has(resolvedPath)) {
+                  const toId = fileToNodeId.get(resolvedPath);
+                  edges.push(createEdge(fromId, toId, `edge-${edgeId++}`));
                 }
               });
             });
@@ -238,11 +295,15 @@ jobs:
               id: `node-${nodeId++}`,
               type: 'text',
               x: 0,
-              y: -200,
-              width: 300,
-              height: 120,
+              y: -250,
+              width: 350,
+              height: 140,
               color: '#064e3b',
-              text: `# Code Map\n\n**Files:** ${files.length}\n**Connections:** ${edges.length}\n**Generated:** ${new Date().toISOString().split('T')[0]}`
+              text: `# 🗺️ Code Structure Map\n\n` +
+                    `**Entry Point:** ${path.basename(entryPoint)}\n` +
+                    `**Total Files:** ${fileMap.size}\n` +
+                    `**Connections:** ${edges.length}\n` +
+                    `**Generated:** ${new Date().toISOString().split('T')[0]}`
             };
             nodes.unshift(metaNode);
 
@@ -250,18 +311,33 @@ jobs:
           }
 
           function main() {
-            const sourceDir = process.argv[2] || './src';
-            const outputFile = process.argv[3] || './code-map.canvas';
-
-            if (!fs.existsSync(sourceDir)) {
-              console.error(`Error: Source directory not found: ${sourceDir}`);
+            const args = process.argv.slice(2);
+            
+            if (args.length < 2) {
+              console.log('Usage: node ts-to-canvas.js <entry-point-file> <output-canvas-file>');
+              console.log('Example: node ts-to-canvas.js ./src/main.ts ./code-map.canvas');
               process.exit(1);
             }
 
-            console.log('Analyzing TypeScript files...');
-            const canvas = generateCanvas(sourceDir);
+            const entryPoint = path.resolve(args[0]);
+            const outputFile = path.resolve(args[1]);
+            const baseDir = path.dirname(entryPoint);
+
+            console.log('=== Canvas Generator ===');
+            console.log(`Entry Point: ${entryPoint}`);
+            console.log(`Output File: ${outputFile}`);
+            console.log(`Base Dir: ${baseDir}`);
+            console.log('');
+
+            const canvas = generateCanvas(entryPoint, baseDir);
             
-            console.log(`Generated ${canvas.nodes.length} nodes and ${canvas.edges.length} edges`);
+            if (canvas.nodes.length === 0) {
+              console.error('ERROR: No nodes generated! Canvas will be empty.');
+              process.exit(1);
+            }
+
+            console.log('');
+            console.log(`✅ Generated ${canvas.nodes.length} nodes and ${canvas.edges.length} edges`);
             
             fs.writeFileSync(outputFile, JSON.stringify(canvas, null, 2));
             console.log(`✅ Canvas file created: ${outputFile}`);
@@ -272,59 +348,123 @@ jobs:
           
           chmod +x ts-to-canvas.js
       
+      - name: Find main.ts location
+        id: find_main
+        run: |
+          if [ -f "src/main.ts" ]; then
+            echo "main_path=src/main.ts" >> $GITHUB_OUTPUT
+            echo "✅ Found main.ts at src/main.ts"
+          elif [ -f "main.ts" ]; then
+            echo "main_path=main.ts" >> $GITHUB_OUTPUT
+            echo "✅ Found main.ts at root"
+          else
+            echo "❌ ERROR: main.ts not found!"
+            find . -name "main.ts" -type f || echo "No main.ts found anywhere"
+            exit 1
+          fi
+      
       - name: Generate Canvas file
         run: |
-          node ts-to-canvas.js ./src ./code-map.canvas
+          echo "Generating canvas from entry point: ${{ steps.find_main.outputs.main_path }}"
+          node ts-to-canvas.js ${{ steps.find_main.outputs.main_path }} ./code-map.canvas
       
-      - name: Create docs directory if it doesn't exist
+      - name: Verify Canvas was created
+        run: |
+          if [ ! -f "./code-map.canvas" ]; then
+            echo "❌ ERROR: Canvas file was not created!"
+            exit 1
+          fi
+          echo "✅ Canvas file exists"
+          echo "File size: $(wc -c < ./code-map.canvas) bytes"
+          echo ""
+          echo "First 500 characters:"
+          head -c 500 ./code-map.canvas
+      
+      - name: Create docs directory
         run: mkdir -p docs
       
       - name: Move Canvas to docs
-        run: mv code-map.canvas docs/code-map.canvas
+        run: |
+          cp ./code-map.canvas docs/code-map.canvas
+          echo "✅ Copied canvas to docs/"
+          ls -lh docs/
       
       - name: Generate README for the canvas
         run: |
           cat > docs/README.md << 'EOF'
-          # Code Structure Map
+          # 🗺️ Code Structure Map
 
           This directory contains an automatically generated visual map of the codebase.
 
           ## Files
 
-          - `code-map.canvas` - Obsidian Canvas file showing code structure and dependencies
+          - **code-map.canvas** - Obsidian Canvas file showing code structure and dependencies
 
           ## How to Use
 
-          1. Download `code-map.canvas`
-          2. Place it in your Obsidian vault
-          3. Open it with Obsidian's Canvas plugin
+          1. **Download** `code-map.canvas` 
+          2. **Place it** in your Obsidian vault
+          3. **Open it** with Obsidian's Canvas plugin
+
+          You'll see:
+          - 🚀 **Red node** = Entry point (main.ts)
+          - 📄 **Blue nodes** = Other TypeScript files
+          - ➡️ **Arrows** = Import dependencies
+
+          ## Features
+
+          - Shows which files import from which
+          - Starts from main.ts and follows all imports
+          - Only includes files actually used in your project
+          - Color-coded for easy navigation
 
           ## Automatic Updates
 
           This map is automatically regenerated:
-          - On every push to main branch
-          - Daily at midnight UTC
-          - On pull requests
-          - Can be manually triggered from GitHub Actions tab
+          - ✅ On every push to main branch (when .ts files change)
+          - ✅ Daily at midnight UTC
+          - ✅ On pull requests
+          - ✅ Manually from GitHub Actions tab
 
-          Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          ---
+
+          **Last updated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          **Entry point:** ${{ steps.find_main.outputs.main_path }}
           EOF
+      
+      - name: Debug - Show what will be committed
+        run: |
+          echo "=== Files to be committed ==="
+          git status
+          echo ""
+          echo "=== Docs directory contents ==="
+          ls -lah docs/
       
       - name: Check for changes
         id: check_changes
         run: |
-          git diff --quiet docs/code-map.canvas || echo "changed=true" >> $GITHUB_OUTPUT
+          git add docs/
+          if git diff --staged --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Changes detected"
+          fi
       
       - name: Commit and push if changed
         if: steps.check_changes.outputs.changed == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add docs/code-map.canvas docs/README.md
           git commit -m "🗺️ Auto-update code map canvas [skip ci]"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: No changes message
+        if: steps.check_changes.outputs.changed == 'false'
+        run: |
+          echo "ℹ️ Canvas file unchanged - no commit needed"
       
       - name: Upload Canvas as artifact
         uses: actions/upload-artifact@v4
@@ -333,15 +473,16 @@ jobs:
           path: docs/code-map.canvas
           retention-days: 90
       
-      - name: Create release asset (optional)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: code-map-latest
-          files: docs/code-map.canvas
-          body: |
-            Automatically generated code structure map.
-            Download and open in Obsidian Canvas to visualize the codebase.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
+      - name: Summary
+        run: |
+          echo "## 🗺️ Code Map Generated Successfully! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "- **Entry Point:** ${{ steps.find_main.outputs.main_path }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Canvas Location:** \`docs/code-map.canvas\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **File Size:** $(wc -c < docs/code-map.canvas) bytes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 How to Access" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download from [\`docs/code-map.canvas\`](../blob/main/docs/code-map.canvas)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Or download from [Artifacts](#artifacts) below" >> $GITHUB_STEP_SUMMARY
+          echo "3. Open in Obsidian Canvas" >> $GITHUB_STEP_SUMMARY
