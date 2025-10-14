@@ -85,7 +85,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   
   // Metadata (common)
   mediaType: 'media',
-  status: 'status',
+  status: 'state',
   mean: 'score',
   
   // Genres (common)
