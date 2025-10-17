@@ -227,7 +227,6 @@ export async function saveMediaItems(
       }
     } catch (error) {
       console.error(`[Storage] Failed to save ${item.title}:`, error);
-      new Notice(`❌ Failed to save: ${item.title}`, 3000);
     }
   }
   
