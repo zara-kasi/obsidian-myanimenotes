@@ -86,18 +86,16 @@ export class SyncManager {
         const skipped = allResults.filter(r => r.action === 'skipped').length;
         
         if (created + updated === 0) {
-          new Notice(`✓ Sync complete - All ${allResults.length} notes up to date`, 3000);
+          new Notice(`✓ Sync complete - All ${allResults.length} notes up to date`, 2000);
         } else {
           const parts = [];
           if (created > 0) parts.push(`${created} created`);
           if (updated > 0) parts.push(`${updated} updated`);
           if (skipped > 0) parts.push(`${skipped} unchanged`);
-          new Notice(`✓ Sync complete - ${parts.join(', ')}`, 3000);
         }
         
       } catch (saveError) {
         console.error('[Sync Manager] Failed to save to vault:', saveError);
-        new Notice(`⚠️ Synced but failed to save: ${saveError.message}`, 5000);
       }
     }
     
