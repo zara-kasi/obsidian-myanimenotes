@@ -47,7 +47,6 @@ export function renderPropertyMappingSection(
     { key: 'userStartDate', label: 'Date Started (User)', default: 'started' },     
     { key: 'userFinishDate', label: 'Date Finished (User)', default: 'finished' },        
     
-    { key: 'lastSynced', label: 'Last Sync Timestamp', default: 'synced' },
 ];
   
   container.createEl('h4', { text: 'Common Fields' });
