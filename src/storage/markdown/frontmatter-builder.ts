@@ -131,9 +131,6 @@ export function buildSyncedFrontmatterProperties(
     addProperty('userScore', item.userScore);
   }
   
-  // Sync metadata
-  addProperty('lastSynced', new Date(item.lastSynced || Date.now()).toISOString());
-  
   return properties;
 }
 
@@ -193,7 +190,6 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'category',
     'id',
     'cassette',
-    'synced',
   ];
   
   // Create ordered object
