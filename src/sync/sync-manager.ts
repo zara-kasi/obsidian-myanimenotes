@@ -3,7 +3,7 @@ import type CassettePlugin from '../main';
 import type { UniversalMediaItem, SyncResult } from '../models';
 import { MediaCategory } from '../models';
 import { syncMAL, type MALSyncOptions } from './mal-sync-service';
-import { saveMediaItems, saveMediaItemsByCategory, type StorageConfig, type SyncActionResult } from '../storage';
+import { saveMediaItems, type StorageConfig, type SyncActionResult } from '../storage';
 import { createDebugLogger, type DebugLogger } from '../utils';
 
 /**
@@ -42,91 +42,71 @@ export class SyncManager {
    * @param options Sync options
    * @returns Synced items and result
    */
-
-   async syncFromMAL(options: CompleteSyncOptions = {}): Promise<{
+  async syncFromMAL(options: CompleteSyncOptions = {}): Promise<{
   items: UniversalMediaItem[];
   result: SyncResult;
   savedPaths?: { anime: string[]; manga: string[] };
-   }> {
-  // ... existing sync logic ...
+  }> {
+  this.debug.log('[Sync Manager] Starting MAL sync...', options);
   
-  if (options.saveToVault !== false && items.length > 0) {
-    try {
-      const storageConfig = options.storageConfig || this.getStorageConfig();
-      
-      // Get detailed results from storage service
-      const animeItems = items.filter(item => item.category === 'anime');
-      const mangaItems = items.filter(item => item.category === 'manga');
-      
-      const allResults: SyncActionResult[] = [];
-      
-      if (animeItems.length > 0) {
-        const results = await saveMediaItems(this.plugin, animeItems, storageConfig);
-        allResults.push(...results);
+  try {
+    // Perform sync
+    const { items, result } = await syncMAL(this.plugin, options);
+    
+    // Save to vault if enabled
+    let savedPaths: { anime: string[]; manga: string[] } | undefined;
+    
+    if (options.saveToVault !== false && items.length > 0) {
+      try {
+        const storageConfig = options.storageConfig || this.getStorageConfig();
+        
+        const animeItems = items.filter(item => item.category === 'anime');
+        const mangaItems = items.filter(item => item.category === 'manga');
+        
+        const allResults: SyncActionResult[] = [];
+        
+        if (animeItems.length > 0) {
+          const results = await saveMediaItems(this.plugin, animeItems, storageConfig);
+          allResults.push(...results);
+        }
+        
+        if (mangaItems.length > 0) {
+          const results = await saveMediaItems(this.plugin, mangaItems, storageConfig);
+          allResults.push(...results);
+        }
+        
+        savedPaths = {
+          anime: allResults.filter(r => r.filePath.includes(storageConfig.animeFolder)).map(r => r.filePath),
+          manga: allResults.filter(r => r.filePath.includes(storageConfig.mangaFolder)).map(r => r.filePath)
+        };
+        
+        // Simple summary
+        const created = allResults.filter(r => r.action === 'created').length;
+        const updated = allResults.filter(r => r.action === 'updated').length;
+        const skipped = allResults.filter(r => r.action === 'skipped').length;
+        
+        if (created + updated === 0) {
+          new Notice(`✓ Sync complete - All ${allResults.length} notes up to date`, 3000);
+        } else {
+          const parts = [];
+          if (created > 0) parts.push(`${created} created`);
+          if (updated > 0) parts.push(`${updated} updated`);
+          if (skipped > 0) parts.push(`${skipped} unchanged`);
+          new Notice(`✓ Sync complete - ${parts.join(', ')}`, 3000);
+        }
+        
+      } catch (saveError) {
+        console.error('[Sync Manager] Failed to save to vault:', saveError);
+        new Notice(`⚠️ Synced but failed to save: ${saveError.message}`, 5000);
       }
-      
-      if (mangaItems.length > 0) {
-        const results = await saveMediaItems(this.plugin, mangaItems, storageConfig);
-        allResults.push(...results);
-      }
-      
-      // Show improved summary
-      this.showSyncSummary(allResults);
-      
-    } catch (saveError) {
-      console.error('[Sync Manager] Failed to save to vault:', saveError);
-      new Notice(`⚠️ Synced but failed to save: ${saveError.message}`, 5000);
     }
+    
+    return { items, result, savedPaths };
+    
+  } catch (error) {
+    console.error('[Sync Manager] Sync failed:', error);
+    throw error;
   }
-  
-  return { items, result, savedPaths };
-}
-
-   /**
- * Provides detailed sync summary with change statistics
- */
-   private showSyncSummary(results: SyncActionResult[]): void {
-  const stats = {
-    created: results.filter(r => r.action === 'created').length,
-    updated: results.filter(r => r.action === 'updated').length,
-    skipped: results.filter(r => r.action === 'skipped').length,
-    linkedLegacy: results.filter(r => r.action === 'linked-legacy').length,
-    duplicates: results.filter(r => r.action === 'duplicates-detected').length,
-  };
-
-  const total = results.length;
-  const changed = stats.created + stats.updated + stats.linkedLegacy;
-  
-  // Build summary message
-  const parts: string[] = [];
-  
-  if (stats.created > 0) parts.push(`${stats.created} created`);
-  if (stats.updated > 0) parts.push(`${stats.updated} updated`);
-  if (stats.skipped > 0) parts.push(`${stats.skipped} unchanged`);
-  if (stats.linkedLegacy > 0) parts.push(`${stats.linkedLegacy} migrated`);
-  
-  const summary = parts.join(', ');
-  
-  // Different messages based on results
-  if (changed === 0) {
-    new Notice(`✓ Sync complete - All ${total} notes up to date`, 3000);
-  } else if (stats.skipped > 0) {
-    new Notice(`✓ Sync complete - ${summary} (${total} total)`, 4000);
-  } else {
-    new Notice(`✓ Sync complete - ${summary}`, 3000);
-  }
-  
-  // Warn about duplicates
-  if (stats.duplicates > 0) {
-    new Notice(`⚠️ ${stats.duplicates} items have duplicate notes`, 4000);
-  }
-  
-  // Debug log detailed stats
-  this.debug.log('[Sync Summary]', {
-    total,
-    changed,
-    ...stats
-  });
 }
 
   /**
@@ -206,7 +186,6 @@ export class SyncManager {
     const { items } = await this.syncFromMAL(options);
     return items;
   }
-
 
   /**
    * Gets sync statistics
