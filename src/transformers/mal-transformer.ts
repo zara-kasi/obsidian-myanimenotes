@@ -179,7 +179,6 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
     
     // Platform metadata
     platform: 'mal',
-    lastSynced: Date.now()
   };
 }
 
@@ -238,7 +237,6 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     
     // Platform metadata
     platform: 'mal',
-    lastSynced: Date.now()
   };
 }
 
