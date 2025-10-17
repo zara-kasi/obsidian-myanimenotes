@@ -159,6 +159,93 @@ export class SyncManager {
     return items;
   }
 
+/**
+ * Provides detailed sync summary with change statistics
+ */
+private showSyncSummary(results: SyncActionResult[]): void {
+  const stats = {
+    created: results.filter(r => r.action === 'created').length,
+    updated: results.filter(r => r.action === 'updated').length,
+    skipped: results.filter(r => r.action === 'skipped').length,
+    linkedLegacy: results.filter(r => r.action === 'linked-legacy').length,
+    duplicates: results.filter(r => r.action === 'duplicates-detected').length,
+  };
+
+  const total = results.length;
+  const changed = stats.created + stats.updated + stats.linkedLegacy;
+  
+  // Build summary message
+  const parts: string[] = [];
+  
+  if (stats.created > 0) parts.push(`${stats.created} created`);
+  if (stats.updated > 0) parts.push(`${stats.updated} updated`);
+  if (stats.skipped > 0) parts.push(`${stats.skipped} unchanged`);
+  if (stats.linkedLegacy > 0) parts.push(`${stats.linkedLegacy} migrated`);
+  
+  const summary = parts.join(', ');
+  
+  // Different messages based on results
+  if (changed === 0) {
+    new Notice(`✓ Sync complete - All ${total} notes up to date`, 3000);
+  } else if (stats.skipped > 0) {
+    new Notice(`✓ Sync complete - ${summary} (${total} total)`, 4000);
+  } else {
+    new Notice(`✓ Sync complete - ${summary}`, 3000);
+  }
+  
+  // Warn about duplicates
+  if (stats.duplicates > 0) {
+    new Notice(`⚠️ ${stats.duplicates} items have duplicate notes`, 4000);
+  }
+  
+  // Debug log detailed stats
+  this.debug.log('[Sync Summary]', {
+    total,
+    changed,
+    ...stats
+  });
+}
+
+// Call this in your syncFromMAL method after saving:
+async syncFromMAL(options: CompleteSyncOptions = {}): Promise<{
+  items: UniversalMediaItem[];
+  result: SyncResult;
+  savedPaths?: { anime: string[]; manga: string[] };
+}> {
+  // ... existing sync logic ...
+  
+  if (options.saveToVault !== false && items.length > 0) {
+    try {
+      const storageConfig = options.storageConfig || this.getStorageConfig();
+      
+      // Get detailed results from storage service
+      const animeItems = items.filter(item => item.category === 'anime');
+      const mangaItems = items.filter(item => item.category === 'manga');
+      
+      const allResults: SyncActionResult[] = [];
+      
+      if (animeItems.length > 0) {
+        const results = await saveMediaItems(this.plugin, animeItems, storageConfig);
+        allResults.push(...results);
+      }
+      
+      if (mangaItems.length > 0) {
+        const results = await saveMediaItems(this.plugin, mangaItems, storageConfig);
+        allResults.push(...results);
+      }
+      
+      // Show improved summary
+      this.showSyncSummary(allResults);
+      
+    } catch (saveError) {
+      console.error('[Sync Manager] Failed to save to vault:', saveError);
+      new Notice(`⚠️ Synced but failed to save: ${saveError.message}`, 5000);
+    }
+  }
+  
+  return { items, result, savedPaths };
+}
+
   /**
    * Gets sync statistics
    * @returns Sync statistics
