@@ -4,9 +4,9 @@ on:
   # Manual trigger
   workflow_dispatch:
   
-  # Scheduled run (every day at 2 AM UTC)
+  # Scheduled run Weekly on Sunday
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 0 * * 0'
 
 jobs:
   sync-readme:
