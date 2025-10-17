@@ -86,7 +86,7 @@ export class SyncManager {
         const skipped = allResults.filter(r => r.action === 'skipped').length;
         
         if (created + updated === 0) {
-          new Notice(`✓ Sync complete - All ${allResults.length} notes up to date`, 2000);
+          new Notice(`${allResults.length} notes synced`, 2000);
         } else {
           const parts = [];
           if (created > 0) parts.push(`${created} created`);
