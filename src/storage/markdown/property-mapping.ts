@@ -56,8 +56,6 @@ export interface PropertyMapping {
   numVolumesRead?: string;
   numChaptersRead?: string;
   
-  // Sync metadata (common)
-  lastSynced?: string;
 }
 
 /**
@@ -118,9 +116,6 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   numChaptersRead: 'chap_read',
   userStartDate: 'started',   
   userFinishDate: 'finished',
-  
-  // Sync metadata (common)
-  lastSynced: 'synced',
 };
 
 /**
