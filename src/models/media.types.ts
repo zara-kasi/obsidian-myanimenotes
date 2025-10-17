@@ -127,5 +127,4 @@ export interface UniversalMediaItem {
   
   // Platform metadata
   platform: 'mal' | 'simkl';
-  lastSynced?: number; // timestamp
 }
