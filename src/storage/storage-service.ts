@@ -126,6 +126,14 @@ export async function saveMediaItem(
       const existingContent = await vault.read(file);
       const newContent = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
       
+      debug.log('=== CHANGE DETECTION DEBUG ===');
+  debug.log('Existing content:', existingContent.substring(0, 500));
+  debug.log('New content:', newContent.substring(0, 500));
+  debug.log('Hashes:');
+  debug.log('  Existing:', generateContentHash(existingContent).substring(0, 16));
+  debug.log('  New:', generateContentHash(newContent).substring(0, 16));
+  debug.log('  Changed:', hasContentChanged(existingContent, newContent));
+      
       // CHECK FOR CHANGES - This is the key optimization
       if (!hasContentChanged(existingContent, newContent)) {
         debug.log(`[Storage] No changes detected for: ${file.path}`);
