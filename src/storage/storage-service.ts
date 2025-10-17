@@ -1,4 +1,3 @@
-import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem } from '../models';
 import type { PropertyMapping } from './markdown';
@@ -221,7 +220,6 @@ export async function saveMediaItems(
       // Log important events
       if (result.action === 'duplicates-detected') {
         console.warn(`[Storage] ${result.message}`);
-        new Notice(`⚠️ Duplicates found: ${item.title}`, 3000);
       } else if (result.action === 'skipped') {
         debug.log(`[Storage] ${result.message}`);
       }
