@@ -192,15 +192,14 @@ export class CassetteSettingTab extends PluginSettingTab {
       descEl.createEl('code', { text: 'https://myanimelist.net/apiconfig/create' });
       descEl.createSpan({ text: ' to get your Client ID and Secret. Set the redirect URI to: ' });
       descEl.createEl('code', { text: 'obsidian://cassette-auth/mal' });
-      descEl.createSpan({ text: '. See our ' });
       descEl.createEl('a', {
-        text: 'guide',
+        text: 'Learn more',
         href: 'https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md'
       }).addEventListener('click', (e) => {
         e.preventDefault();
         window.open('https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md', '_blank');
       });
-      descEl.createSpan({ text: ' for detailed instructions.' });
+      
     }
   }
 
@@ -295,15 +294,13 @@ export class CassetteSettingTab extends PluginSettingTab {
       descEl.createEl('code', { text: 'https://simkl.com/settings/developer/new' });
       descEl.createSpan({ text: ' to get your Client ID and Secret. Set the redirect URI to: ' });
       descEl.createEl('code', { text: 'obsidian://cassette-auth/simkl' });
-      descEl.createSpan({ text: '. See our ' });
       descEl.createEl('a', {
-        text: 'guide',
+        text: 'Learn more',
         href: 'https://github.com/zara-kasi/cassette/blob/main/docs/simkl-authentication-guide.md'
       }).addEventListener('click', (e) => {
         e.preventDefault();
         window.open('https://github.com/zara-kasi/cassette/blob/main/docs/simkl-authentication-guide.md', '_blank');
       });
-      descEl.createSpan({ text: ' for detailed instructions.' });
     }
   }
 
