@@ -355,5 +355,15 @@ export class CassetteSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           }
         }));
+        
+    new Setting(container)
+      .setName('Force full sync')
+      .setDesc('Always overwrite all files during sync.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.forceFullSync)
+        .onChange(async (value) => {
+          this.plugin.settings.forceFullSync = value;
+          await this.plugin.saveSettings();
+        }));
   }
 }
