@@ -122,7 +122,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       // Client ID
       new Setting(container)
         .setName('Client ID')
-        .setDesc('Your MyAnimeList Client ID')
+        .setDesc('Your MyAnimeList Client ID.')
         .addText(text => text
           .setPlaceholder('Enter Client ID')
           .setValue(this.plugin.settings.malClientId)
@@ -134,7 +134,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       // Client Secret
       new Setting(container)
         .setName('Client Secret')
-        .setDesc('Your MyAnimeList Client Secret')
+        .setDesc('Your MyAnimeList Client Secret.')
         .addText(text => {
           text
             .setPlaceholder('Enter Client Secret')
@@ -152,8 +152,8 @@ export class CassetteSettingTab extends PluginSettingTab {
     new Setting(container)
       .setName(isAuth ? 'Clear' : 'Authenticate')
       .setDesc(isAuth 
-        ? 'Clear all MyAnimeList credentials and authentication data' 
-        : 'Sign in to MyAnimeList to sync your anime list'
+        ? 'Clear all MyAnimeList credentials and authentication data.' 
+        : 'Sign in to MyAnimeList to sync your anime list.'
       )
       .addButton(button => {
   button
@@ -234,7 +234,7 @@ export class CassetteSettingTab extends PluginSettingTab {
     if (!isAuth) {
       new Setting(container)
         .setName('Client ID')
-        .setDesc('Your SIMKL Client ID')
+        .setDesc('Your SIMKL Client ID.')
         .addText(text => text
           .setPlaceholder('Enter Client ID')
           .setValue(this.plugin.settings.simklClientId)
@@ -245,7 +245,7 @@ export class CassetteSettingTab extends PluginSettingTab {
 
       new Setting(container)
         .setName('Client Secret')
-        .setDesc('Your SIMKL Client Secret')
+        .setDesc('Your SIMKL Client Secret.')
         .addText(text => {
           text
             .setPlaceholder('Enter Client Secret')
@@ -262,8 +262,8 @@ export class CassetteSettingTab extends PluginSettingTab {
     new Setting(container)
       .setName(isAuth ? 'Clear' : 'Authenticate')
       .setDesc(isAuth 
-        ? 'Clear all SIMKL credentials and authentication data' 
-        : 'Sign in to SIMKL to sync your watch list'
+        ? 'Clear all SIMKL credentials and authentication data.' 
+        : 'Sign in to SIMKL to sync your watch list.'
       )
       .addButton(button => {
   button
@@ -310,7 +310,7 @@ export class CassetteSettingTab extends PluginSettingTab {
   private renderStorageSection(container: HTMLElement): void {
     new Setting(container)
       .setName('Anime folder')
-      .setDesc('Folder where anime notes will be saved')
+      .setDesc('Folder where anime notes will be saved.')
       .addText(text => text
         .setPlaceholder('Cassette/Anime')
         .setValue(this.plugin.settings.animeFolder)
@@ -321,7 +321,7 @@ export class CassetteSettingTab extends PluginSettingTab {
 
     new Setting(container)
       .setName('Manga folder')
-      .setDesc('Folder where manga notes will be saved')
+      .setDesc('Folder where manga notes will be saved.')
       .addText(text => text
         .setPlaceholder('Cassette/Manga')
         .setValue(this.plugin.settings.mangaFolder)
@@ -336,7 +336,7 @@ private renderSyncSection(container: HTMLElement): void {
     
     new Setting(container)
       .setName('Auto sync')
-      .setDesc('Automatically sync your lists at regular intervals')
+      .setDesc('Automatically sync your lists at regular intervals.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.autoSync)
         .onChange(async (value) => {
@@ -351,7 +351,7 @@ private renderSyncSection(container: HTMLElement): void {
 
     syncIntervalSetting = new Setting(container)
       .setName('Sync interval')
-      .setDesc('How often to sync automatically (in minutes)')
+      .setDesc('How often to sync automatically (in minutes).')
       .addText(text => text
         .setPlaceholder('60')
         .setValue(String(this.plugin.settings.syncInterval))
