@@ -1,8 +1,36 @@
-/*
+/* Cassette Plugin Styles */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* MAL User Info Container */
+.cassette-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start;
+  width: 100%;
+}
 
-If your plugin does not need CSS, delete this file.
+/* Setting with user info - remove default flex behavior */
+.setting-item:has(.cassette-user-info) {
+  display: block;
+}
 
-*/
+.setting-item:has(.cassette-user-info) .setting-item-control {
+  justify-content: flex-start;
+}
+
+/* MAL User Avatar */
+.cassette-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* MAL User Name */
+.cassette-user-name {
+  font-size: 1.1em;
+  font-weight: 500;
+  color: var(--text-normal);
+}
+
+

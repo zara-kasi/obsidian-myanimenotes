@@ -1,87 +1,136 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
-// Remember to rename these classes and interfaces!
+import { Plugin } from 'obsidian';
 import { CassetteSettingTab } from './settings';
+import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
+import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
+import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
+import { SyncManager, createSyncManager } from './sync';
+import { MediaCategory } from './models';
+import { AutoSyncManager, createAutoSyncManager } from './sync'; 
 
-interface CassettePluginSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: CassettePluginSettings = {
-	mySetting: 'default'
-}
 
 export default class CassettePlugin extends Plugin {
-	settings: CassettePluginSettings;
+  settings: CassetteSettings;
+  settingsTab: CassetteSettingTab | null = null;
+  syncManager: SyncManager | null = null;
+  autoSyncManager: AutoSyncManager | null = null;
 
-	async onload() {
-		await this.loadSettings();
+  async onload() {
+    await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (_evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+    // Initialize sync manager
+    this.syncManager = createSyncManager(this);
+    
+      // Initialize auto-sync manager
+    this.autoSyncManager = createAutoSyncManager(this);
+    
+    // Start auto-sync if enabled
+    this.autoSyncManager.start();
+    
+    // Add ribbon icon for sync
+    this.addRibbonIcon('refresh-cw', 'Cassette sync all', async (evt: MouseEvent) => {
+     if (!this.syncManager) return;
+  await this.syncManager.syncFromMAL();
+    });
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
+    // Add settings tab
+    this.settingsTab = new CassetteSettingTab(this.app, this);
+    this.addSettingTab(this.settingsTab);
 
+    // Register OAuth protocol handler for MAL
+    this.registerObsidianProtocolHandler('cassette-auth/mal', async (params) => {
+      await handleMALRedirect(this, params);
+    });
 
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, _view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					
+    // Register OAuth protocol handler for SIMKL
+    this.registerObsidianProtocolHandler('cassette-auth/simkl', async (params) => {
+      await handleSimklRedirect(this, params);
+    });
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
+    // Add commands
+    this.addCommands();
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new CassetteSettingTab(this.app, this));
+    
+  }
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
+  onunload() {
+    // Stop auto-sync when plugin unloads
+    if (this.autoSyncManager) {
+      this.autoSyncManager.stop();
+    }
+  }
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-	}
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
 
-	onunload() {
+  async saveSettings() {
+    await this.saveData(this.settings);
+    
+    // Restart auto-sync when settings change
+    // (in case interval or enabled state changed)
+    if (this.autoSyncManager) {
+      this.autoSyncManager.restart();
+    }
+  }
+  
+  refreshSettingsUI(): void {
+    if (this.settingsTab) {
+      this.settingsTab.display();
+    }
+  }
 
-	}
+  /**
+   * Adds plugin commands
+   */
+  private addCommands(): void {
+    // Sync all from MAL
+    this.addCommand({
+      id: 'sync-mal-all',
+      name: 'Sync all from MyAnimeList',
+      callback: async () => {
+        if (!this.syncManager) return;
+        await this.syncManager.syncFromMAL();
+      },
+    });
 
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
+    // Sync anime only
+    this.addCommand({
+      id: 'sync-mal-anime',
+      name: 'Sync anime from MyAnimeList',
+      callback: async () => {
+        if (!this.syncManager) return;
+        await this.syncManager.syncAnime();
+      },
+    });
 
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
+    // Sync manga only
+    this.addCommand({
+      id: 'sync-mal-manga',
+      name: 'Sync manga from MyAnimeList',
+      callback: async () => {
+        if (!this.syncManager) return;
+        await this.syncManager.syncManga();
+      },
+    });
+
+    // Sync currently watching anime
+    this.addCommand({
+      id: 'sync-mal-watching',
+      name: 'Sync currently watching anime',
+      callback: async () => {
+        if (!this.syncManager) return;
+        await this.syncManager.syncByStatus(MediaCategory.ANIME, 'watching');
+      },
+    });
+
+    // Sync currently reading manga
+    this.addCommand({
+      id: 'sync-mal-reading',
+      name: 'Sync currently reading manga',
+      callback: async () => {
+        if (!this.syncManager) return;
+        await this.syncManager.syncByStatus(MediaCategory.MANGA, 'reading');
+      },
+    });
+  }
 }
-
-
-
