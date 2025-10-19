@@ -331,18 +331,25 @@ export class CassetteSettingTab extends PluginSettingTab {
         }));
   }
 
-  private renderSyncSection(container: HTMLElement): void {
+private renderSyncSection(container: HTMLElement): void {
+    let syncIntervalSetting: Setting;
+    
     new Setting(container)
-      .setName('Auto-sync')
+      .setName('Auto sync')
       .setDesc('Automatically sync your lists at regular intervals')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.autoSync)
         .onChange(async (value) => {
           this.plugin.settings.autoSync = value;
           await this.plugin.saveSettings();
+          
+          // Show/hide the sync interval setting
+          if (syncIntervalSetting) {
+            syncIntervalSetting.settingEl.style.display = value ? '' : 'none';
+          }
         }));
 
-    new Setting(container)
+    syncIntervalSetting = new Setting(container)
       .setName('Sync interval')
       .setDesc('How often to sync automatically (in minutes)')
       .addText(text => text
@@ -355,10 +362,13 @@ export class CassetteSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           }
         }));
+    
+    // Set initial visibility based on auto-sync setting
+    syncIntervalSetting.settingEl.style.display = this.plugin.settings.autoSync ? '' : 'none';
         
     new Setting(container)
-      .setName('Force full sync')
-      .setDesc('Always overwrite all files during sync.')
+      .setName('Full overwrite')
+      .setDesc('Make sync update every single file. Normally, sync only updates files that changed - enable this to update everything.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.forceFullSync)
         .onChange(async (value) => {
