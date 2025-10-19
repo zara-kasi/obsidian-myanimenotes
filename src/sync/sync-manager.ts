@@ -164,11 +164,9 @@ export class SyncManager {
    * @returns Sync statistics
    */
   getSyncStats(): {
-    lastSyncTime?: number;
     totalItems?: number;
   } {
     return {
-      lastSyncTime: this.plugin.settings.lastSyncTime,
       totalItems: undefined,
     };
   }
