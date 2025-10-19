@@ -1,7 +1,7 @@
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem } from '../models';
 import type { PropertyMapping } from './markdown';
-import { DEFAULT_PROPERTY_MAPPING, generateMarkdownWithCassetteSync } from './markdown';
+import { DEFAULT_PROPERTY_MAPPING, generateMarkdownWithCassetteSync, parseExistingFile } from './markdown';
 import { 
   generateCassetteSync, 
   findFilesByCassetteSync, 
@@ -27,7 +27,7 @@ export interface StorageConfig {
  * Sync action result
  */
 export interface SyncActionResult {
-  action: 'created' | 'updated' | 'linked-legacy' | 'duplicates-detected';
+  action: 'created' | 'updated' | 'linked-legacy' | 'duplicates-detected' | 'skipped';
   filePath: string;
   cassetteSync: string;
   duplicatePaths?: string[];
@@ -35,22 +35,37 @@ export interface SyncActionResult {
 }
 
 /**
- * Main save function with cassette-based lookup
+ * Checks if timestamps match (sync optimization)
+ * Returns true if local and remote timestamps are equal
+ */
+function areTimestampsEqual(
+  localSynced: string | undefined,
+  remoteSynced: string | undefined
+): boolean {
+  if (!localSynced || !remoteSynced) {
+    return false;
+  }
+  
+  try {
+    const localDate = new Date(localSynced);
+    const remoteDate = new Date(remoteSynced);
+    
+    // Compare as Unix timestamps
+    return localDate.getTime() === remoteDate.getTime();
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Main save function with cassette-based lookup and timestamp optimization
+ * 
+ * SYNC OPTIMIZATION:
+ * - Compares local 'synced' property with remote 'updated_at' timestamp
+ * - Skips file overwrite if timestamps match (unless forceFullSync is enabled)
+ * - Always updates if timestamp is missing or different
  * 
  * CRITICAL: Sync is based ONLY on cassette, NOT on filename or folder location
- * 
- * HOW IT WORKS:
- * - Searches the ENTIRE VAULT for files with matching cassette
- * - Users can move files anywhere - sync will find them
- * - Users can rename files - sync will still update them
- * - Filename is ONLY used when creating NEW files
- * - Once a file has cassette, filename becomes irrelevant
- * 
- * LOOKUP ORDER:
- * 1. Search ENTIRE VAULT by cassette frontmatter (exact match)
- * 2. If multiple found: report duplicates, pick deterministic file
- * 3. If none found: try legacy file detection (only in target folder)
- * 4. If still none: create new file with cassette
  */
 export async function saveMediaItem(
   plugin: CassettePlugin,
@@ -76,18 +91,31 @@ export async function saveMediaItem(
     }
     
     // STEP 1: Lookup by cassette frontmatter across ENTIRE VAULT
-    // This allows users to move/rename files without breaking sync
     const matchingFiles = await findFilesByCassetteSync(plugin, cassetteSync, folderPath);
     
     if (matchingFiles.length > 1) {
       // DUPLICATE DETECTION: Multiple files with same cassette
       console.warn(`[Storage] Found ${matchingFiles.length} files with cassette: ${cassetteSync}`);
-      console.warn(`[Storage] File locations:`, matchingFiles.map(f => f.path));
       
       const selectedFile = selectDeterministicFile(plugin, matchingFiles);
       const existingContent = await vault.read(selectedFile);
-      const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
       
+      // Parse existing file to check timestamp
+      const parsed = parseExistingFile(existingContent);
+      const localSynced = parsed?.frontmatter?.synced;
+      
+      // Check if we can skip this update (timestamp optimization)
+      if (!plugin.settings.forceFullSync && areTimestampsEqual(localSynced, item.syncedAt)) {
+        debug.log(`[Storage] Skipping ${selectedFile.path} - timestamps match`);
+        return {
+          action: 'skipped',
+          filePath: selectedFile.path,
+          cassetteSync,
+          message: `Skipped ${selectedFile.path} - no changes (timestamp match)`
+        };
+      }
+      
+      const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
       await vault.modify(selectedFile, content);
       
       return {
@@ -95,19 +123,32 @@ export async function saveMediaItem(
         filePath: selectedFile.path,
         cassetteSync,
         duplicatePaths: matchingFiles.map(f => f.path),
-        message: `Updated ${selectedFile.path} but found ${matchingFiles.length} duplicates across vault`
+        message: `Updated ${selectedFile.path} but found ${matchingFiles.length} duplicates`
       };
     }
     
     if (matchingFiles.length === 1) {
-      // EXACT MATCH: Update existing file (regardless of location or filename)
+      // EXACT MATCH: Check if update needed via timestamp
       const file = matchingFiles[0];
-      debug.log(`[Storage] Updating existing file: ${file.path}`);
-      debug.log(`[Storage] File location: ${file.parent?.path || 'root'}`);
-      debug.log(`[Storage] Filename: ${file.name}`);
-      debug.log(`[Storage] ✓ Sync based on cassette, NOT filename`);
-      
       const existingContent = await vault.read(file);
+      
+      // Parse existing file to check timestamp
+      const parsed = parseExistingFile(existingContent);
+      const localSynced = parsed?.frontmatter?.synced;
+      
+      // SYNC OPTIMIZATION: Skip if timestamps match
+      if (!plugin.settings.forceFullSync && areTimestampsEqual(localSynced, item.syncedAt)) {
+        debug.log(`[Storage] Skipping ${file.path} - timestamps match (local: ${localSynced}, remote: ${item.syncedAt})`);
+        return {
+          action: 'skipped',
+          filePath: file.path,
+          cassetteSync,
+          message: `Skipped ${file.path} - no changes detected`
+        };
+      }
+      
+      // Timestamps differ or forceFullSync enabled - update file
+      debug.log(`[Storage] Updating ${file.path} - timestamp changed or force sync enabled`);
       const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync, existingContent);
       
       await vault.modify(file, content);
@@ -116,13 +157,12 @@ export async function saveMediaItem(
         action: 'updated',
         filePath: file.path,
         cassetteSync,
-        message: `Updated ${file.path} (filename-independent sync)`
+        message: `Updated ${file.path}`
       };
     }
     
     // STEP 2: No cassette match - try legacy file detection
-    // Note: Legacy detection only looks in target folder since old files wouldn't have been moved
-    debug.log(`[Storage] No cassette match in entire vault, attempting legacy file detection in ${folderPath}...`);
+    debug.log(`[Storage] No cassette match, attempting legacy detection in ${folderPath}...`);
     const legacyCandidates = await findLegacyFiles(plugin, item, folderPath);
     
     if (legacyCandidates.length > 0) {
@@ -153,7 +193,6 @@ export async function saveMediaItem(
     const sanitizedTitle = item.title.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
     let filename = `${sanitizedTitle}.md`;
     
-    // Check for filename collision and generate unique name if needed
     const existingByName = vault.getAbstractFileByPath(`${folderPath}/${filename}`);
     if (existingByName) {
       debug.log(`[Storage] Filename collision detected, generating unique name`);
@@ -173,7 +212,6 @@ export async function saveMediaItem(
     };
     
   } finally {
-    // Always release lock
     releaseSyncLock(cassetteSync);
   }
 }
@@ -197,8 +235,9 @@ export async function saveMediaItems(
       // Log important events
       if (result.action === 'duplicates-detected') {
         console.warn(`[Storage] ${result.message}`);
-      
       } else if (result.action === 'linked-legacy') {
+        debug.log(`[Storage] ${result.message}`);
+      } else if (result.action === 'skipped') {
         debug.log(`[Storage] ${result.message}`);
       }
     } catch (error) {
