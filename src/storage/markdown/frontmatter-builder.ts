@@ -27,10 +27,6 @@ export function buildSyncedFrontmatterProperties(
   // CRITICAL: Add cassette as the first property (primary key)
   properties.cassette = cassetteSync;
   
-  // Add sync timestamp if available (for sync optimization)
-  if (item.syncedAt) {
-    addProperty('synced', item.syncedAt);
-  }
   
   const addProperty = (key: keyof PropertyMapping, value: any) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -88,6 +84,11 @@ export function buildSyncedFrontmatterProperties(
     if (sanitizedGenres.length > 0) {
       addProperty('genres', sanitizedGenres);
     }
+  }
+  
+    // Add sync timestamp if available (for sync optimization)
+  if (item.syncedAt) {
+    addProperty('synced', item.syncedAt);
   }
   
   
