@@ -1,76 +1,187 @@
 name: Release Obsidian Plugin
 
 on:
-  push:
-    tags:
-      - "*"
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      description:
+        description: 'Release notes (optional)'
+        required: false
+        type: string
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+    
     steps:
-      - name: Checkout code
+      # Step 1: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Step 2: Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build plugin
-        run: npm run build
-
-      - name: Get version from tag
-        id: get_version
+          node-version: '18'
+      
+      # Step 3: Read current version and calculate new version
+      - name: Calculate new version
+        id: version
         run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          echo "VERSION=${TAG}" >> $GITHUB_OUTPUT
-          echo "Building version ${TAG}"
-
-      - name: Verify version matches manifest
-        run: |
-          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
-          TAG_VERSION=${{ steps.get_version.outputs.VERSION }}
-          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
-            echo "Error: manifest.json version ($MANIFEST_VERSION) does not match tag ($TAG_VERSION)"
-            exit 1
+          # Read current version from manifest.json
+          CURRENT_VERSION=$(jq -r '.version' manifest.json)
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Split version into parts
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          
+          # Bump version based on input
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          
+          if [ "$RELEASE_TYPE" = "major" ]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [ "$RELEASE_TYPE" = "minor" ]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
           fi
-
-      - name: Create release package
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "New version: $NEW_VERSION"
+          
+          # Export versions for next steps
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+      
+      # Step 4: Update manifest.json
+      - name: Update manifest.json
         run: |
-          mkdir release
-          cp main.js manifest.json release/
-          if [ -f styles.css ]; then
-            cp styles.css release/
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          
+          # Update version in manifest.json
+          jq --arg version "$NEW_VERSION" '.version = $version' manifest.json > manifest.tmp
+          mv manifest.tmp manifest.json
+          
+          echo "Updated manifest.json to version $NEW_VERSION"
+          cat manifest.json
+      
+      # Step 5: Update versions.json
+      - name: Update versions.json
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          
+          # Read minAppVersion from manifest.json
+          MIN_APP_VERSION=$(jq -r '.minAppVersion' manifest.json)
+          
+          # Create or update versions.json
+          if [ ! -f versions.json ]; then
+            echo "{}" > versions.json
           fi
-          cd release
-          zip -r ../cassette-${{ steps.get_version.outputs.VERSION }}.zip .
-          cd ..
-
-      - name: Create Release
+          
+          # Add new version entry
+          jq --arg version "$NEW_VERSION" --arg minVersion "$MIN_APP_VERSION" \
+            '.[$version] = $minVersion' versions.json > versions.tmp
+          mv versions.tmp versions.json
+          
+          echo "Updated versions.json"
+          cat versions.json
+      
+      # Step 6: Update package.json (if exists)
+      - name: Update package.json
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          
+          if [ -f package.json ]; then
+            jq --arg version "$NEW_VERSION" '.version = $version' package.json > package.tmp
+            mv package.tmp package.json
+            echo "Updated package.json to version $NEW_VERSION"
+          else
+            echo "package.json not found, skipping"
+          fi
+      
+      # Step 7: Build the plugin
+      - name: Install dependencies and build
+        run: |
+          npm install
+          npm run build
+      
+      # Step 8: Commit version changes
+      - name: Commit version changes
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Add changed files
+          git add manifest.json versions.json
+          [ -f package.json ] && git add package.json || true
+          
+          # Commit changes
+          git commit -m "chore: release v$NEW_VERSION"
+          
+          echo "Committed version changes"
+      
+      # Step 9: Create and push tag (WITHOUT 'v' prefix)
+      - name: Create and push tag
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          
+          # Create tag WITHOUT 'v' prefix (required by Obsidian)
+          git tag "$NEW_VERSION"
+          
+          # Push commit and tag
+          git push origin HEAD:main
+          git push origin "$NEW_VERSION"
+          
+          echo "Created and pushed tag: $NEW_VERSION"
+      
+      # Step 10: Create GitHub Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.version.outputs.new_version }}
+          name: ${{ steps.version.outputs.new_version }}
+          body: ${{ github.event.inputs.description || format('Release version {0}', steps.version.outputs.new_version) }}
+          draft: false
+          prerelease: false
           files: |
             main.js
             manifest.json
             styles.css
-            cassette-${{ steps.get_version.outputs.VERSION }}.zip
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-          name: Release ${{ steps.get_version.outputs.VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-files
-          path: |
-            main.js
-            manifest.json
-            styles.css
+      
+      # Step 11: Summary
+      - name: Release Summary
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          echo "### ✅ Release Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** $NEW_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "**Type:** ${{ github.event.inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`$NEW_VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Files released:**" >> $GITHUB_STEP_SUMMARY
+          echo "- main.js" >> $GITHUB_STEP_SUMMARY
+          echo "- manifest.json" >> $GITHUB_STEP_SUMMARY
+          echo "- styles.css" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [View Release](https://github.com/${{ github.repository }}/releases/tag/$NEW_VERSION)" >> $GITHUB_STEP_SUMMARY
