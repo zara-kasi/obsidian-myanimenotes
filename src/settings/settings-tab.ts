@@ -191,7 +191,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       });
       descEl.createEl('code', { text: 'https://myanimelist.net/apiconfig/create' });
       descEl.createSpan({ text: ' to get your Client ID and Secret. Set the redirect URI to: ' });
-      descEl.createEl('code', { text: 'obsidian://cassette-auth/mal' });
+      descEl.createEl('code', { text: 'obsidian://cassette-auth/mal.' });
       descEl.createEl('a', {
         text: 'Learn more',
         href: 'https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md'
@@ -293,7 +293,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       });
       descEl.createEl('code', { text: 'https://simkl.com/settings/developer/new' });
       descEl.createSpan({ text: ' to get your Client ID and Secret. Set the redirect URI to: ' });
-      descEl.createEl('code', { text: 'obsidian://cassette-auth/simkl' });
+      descEl.createEl('code', { text: 'obsidian://cassette-auth/simkl.' });
       descEl.createEl('a', {
         text: 'Learn more',
         href: 'https://github.com/zara-kasi/cassette/blob/main/docs/simkl-authentication-guide.md'
