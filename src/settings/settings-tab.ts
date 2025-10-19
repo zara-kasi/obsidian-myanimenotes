@@ -367,8 +367,8 @@ private renderSyncSection(container: HTMLElement): void {
     syncIntervalSetting.settingEl.style.display = this.plugin.settings.autoSync ? '' : 'none';
         
     new Setting(container)
-      .setName('Full overwrite')
-      .setDesc('Make sync update every single file. Normally, sync only updates files that changed - enable this to update everything.')
+      .setName('Overwrite all')
+      .setDesc('Update all notes on every sync, even if nothing changed.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.forceFullSync)
         .onChange(async (value) => {
