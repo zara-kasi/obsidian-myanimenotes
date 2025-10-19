@@ -13,7 +13,7 @@ export function renderPropertyMappingSection(
   // Toggle for custom mapping
   new Setting(container)
     .setName('Property Customization')
-    .setDesc('Customize the frontmatter property names used in your notes')
+    .setDesc('Customize the frontmatter property names used in your notes.')
     .addToggle(toggle => toggle
       .setValue(plugin.settings.useCustomPropertyMapping)
       .onChange(async (value) => {
@@ -116,7 +116,7 @@ export function renderPropertyMappingSection(
   // Reset button
   new Setting(container)
     .setName('Reset to defaults')
-    .setDesc('Reset all property names to their default values')
+    .setDesc('Reset all property names to their default values.')
     .addButton(button => button
       .setButtonText('Reset')
       .setWarning()
