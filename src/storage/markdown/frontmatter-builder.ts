@@ -27,6 +27,11 @@ export function buildSyncedFrontmatterProperties(
   // CRITICAL: Add cassette as the first property (primary key)
   properties.cassette = cassetteSync;
   
+  // Add sync timestamp if available (for sync optimization)
+  if (item.syncedAt) {
+    addProperty('synced', item.syncedAt);
+  }
+  
   const addProperty = (key: keyof PropertyMapping, value: any) => {
     if (value !== undefined && value !== null && value !== '') {
       const mappedKey = getMappedPropertyName(key, mapping);
@@ -190,6 +195,7 @@ export function serializeFrontmatter(frontmatter: Record<string, any>): string {
     'category',
     'id',
     'cassette',
+    'synced',
   ];
   
   // Create ordered object
