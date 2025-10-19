@@ -3,7 +3,7 @@ import type CassettePlugin from '../main';
 import type { UniversalMediaItem, SyncResult } from '../models';
 import { MediaCategory } from '../models';
 import { syncMAL, type MALSyncOptions } from './mal-sync-service';
-import { saveMediaItems, type StorageConfig, type SyncActionResult } from '../storage';
+import { saveMediaItemsByCategory, type StorageConfig } from '../storage';
 import { createDebugLogger, type DebugLogger } from '../utils';
 
 /**
@@ -43,69 +43,43 @@ export class SyncManager {
    * @returns Synced items and result
    */
   async syncFromMAL(options: CompleteSyncOptions = {}): Promise<{
-  items: UniversalMediaItem[];
-  result: SyncResult;
-  savedPaths?: { anime: string[]; manga: string[] };
+    items: UniversalMediaItem[];
+    result: SyncResult;
+    savedPaths?: { anime: string[]; manga: string[] };
   }> {
-  this.debug.log('[Sync Manager] Starting MAL sync...', options);
-  
-  try {
-    // Perform sync
-    const { items, result } = await syncMAL(this.plugin, options);
+    this.debug.log('[Sync Manager] Starting MAL sync...', options);
     
-    // Save to vault if enabled
-    let savedPaths: { anime: string[]; manga: string[] } | undefined;
-    
-    if (options.saveToVault !== false && items.length > 0) {
-      try {
-        const storageConfig = options.storageConfig || this.getStorageConfig();
-        
-        const animeItems = items.filter(item => item.category === 'anime');
-        const mangaItems = items.filter(item => item.category === 'manga');
-        
-        const allResults: SyncActionResult[] = [];
-        
-        if (animeItems.length > 0) {
-          const results = await saveMediaItems(this.plugin, animeItems, storageConfig);
-          allResults.push(...results);
+    try {
+      // Perform sync
+      const { items, result } = await syncMAL(this.plugin, options);
+      
+      // Save to vault if enabled
+      let savedPaths: { anime: string[]; manga: string[] } | undefined;
+      
+      if (options.saveToVault !== false && items.length > 0) {
+        try {
+          const storageConfig = options.storageConfig || this.getStorageConfig();
+          
+          savedPaths = await saveMediaItemsByCategory(
+            this.plugin,
+            items,
+            storageConfig
+          );
+          
+          this.debug.log('[Sync Manager] Saved to vault:', savedPaths);
+        } catch (saveError) {
+          console.error('[Sync Manager] Failed to save to vault:', saveError);
+          new Notice(`⚠️ Synced but failed to save: ${saveError.message}`, 5000);
         }
-        
-        if (mangaItems.length > 0) {
-          const results = await saveMediaItems(this.plugin, mangaItems, storageConfig);
-          allResults.push(...results);
-        }
-        
-        savedPaths = {
-          anime: allResults.filter(r => r.filePath.includes(storageConfig.animeFolder)).map(r => r.filePath),
-          manga: allResults.filter(r => r.filePath.includes(storageConfig.mangaFolder)).map(r => r.filePath)
-        };
-        
-        // Simple summary
-        const created = allResults.filter(r => r.action === 'created').length;
-        const updated = allResults.filter(r => r.action === 'updated').length;
-        const skipped = allResults.filter(r => r.action === 'skipped').length;
-        
-        if (created + updated === 0) {
-          new Notice(`${allResults.length} notes synced`, 2000);
-        } else {
-          const parts = [];
-          if (created > 0) parts.push(`${created} created`);
-          if (updated > 0) parts.push(`${updated} updated`);
-          if (skipped > 0) parts.push(`${skipped} unchanged`);
-        }
-        
-      } catch (saveError) {
-        console.error('[Sync Manager] Failed to save to vault:', saveError);
       }
+      
+      return { items, result, savedPaths };
+      
+    } catch (error) {
+      console.error('[Sync Manager] Sync failed:', error);
+      throw error;
     }
-    
-    return { items, result, savedPaths };
-    
-  } catch (error) {
-    console.error('[Sync Manager] Sync failed:', error);
-    throw error;
   }
-}
 
   /**
    * Quick sync for a specific category
