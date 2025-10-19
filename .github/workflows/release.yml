@@ -1,69 +1,44 @@
 name: Release Obsidian Plugin
 
 on:
-  workflow_dispatch:
-    inputs:
-      version_type:
-        description: 'Version bump type'
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-        default: 'patch'
+  push:
+    tags:
+      - "*"
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
-    
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Bump version
-        id: version
-        run: |
-          # Bump version using npm (this runs version-bump.mjs automatically)
-          npm version ${{ inputs.version_type }} --no-git-tag-version
-          
-          # Get the new version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_OUTPUT
-          echo "Bumped to version ${NEW_VERSION}"
-
-      - name: Commit version bump
-        run: |
-          git add package.json manifest.json versions.json
-          git commit -m "chore: bump version to ${{ steps.version.outputs.NEW_VERSION }}"
-          git push origin main
-
-      - name: Create and push tag
-        run: |
-          git tag ${{ steps.version.outputs.NEW_VERSION }}
-          git push origin ${{ steps.version.outputs.NEW_VERSION }}
-
       - name: Build plugin
         run: npm run build
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "VERSION=${TAG}" >> $GITHUB_OUTPUT
+          echo "Building version ${TAG}"
+
+      - name: Verify version matches manifest
+        run: |
+          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
+          TAG_VERSION=${{ steps.get_version.outputs.VERSION }}
+          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+            echo "Error: manifest.json version ($MANIFEST_VERSION) does not match tag ($TAG_VERSION)"
+            exit 1
+          fi
 
       - name: Create release package
         run: |
@@ -73,31 +48,29 @@ jobs:
             cp styles.css release/
           fi
           cd release
-          zip -r ../cassette-${{ steps.version.outputs.NEW_VERSION }}.zip .
+          zip -r ../cassette-${{ steps.get_version.outputs.VERSION }}.zip .
           cd ..
 
-      - name: Create GitHub Release
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.version.outputs.NEW_VERSION }}
-          name: Release ${{ steps.version.outputs.NEW_VERSION }}
           files: |
             main.js
             manifest.json
             styles.css
-            cassette-${{ steps.version.outputs.NEW_VERSION }}.zip
+            cassette-${{ steps.get_version.outputs.VERSION }}.zip
           draft: false
           prerelease: false
           generate_release_notes: true
+          name: Release ${{ steps.get_version.outputs.VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-files-${{ steps.version.outputs.NEW_VERSION }}
+          name: release-files
           path: |
             main.js
             manifest.json
             styles.css
-            cassette-${{ steps.version.outputs.NEW_VERSION }}.zip
