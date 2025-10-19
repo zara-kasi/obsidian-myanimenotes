@@ -98,10 +98,6 @@ export class AutoSyncManager {
       // Perform the sync (quiet mode - no prominent notices)
       await this.plugin.syncManager.syncFromMAL();
 
-      // Update last sync time
-      this.plugin.settings.lastSyncTime = Date.now();
-      await this.plugin.saveSettings();
-
       this.debug.log('[Auto-Sync] Completed successfully');
 
       // Optional: Show subtle notice for background sync
@@ -114,39 +110,6 @@ export class AutoSyncManager {
       
       // Show error notice
       new Notice(`⚠️ Auto-sync failed: ${error.message}`, 4000);
-    }
-  }
-
-  /**
-   * Gets time until next sync (in milliseconds)
-   * Returns null if auto-sync is not running
-   */
-  getTimeUntilNextSync(): number | null {
-    if (!this.isRunning() || !this.plugin.settings.lastSyncTime) {
-      return null;
-    }
-
-    const intervalMs = this.plugin.settings.syncInterval * 60 * 1000;
-    const timeSinceLastSync = Date.now() - this.plugin.settings.lastSyncTime;
-    const timeUntilNext = intervalMs - timeSinceLastSync;
-
-    return timeUntilNext > 0 ? timeUntilNext : 0;
-  }
-
-  /**
-   * Gets formatted string for time until next sync
-   */
-  getFormattedTimeUntilNextSync(): string | null {
-    const ms = this.getTimeUntilNextSync();
-    if (ms === null) return null;
-
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-
-    if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    } else {
-      return `${seconds}s`;
     }
   }
 }
