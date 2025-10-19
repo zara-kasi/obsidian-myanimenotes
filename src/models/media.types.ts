@@ -125,6 +125,9 @@ export interface UniversalMediaItem {
   numVolumesRead?: number; // For manga
   numChaptersRead?: number; // For manga
   
+  // Sync metadata - timestamp from API
+  syncedAt?: string; 
+  
   // Platform metadata
   platform: 'mal' | 'simkl';
 }
