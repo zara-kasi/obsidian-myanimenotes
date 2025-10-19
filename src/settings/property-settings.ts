@@ -12,8 +12,8 @@ export function renderPropertyMappingSection(
 ): void {
   // Toggle for custom mapping
   new Setting(container)
-    .setName('Use custom property names')
-    .setDesc('Enable to customize property field names')
+    .setName('Property Customization')
+    .setDesc('Customize the frontmatter property names used in your notes')
     .addToggle(toggle => toggle
       .setValue(plugin.settings.useCustomPropertyMapping)
       .onChange(async (value) => {
