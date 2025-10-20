@@ -1,6 +1,7 @@
 name: Release Obsidian Plugin
 
 on:
+  # Manual trigger - existing functionality
   workflow_dispatch:
     inputs:
       release_type:
@@ -17,26 +18,84 @@ on:
         required: false
         type: string
 
+  # Auto-trigger on push to main branch
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - '*.ts'
+      - 'manifest.json'
+      - 'package.json'
+    paths-ignore:
+      - '**.md'
+      - 'versions.json'
+      - 'README.md'
+      - 'LICENSE'
+
+  # Scheduled release - First day of every month at 10 AM UTC
+  schedule:
+    - cron: '0 10 1 * *'
+
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
+      # Step 0: Determine release type based on trigger
+      - name: Determine release type
+        id: release_type
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger - use user input
+            RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+            DESCRIPTION="${{ github.event.inputs.description }}"
+            TRIGGER="Manual"
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            # Scheduled trigger - default to minor version
+            RELEASE_TYPE="minor"
+            DESCRIPTION="Scheduled monthly release"
+            TRIGGER="Scheduled"
+          else
+            # Push trigger - analyze commit message
+            COMMIT_MSG="${{ github.event.head_commit.message }}"
+            TRIGGER="Push to main"
+            
+            if [[ "$COMMIT_MSG" =~ \[major\]|\bBREAKING[[:space:]]CHANGE\b ]]; then
+              RELEASE_TYPE="major"
+              DESCRIPTION="Auto-release: Major version (breaking changes detected)"
+            elif [[ "$COMMIT_MSG" =~ \[minor\]|\bfeat\b|\bfeature\b ]]; then
+              RELEASE_TYPE="minor"
+              DESCRIPTION="Auto-release: Minor version (new features)"
+            else
+              RELEASE_TYPE="patch"
+              DESCRIPTION="Auto-release: Patch version (bug fixes and improvements)"
+            fi
+          fi
+          
+          echo "type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "description=$DESCRIPTION" >> $GITHUB_OUTPUT
+          echo "trigger=$TRIGGER" >> $GITHUB_OUTPUT
+          
+          echo "Release Type: $RELEASE_TYPE"
+          echo "Trigger: $TRIGGER"
+          echo "Description: $DESCRIPTION"
+
       # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       # Step 2: Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       # Step 3: Read current version and calculate new version
       - name: Calculate new version
         id: version
@@ -48,8 +107,8 @@ jobs:
           # Split version into parts
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
           
-          # Bump version based on input
-          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          # Bump version based on determined release type
+          RELEASE_TYPE="${{ steps.release_type.outputs.type }}"
           
           if [ "$RELEASE_TYPE" = "major" ]; then
             MAJOR=$((MAJOR + 1))
@@ -135,7 +194,7 @@ jobs:
           [ -f package.json ] && git add package.json || true
           
           # Commit changes
-          git commit -m "chore: release v$NEW_VERSION"
+          git commit -m "chore: release v$NEW_VERSION [skip ci]"
           
           echo "Committed version changes"
       
@@ -159,7 +218,7 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.new_version }}
           name: ${{ steps.version.outputs.new_version }}
-          body: ${{ github.event.inputs.description || format('Release version {0}', steps.version.outputs.new_version) }}
+          body: ${{ steps.release_type.outputs.description }}
           draft: false
           prerelease: false
           files: |
@@ -168,15 +227,19 @@ jobs:
             styles.css
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
       # Step 11: Summary
       - name: Release Summary
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          RELEASE_TYPE="${{ steps.release_type.outputs.type }}"
+          TRIGGER="${{ steps.release_type.outputs.trigger }}"
+          
           echo "### ✅ Release Complete!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** $NEW_VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "**Type:** ${{ github.event.inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Type:** $RELEASE_TYPE" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** $TRIGGER" >> $GITHUB_STEP_SUMMARY
           echo "**Tag:** \`$NEW_VERSION\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Files released:**" >> $GITHUB_STEP_SUMMARY
