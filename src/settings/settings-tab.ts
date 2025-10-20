@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
-import { startAuthFlow as startSimklAuth, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../api/simkl';
+// import { startAuthFlow as startSimklAuth, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../api/simkl';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 import { renderPropertyMappingSection } from './property-settings';
 import { FolderSuggest } from './folder-suggest';
@@ -30,11 +30,11 @@ export class CassetteSettingTab extends PluginSettingTab {
     // ========================================================================
     // SIMKL Section
     // ========================================================================
-    new Setting(containerEl)
-  .setName('SIMKL')
-  .setHeading();
+//    new Setting(containerEl)
+//  .setName('SIMKL')
+//  .setHeading();
     
-    this.renderSimklSection(containerEl);
+//    this.renderSimklSection(containerEl);
 
     // ========================================================================
     // Storage Section
@@ -203,7 +203,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       
     }
   }
-
+/*
   private renderSimklSection(container: HTMLElement): void {
     const isAuth = isSimklAuthenticated(this.plugin);
 
@@ -304,7 +304,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       });
     }
   }
-
+*/
   private renderStorageSection(container: HTMLElement): void {
   new Setting(container)
     .setName('Anime folder')
