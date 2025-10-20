@@ -1,7 +1,7 @@
 {
   "id": "cassette",
   "name": "Cassette",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "minAppVersion": "0.15.0",
   "description": "Make your media a part of your knowledge. Sync your anime, manga, movies, and TV shows from MyAnimeList and Simkl directly into your vault.",
   "author": "Zarakasi",
