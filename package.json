@@ -1,6 +1,6 @@
 {
   "name": "cassette",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Make your media a part of your knowledge. Sync your media items from MyAnimeList, AniList, and Simkl directly into your vault.",
   "main": "main.js",
   "scripts": {
