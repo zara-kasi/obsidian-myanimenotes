@@ -5,8 +5,11 @@ import { App, TFolder, TAbstractFile, AbstractInputSuggest } from 'obsidian';
  * Provides autocomplete suggestions for vault folders
  */
 export class FolderSuggest extends AbstractInputSuggest<TFolder> {
+  inputEl: HTMLInputElement;
+
   constructor(app: App, inputEl: HTMLInputElement) {
     super(app, inputEl);
+    this.inputEl = inputEl;
   }
 
   getSuggestions(inputStr: string): TFolder[] {
