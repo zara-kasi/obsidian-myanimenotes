@@ -4,6 +4,7 @@ import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as 
 import { startAuthFlow as startSimklAuth, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../api/simkl';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 import { renderPropertyMappingSection } from './property-settings';
+import { FolderSuggest } from './folder-suggest';
 
 export class CassetteSettingTab extends PluginSettingTab {
   plugin: CassettePlugin;
@@ -305,28 +306,34 @@ export class CassetteSettingTab extends PluginSettingTab {
   }
 
   private renderStorageSection(container: HTMLElement): void {
-    new Setting(container)
-      .setName('Anime folder')
-      .setDesc('Folder where anime notes will be saved.')
-      .addText(text => text
+  new Setting(container)
+    .setName('Anime folder')
+    .setDesc('Folder where anime notes will be saved.')
+    .addText(text => {
+      new FolderSuggest(this.app, text.inputEl);
+      text
         .setPlaceholder('Cassette/Anime')
         .setValue(this.plugin.settings.animeFolder)
         .onChange(async (value) => {
           this.plugin.settings.animeFolder = value.trim() || 'Cassette/Anime';
           await this.plugin.saveSettings();
-        }));
+        });
+    });
 
-    new Setting(container)
-      .setName('Manga folder')
-      .setDesc('Folder where manga notes will be saved.')
-      .addText(text => text
+  new Setting(container)
+    .setName('Manga folder')
+    .setDesc('Folder where manga notes will be saved.')
+    .addText(text => {
+      new FolderSuggest(this.app, text.inputEl);
+      text
         .setPlaceholder('Cassette/Manga')
         .setValue(this.plugin.settings.mangaFolder)
         .onChange(async (value) => {
           this.plugin.settings.mangaFolder = value.trim() || 'Cassette/Manga';
           await this.plugin.saveSettings();
-        }));
-  }
+        });
+    });
+}
 
 private renderSyncSection(container: HTMLElement): void {
     let syncIntervalSetting: Setting;
