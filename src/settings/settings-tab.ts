@@ -336,39 +336,15 @@ export class CassetteSettingTab extends PluginSettingTab {
 }
 
 private renderSyncSection(container: HTMLElement): void {
-    let syncIntervalSetting: Setting;
-    
     new Setting(container)
       .setName('Auto sync')
-      .setDesc('Automatically sync your lists at regular intervals.')
+      .setDesc('Automatically sync your lists 10 minutes after plugin loads.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.autoSync)
         .onChange(async (value) => {
           this.plugin.settings.autoSync = value;
           await this.plugin.saveSettings();
-          
-          // Show/hide the sync interval setting
-          if (syncIntervalSetting) {
-            syncIntervalSetting.settingEl.style.display = value ? '' : 'none';
-          }
         }));
-
-    syncIntervalSetting = new Setting(container)
-      .setName('Sync interval')
-      .setDesc('How often to sync automatically (in minutes).')
-      .addText(text => text
-        .setPlaceholder('60')
-        .setValue(String(this.plugin.settings.syncInterval))
-        .onChange(async (value) => {
-          const interval = parseInt(value);
-          if (!isNaN(interval) && interval > 0) {
-            this.plugin.settings.syncInterval = interval;
-            await this.plugin.saveSettings();
-          }
-        }));
-    
-    // Set initial visibility based on auto-sync setting
-    syncIntervalSetting.settingEl.style.display = this.plugin.settings.autoSync ? '' : 'none';
         
     new Setting(container)
       .setName('Overwrite all')
