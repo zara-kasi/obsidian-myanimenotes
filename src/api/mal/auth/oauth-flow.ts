@@ -48,7 +48,7 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
 
   const authUrl = `${MAL_AUTH_URL}?${params.toString()}`;
 
-  new Notice('Opening MyAnimeList login page…', 3000);
+  new Notice('🔐 Opening MyAnimeList login page…', 3000);
   
   // Open in external browser
   if (window.require) {
@@ -107,7 +107,7 @@ async function exchangeCodeForToken(
     throw new Error('Invalid authorization code');
   }
 
-  new Notice('Exchanging authorization code for tokens…', 3000);
+  new Notice('Exchanging authorization code for tokens…', 2000);
 
   const body = new URLSearchParams({
     client_id: plugin.settings.malClientId,
@@ -142,24 +142,18 @@ async function exchangeCodeForToken(
     if (!data.access_token) {
       throw new Error('No access token received from MyAnimeList');
     }
-    
+
     // Save tokens
     plugin.settings.malAccessToken = data.access_token;
     plugin.settings.malRefreshToken = data.refresh_token;
     plugin.settings.malTokenExpiry = Date.now() + (data.expires_in * 1000);
     plugin.settings.malAuthenticated = true;
-    
-    // Automatically enable auto-sync on first successful authentication
-    if (!plugin.settings.autoSync) {
-      plugin.settings.autoSync = true;
-    }
-    
     await plugin.saveSettings();
 
     // Clear temporary PKCE data
     authState = null;
 
-    new Notice('Authenticated successfully!', 2000);
+    new Notice('✅ Authenticated successfully!', 4000);
     
     // Fetch user info
     try {
@@ -170,11 +164,6 @@ async function exchangeCodeForToken(
     
     // Refresh settings UI after Authentication
     plugin.refreshSettingsUI();
-    
-    // Start auto-sync timer now that authentication is complete
-    if (plugin.autoSyncManager) {
-      plugin.autoSyncManager.restart();
-    }
     
   } catch (err) {
     new Notice(`❌ MAL Auth failed: ${err.message}`, 5000);
