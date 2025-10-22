@@ -5,14 +5,12 @@ import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
 import { SyncManager, createSyncManager } from './sync';
 import { MediaCategory } from './models';
-import { AutoSyncManager, createAutoSyncManager } from './sync'; 
 
 
 export default class CassettePlugin extends Plugin {
   settings: CassetteSettings;
   settingsTab: CassetteSettingTab | null = null;
   syncManager: SyncManager | null = null;
-  autoSyncManager: AutoSyncManager | null = null;
 
   async onload() {
     await this.loadSettings();
@@ -20,11 +18,6 @@ export default class CassettePlugin extends Plugin {
     // Initialize sync manager
     this.syncManager = createSyncManager(this);
     
-      // Initialize auto-sync manager
-    this.autoSyncManager = createAutoSyncManager(this);
-    
-    // Start auto-sync if enabled
-    this.autoSyncManager.start();
     
     // Add ribbon icon for sync
     this.addRibbonIcon('refresh-cw', 'Cassette sync all', async (evt: MouseEvent) => {
@@ -53,10 +46,6 @@ export default class CassettePlugin extends Plugin {
   }
 
   onunload() {
-    // Stop auto-sync when plugin unloads
-    if (this.autoSyncManager) {
-      this.autoSyncManager.stop();
-    }
   }
 
   async loadSettings() {
@@ -66,11 +55,6 @@ export default class CassettePlugin extends Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
     
-    // Restart auto-sync when settings change
-    // (in case interval or enabled state changed)
-    if (this.autoSyncManager) {
-      this.autoSyncManager.restart();
-    }
   }
   
   refreshSettingsUI(): void {
