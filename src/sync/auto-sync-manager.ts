@@ -5,13 +5,17 @@ import { createDebugLogger } from '../utils';
 /**
  * Auto-Sync Manager
  * 
- * Handles automatic periodic syncing based on user settings
- * Runs in the background at configured intervals
+ * Handles one-time automatic sync after plugin load
+ * Executes exactly once, 10 minutes after plugin initialization
  */
 export class AutoSyncManager {
-  private intervalId: number | null = null;
+  private timeoutId: number | null = null;
   private plugin: CassettePlugin;
   private debug;
+  private hasExecuted: boolean = false;
+
+  // Fixed delay: 10 minutes in milliseconds
+  private readonly SYNC_DELAY_MS = 10 * 60 * 1000;
 
   constructor(plugin: CassettePlugin) {
     this.plugin = plugin;
@@ -19,11 +23,15 @@ export class AutoSyncManager {
   }
 
   /**
-   * Starts auto-sync if enabled in settings
+   * Starts auto-sync timer if enabled in settings
+   * Executes exactly once, 10 minutes after this method is called
    */
   start(): void {
-    // Stop any existing interval first
+    // Stop any existing timer first
     this.stop();
+
+    // Reset execution flag
+    this.hasExecuted = false;
 
     // Only start if auto-sync is enabled
     if (!this.plugin.settings.autoSync) {
@@ -37,30 +45,31 @@ export class AutoSyncManager {
       return;
     }
 
-    // Convert minutes to milliseconds
-    const intervalMs = this.plugin.settings.syncInterval * 60 * 1000;
-
-    // Set up recurring sync
-    this.intervalId = window.setInterval(async () => {
+    // Set up one-time sync timer (10 minutes)
+    this.timeoutId = window.setTimeout(async () => {
       await this.performAutoSync();
-    }, intervalMs);
+      this.hasExecuted = true;
+      this.timeoutId = null;
+    }, this.SYNC_DELAY_MS);
 
-    this.debug.log(`[Auto-Sync] Started with interval: ${this.plugin.settings.syncInterval} minutes`);
+    this.debug.log('[Auto-Sync] Scheduled to run in 10 minutes');
   }
 
   /**
-   * Stops auto-sync
+   * Stops auto-sync timer
+   * Cancels the pending sync if it hasn't executed yet
    */
   stop(): void {
-    if (this.intervalId !== null) {
-      window.clearInterval(this.intervalId);
-      this.intervalId = null;
-      this.debug.log('[Auto-Sync] Stopped');
+    if (this.timeoutId !== null) {
+      window.clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+      this.debug.log('[Auto-Sync] Stopped/Cancelled');
     }
   }
 
   /**
-   * Restarts auto-sync (useful when settings change)
+   * Restarts auto-sync timer
+   * Useful when settings change or plugin reloads
    */
   restart(): void {
     this.debug.log('[Auto-Sync] Restarting...');
@@ -69,22 +78,28 @@ export class AutoSyncManager {
   }
 
   /**
-   * Checks if auto-sync is currently running
+   * Checks if auto-sync timer is currently scheduled
    */
-  isRunning(): boolean {
-    return this.intervalId !== null;
+  isScheduled(): boolean {
+    return this.timeoutId !== null;
+  }
+
+  /**
+   * Checks if auto-sync has already executed in this session
+   */
+  hasAlreadyExecuted(): boolean {
+    return this.hasExecuted;
   }
 
   /**
    * Performs a single auto-sync operation
    */
   private async performAutoSync(): Promise<void> {
-    this.debug.log('[Auto-Sync] Running scheduled sync...');
+    this.debug.log('[Auto-Sync] Executing scheduled sync...');
 
     // Double-check authentication before syncing
     if (!this.plugin.settings.malAuthenticated) {
       this.debug.log('[Auto-Sync] Skipped - not authenticated');
-      this.stop(); // Stop auto-sync if no longer authenticated
       return;
     }
 
@@ -100,16 +115,12 @@ export class AutoSyncManager {
 
       this.debug.log('[Auto-Sync] Completed successfully');
 
-      // Optional: Show subtle notice for background sync
-      if (this.plugin.settings.debugMode) {
-        new Notice('✓ Auto-sync completed', 2000);
-      }
 
     } catch (error) {
       console.error('[Auto-Sync] Failed:', error);
       
       // Show error notice
-      new Notice(`⚠️ Auto-sync failed: ${error.message}`, 4000);
+      new Notice(`Cassette sync failed: ${error.message}`, 1500);
     }
   }
 }
