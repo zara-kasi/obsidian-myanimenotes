@@ -337,16 +337,6 @@ export class CassetteSettingTab extends PluginSettingTab {
 
 private renderSyncSection(container: HTMLElement): void {
     new Setting(container)
-      .setName('Auto sync')
-      .setDesc('Automatically sync your lists 10 minutes after plugin loads.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.autoSync)
-        .onChange(async (value) => {
-          this.plugin.settings.autoSync = value;
-          await this.plugin.saveSettings();
-        }));
-        
-    new Setting(container)
       .setName('Overwrite all')
       .setDesc('Update all notes on every sync, even if nothing changed.')
       .addToggle(toggle => toggle
