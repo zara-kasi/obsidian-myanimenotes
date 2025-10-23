@@ -149,7 +149,7 @@ async function exchangeCodeForToken(
     plugin.settings.malTokenExpiry = Date.now() + (data.expires_in * 1000);
     plugin.settings.malAuthenticated = true;
     // Enable auto-sync toggles by default after successful authentication
-    plugin.settings.autoSync = true;
+    plugin.settings.backgroundSync = true;
     plugin.settings.syncOnLoad = true;
     await plugin.saveSettings();
 
