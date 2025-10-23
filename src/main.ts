@@ -3,7 +3,7 @@ import { CassetteSettingTab } from './settings';
 import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
-import { SyncManager, createSyncManager } from './sync';
+import { SyncManager, createSyncManager, startAutoSyncTimer, clearAutoSyncTimer } from './sync';
 import { MediaCategory } from './models';
 
 
@@ -11,13 +11,15 @@ export default class CassettePlugin extends Plugin {
   settings: CassetteSettings;
   settingsTab: CassetteSettingTab | null = null;
   syncManager: SyncManager | null = null;
+  autoSyncTimer: NodeJS.Timeout | null = null;
 
   async onload() {
     await this.loadSettings();
 
     // Initialize sync manager
     this.syncManager = createSyncManager(this);
-    
+    // Start auto-sync timer
+    this.autoSyncTimer = startAutoSyncTimer(this);
     
     // Add ribbon icon for sync
     this.addRibbonIcon('refresh-cw', 'Cassette sync all', async (evt: MouseEvent) => {
@@ -46,6 +48,9 @@ export default class CassettePlugin extends Plugin {
   }
 
   onunload() {
+    // Clear auto-sync timer if it exists
+    clearAutoSyncTimer(this.autoSyncTimer);
+    this.autoSyncTimer = null;
   }
 
   async loadSettings() {
