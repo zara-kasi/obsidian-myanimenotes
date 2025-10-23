@@ -372,7 +372,7 @@ private renderSyncSection(container: HTMLElement): void {
     // Sync on load toggle
     new Setting(container)
       .setName('Sync on plugin load')
-      .setDesc('Automatically sync 10 minutes after opening Obsidian.')
+      .setDesc('Automatically sync 5 minutes after opening Obsidian.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.syncOnLoad)
         .onChange(async (value) => {
