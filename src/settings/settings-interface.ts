@@ -30,6 +30,7 @@ export interface CassetteSettings {
   
   // Sync Settings
   forceFullSync: boolean; 
+  autoSync: boolean;
   
   // Template Settings (for future use)
   useCustomTemplate: boolean;
@@ -66,6 +67,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   
   // Sync defaults
   forceFullSync: false,
+  autoSync: false,
   
   // Template defaults
   useCustomTemplate: false,
