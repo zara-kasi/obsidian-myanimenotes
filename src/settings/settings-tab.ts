@@ -347,86 +347,64 @@ private renderSyncSection(container: HTMLElement): void {
         await this.plugin.saveSettings();
       }));
   
-  // Master auto-sync toggle
+  // Sync on load toggle
   new Setting(container)
-    .setName('Auto sync')
-    .setDesc('Enable automatic syncing from MyAnimeList.')
+    .setName('Sync on plugin load')
+    .setDesc('Automatically sync 5 minutes after opening Obsidian.')
     .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.autoSync)
+      .setValue(this.plugin.settings.syncOnLoad)
       .onChange(async (value) => {
-        this.plugin.settings.autoSync = value;
+        this.plugin.settings.syncOnLoad = value;
         await this.plugin.saveSettings();
         
-        // Restart auto-sync manager
+        // Restart auto-sync manager to apply changes
         if (this.plugin.autoSyncManager) {
           this.plugin.autoSyncManager.stop();
-          if (value) {
-            this.plugin.autoSyncManager.start();
-          }
+          this.plugin.autoSyncManager.start();
+        }
+      }));
+  
+  // Background sync toggle
+  new Setting(container)
+    .setName('Background sync')
+    .setDesc('Automatically sync at regular intervals.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.backgroundSync)
+      .onChange(async (value) => {
+        this.plugin.settings.backgroundSync = value;
+        await this.plugin.saveSettings();
+        
+        // Restart auto-sync manager to apply changes
+        if (this.plugin.autoSyncManager) {
+          this.plugin.autoSyncManager.stop();
+          this.plugin.autoSyncManager.start();
         }
         
-        // Refresh UI to show/hide sub-options
+        // Refresh UI to show/hide interval input
         this.display();
       }));
   
-    // Sync on load toggle
+  // Background sync interval (only show if background sync is enabled)
+  if (this.plugin.settings.backgroundSync) {
     new Setting(container)
-      .setName('Sync on plugin load')
-      .setDesc('Automatically sync 5 minutes after opening Obsidian.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.syncOnLoad)
+      .setName('Sync interval')
+      .setDesc('Time between automatic syncs in minutes (minimum 30).')
+      .addText(text => text
+        .setPlaceholder('120')
+        .setValue(String(this.plugin.settings.backgroundSyncInterval))
         .onChange(async (value) => {
-          this.plugin.settings.syncOnLoad = value;
-          await this.plugin.saveSettings();
-          
-          // Restart auto-sync manager to apply changes
-          if (this.plugin.autoSyncManager) {
-            this.plugin.autoSyncManager.stop();
-            this.plugin.autoSyncManager.start();
-          }
-        }));
-    
-    // Background sync toggle
-    new Setting(container)
-      .setName('Background sync')
-      .setDesc('Automatically sync at regular intervals.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.backgroundSync)
-        .onChange(async (value) => {
-          this.plugin.settings.backgroundSync = value;
-          await this.plugin.saveSettings();
-          
-          // Restart auto-sync manager to apply changes
-          if (this.plugin.autoSyncManager) {
-            this.plugin.autoSyncManager.stop();
-            this.plugin.autoSyncManager.start();
-          }
-          
-          // Refresh UI to show/hide interval input
-          this.display();
-        }));
-    
-    // Background sync interval (only show if background sync is enabled)
-    if (this.plugin.settings.backgroundSync) {
-      new Setting(container)
-        .setName('Sync interval')
-        .setDesc('Time between automatic syncs in minutes (minimum 30).')
-        .addText(text => text
-          .setPlaceholder('120')
-          .setValue(String(this.plugin.settings.backgroundSyncInterval))
-          .onChange(async (value) => {
-            const numValue = parseInt(value);
-            if (!isNaN(numValue) && numValue >= 30) {
-              this.plugin.settings.backgroundSyncInterval = numValue;
-              await this.plugin.saveSettings();
-              
-              // Restart auto-sync manager to apply new interval
-              if (this.plugin.autoSyncManager) {
-                this.plugin.autoSyncManager.stop();
-                this.plugin.autoSyncManager.start();
-              }
+          const numValue = parseInt(value);
+          if (!isNaN(numValue) && numValue >= 30) {
+            this.plugin.settings.backgroundSyncInterval = numValue;
+            await this.plugin.saveSettings();
+            
+            // Restart auto-sync manager to apply new interval
+            if (this.plugin.autoSyncManager) {
+              this.plugin.autoSyncManager.stop();
+              this.plugin.autoSyncManager.start();
             }
-          }));
-    }
+          }
+        }));
+  }
 }
 }
