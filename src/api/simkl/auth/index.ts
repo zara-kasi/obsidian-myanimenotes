@@ -1,3 +1,4 @@
+/*
 // Main entry point for SIMKL authentication module
 
 // Re-export all public APIs
@@ -22,3 +23,4 @@ export type {
   SimklTokenResponse,
   SimklAuthState
 } from './types';
+*/
