@@ -369,8 +369,6 @@ private renderSyncSection(container: HTMLElement): void {
         this.display();
       }));
   
-  // Only show auto-sync options if auto-sync is enabled
-  if (this.plugin.settings.autoSync) {
     // Sync on load toggle
     new Setting(container)
       .setName('Sync on plugin load')
@@ -430,6 +428,5 @@ private renderSyncSection(container: HTMLElement): void {
             }
           }));
     }
-  }
 }
 }
