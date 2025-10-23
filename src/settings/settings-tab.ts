@@ -345,5 +345,15 @@ private renderSyncSection(container: HTMLElement): void {
           this.plugin.settings.forceFullSync = value;
           await this.plugin.saveSettings();
         }));
+        
+    new Setting(container)
+      .setName('Auto sync')
+      .setDesc('Automatically sync from MyAnimeList 10 minutes after plugin loads.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.autoSync)
+        .onChange(async (value) => {
+          this.plugin.settings.autoSync = value;
+          await this.plugin.saveSettings();
+        }));
   }
 }
