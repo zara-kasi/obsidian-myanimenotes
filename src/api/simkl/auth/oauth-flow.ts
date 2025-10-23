@@ -1,5 +1,5 @@
 // SIMKL OAuth 2.0 authorization flow
-
+/*
 import { Notice, requestUrl } from 'obsidian';
 import type CassettePlugin from '../../../main';
 import type { SimklAuthState, SimklTokenResponse, OAuthParams } from './types';
@@ -12,11 +12,13 @@ import { createDebugLogger } from '../../../utils';
 
 // Store state temporarily during auth flow
 let authState: SimklAuthState | null = null;
+*/
 
 /**
  * Initiates the OAuth authorization flow
  * @param plugin Plugin instance
  */
+ /*
 export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
   if (!plugin.settings.simklClientId) {
     new Notice('❌ Please enter your SIMKL Client ID first.', 5000);
@@ -59,12 +61,15 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
     window.open(authUrl, '_blank');
   }
 }
+*/
 
 /**
  * Handles the OAuth redirect callback
  * @param plugin Plugin instance
  * @param params Redirect parameters
  */
+ 
+ /*
 export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthParams): Promise<void> {
   const debug = createDebugLogger(plugin, 'SIMKL Auth');
   try {
@@ -92,12 +97,15 @@ export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthP
     new Notice(`❌ SIMKL Authentication failed: ${error.message}`, 5000);
   }
 }
+*/
 
 /**
  * Exchanges authorization code for access token
  * @param plugin Plugin instance
  * @param code Authorization code
  */
+ 
+ /*
 async function exchangeCodeForToken(
   plugin: CassettePlugin, 
   code: string
@@ -164,10 +172,13 @@ async function exchangeCodeForToken(
 }
 
 // Helper functions
+*/
 
 /**
  * Extracts code and state from various OAuth redirect formats
  */
+ 
+ /*
 function extractOAuthParams(params: OAuthParams): { code: string | null; state: string | null } {
   let code: string | null = null;
   let state: string | null = null;
@@ -192,10 +203,13 @@ function extractOAuthParams(params: OAuthParams): { code: string | null; state: 
   
   return { code, state };
 }
+*/
 
 /**
  * Formats token exchange error with helpful messages
  */
+ 
+ /*
 function formatTokenError(res: any): string {
   const errorText = res.text || JSON.stringify(res.json) || 'Unknown error';
   let errorMsg = `Token exchange failed (HTTP ${res.status})`;
@@ -222,3 +236,4 @@ function formatTokenError(res: any): string {
   
   return errorMsg;
 }
+*/
