@@ -22,7 +22,7 @@ export default class CassettePlugin extends Plugin {
     this.autoSyncTimer = startAutoSyncTimer(this);
     
     // Add ribbon icon for sync
-    this.addRibbonIcon('refresh-cw', 'Cassette sync all', async (evt: MouseEvent) => {
+    this.addRibbonIcon('cassette-tape', 'Cassette sync all', async (evt: MouseEvent) => {
      if (!this.syncManager) return;
   await this.syncManager.syncFromMAL();
     });
