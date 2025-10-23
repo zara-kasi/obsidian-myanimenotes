@@ -3,7 +3,7 @@
   "name": "Cassette",
   "version": "1.0.1",
   "minAppVersion": "0.15.0",
-  "description": "Make your media a part of your knowledge. Sync your anime, manga, movies, and TV shows from MyAnimeList and Simkl directly into your vault.",
+  "description": "Sync your anime and manga from MyAnimeList (MAL) directly into your vault",
   "author": "Zarakasi",
   "authorUrl": "https://github.com/zara-kasi",
   "isDesktopOnly": false
