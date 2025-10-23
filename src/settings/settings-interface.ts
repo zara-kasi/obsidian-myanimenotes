@@ -13,13 +13,13 @@ export interface CassetteSettings {
   malUserInfo?: MALUserInfo | null;
   malAuthenticated: boolean;
   
-  // SIMKL Authentication
+ /*// SIMKL Authentication
   simklClientId: string;
   simklClientSecret?: string;
   simklAccessToken?: string;
   simklUserInfo?: SimklUserInfo | null;
   simklAuthenticated: boolean;
-  
+  */
   // Storage Settings
   animeFolder: string;
   mangaFolder: string;
@@ -30,7 +30,6 @@ export interface CassetteSettings {
   
   // Sync Settings
   forceFullSync: boolean; 
-  autoSync: boolean; // Master toggle for all auto-sync features
   syncOnLoad: boolean; // Sync after plugin loads
   backgroundSync: boolean; // Periodic background sync
   backgroundSyncInterval: number; // Interval in minutes (min: 30)
@@ -70,7 +69,6 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   
   // Sync defaults
   forceFullSync: false,
-  autoSync: false,
   syncOnLoad: false,
   backgroundSync: false,
   backgroundSyncInterval: 90, // 90 minutes default
