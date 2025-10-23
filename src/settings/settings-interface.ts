@@ -29,9 +29,8 @@ export interface CassetteSettings {
   useCustomPropertyMapping: boolean;
   
   // Sync Settings
-  autoSync: boolean;
-  syncInterval: number; // minutes
   forceFullSync: boolean; 
+  autoSync: boolean;
   
   // Template Settings (for future use)
   useCustomTemplate: boolean;
@@ -67,9 +66,8 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   useCustomPropertyMapping: false,
   
   // Sync defaults
-  autoSync: false,
-  syncInterval: 60, // 1 hour
   forceFullSync: false,
+  autoSync: false,
   
   // Template defaults
   useCustomTemplate: false,

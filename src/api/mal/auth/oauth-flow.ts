@@ -19,7 +19,7 @@ let authState: MALAuthState | null = null;
  */
 export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
   if (!plugin.settings.malClientId) {
-    new Notice('❌ Please enter your MAL Client ID first.', 5000);
+    new Notice('Please enter your MAL Client ID first.', 5000);
     return;
   }
   
@@ -48,7 +48,7 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
 
   const authUrl = `${MAL_AUTH_URL}?${params.toString()}`;
 
-  new Notice('🔐 Opening MyAnimeList login page…', 3000);
+  new Notice('Opening MyAnimeList login page…', 2000);
   
   // Open in external browser
   if (window.require) {
@@ -107,7 +107,7 @@ async function exchangeCodeForToken(
     throw new Error('Invalid authorization code');
   }
 
-  new Notice('Exchanging authorization code for tokens…', 2000);
+  new Notice('Exchanging authorization code for tokens…', 1500);
 
   const body = new URLSearchParams({
     client_id: plugin.settings.malClientId,
@@ -153,7 +153,7 @@ async function exchangeCodeForToken(
     // Clear temporary PKCE data
     authState = null;
 
-    new Notice('✅ Authenticated successfully!', 4000);
+    new Notice('Authenticated successfully!', 3000);
     
     // Fetch user info
     try {
@@ -161,6 +161,10 @@ async function exchangeCodeForToken(
     } catch (userError) {
       console.warn('[MAL-AUTH] Failed to fetch user info but auth succeeded', userError);
     }
+    
+    // Enable auto-sync by default after successful authentication
+    plugin.settings.autoSync = true;
+    await plugin.saveSettings();
     
     // Refresh settings UI after Authentication
     plugin.refreshSettingsUI();
