@@ -2,7 +2,7 @@ import { Plugin } from 'obsidian';
 import { CassetteSettingTab } from './settings';
 import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
-import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
+// import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
 import { MediaCategory } from './models';
 
