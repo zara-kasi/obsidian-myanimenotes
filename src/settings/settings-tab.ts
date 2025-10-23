@@ -336,24 +336,100 @@ export class CassetteSettingTab extends PluginSettingTab {
 }
 
 private renderSyncSection(container: HTMLElement): void {
-    new Setting(container)
-      .setName('Overwrite all')
-      .setDesc('Update all notes on every sync, even if nothing changed.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.forceFullSync)
-        .onChange(async (value) => {
-          this.plugin.settings.forceFullSync = value;
-          await this.plugin.saveSettings();
-        }));
+  // Force full sync toggle
+  new Setting(container)
+    .setName('Overwrite all')
+    .setDesc('Update all notes on every sync, even if nothing changed.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.forceFullSync)
+      .onChange(async (value) => {
+        this.plugin.settings.forceFullSync = value;
+        await this.plugin.saveSettings();
+      }));
+  
+  // Master auto-sync toggle
+  new Setting(container)
+    .setName('Auto sync')
+    .setDesc('Enable automatic syncing from MyAnimeList.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.autoSync)
+      .onChange(async (value) => {
+        this.plugin.settings.autoSync = value;
+        await this.plugin.saveSettings();
         
+        // Restart auto-sync manager
+        if (this.plugin.autoSyncManager) {
+          this.plugin.autoSyncManager.stop();
+          if (value) {
+            this.plugin.autoSyncManager.start();
+          }
+        }
+        
+        // Refresh UI to show/hide sub-options
+        this.display();
+      }));
+  
+  // Only show auto-sync options if auto-sync is enabled
+  if (this.plugin.settings.autoSync) {
+    // Sync on load toggle
     new Setting(container)
-      .setName('Auto sync')
-      .setDesc('Automatically sync from MyAnimeList 10 minutes after plugin loads.')
+      .setName('Sync on plugin load')
+      .setDesc('Automatically sync 10 minutes after opening Obsidian.')
       .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.autoSync)
+        .setValue(this.plugin.settings.syncOnLoad)
         .onChange(async (value) => {
-          this.plugin.settings.autoSync = value;
+          this.plugin.settings.syncOnLoad = value;
           await this.plugin.saveSettings();
+          
+          // Restart auto-sync manager to apply changes
+          if (this.plugin.autoSyncManager) {
+            this.plugin.autoSyncManager.stop();
+            this.plugin.autoSyncManager.start();
+          }
         }));
+    
+    // Background sync toggle
+    new Setting(container)
+      .setName('Background sync')
+      .setDesc('Automatically sync at regular intervals.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.backgroundSync)
+        .onChange(async (value) => {
+          this.plugin.settings.backgroundSync = value;
+          await this.plugin.saveSettings();
+          
+          // Restart auto-sync manager to apply changes
+          if (this.plugin.autoSyncManager) {
+            this.plugin.autoSyncManager.stop();
+            this.plugin.autoSyncManager.start();
+          }
+          
+          // Refresh UI to show/hide interval input
+          this.display();
+        }));
+    
+    // Background sync interval (only show if background sync is enabled)
+    if (this.plugin.settings.backgroundSync) {
+      new Setting(container)
+        .setName('Sync interval')
+        .setDesc('Time between automatic syncs in minutes (minimum 30).')
+        .addText(text => text
+          .setPlaceholder('90')
+          .setValue(String(this.plugin.settings.backgroundSyncInterval))
+          .onChange(async (value) => {
+            const numValue = parseInt(value);
+            if (!isNaN(numValue) && numValue >= 30) {
+              this.plugin.settings.backgroundSyncInterval = numValue;
+              await this.plugin.saveSettings();
+              
+              // Restart auto-sync manager to apply new interval
+              if (this.plugin.autoSyncManager) {
+                this.plugin.autoSyncManager.stop();
+                this.plugin.autoSyncManager.start();
+              }
+            }
+          }));
+    }
   }
+}
 }
