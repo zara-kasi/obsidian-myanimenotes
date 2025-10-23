@@ -162,6 +162,10 @@ async function exchangeCodeForToken(
       console.warn('[MAL-AUTH] Failed to fetch user info but auth succeeded', userError);
     }
     
+    // Enable auto-sync by default after successful authentication
+    plugin.settings.autoSync = true;
+    await plugin.saveSettings();
+    
     // Refresh settings UI after Authentication
     plugin.refreshSettingsUI();
     
