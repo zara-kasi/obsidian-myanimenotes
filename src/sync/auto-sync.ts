@@ -6,6 +6,7 @@ const MIN_BACKGROUND_INTERVAL = 30; // Minimum 30 minutes
 
 /**
  * Manages auto-sync timers
+ * Each sync type (syncOnLoad, backgroundSync) works independently
  */
 export class AutoSyncManager {
   private plugin: CassettePlugin;
@@ -20,20 +21,9 @@ export class AutoSyncManager {
 
   /**
    * Starts all enabled auto-sync timers
+   * Each timer checks authentication independently
    */
   start(): void {
-    // Check if auto-sync is enabled at all
-    if (!this.plugin.settings.autoSync) {
-      this.debug.log('Auto-sync disabled in settings');
-      return;
-    }
-
-    // Check if authenticated with MAL
-    if (!this.plugin.settings.malAuthenticated || !this.plugin.settings.malAccessToken) {
-      this.debug.log('Skipped: Not authenticated with MAL');
-      return;
-    }
-
     // Start sync on load if enabled
     if (this.plugin.settings.syncOnLoad) {
       this.startSyncOnLoad();
@@ -59,11 +49,23 @@ export class AutoSyncManager {
   private startSyncOnLoad(): void {
     this.clearSyncOnLoadTimer();
 
+    // Check authentication before starting timer
+    if (!this.isAuthenticated()) {
+      this.debug.log('[Sync on Load] Skipped: Not authenticated with MAL');
+      return;
+    }
+
     this.debug.log('[Sync on Load] Timer started: Will sync in 5 minutes');
 
     this.syncOnLoadTimer = setTimeout(async () => {
       this.debug.log('[Sync on Load] Triggered after 5 minutes');
       
+      // Double-check authentication at execution time
+      if (!this.isAuthenticated()) {
+        this.debug.log('[Sync on Load] Aborted: Not authenticated with MAL');
+        return;
+      }
+
       try {
         if (this.plugin.syncManager) {
           await this.plugin.syncManager.syncFromMAL();
@@ -81,6 +83,12 @@ export class AutoSyncManager {
   private startBackgroundSync(): void {
     this.clearBackgroundSyncTimer();
 
+    // Check authentication before starting timer
+    if (!this.isAuthenticated()) {
+      this.debug.log('[Background Sync] Skipped: Not authenticated with MAL');
+      return;
+    }
+
     // Validate interval (minimum 30 minutes)
     const intervalMinutes = Math.max(
       this.plugin.settings.backgroundSyncInterval,
@@ -93,6 +101,12 @@ export class AutoSyncManager {
     const runSync = async () => {
       this.debug.log('[Background Sync] Triggered');
       
+      // Check authentication at execution time
+      if (!this.isAuthenticated()) {
+        this.debug.log('[Background Sync] Aborted: Not authenticated with MAL');
+        return;
+      }
+
       try {
         if (this.plugin.syncManager) {
           await this.plugin.syncManager.syncFromMAL();
@@ -102,14 +116,26 @@ export class AutoSyncManager {
         console.error('[Background Sync] Failed:', error);
       }
 
-      // Schedule next sync if still enabled
-      if (this.plugin.settings.autoSync && this.plugin.settings.backgroundSync) {
+      // Schedule next sync if still enabled and authenticated
+      if (this.plugin.settings.backgroundSync && this.isAuthenticated()) {
         this.backgroundSyncTimer = setTimeout(runSync, intervalMs);
+      } else {
+        this.debug.log('[Background Sync] Stopped: Either disabled or not authenticated');
       }
     };
 
     // Start the first timer
     this.backgroundSyncTimer = setTimeout(runSync, intervalMs);
+  }
+
+  /**
+   * Checks if authenticated with MAL
+   */
+  private isAuthenticated(): boolean {
+    return !!(
+      this.plugin.settings.malAuthenticated && 
+      this.plugin.settings.malAccessToken
+    );
   }
 
   /**
