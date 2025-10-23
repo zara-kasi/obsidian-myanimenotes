@@ -1,7 +1,6 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
-// import { startAuthFlow as startSimklAuth, logout as simklLogout, isAuthenticated as isSimklAuthenticated } from '../api/simkl';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 import { renderPropertyMappingSection } from './property-settings';
 import { FolderSuggest } from './folder-suggest';
@@ -26,15 +25,6 @@ export class CassetteSettingTab extends PluginSettingTab {
   .setHeading();
     
     this.renderMALSection(containerEl);
-
-    // ========================================================================
-    // SIMKL Section
-    // ========================================================================
-//    new Setting(containerEl)
-//  .setName('SIMKL')
-//  .setHeading();
-    
-//    this.renderSimklSection(containerEl);
 
     // ========================================================================
     // Storage Section
@@ -203,108 +193,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       
     }
   }
-/*
-  private renderSimklSection(container: HTMLElement): void {
-    const isAuth = isSimklAuthenticated(this.plugin);
 
-    // Show user info if authenticated
-    if (isAuth && this.plugin.settings.simklUserInfo) {
-      const userInfo = this.plugin.settings.simklUserInfo;
-      
-      const userSetting = new Setting(container);
-      
-      const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
-      
-      if (userInfo.picture) {
-        userInfoContainer.createEl('img', {
-          cls: 'cassette-user-avatar',
-          attr: {
-            src: userInfo.picture,
-            alt: userInfo.name
-          }
-        });
-      }
-      
-      userInfoContainer.createEl('span', {
-        cls: 'cassette-user-name',
-        text: userInfo.name
-      });
-    }
-
-    if (!isAuth) {
-      new Setting(container)
-        .setName('Client ID')
-        .setDesc('Your SIMKL Client ID.')
-        .addText(text => text
-          .setPlaceholder('Enter Client ID')
-          .setValue(this.plugin.settings.simklClientId)
-          .onChange(async (value) => {
-            this.plugin.settings.simklClientId = value.trim();
-            await this.plugin.saveSettings();
-          }));
-
-      new Setting(container)
-        .setName('Client Secret')
-        .setDesc('Your SIMKL Client Secret.')
-        .addText(text => {
-          text
-            .setPlaceholder('Enter Client Secret')
-            .setValue(this.plugin.settings.simklClientSecret || '')
-            .onChange(async (value) => {
-              this.plugin.settings.simklClientSecret = value.trim();
-              await this.plugin.saveSettings();
-            });
-          text.inputEl.type = 'password';
-          return text;
-        });
-    }
-    
-    new Setting(container)
-      .setName(isAuth ? 'Clear' : 'Authenticate')
-      .setDesc(isAuth 
-        ? 'Clear all SIMKL credentials and authentication data.' 
-        : 'Sign in to SIMKL to sync your watch list.'
-      )
-      .addButton(button => {
-  button
-    .setButtonText(isAuth ? 'Clear' : 'Authenticate')
-    .onClick(async () => {
-      if (isAuth) {
-        await simklLogout(this.plugin);
-        this.display();
-      } else {
-        await startSimklAuth(this.plugin);
-        this.display();
-      }
-    });
-
-  button.buttonEl.addClass(isAuth ? 'mod-warning' : 'mod-cta');
-});
-
-    if (!isAuth) {
-      const credentialSetting = new Setting(container)
-        .setName('How to get credentials')
-        .then(setting => {
-          setting.settingEl.addClass('cassette-credential-info');
-        });
-      
-      const descEl = credentialSetting.descEl;
-      descEl.createSpan({ 
-        text: 'Create an app at ' 
-      });
-      descEl.createEl('code', { text: 'https://simkl.com/settings/developer/new' });
-      descEl.createSpan({ text: ' to get your Client ID and Secret. Set the redirect URI to: ' });
-      descEl.createEl('code', { text: 'obsidian://cassette-auth/simkl.' });
-      descEl.createEl('a', {
-        text: 'Learn more',
-        href: 'https://github.com/zara-kasi/cassette/blob/main/docs/simkl-authentication-guide.md'
-      }).addEventListener('click', (e) => {
-        e.preventDefault();
-        window.open('https://github.com/zara-kasi/cassette/blob/main/docs/simkl-authentication-guide.md', '_blank');
-      });
-    }
-  }
-*/
   private renderStorageSection(container: HTMLElement): void {
   new Setting(container)
     .setName('Anime folder')
@@ -336,24 +225,75 @@ export class CassetteSettingTab extends PluginSettingTab {
 }
 
 private renderSyncSection(container: HTMLElement): void {
-    new Setting(container)
-      .setName('Overwrite all')
-      .setDesc('Update all notes on every sync, even if nothing changed.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.forceFullSync)
-        .onChange(async (value) => {
-          this.plugin.settings.forceFullSync = value;
-          await this.plugin.saveSettings();
-        }));
+  // Force full sync toggle
+  new Setting(container)
+    .setName('Overwrite all')
+    .setDesc('Update all notes on every sync, even if nothing changed.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.forceFullSync)
+      .onChange(async (value) => {
+        this.plugin.settings.forceFullSync = value;
+        await this.plugin.saveSettings();
+      }));
+  
+  // Sync on load toggle
+  new Setting(container)
+    .setName('Sync on plugin load')
+    .setDesc('Automatically sync 5 minutes after opening Obsidian.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.syncOnLoad)
+      .onChange(async (value) => {
+        this.plugin.settings.syncOnLoad = value;
+        await this.plugin.saveSettings();
         
+        // Restart auto-sync manager to apply changes
+        if (this.plugin.autoSyncManager) {
+          this.plugin.autoSyncManager.stop();
+          this.plugin.autoSyncManager.start();
+        }
+      }));
+  
+  // Background sync toggle
+  new Setting(container)
+    .setName('Background sync')
+    .setDesc('Automatically sync at regular intervals.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.backgroundSync)
+      .onChange(async (value) => {
+        this.plugin.settings.backgroundSync = value;
+        await this.plugin.saveSettings();
+        
+        // Restart auto-sync manager to apply changes
+        if (this.plugin.autoSyncManager) {
+          this.plugin.autoSyncManager.stop();
+          this.plugin.autoSyncManager.start();
+        }
+        
+        // Refresh UI to show/hide interval input
+        this.display();
+      }));
+  
+  // Background sync interval (only show if background sync is enabled)
+  if (this.plugin.settings.backgroundSync) {
     new Setting(container)
-      .setName('Auto sync')
-      .setDesc('Automatically sync from MyAnimeList 10 minutes after plugin loads.')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.autoSync)
+      .setName('Sync interval')
+      .setDesc('Time between automatic syncs in minutes (minimum 30).')
+      .addText(text => text
+        .setPlaceholder('120')
+        .setValue(String(this.plugin.settings.backgroundSyncInterval))
         .onChange(async (value) => {
-          this.plugin.settings.autoSync = value;
-          await this.plugin.saveSettings();
+          const numValue = parseInt(value);
+          if (!isNaN(numValue) && numValue >= 30) {
+            this.plugin.settings.backgroundSyncInterval = numValue;
+            await this.plugin.saveSettings();
+            
+            // Restart auto-sync manager to apply new interval
+            if (this.plugin.autoSyncManager) {
+              this.plugin.autoSyncManager.stop();
+              this.plugin.autoSyncManager.start();
+            }
+          }
         }));
   }
+}
 }

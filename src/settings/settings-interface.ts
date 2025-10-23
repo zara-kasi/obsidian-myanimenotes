@@ -1,5 +1,4 @@
 import type { MALUserInfo } from '../api/mal';
-import type { SimklUserInfo } from '../api/simkl';
 import type { PropertyMapping } from '../storage/markdown';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 
@@ -13,13 +12,6 @@ export interface CassetteSettings {
   malUserInfo?: MALUserInfo | null;
   malAuthenticated: boolean;
   
-  // SIMKL Authentication
-  simklClientId: string;
-  simklClientSecret?: string;
-  simklAccessToken?: string;
-  simklUserInfo?: SimklUserInfo | null;
-  simklAuthenticated: boolean;
-  
   // Storage Settings
   animeFolder: string;
   mangaFolder: string;
@@ -30,7 +22,9 @@ export interface CassetteSettings {
   
   // Sync Settings
   forceFullSync: boolean; 
-  autoSync: boolean;
+  syncOnLoad: boolean; // Sync after plugin loads
+  backgroundSync: boolean; // Periodic background sync
+  backgroundSyncInterval: number; // Interval in minutes (min: 30)
   
   // Template Settings (for future use)
   useCustomTemplate: boolean;
@@ -50,13 +44,6 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malUserInfo: null,
   malAuthenticated: false,
   
-  // SIMKL defaults
-  simklClientId: '',
-  simklClientSecret: '',
-  simklAccessToken: '',
-  simklUserInfo: null,
-  simklAuthenticated: false,
-  
   // Storage defaults
   animeFolder: 'Cassette/Anime',
   mangaFolder: 'Cassette/Manga',
@@ -67,7 +54,9 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   
   // Sync defaults
   forceFullSync: false,
-  autoSync: false,
+  syncOnLoad: false,
+  backgroundSync: false,
+  backgroundSyncInterval: 120, // 120 minutes default
   
   // Template defaults
   useCustomTemplate: false,

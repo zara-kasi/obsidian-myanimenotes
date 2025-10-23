@@ -1,6 +1,3 @@
----
-updated: 2025-10-23 12:55:23.776
----
 # Obsidian Cassette Plugin
 
 Sync your anime and manga from MyAnimeList directly into your Obsidian vault. Build a private, offline media library that integrates with your notes.
@@ -102,6 +99,10 @@ Cassette compares timestamps to avoid unnecessary file updates:
 Enable **Property Customization** to rename frontmatter fields to match your workflow.
 
 Example: Change `rating` → `my_score`, `status` → `watch_status`, etc.
+
+---
+
+## Customization
 
 ### Using Genres as Tags
 
