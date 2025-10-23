@@ -3,7 +3,7 @@ import { CassetteSettingTab } from './settings';
 import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
-import { SyncManager, createSyncManager, startAutoSyncTimer, clearAutoSyncTimer } from './sync';
+import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
 import { MediaCategory } from './models';
 
 
@@ -11,47 +11,50 @@ export default class CassettePlugin extends Plugin {
   settings: CassetteSettings;
   settingsTab: CassetteSettingTab | null = null;
   syncManager: SyncManager | null = null;
-  autoSyncTimer: NodeJS.Timeout | null = null;
+  autoSyncManager: AutoSyncManager | null = null;
 
   async onload() {
-    await this.loadSettings();
+  await this.loadSettings();
 
-    // Initialize sync manager
-    this.syncManager = createSyncManager(this);
-    // Start auto-sync timer
-    this.autoSyncTimer = startAutoSyncTimer(this);
-    
-    // Add ribbon icon for sync
-    this.addRibbonIcon('cassette-tape', 'Cassette sync all', async (evt: MouseEvent) => {
-     if (!this.syncManager) return;
-  await this.syncManager.syncFromMAL();
-    });
+  // Initialize sync manager
+  this.syncManager = createSyncManager(this);
+  
+  // Initialize auto-sync manager
+  this.autoSyncManager = createAutoSyncManager(this);
+  
+  // Add ribbon icon for sync
+  this.addRibbonIcon('cassette-tape', 'Cassette sync all', async (evt: MouseEvent) => {
+    if (!this.syncManager) return;
+    await this.syncManager.syncFromMAL();
+  });
 
-    // Add settings tab
-    this.settingsTab = new CassetteSettingTab(this.app, this);
-    this.addSettingTab(this.settingsTab);
+  // Add settings tab
+  this.settingsTab = new CassetteSettingTab(this.app, this);
+  this.addSettingTab(this.settingsTab);
 
-    // Register OAuth protocol handler for MAL
-    this.registerObsidianProtocolHandler('cassette-auth/mal', async (params) => {
-      await handleMALRedirect(this, params);
-    });
+  // Register OAuth protocol handler for MAL
+  this.registerObsidianProtocolHandler('cassette-auth/mal', async (params) => {
+    await handleMALRedirect(this, params);
+  });
 
-    // Register OAuth protocol handler for SIMKL
-    this.registerObsidianProtocolHandler('cassette-auth/simkl', async (params) => {
-      await handleSimklRedirect(this, params);
-    });
+  /*
+  // Register OAuth protocol handler for SIMKL
+  this.registerObsidianProtocolHandler('cassette-auth/simkl', async (params) => {
+    await handleSimklRedirect(this, params);
+  });
+*/
 
-    // Add commands
-    this.addCommands();
-
-    
-  }
+  // Add commands
+  this.addCommands();
+}
 
   onunload() {
-    // Clear auto-sync timer if it exists
-    clearAutoSyncTimer(this.autoSyncTimer);
-    this.autoSyncTimer = null;
+  // Stop all auto-sync timers
+  if (this.autoSyncManager) {
+    this.autoSyncManager.stop();
   }
+  this.autoSyncManager = null;
+}
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
