@@ -2,7 +2,6 @@ import { Plugin } from 'obsidian';
 import { CassetteSettingTab } from './settings';
 import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
-// import { handleOAuthRedirect as handleSimklRedirect } from './api/simkl';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
 import { MediaCategory } from './models';
 
@@ -37,12 +36,6 @@ export default class CassettePlugin extends Plugin {
     await handleMALRedirect(this, params);
   });
 
-  /*
-  // Register OAuth protocol handler for SIMKL
-  this.registerObsidianProtocolHandler('cassette-auth/simkl', async (params) => {
-    await handleSimklRedirect(this, params);
-  });
-*/
 
   // Add commands
   this.addCommands();
