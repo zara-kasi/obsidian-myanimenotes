@@ -1,5 +1,4 @@
 import type { MALUserInfo } from '../api/mal';
-// import type { SimklUserInfo } from '../api/simkl';
 import type { PropertyMapping } from '../storage/markdown';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 
@@ -13,13 +12,6 @@ export interface CassetteSettings {
   malUserInfo?: MALUserInfo | null;
   malAuthenticated: boolean;
   
- /*// SIMKL Authentication
-  simklClientId: string;
-  simklClientSecret?: string;
-  simklAccessToken?: string;
-  simklUserInfo?: SimklUserInfo | null;
-  simklAuthenticated: boolean;
-  */
   // Storage Settings
   animeFolder: string;
   mangaFolder: string;
@@ -52,14 +44,6 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malUserInfo: null,
   malAuthenticated: false,
   
- /*
- // SIMKL defaults
-  simklClientId: '',
-  simklClientSecret: '',
-  simklAccessToken: '',
-  simklUserInfo: null,
-  simklAuthenticated: false,
-  */
   // Storage defaults
   animeFolder: 'Cassette/Anime',
   mangaFolder: 'Cassette/Manga',
