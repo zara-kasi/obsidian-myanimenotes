@@ -347,6 +347,27 @@ private renderSyncSection(container: HTMLElement): void {
         await this.plugin.saveSettings();
       }));
   
+  // Master auto-sync toggle
+  new Setting(container)
+    .setName('Auto sync')
+    .setDesc('Enable automatic syncing from MyAnimeList.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.autoSync)
+      .onChange(async (value) => {
+        this.plugin.settings.autoSync = value;
+        await this.plugin.saveSettings();
+        
+        // Restart auto-sync manager
+        if (this.plugin.autoSyncManager) {
+          this.plugin.autoSyncManager.stop();
+          if (value) {
+            this.plugin.autoSyncManager.start();
+          }
+        }
+        
+        // Refresh UI to show/hide sub-options
+        this.display();
+      }));
   
     // Sync on load toggle
     new Setting(container)
