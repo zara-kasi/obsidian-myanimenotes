@@ -1,7 +1,7 @@
 import type CassettePlugin from '../main';
 import { createDebugLogger } from '../utils';
 
-const SYNC_ON_LOAD_DELAY = 10 * 60 * 1000; // 10 minutes in milliseconds
+const SYNC_ON_LOAD_DELAY = 5 * 60 * 1000; // 5 minutes in milliseconds
 const MIN_BACKGROUND_INTERVAL = 30; // Minimum 30 minutes
 
 /**
@@ -54,15 +54,15 @@ export class AutoSyncManager {
   }
 
   /**
-   * Starts the sync-on-load timer (one-time, 10 minutes after load)
+   * Starts the sync-on-load timer (one-time, 5 minutes after load)
    */
   private startSyncOnLoad(): void {
     this.clearSyncOnLoadTimer();
 
-    this.debug.log('[Sync on Load] Timer started: Will sync in 10 minutes');
+    this.debug.log('[Sync on Load] Timer started: Will sync in 5 minutes');
 
     this.syncOnLoadTimer = setTimeout(async () => {
-      this.debug.log('[Sync on Load] Triggered after 10 minutes');
+      this.debug.log('[Sync on Load] Triggered after 5 minutes');
       
       try {
         if (this.plugin.syncManager) {
