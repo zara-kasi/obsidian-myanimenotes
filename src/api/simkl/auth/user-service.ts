@@ -1,16 +1,19 @@
 // SIMKL user information management
-
+/*
 import { requestUrl } from 'obsidian';
 import type CassettePlugin from '../../../main';
 import type { SimklUserInfo } from './types';
 import { SIMKL_USER_URL } from './constants';
 import { getAuthHeaders } from './token-manager';
+*/
 
 /**
  * Fetches user information from SIMKL API
  * @param plugin Plugin instance
  * @throws Error if fetch fails
  */
+ 
+ /*
 export async function fetchUserInfo(plugin: CassettePlugin): Promise<void> {
   const headers = getAuthHeaders(plugin);
   if (!headers) {
@@ -39,15 +42,19 @@ export async function fetchUserInfo(plugin: CassettePlugin): Promise<void> {
   
   await plugin.saveSettings();
 }
+*/
 
 /**
  * Gets the current user info
  * @param plugin Plugin instance
  * @returns User info or null if not available
  */
+ 
+ /*
 export function getUserInfo(plugin: CassettePlugin): SimklUserInfo | null {
   return plugin.settings.simklUserInfo || null;
 }
+*/
 
 /**
  * Gets the authenticated username
@@ -55,6 +62,8 @@ export function getUserInfo(plugin: CassettePlugin): SimklUserInfo | null {
  * @returns Username
  * @throws Error if not authenticated or username not available
  */
+ 
+ /*
 export async function getAuthenticatedUsername(plugin: CassettePlugin): Promise<string> {
   if (!plugin.settings.simklAccessToken) {
     throw new Error('Not authenticated with SIMKL');
@@ -71,3 +80,4 @@ export async function getAuthenticatedUsername(plugin: CassettePlugin): Promise<
   
   return name;
 }
+*/
