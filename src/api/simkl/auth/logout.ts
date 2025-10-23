@@ -7,7 +7,7 @@
  * Clears all SIMKL authentication data and credentials
  * @param plugin Plugin instance
  */
-export async function logout(plugin: CassettePlugin): Promise<void> {
+/* export async function logout(plugin: CassettePlugin): Promise<void> {
   // Clear credentials
   plugin.settings.simklClientId = '';
   plugin.settings.simklClientSecret = '';
@@ -21,3 +21,4 @@ export async function logout(plugin: CassettePlugin): Promise<void> {
   
   new Notice('✅ Cleared all SIMKL credentials', 3000);
 }
+*/
