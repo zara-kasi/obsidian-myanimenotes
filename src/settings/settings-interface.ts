@@ -52,13 +52,14 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malUserInfo: null,
   malAuthenticated: false,
   
-  // SIMKL defaults
+ /*
+ // SIMKL defaults
   simklClientId: '',
   simklClientSecret: '',
   simklAccessToken: '',
   simklUserInfo: null,
   simklAuthenticated: false,
-  
+  */
   // Storage defaults
   animeFolder: 'Cassette/Anime',
   mangaFolder: 'Cassette/Manga',
