@@ -4,7 +4,8 @@ import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
 import { MediaCategory } from './models';
-
+import type { CassetteIndex } from './storage/cassette';
+import { createCassetteIndex } from './storage/cassette';
 
 export default class CassettePlugin extends Plugin {
   settings: CassetteSettings;
