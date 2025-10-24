@@ -22,7 +22,6 @@ export default class CassettePlugin extends Plugin {
   // Initialize cassette index (after settings loaded)
     try {
       this.cassetteIndex = await createCassetteIndex(this);
-      debug.log('[Cassette] Index initialized successfully');
     } catch (error) {
       console.error('[Cassette] Failed to initialize index:', error);
       // Plugin can still work without index (uses fallback)
