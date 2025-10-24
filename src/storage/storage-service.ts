@@ -7,8 +7,7 @@ import {
   findFilesByCassetteSync, 
   findLegacyFiles, 
   selectDeterministicFile,
-  acquireSyncLock,
-  releaseSyncLock
+  withLock
 } from './cassette';
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
 import { createDebugLogger } from '../utils';
@@ -79,10 +78,8 @@ export async function saveMediaItem(
   const cassetteSync = generateCassetteSync(item);
   debug.log(`[Storage] Processing item with cassette: ${cassetteSync}`);
   
-  // Acquire lock to prevent concurrent operations on same ID
-  await acquireSyncLock(cassetteSync);
-  
-  try {
+  // Use withLock wrapper for automatic lock management
+  return await withLock(cassetteSync, async () => {
     // Determine target folder
     const folderPath = item.category === 'anime' ? config.animeFolder : config.mangaFolder;
     
@@ -210,10 +207,7 @@ export async function saveMediaItem(
       cassetteSync,
       message: `Created ${filePath}`
     };
-    
-  } finally {
-    releaseSyncLock(cassetteSync);
-  }
+  });
 }
 
 /**
