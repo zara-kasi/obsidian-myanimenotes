@@ -12,7 +12,7 @@ export default class CassettePlugin extends Plugin {
   settingsTab: CassetteSettingTab | null = null;
   syncManager: SyncManager | null = null;
   autoSyncManager: AutoSyncManager | null = null;
-public cassetteIndex: CassetteIndex | null = null;
+  cassetteIndex: CassetteIndex | null = null;
 
   async onload() {
   await this.loadSettings();
