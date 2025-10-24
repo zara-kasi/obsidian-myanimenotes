@@ -3,13 +3,14 @@
  * 
  * Handles cassette identifier generation, validation, file lookup,
  * and concurrency control through in-memory locks.
+ * 
+ * PERFORMANCE: Now uses indexed lookups instead of vault-wide scans
  */
 
 import { TFile } from 'obsidian';
 import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../../models';
 import { createDebugLogger } from '../../utils';
-
 
 /**
  * Validates cassette format: provider:category:id
@@ -39,16 +40,15 @@ export function generateCassetteSync(item: UniversalMediaItem): string {
   return cassetteSync;
 }
 
-
 /**
- * Finds files by cassette frontmatter property
- * Returns all files that match the cassette value
+ * Finds files by cassette frontmatter property using indexed lookup
  * 
- * IMPORTANT: Searches the ENTIRE VAULT, not just a specific folder
- * This allows users to:
- * - Move files between folders without creating duplicates
- * - Organize files anywhere in their vault
- * - Rename files without breaking sync
+ * PERFORMANCE IMPROVEMENT: O(1) index lookup instead of O(n) vault scan
+ * 
+ * @param plugin Plugin instance with cassette index
+ * @param cassetteSync Cassette identifier to search for
+ * @param folderPath Folder path (kept for API compatibility but not used)
+ * @returns Array of files with matching cassette
  */
 export async function findFilesByCassetteSync(
   plugin: CassettePlugin,
@@ -56,21 +56,44 @@ export async function findFilesByCassetteSync(
   folderPath: string
 ): Promise<TFile[]> {
   const debug = createDebugLogger(plugin, 'CassetteSync');
+  
+  // Use indexed lookup if available
+  if (plugin.cassetteIndex) {
+    const files = plugin.cassetteIndex.findFilesByCassette(cassetteSync);
+    
+    if (files.length > 0) {
+      debug.log(`[CassetteSync] Found ${files.length} file(s) via index: ${cassetteSync}`);
+    }
+    
+    return files;
+  }
+  
+  // Fallback to old method if index not available (shouldn't happen)
+  debug.log('[CassetteSync] WARNING: Index not available, falling back to vault scan');
+  return await findFilesByCassetteSyncLegacy(plugin, cassetteSync);
+}
+
+/**
+ * Legacy fallback method for finding files (only used if index unavailable)
+ * Kept for safety but should rarely be called
+ */
+async function findFilesByCassetteSyncLegacy(
+  plugin: CassettePlugin,
+  cassetteSync: string
+): Promise<TFile[]> {
+  const debug = createDebugLogger(plugin, 'CassetteSync');
   const { vault, metadataCache } = plugin.app;
   const matchingFiles: TFile[] = [];
   
-  // CRITICAL: Search ALL markdown files in the ENTIRE VAULT
-  // Not limited to folderPath - this is intentional!
   const allFiles = vault.getMarkdownFiles();
   
-  // Check each file's frontmatter for cassette property
   for (const file of allFiles) {
     const cache = metadataCache.getFileCache(file);
     const frontmatter = cache?.frontmatter;
     
     if (frontmatter && frontmatter.cassette === cassetteSync) {
       matchingFiles.push(file);
-      debug.log(`[CassetteSync] Found file by cassette: ${file.path}`);
+      debug.log(`[CassetteSync] Found file by cassette (legacy): ${file.path}`);
     }
   }
   
@@ -81,9 +104,8 @@ export async function findFilesByCassetteSync(
  * Attempts to find legacy files that might match this item
  * Uses heuristics: provider-specific ID fields, filename patterns
  * 
- * LEGACY DETECTION STRATEGIES:
- * 1. Check frontmatter for provider-specific ID fields (malId, id, providerId)
- * 2. Check filename patterns (provider-id, provider-id-*)
+ * OPTIMIZATION: Limited to folderPath scope to avoid full vault scan
+ * Only called when no cassette match exists (fallback path)
  */
 export async function findLegacyFiles(
   plugin: CassettePlugin,
@@ -94,8 +116,11 @@ export async function findLegacyFiles(
   const { vault, metadataCache } = plugin.app;
   const candidates: TFile[] = [];
   
+  // OPTIMIZATION: Only scan files in the target folder, not entire vault
   const allFiles = vault.getMarkdownFiles();
   const folderFiles = allFiles.filter(file => file.path.startsWith(folderPath));
+  
+  debug.log(`[CassetteSync] Legacy detection scanning ${folderFiles.length} files in ${folderPath}`);
   
   // Strategy 1: Check frontmatter for provider-specific ID fields
   for (const file of folderFiles) {
