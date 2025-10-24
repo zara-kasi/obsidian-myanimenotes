@@ -52,6 +52,11 @@ public cassetteIndex: CassetteIndex | null = null;
 }
 
   onunload() {
+ 
+   // Clear index on unload
+  if (this.cassetteIndex) {
+      this.cassetteIndex.clear();
+    }
   // Stop all auto-sync timers
   if (this.autoSyncManager) {
     this.autoSyncManager.stop();
