@@ -563,12 +563,12 @@ console.log(stats); // Check duplicates count
 
 The Cassette Index system provides:
 
-✅ **Dramatic performance improvements** (20-200x faster lookups)  
-✅ **Automatic real-time updates** via metadata cache events  
-✅ **Minimal memory overhead** (~50 bytes per indexed file)  
-✅ **Graceful degradation** with fallback to legacy scan  
-✅ **Zero user intervention** - works automatically  
-✅ **Extensible architecture** for future enhancements
+ **Dramatic performance improvements** (20-200x faster lookups)  
+ **Automatic real-time updates** via metadata cache events  
+ **Minimal memory overhead** (~50 bytes per indexed file)  
+ **Graceful degradation** with fallback to legacy scan  
+ **Zero user intervention** - works automatically  
+ **Extensible architecture** for future enhancements
 
 **Bottom Line:** Large vaults now sync in seconds instead of minutes, with negligible memory cost.
 
