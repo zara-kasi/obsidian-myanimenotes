@@ -20,9 +20,6 @@ export class CassetteSettingTab extends PluginSettingTab {
     // ========================================================================
     // MAL Section
     // ========================================================================
-    new Setting(containerEl)
-  .setName('MyAnimeList')
-  .setHeading();
     
     this.renderMALSection(containerEl);
 
