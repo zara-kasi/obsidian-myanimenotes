@@ -4,19 +4,28 @@ import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
 import { MediaCategory } from './models';
-
+import type { CassetteIndex } from './storage/cassette';
+import { createCassetteIndex } from './storage/cassette';
 
 export default class CassettePlugin extends Plugin {
   settings: CassetteSettings;
   settingsTab: CassetteSettingTab | null = null;
   syncManager: SyncManager | null = null;
   autoSyncManager: AutoSyncManager | null = null;
+  cassetteIndex: CassetteIndex | null = null;
 
   async onload() {
   await this.loadSettings();
 
   // Initialize sync manager
   this.syncManager = createSyncManager(this);
+  // Initialize cassette index (after settings loaded)
+    try {
+      this.cassetteIndex = await createCassetteIndex(this);
+    } catch (error) {
+      console.error('[Cassette] Failed to initialize index:', error);
+      // Plugin can still work without index (uses fallback)
+    }
   
   // Initialize auto-sync manager
   this.autoSyncManager = createAutoSyncManager(this);
@@ -42,6 +51,11 @@ export default class CassettePlugin extends Plugin {
 }
 
   onunload() {
+ 
+   // Clear index on unload
+  if (this.cassetteIndex) {
+      this.cassetteIndex.clear();
+    }
   // Stop all auto-sync timers
   if (this.autoSyncManager) {
     this.autoSyncManager.stop();
