@@ -60,24 +60,6 @@ export class CassetteSettingTab extends PluginSettingTab {
         
       }));
 
-
-    // ========================================================================
-    // Footer
-    // ========================================================================
-
-    new Setting(containerEl)
-      .setName('GitHub')
-      .setDesc('Get more info or report an issue.')
-      .addButton(button =>
-        button
-          .setClass('mod-cta')
-          .setButtonText('Open GitHub')
-          .onClick(() => {
-            window.open('https://github.com/zara-kasi/cassette', '_blank');
-          })
-      );
-  }
-
   private renderMALSection(container: HTMLElement): void {
     const isAuth = isMALAuthenticated(this.plugin);
 
