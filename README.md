@@ -1,10 +1,14 @@
 # Obsidian Cassette Plugin
 
-Sync your anime and manga from MyAnimeList directly into your Obsidian vault. Build a private, offline media library that integrates with your notes.
-
----
+Cassette is an Obsidian plugin that syncs your anime and manga lists from MyAnimeList (MAL) into structured Markdown notes, complete with metadata, cover images, and automatic updates.
 
 ## Getting Started
+
+### Installation
+
+You can install Cassette via:
+- **BRAT:** Add `https://github.com/zara-kasi/cassette` to your BRAT list.
+- **Manual:** Download the latest release from [Releases](https://github.com/zara-kasi/cassette/releases) and extract it into your `.obsidian/plugins/cassette` folder.
 
 ### MyAnimeList Authentication
 
@@ -13,23 +17,15 @@ Sync your anime and manga from MyAnimeList directly into your Obsidian vault. Bu
 3. Enter your **Client ID** and **Client Secret**
 4. Click **Authenticate** and sign in via your browser
 
+> Cassette connects securely to your MyAnimeList account using their official API. You only need to create an API app once to link your account.
+
 ---
 
 ## Usage
 
-### Manual Sync
+After authenticating, use the Command Palette and run `Cassette: Sync all from MyAnimeList` or use the ribbon icon (Cassette symbol). Synced anime and manga appear in your chosen folder (set in plugin settings).
 
-Use the **Command Palette** (`Ctrl/Cmd + P`):
-
-- **Sync all from MyAnimeList** – Syncs both anime and manga
-- **Sync anime from MyAnimeList** – Anime only
-- **Sync manga from MyAnimeList** – Manga only
-- **Sync currently watching anime** – Only your "watching" list
-- **Sync currently reading manga** – Only your "reading" list
-
-Or click the **ribbon icon** (refresh symbol) in the left sidebar.
-
-### File Structure
+### Example synced note
 
 Synced items are saved as markdown notes with frontmatter:
 
@@ -73,74 +69,37 @@ synced: 2025-10-23T00:54:38+00:00
 [Your personal notes and thoughts go here—this content is never touched by sync]
 ```
 
-### The Cassette System
+> Fields like title, status, rating, and score are fetched from MAL. You can freely edit or add your own fields below the frontmatter — Cassette won’t overwrite your custom notes.
 
-Each note contains a **cassette** identifier in frontmatter (e.g., `mal:anime:40748`). This allows you to:
+### How Sync Works
 
-- Rename files freely – The filename doesn't matter
-- Move notes anywhere – Organize across folders without breaking sync
-- Avoid duplicates – Cassette prevents creating duplicate entries
+Each synced note includes a `cassette` property in the frontmatter (e.g., `mal:anime:40748`).  
+This value uniquely identifies the item by combining its platform, media type, and ID, allowing Cassette to identify and update notes based on their MyAnimeList entries.
 
-Files are tracked by the cassette property, not by filename or location.
+Cassette uses this identifier — not the file name or location — to track synced notes. You can safely rename or move files anywhere in your vault without breaking sync.
 
-### Sync Optimization
-
-Cassette compares timestamps to avoid unnecessary file updates:
-
-- Only updates notes when the API data has actually changed
-- Can be overridden with **Overwrite all** setting in plugin settings
-
----
-
-## Configuration
+Cassette compares the synced timestamp to skip unnecessary updates. If you prefer to refresh all data, enable **Overwrite all** in the plugin settings.
 
 ### Property Customization
 
-Enable **Property Customization** to rename frontmatter fields to match your workflow.
+Cassette lets you rename synced frontmatter fields to fit your personal workflow. You can configure this under **Settings → Cassette → Property Customization**.
 
-Example: Change `rating` → `my_score`, `status` → `watch_status`, etc.
+For example, change `status` → `watch_status` or `genres` → `tags` to match your note style.  
 
----
-
-## Customization
-
-### Using Genres as Tags
-
-Genres are automatically sanitized to work as Obsidian tags:
-
-```yaml
-genres:
-  - slice-of-life
-  - supernatural
-  - comedy
-```
-
-You can use these in tag queries or dataview:
-
-```dataview
-LIST
-FROM #slice-of-life
-WHERE rating > 8
-SORT rating DESC
-```
+> Tip: When genres are used as tags, Cassette automatically sanitizes them to work properly as Obsidian tags.
 
 
 ---
 
-## Support
+## Contributing
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/zara-kasi/cassette/issues)
-
----
-
-## Acknowledgments
-
-Built for the Obsidian community.
-
-Special thanks to [MyAnimeList](https://myanimelist.net/) for their API.
-
----
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development instructions.  
+Report bugs or suggest new features [here](https://github.com/zara-kasi/cassette/issues).
 
 ## License
 
-MIT License - see [LICENSE](https://github.com/zara-kasi/cassette/blob/main/LICENSE) for details.
+Cassette is released under the MIT License.  [MIT License](./LICENSE).  
+You are free to use, modify, and distribute Cassette in accordance with the license terms.  
+© 2025 [Zara Kasi](https://github.com/zara-kasi)
+
+---
