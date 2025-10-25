@@ -183,30 +183,60 @@ export async function saveMediaItem(
         message: `Migrated legacy file ${selectedFile.path} (added cassette)`
       };
     }
-    
-    // STEP 3: No existing file - create new file
-    debug.log(`[Storage] Creating new file for ${cassetteSync}`);
-    
-    const sanitizedTitle = item.title.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
-    let filename = `${sanitizedTitle}.md`;
-    
-    const existingByName = vault.getAbstractFileByPath(`${folderPath}/${filename}`);
-    if (existingByName) {
-      debug.log(`[Storage] Filename collision detected, generating unique name`);
-      filename = generateUniqueFilename(plugin, vault, folderPath, filename);
+   
+   // STEP 3: No existing file - create new file
+debug.log(`[Storage] Creating new file for ${cassetteSync}`);
+
+const sanitizedTitle = item.title.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+let filename = `${sanitizedTitle}.md`;
+const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync);
+
+// Robust file creation with automatic retry on collision
+const MAX_ATTEMPTS = 5;
+let attempt = 0;
+let filePath: string;
+let createdFile = null;
+
+while (attempt < MAX_ATTEMPTS && !createdFile) {
+  attempt++;
+  
+  // Generate unique filename if needed (after first attempt)
+  if (attempt > 1) {
+    filename = generateUniqueFilename(plugin, vault, folderPath, sanitizedTitle + '.md');
+    debug.log(`[Storage] Retry attempt ${attempt} with filename: ${filename}`);
+  }
+  
+  filePath = `${folderPath}/${filename}`;
+  
+  try {
+    createdFile = await vault.create(filePath, content);
+    debug.log(`[Storage] Successfully created: ${filePath}`);
+  } catch (error) {
+    // File already exists - retry with unique name
+    if (error.message?.includes('already exists') || error.message?.includes('File already exists')) {
+      debug.log(`[Storage] Collision detected on attempt ${attempt}, retrying with unique name`);
+      
+      if (attempt >= MAX_ATTEMPTS) {
+        throw new Error(`Failed to create file after ${MAX_ATTEMPTS} attempts due to naming conflicts`);
+      }
+      // Continue to next iteration
+    } else {
+      // Different error - rethrow
+      throw error;
     }
-    
-    const filePath = `${folderPath}/${filename}`;
-    const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync);
-    
-    await vault.create(filePath, content);
-    
-    return {
-      action: 'created',
-      filePath,
-      cassetteSync,
-      message: `Created ${filePath}`
-    };
+  }
+}
+
+if (!createdFile) {
+  throw new Error(`Failed to create file for ${cassetteSync} after ${MAX_ATTEMPTS} attempts`);
+}
+
+return {
+  action: 'created',
+  filePath: createdFile.path,
+  cassetteSync,
+  message: `Created ${createdFile.path}`
+};
   });
 }
 
