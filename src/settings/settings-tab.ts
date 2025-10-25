@@ -60,6 +60,8 @@ export class CassetteSettingTab extends PluginSettingTab {
         
       }));
 
+  }
+
   private renderMALSection(container: HTMLElement): void {
     const isAuth = isMALAuthenticated(this.plugin);
 
