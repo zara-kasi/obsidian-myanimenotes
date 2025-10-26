@@ -10,6 +10,7 @@ import {
   fetchMALAnimeByStatus,
   fetchMALMangaByStatus,
   isAuthenticated,
+  throttlePromises,
 } from '../api/mal';
 import {
   transformMALAnimeList,
