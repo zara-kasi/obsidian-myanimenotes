@@ -65,14 +65,47 @@ const MANGA_FIELDS = [
   'list_status{status,score,num_volumes_read,num_chapters_read,start_date,finish_date}'
 ].join(',');
 
+// Rate limiting configuration
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY_MS = 1000; // 1 second
+const MAX_RETRY_DELAY_MS = 10000; // 10 seconds
+
 /**
- * Makes an authenticated request to MAL API
+ * Sleep utility for retry delays
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Calculates exponential backoff delay with jitter
+ * @param attempt Current retry attempt (0-indexed)
+ * @returns Delay in milliseconds
+ */
+function calculateBackoffDelay(attempt: number): number {
+  // Exponential: 1s, 2s, 4s, 8s (capped at MAX_RETRY_DELAY_MS)
+  const exponentialDelay = Math.min(
+    INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt),
+    MAX_RETRY_DELAY_MS
+  );
+  
+  // Add jitter (±20%) to prevent thundering herd
+  const jitter = exponentialDelay * 0.2 * (Math.random() - 0.5);
+  
+  return Math.floor(exponentialDelay + jitter);
+}
+
+/**
+ * Makes an authenticated request to MAL API with retry logic
+ * Implements exponential backoff for rate limits and transient errors
  */
 async function makeMALRequest(
   plugin: CassettePlugin,
   endpoint: string,
   params: Record<string, string> = {}
 ): Promise<any> {
+  const debug = createDebugLogger(plugin, 'MAL API');
+  
   await ensureValidToken(plugin);
   
   const headers = getAuthHeaders(plugin);
@@ -85,18 +118,105 @@ async function makeMALRequest(
     url.searchParams.append(key, value);
   });
 
-  const response = await requestUrl({
-    url: url.toString(),
-    method: 'GET',
-    headers,
-    throw: false
-  });
+  let lastError: Error | null = null;
 
-  if (response.status < 200 || response.status >= 300) {
-    throw new Error(`MAL API request failed (HTTP ${response.status}): ${response.text}`);
+  // Retry loop with exponential backoff
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await requestUrl({
+        url: url.toString(),
+        method: 'GET',
+        headers,
+        throw: false
+      });
+
+      // Success - return immediately
+      if (response.status >= 200 && response.status < 300) {
+        return response.json || JSON.parse(response.text);
+      }
+
+      // Rate limit hit (429) - always retry with backoff
+      if (response.status === 429) {
+        if (attempt < MAX_RETRIES) {
+          const delay = calculateBackoffDelay(attempt);
+          debug.log(
+            `[MAL API] Rate limit hit (429). Retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})...`
+          );
+          await sleep(delay);
+          continue; // Retry
+        } else {
+          throw new Error(
+            `MAL API rate limit exceeded. Please try again in a few minutes.`
+          );
+        }
+      }
+
+      // Server errors (5xx) - retry with backoff
+      if (response.status >= 500 && response.status < 600) {
+        if (attempt < MAX_RETRIES) {
+          const delay = calculateBackoffDelay(attempt);
+          debug.log(
+            `[MAL API] Server error (${response.status}). Retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})...`
+          );
+          await sleep(delay);
+          continue; // Retry
+        } else {
+          throw new Error(
+            `MAL API server error (HTTP ${response.status}). Please try again later.`
+          );
+        }
+      }
+
+      // Client errors (4xx except 429) - don't retry, fail immediately
+      if (response.status >= 400 && response.status < 500) {
+        const errorMessage = parseErrorMessage(response);
+        throw new Error(
+          `MAL API request failed (HTTP ${response.status}): ${errorMessage}`
+        );
+      }
+
+      // Other errors - throw
+      throw new Error(
+        `MAL API request failed (HTTP ${response.status}): ${response.text}`
+      );
+
+    } catch (error) {
+      lastError = error;
+
+      // Network errors or other exceptions - retry
+      if (attempt < MAX_RETRIES) {
+        const delay = calculateBackoffDelay(attempt);
+        debug.log(
+          `[MAL API] Request failed: ${error.message}. Retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})...`
+        );
+        await sleep(delay);
+        continue; // Retry
+      }
+      
+      // Max retries reached - throw the last error
+      break;
+    }
   }
 
-  return response.json || JSON.parse(response.text);
+  // If we get here, all retries failed
+  throw new Error(
+    `MAL API request failed after ${MAX_RETRIES} retries: ${lastError?.message || 'Unknown error'}`
+  );
+}
+
+/**
+ * Parses error message from MAL API response
+ */
+function parseErrorMessage(response: any): string {
+  try {
+    const data = response.json || (response.text ? JSON.parse(response.text) : {});
+    if (data.error) {
+      return data.message || data.error;
+    }
+  } catch (e) {
+    // Ignore parse errors
+  }
+  return response.text || 'Unknown error';
 }
 
 /**
