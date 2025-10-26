@@ -1,7 +1,7 @@
 import type CassettePlugin from '../main';
 import { createDebugLogger } from '../utils';
 
-const SYNC_ON_LOAD_DELAY = 1 * 60 * 1000; // 3 seconds in milliseconds (fast but non-blocking)
+const SYNC_ON_LOAD_DELAY = 1 * 60 * 1000; // 1 minutes (fast but non-blocking)
 const MIN_SCHEDULED_INTERVAL = 30; // Minimum 30 minutes
 
 /**
