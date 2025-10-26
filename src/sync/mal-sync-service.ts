@@ -51,7 +51,6 @@ async function syncAnimeList(
   let rawItems: any[] = [];
 
 if (statuses && statuses.length > 0) {
-  // Fetch all statuses in parallel
   const animePromises = statuses.map(status => 
     fetchMALAnimeByStatus(
       plugin,
@@ -59,12 +58,11 @@ if (statuses && statuses.length > 0) {
     )
   );
   
-  const animeResults = await Promise.all(animePromises);
+  const animeResults = await throttlePromises(animePromises, 2, 300);
   rawItems = animeResults.flat();
 } else {
-    // Fetch all anime
-    rawItems = await fetchCompleteMALAnimeList(plugin);
-  }
+  rawItems = await fetchCompleteMALAnimeList(plugin);
+}
 
   debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
   
@@ -90,8 +88,8 @@ async function syncMangaList(
   
   let rawItems: any[] = [];
 
+// Update mal-sync-service.ts - syncMangaList()
 if (statuses && statuses.length > 0) {
-  // Fetch all statuses in parallel
   const mangaPromises = statuses.map(status => 
     fetchMALMangaByStatus(
       plugin,
@@ -99,12 +97,11 @@ if (statuses && statuses.length > 0) {
     )
   );
   
-  const mangaResults = await Promise.all(mangaPromises);
+  const mangaResults = await throttlePromises(mangaPromises, 2, 300);
   rawItems = mangaResults.flat();
 } else {
-    // Fetch all manga
-    rawItems = await fetchCompleteMALMangaList(plugin);
-  }
+  rawItems = await fetchCompleteMALMangaList(plugin);
+}
 
   debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
   
