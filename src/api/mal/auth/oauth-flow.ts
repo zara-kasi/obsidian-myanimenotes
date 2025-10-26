@@ -9,13 +9,12 @@ import { isTokenValid } from './token-manager';
 import { fetchUserInfo } from './user-service';
 import { createDebugLogger } from '../../../utils';
 
-
-// Store PKCE parameters temporarily during auth flow
-let authState: MALAuthState | null = null;
+// Auth state timeout: 10 minutes
+const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
 
 /**
  * Initiates the OAuth authorization flow
- * @param plugin Plugin instance
+ * Stores PKCE parameters in plugin settings for persistence
  */
 export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
   if (!plugin.settings.malClientId) {
@@ -33,8 +32,13 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
   const challenge = generateChallenge(verifier);
   const state = generateState();
 
-  // Store for later validation
-  authState = { verifier, state };
+  // Store in plugin settings (persisted across reloads)
+  plugin.settings.malAuthState = {
+    verifier,
+    state,
+    timestamp: Date.now()
+  };
+  await plugin.saveSettings();
 
   // Build authorization URL
   const params = new URLSearchParams({
@@ -61,8 +65,7 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
 
 /**
  * Handles the OAuth redirect callback
- * @param plugin Plugin instance
- * @param params Redirect parameters
+ * Retrieves PKCE parameters from plugin settings
  */
 export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthParams): Promise<void> {
   const debug = createDebugLogger(plugin, 'MAL Auth');
@@ -71,8 +74,25 @@ export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthP
     
     const { code, state } = extractOAuthParams(params);
     
+    // Retrieve stored auth state
+    const authState = plugin.settings.malAuthState;
+    
+    // Validate auth state exists
+    if (!authState) {
+      throw new Error('No auth state found. Please restart the authentication process.');
+    }
+    
+    // Check if auth state has expired (10 minutes timeout)
+    const stateAge = Date.now() - authState.timestamp;
+    if (stateAge > AUTH_STATE_TIMEOUT_MS) {
+      // Clear expired state
+      plugin.settings.malAuthState = null;
+      await plugin.saveSettings();
+      throw new Error('Authentication session expired. Please try again.');
+    }
+    
     // Validate state to prevent CSRF
-    if (!authState || state !== authState.state) {
+    if (state !== authState.state) {
       throw new Error('State mismatch - possible CSRF attack');
     }
     
@@ -94,9 +114,6 @@ export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthP
 
 /**
  * Exchanges authorization code for access token
- * @param plugin Plugin instance
- * @param code Authorization code
- * @param verifier PKCE code verifier
  */
 async function exchangeCodeForToken(
   plugin: CassettePlugin, 
@@ -148,20 +165,22 @@ async function exchangeCodeForToken(
     plugin.settings.malRefreshToken = data.refresh_token;
     plugin.settings.malTokenExpiry = Date.now() + (data.expires_in * 1000);
     plugin.settings.malAuthenticated = true;
+    
+    // Clear auth state (no longer needed)
+    plugin.settings.malAuthState = null;
+    
     // Enable auto-sync toggles by default after successful authentication
     plugin.settings.scheduledSync = true;
+    
     await plugin.saveSettings();
 
-    // Clear temporary PKCE data
-    authState = null;
-
-    new Notice('Authenticated successfully!', 3000);
+    new Notice('✅ Authenticated successfully!', 3000);
     
     // Fetch user info
     try {
       await fetchUserInfo(plugin);
     } catch (userError) {
-      console.warn('[MAL-AUTH] Failed to fetch user info but auth succeeded', userError);
+      console.warn('[MAL Auth] Failed to fetch user info but auth succeeded', userError);
     }
     
     // Refresh settings UI after Authentication
