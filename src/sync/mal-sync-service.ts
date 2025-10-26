@@ -50,16 +50,18 @@ async function syncAnimeList(
   
   let rawItems: any[] = [];
 
-  if (statuses && statuses.length > 0) {
-    // Fetch specific statuses
-    for (const status of statuses) {
-      const items = await fetchMALAnimeByStatus(
-        plugin,
-        status as 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch'
-      );
-      rawItems.push(...items);
-    }
-  } else {
+if (statuses && statuses.length > 0) {
+  // Fetch all statuses in parallel
+  const animePromises = statuses.map(status => 
+    fetchMALAnimeByStatus(
+      plugin,
+      status as 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch'
+    )
+  );
+  
+  const animeResults = await Promise.all(animePromises);
+  rawItems = animeResults.flat();
+} else {
     // Fetch all anime
     rawItems = await fetchCompleteMALAnimeList(plugin);
   }
@@ -88,16 +90,18 @@ async function syncMangaList(
   
   let rawItems: any[] = [];
 
-  if (statuses && statuses.length > 0) {
-    // Fetch specific statuses
-    for (const status of statuses) {
-      const items = await fetchMALMangaByStatus(
-        plugin,
-        status as 'reading' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_read'
-      );
-      rawItems.push(...items);
-    }
-  } else {
+if (statuses && statuses.length > 0) {
+  // Fetch all statuses in parallel
+  const mangaPromises = statuses.map(status => 
+    fetchMALMangaByStatus(
+      plugin,
+      status as 'reading' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_read'
+    )
+  );
+  
+  const mangaResults = await Promise.all(mangaPromises);
+  rawItems = mangaResults.flat();
+} else {
     // Fetch all manga
     rawItems = await fetchCompleteMALMangaList(plugin);
   }
