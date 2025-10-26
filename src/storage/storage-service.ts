@@ -36,24 +36,33 @@ export interface SyncActionResult {
 /**
  * Checks if timestamps match (sync optimization)
  * Returns true if local and remote timestamps are equal
+ * Returns false if either timestamp is missing, invalid, or they don't match
  */
 function areTimestampsEqual(
   localSynced: string | undefined,
   remoteSynced: string | undefined
 ): boolean {
+  // Return false if either timestamp is missing
   if (!localSynced || !remoteSynced) {
     return false;
   }
   
-  try {
-    const localDate = new Date(localSynced);
-    const remoteDate = new Date(remoteSynced);
-    
-    // Compare as Unix timestamps
-    return localDate.getTime() === remoteDate.getTime();
-  } catch (error) {
+  // Parse dates
+  const localDate = new Date(localSynced);
+  const remoteDate = new Date(remoteSynced);
+  
+  // Validate both dates are valid
+  // Invalid dates have NaN as their time value
+  const localTime = localDate.getTime();
+  const remoteTime = remoteDate.getTime();
+  
+  // Check if either date is invalid (NaN)
+  if (isNaN(localTime) || isNaN(remoteTime)) {
     return false;
   }
+  
+  // Compare as Unix timestamps (milliseconds since epoch)
+  return localTime === remoteTime;
 }
 
 /**
