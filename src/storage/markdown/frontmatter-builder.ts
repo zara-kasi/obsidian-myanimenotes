@@ -161,59 +161,72 @@ export function mergeFrontmatter(
 }
 
 /**
+ * Property ordering configuration for frontmatter serialization
+ * Lower numbers appear first in the output
+ * Properties not listed here will appear at the end in alphabetical order
+ */
+const PROPERTY_ORDER: Record<string, number> = {
+  'title': 1,
+  'aliases': 2,
+  'status': 3,
+  'eps_seen': 4,
+  'chap_read': 5,
+  'vol_read': 6,
+  'rating': 7,
+  'started': 8,
+  'finished': 9,
+  'media': 10,
+  'episodes': 11,
+  'chapters': 12,
+  'volumes': 13,
+  'state': 14,
+  'released': 15,
+  'ended': 16,
+  'studios': 17,
+  'origin': 18,
+  'genres': 19,
+  'authors': 20,
+  'duration': 21,
+  'score': 22,
+  'description': 23,
+  'image': 24,
+  'source': 25,
+  'platform': 26,
+  'category': 27,
+  'id': 28,
+  'cassette': 29,
+  'synced': 30,
+};
+
+/**
+ * Comparator function for sorting frontmatter properties
+ * Maintains the order defined in PROPERTY_ORDER
+ */
+function compareProperties(a: string, b: string): number {
+  const orderA = PROPERTY_ORDER[a] ?? 999;
+  const orderB = PROPERTY_ORDER[b] ?? 999;
+  
+  // If both have defined order, sort by order
+  if (orderA !== 999 || orderB !== 999) {
+    return orderA - orderB;
+  }
+  
+  // If neither have defined order, sort alphabetically
+  return a.localeCompare(b);
+}
+
+/**
  * Serializes frontmatter to YAML string with consistent formatting
- * cassette is always positioned first as the primary key
+ * Properties are ordered according to PROPERTY_ORDER configuration
  */
 export function serializeFrontmatter(frontmatter: Record<string, any>): string {
-  // Define property order with cassette first (primary key position)
-  const propertyOrder = [
-    'title',
-    'aliases',
-    'status',
-    'eps_seen',
-    'chap_read',
-    'vol_read',
-    'rating',
-    'started',    
-    'finished',
-    'media',
-    'episodes',
-    'chapters',
-    'volumes',
-    'state',
-    'released',
-    'ended',
-    'studios',
-    'origin',
-    'genres',
-    'authors',
-    'duration',
-    'score',
-    'description',
-    'image',
-    'source',
-    'platform',
-    'category',
-    'id',
-    'cassette',
-    'synced',
-  ];
-  
-  // Create ordered object
+  // Create ordered object by sorting keys
   const ordered: Record<string, any> = {};
   
-  // Add properties in defined order
-  propertyOrder.forEach(key => {
-    if (frontmatter.hasOwnProperty(key)) {
-      ordered[key] = frontmatter[key];
-    }
-  });
+  const sortedKeys = Object.keys(frontmatter).sort(compareProperties);
   
-  // Add any remaining properties not in the order list (user-defined properties)
-  Object.keys(frontmatter).forEach(key => {
-    if (!ordered.hasOwnProperty(key)) {
-      ordered[key] = frontmatter[key];
-    }
+  sortedKeys.forEach(key => {
+    ordered[key] = frontmatter[key];
   });
   
   // Serialize to YAML with consistent formatting
