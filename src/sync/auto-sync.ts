@@ -44,7 +44,7 @@ export class AutoSyncManager {
   }
 
   /**
-   * Starts the sync-on-load timer (one-time, 3 seconds after load)
+   * Starts the sync-on-load timer (one-time, 1 minutes after load)
    * Uses a short delay to avoid blocking plugin initialization
    */
   private startSyncOnLoad(): void {
@@ -56,10 +56,10 @@ export class AutoSyncManager {
       return;
     }
 
-    this.debug.log('[Sync on Load] Timer started: Will sync in 3 seconds');
+    this.debug.log('[Sync on Load] Timer started: Will sync in 1 minutes');
 
     this.syncOnLoadTimer = setTimeout(async () => {
-      this.debug.log('[Sync on Load] Triggered after 3 seconds');
+      this.debug.log('[Sync on Load] Triggered after 1 minutes');
       
       // Double-check authentication at execution time
       if (!this.isAuthenticated()) {
