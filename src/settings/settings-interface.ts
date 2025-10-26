@@ -22,9 +22,9 @@ export interface CassetteSettings {
   
   // Sync Settings
   forceFullSync: boolean; 
-  syncOnLoad: boolean; // Sync after plugin loads
-  backgroundSync: boolean; // Periodic background sync
-  backgroundSyncInterval: number; // Interval in minutes (min: 30)
+  syncOnLoad: boolean; // Sync shortly after plugin loads (3 seconds)
+  scheduledSync: boolean; // Periodic scheduled sync
+  scheduledSyncInterval: number; // Interval in minutes (min: 30)
   
   // Template Settings (for future use)
   useCustomTemplate: boolean;
@@ -55,8 +55,8 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   // Sync defaults
   forceFullSync: false,
   syncOnLoad: false,
-  backgroundSync: false,
-  backgroundSyncInterval: 120, // 120 minutes default
+  scheduledSync: false,
+  scheduledSyncInterval: 120, // 120 minutes default
   
   // Template defaults
   useCustomTemplate: false,
