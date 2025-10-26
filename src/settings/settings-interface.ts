@@ -18,6 +18,9 @@ export interface CassetteSettings {
     state: string;
     timestamp: number; // For expiry checking
   } | null;
+    // Advanced API settings
+  apiMaxRetries?: number;
+  apiRetryDelay?: number;
   
   // Storage Settings
   animeFolder: string;
