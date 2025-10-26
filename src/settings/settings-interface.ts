@@ -12,6 +12,13 @@ export interface CassetteSettings {
   malUserInfo?: MALUserInfo | null;
   malAuthenticated: boolean;
   
+  // OAuth flow state (temporary, cleared after auth completes)
+  malAuthState?: {
+    verifier: string;
+    state: string;
+    timestamp: number; // For expiry checking
+  } | null;
+  
   // Storage Settings
   animeFolder: string;
   mangaFolder: string;
@@ -43,6 +50,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malTokenExpiry: null,
   malUserInfo: null,
   malAuthenticated: false,
+  malAuthState: null, 
   
   // Storage defaults
   animeFolder: 'Cassette/Anime',
