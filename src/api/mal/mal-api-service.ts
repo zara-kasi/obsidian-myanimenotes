@@ -220,6 +220,31 @@ function parseErrorMessage(response: any): string {
 }
 
 /**
+ * Throttles parallel promises to avoid overwhelming the API
+ * Executes promises in batches with delay between batches
+ */
+ 
+export async function throttlePromises<T>(
+  promises: Promise<T>[],
+  batchSize: number = 2,
+  delayBetweenBatchesMs: number = 300
+): Promise<T[]> {
+  const results: T[] = [];
+  
+  for (let i = 0; i < promises.length; i += batchSize) {
+    const batch = promises.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch);
+    results.push(...batchResults);
+    
+    if (i + batchSize < promises.length) {
+      await new Promise(resolve => setTimeout(resolve, delayBetweenBatchesMs));
+    }
+  }
+  
+  return results;
+}
+
+/**
  * Fetches all pages of a paginated MAL endpoint
  */
 async function fetchAllPages(
