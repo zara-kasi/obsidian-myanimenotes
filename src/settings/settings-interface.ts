@@ -56,7 +56,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   forceFullSync: false,
   syncOnLoad: false,
   scheduledSync: false,
-  scheduledSyncInterval: 120, // 120 minutes default
+  scheduledSyncInterval: 90, // 90 minutes default
   
   // Template defaults
   useCustomTemplate: false,
