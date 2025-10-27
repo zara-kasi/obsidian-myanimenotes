@@ -96,7 +96,7 @@ For example, change `status` → `watch_status` or `genres` → `tags` to match 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for development instructions.  
 Report bugs or suggest new features [here](https://github.com/zara-kasi/cassette/issues).
 
-> “For information about data usage and privacy, see [PRIVACY](./PRIVACY.md).”
+> For information about data usage and privacy, see [PRIVACY](./PRIVACY.md).
 
 ## License
 
