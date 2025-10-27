@@ -86,7 +86,7 @@ Cassette lets you rename synced frontmatter fields to fit your personal workflow
 
 For example, change `status` → `watch_status` or `genres` → `tags` to match your note style.  
 
-> Tip: When genres are used as tags, Cassette automatically sanitizes them to work properly as Obsidian tags.
+> Genres are formatted to match Obsidian’s tag syntax.
 
 
 ---
