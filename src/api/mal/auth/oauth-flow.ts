@@ -169,9 +169,6 @@ async function exchangeCodeForToken(
     // Clear auth state (no longer needed)
     plugin.settings.malAuthState = null;
     
-    // Enable auto-sync toggles by default after successful authentication
-    plugin.settings.scheduledSync = true;
-    
     await plugin.saveSettings();
 
     new Notice('✅ Authenticated successfully!', 3000);
