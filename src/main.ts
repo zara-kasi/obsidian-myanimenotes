@@ -8,7 +8,7 @@ import type { CassetteIndex } from './storage/cassette';
 import { createCassetteIndex } from './storage/cassette';
 
 export default class CassettePlugin extends Plugin {
-  settings: CassetteSettings;
+  settings: CassetteSettings = DEFAULT_SETTINGS;
   settingsTab: CassetteSettingTab | null = null;
   syncManager: SyncManager | null = null;
   autoSyncManager: AutoSyncManager | null = null;
