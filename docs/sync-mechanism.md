@@ -43,7 +43,7 @@ sequenceDiagram
 
 1. **Authenticated MAL Connection**: Sync requires valid MAL authentication tokens
     
-    - See [OAuth 2.0 Authentication Flow](./oauth-2.0-authentication-flow-for-myanimelist-in-obsidian.md) for setup
+    - See [OAuth 2.0 Authentication Flow](./oauth-2.0-authentication-flow-for-mal.md) for setup
     - Sync functions will fail gracefully if not authenticated
 2. **Vault Configuration**: Configure sync folders in plugin settings
     
@@ -127,7 +127,7 @@ export async function syncMAL(
     }
     ```
     
-    Fails fast if tokens are invalid. See [[OAuth 2.0 Authentication Flow]] for token management.
+    Fails fast if tokens are invalid. See [OAuth 2.0 Authentication Flow](./oauth-2.0-authentication-flow-for-mal.md) for token management.
     
 2. **Fetch Anime** (if enabled)
     
@@ -209,7 +209,7 @@ await throttlePromises(animePromises, 2, 300);
 
 - **Batch size: 2** - Only 2 concurrent requests at a time
 - **Delay: 300ms** - 300ms pause between batches
-- Prevents MAL API rate limiting (see [[OAuth 2.0 Authentication Flow#Rate Limiting]])
+- Prevents MAL API rate limiting
 
 #### Error Handling
 
@@ -573,12 +573,12 @@ await saveMediaItemsByCategory(plugin, items, {
 ```markdown
 ---
 title: "Cowboy Bebop"
-mal_id: 1
+id: 1
 category: anime
 status: completed
 score: 10
-episodes_watched: 26
-total_episodes: 26
+eps_watched: 26
+episodes: 26
 genres:
   - Action
   - Sci-Fi
@@ -599,7 +599,7 @@ Each layer handles errors differently:
 
 - Retries on rate limits (429) with exponential backoff
 - Throws on auth failures
-- See [[OAuth 2.0 Authentication Flow#Rate Limiting]]
+- See [OAuth 2.0 Authentication Flow#Rate Limiting](./oauth-2.0-authentication-flow-for-mal.md)
 
 **2. Sync Service Layer** (`mal-sync-service.ts`):
 
@@ -1005,7 +1005,7 @@ Verify automatic retry with backoff.
 
 ## References
 
-- [OAuth 2.0 Authentication Flow](./oauth-2.0-authentication-flow-for-myanimelist-in-obsidian.md) - Authentication and token management
+- [OAuth 2.0 Authentication Flow](./oauth-2.0-authentication-flow-for-mal.md) - Authentication and token management
 - [MAL API Documentation](https://myanimelist.net/apiconfig/references/api/v2) - Official API reference
 - `src/api/mal/mal-api-service.ts` - API layer implementation
 - `src/transformers/` - Data transformation logic
