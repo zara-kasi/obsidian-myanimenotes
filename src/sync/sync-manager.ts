@@ -69,8 +69,9 @@ export class SyncManager {
           this.debug.log('[Sync Manager] Saved to vault:', savedPaths);
         } catch (saveError) {
           console.error('[Sync Manager] Failed to save to vault:', saveError);
-          new Notice(`⚠️ Synced but failed to save: ${saveError.message}`, 5000);
-        }
+          const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
+          new Notice(`⚠️ Synced but failed to save: ${errorMessage}`, 5000);
+       }        
       }
       
       return { items, result, savedPaths };
