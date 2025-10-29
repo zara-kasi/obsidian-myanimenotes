@@ -33,7 +33,7 @@ To test or modify the authentication flow, you'll need:
 
 1. **MAL Developer Application:** Register your own test application on MyAnimeList to obtain a `client_id` (and optionally `client_secret`).
     
-    - Follow the guide: [[Get Client ID & Client Secret from MyAnimeList]]
+    - Follow the guide: [Get Client ID & Client Secret from MyAnimeList](./mal-authentication-guide.md)
     - **Critical:** Use the exact redirect URI: `obsidian://cassette-auth/mal`
 2. **Test Credentials:** Store your test credentials in the plugin settings UI (or configure them programmatically if building dev tooling).
     
