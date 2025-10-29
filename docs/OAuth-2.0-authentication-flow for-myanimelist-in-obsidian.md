@@ -484,6 +484,6 @@ Enable debug mode in plugin settings to see detailed auth flow logs.
 - [RFC 6749 (OAuth 2.0)](https://datatracker.ietf.org/doc/html/rfc6749)
 - [RFC 7636 (PKCE)](https://datatracker.ietf.org/doc/html/rfc7636)
 - [MAL API Documentation](https://myanimelist.net/apiconfig/references/api/v2)
-- [[Get Client ID & Client Secret from MyAnimeList|MAL Application Setup Guide]]
+- [Get Client ID & Client Secret from MyAnimeList|MAL Application Setup Guide](./mal-authentication-guide.md)
 
 ---
