@@ -369,7 +369,7 @@ Translates MAL's OAuth error codes into actionable user guidance without exposin
 
 |Error|Cause|Solution|
 |---|---|---|
-|`invalid_client`|Wrong Client ID/Secret|Verify credentials match your [[Get Client ID & Client Secret from MyAnimeList\|MAL app registration]]|
+|`invalid_client`|Wrong Client ID/Secret|Verify credentials match your [Get Client ID & Client Secret from MyAnimeList\|MAL app registration](./mal-authentication-guide.md)|
 |`invalid_grant`|Code expired/reused|Authorization codes are single-use; restart flow|
 |`State mismatch`|CSRF attack or timing issue|Restart authentication|
 |`Session expired`|>10 minutes since initiation|Restart authentication|
