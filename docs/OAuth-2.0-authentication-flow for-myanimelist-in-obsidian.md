@@ -116,7 +116,7 @@ const authUrl = `${MAL_AUTH_URL}?${params.toString()}`;
 
 **Custom URI scheme:** The `obsidian://` protocol is registered by Obsidian to handle deep links. When MAL redirects to this URI, Obsidian intercepts it and triggers the plugin's URI handler.
 
-**Getting your Client ID:** See [[Get Client ID & Client Secret from MyAnimeList]] for instructions on registering your application and obtaining credentials.
+**Getting your Client ID:** See [Get Client ID & Client Secret from MyAnimeList](./mal-authentication-guide.md) for instructions on registering your application and obtaining credentials.
 
 ### 3. Handling the OAuth Callback (`handleOAuthRedirect`)
 
