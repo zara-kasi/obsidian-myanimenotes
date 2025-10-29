@@ -56,7 +56,7 @@ genres:
   - supernatural
 duration: 24
 score: 8.53
-description: Idly indulging in baseless paranormal activities with the Occult Club, high schooler Yuji Itadori spends his days at either the clubroom or the hospital, where he visits his bedridden grandfather...
+description: Idly indulging in baseless paranormal activities with the Occult Club...
 image: https://cdn.myanimelist.net/images/anime/1171/109222l.jpg
 source: https://myanimelist.net/anime/40748
 platform: mal
