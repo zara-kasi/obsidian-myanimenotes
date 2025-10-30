@@ -171,10 +171,3 @@ export function sanitizeGenreObjectsForTags(genres: Array<{ id: number; name: st
   return sanitizeGenresForTags(genres.map(g => g.name));
 }
 
-/**
- * Formats start_season as "season year" (e.g., "winter 2024")
- */
-export function formatStartSeason(season?: { year?: number; season?: string }): string | undefined {
-  if (!season || !season.year || !season.season) return undefined;
-  return `${season.season} ${season.year}`;
-}
