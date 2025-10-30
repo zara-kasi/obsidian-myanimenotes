@@ -32,7 +32,6 @@ export {
 export {
   sanitizeFilename,
   sanitizeSynopsis,
-  formatStartSeason,
   ensureFolderExists,
   generateUniqueFilename
 } from './file-utils';
