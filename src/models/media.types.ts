@@ -129,5 +129,5 @@ export interface UniversalMediaItem {
   syncedAt?: string; 
   
   // Platform metadata
-  platform: 'MAL';
+  platform: 'mal' | 'simkl';
 }
