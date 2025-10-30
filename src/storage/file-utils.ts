@@ -135,7 +135,6 @@ export function sanitizeSynopsisMultiline(synopsis: string | undefined): string 
  */
 export function sanitizeGenreForTag(genre: string): string {
   return genre
-    .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')
     .replace(/[^\w\s\-\/]/g, '-')
