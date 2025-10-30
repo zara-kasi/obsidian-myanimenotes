@@ -180,7 +180,7 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
     // Sync metadata - MAL's updated_at timestamp
     syncedAt: listStatus?.updated_at,
     // Platform metadata
-    platform: 'mal',
+    platform: 'MAL',
   };
 }
 
