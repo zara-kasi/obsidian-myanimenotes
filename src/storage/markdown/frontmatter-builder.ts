@@ -72,7 +72,18 @@ export function buildSyncedFrontmatterProperties(
   }
   
   // Metadata
-  addProperty('mediaType', item.mediaType);
+  const addProperty = (key: keyof PropertyMapping, value: any) => {
+  if (value !== undefined && value !== null && value !== '') {
+    const mappedKey = getMappedPropertyName(key, mapping);
+    
+    // FORMAT mediaType AS WIKI LINK 
+    if (key === 'mediaType') {
+      properties[mappedKey] = formatMediaTypeAsWikiLink(value);
+    } else {
+      properties[mappedKey] = value;
+    }
+  }
+};
   addProperty('status', item.status);
   addProperty('mean', item.mean);
   
