@@ -9,7 +9,7 @@
 import type { UniversalMediaItem } from '../../models';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName } from './property-mapping';
-import { sanitizeSynopsis, sanitizeGenreObjectsForTags, sanitizeFilename, formatMediaTypeAsWikiLink } from '../file-utils';
+import { sanitizeSynopsis, sanitizeGenreObjectsForTags, sanitizeFilename } from '../file-utils';
 import * as yaml from 'js-yaml';
 
 /**
@@ -72,18 +72,7 @@ export function buildSyncedFrontmatterProperties(
   }
   
   // Metadata
-  const addProperty = (key: keyof PropertyMapping, value: any) => {
-  if (value !== undefined && value !== null && value !== '') {
-    const mappedKey = getMappedPropertyName(key, mapping);
-    
-    // FORMAT mediaType AS WIKI LINK 
-    if (key === 'mediaType') {
-      properties[mappedKey] = formatMediaTypeAsWikiLink(value);
-    } else {
-      properties[mappedKey] = value;
-    }
-  }
-};
+  addProperty('mediaType', item.mediaType);
   addProperty('status', item.status);
   addProperty('mean', item.mean);
   
