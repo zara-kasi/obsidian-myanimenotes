@@ -170,3 +170,28 @@ export function sanitizeGenreObjectsForTags(genres: Array<{ id: number; name: st
   return sanitizeGenresForTags(genres.map(g => g.name));
 }
 
+/**
+ * Formats mediaType value for display with Obsidian wiki links
+ * Converts lowercase/underscore format to Title Case wiki links
+ */
+function formatMediaTypeAsWikiLink(mediaType: string): string {
+  if (!mediaType || mediaType === 'unknown') {
+    return '[[Unknown]]';
+  }
+
+  // Special cases for acronyms (should be all caps)
+  const acronyms = ['tv', 'ova', 'ona'];
+  const normalized = mediaType.toLowerCase();
+  
+  if (acronyms.includes(normalized)) {
+    return `[[${normalized.toUpperCase()}]]`;
+  }
+
+  // Split by underscore and capitalize each word
+  const formatted = mediaType
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+  
+  return `[[${formatted}]]`;
+}
