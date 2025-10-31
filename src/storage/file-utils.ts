@@ -277,32 +277,26 @@ function formatAuthorArray(value: any[]): string[] {
  */
 export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array' | 'nameArray' | 'authorArray' | 'duration' | 'platform' | null {
   switch (propertyKey) {
-    // Simple string properties
     case 'mediaType':
     case 'source':
     case 'category':
       return 'simple';
     
-    // String array properties (already sanitized)
     case 'genres':
       return 'array';
     
-    // Object array with 'name' property
     case 'studios':
       return 'nameArray';
     
-    // Author objects
     case 'authors':
       return 'authorArray';
-      
-    // Special formatters
+    
     case 'duration':
       return 'duration';
     
     case 'platform':
       return 'platform';
     
-    // Don't format these properties
     default:
       return null;
   }
