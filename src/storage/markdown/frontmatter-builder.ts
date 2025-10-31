@@ -12,7 +12,7 @@ import { getMappedPropertyName } from './property-mapping';
 import { 
   sanitizeSynopsis,
   formatPropertyAsWikiLink,
-  getFormatTypeForProperty,
+  getWikiLinkFormatType,
   formatDuration,
   formatPlatformDisplay 
 } from '../file-utils';
