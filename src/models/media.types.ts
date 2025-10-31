@@ -107,7 +107,7 @@ export interface UniversalMediaItem {
   // Anime-specific
   numEpisodes?: number;
   source?: string; // manga, light_novel, etc.
-  studios?: string[];          // production studios
+  studios?: Array<{ name: string }>;          // production studios
   duration?: number;
   
   // Manga-specific
