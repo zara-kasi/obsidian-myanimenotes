@@ -275,7 +275,7 @@ function formatAuthorArray(value: any[]): string[] {
  * Auto-detects the format type based on property key
  * Used in frontmatter-builder to automatically choose the right format
  */
-export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array' | 'nameArray' | 'authorArray' | null {
+export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array' | 'nameArray' | 'authorArray' | 'duration' | 'platform' | null {
   switch (propertyKey) {
     // Simple string properties
     case 'mediaType':
