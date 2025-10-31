@@ -35,7 +35,7 @@ export {
   ensureFolderExists,
   generateUniqueFilename,
   formatPropertyAsWikiLink,
-  getFormatTypeForProperty,
+  getWikiLinkFormatType,
   formatDuration, 
   formatPlatformDisplay
 } from './file-utils';
