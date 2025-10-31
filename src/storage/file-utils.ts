@@ -166,6 +166,12 @@ export function formatPropertyAsWikiLink(
     
     case 'authorArray':
       return formatAuthorArray(value);
+      
+    case 'duration':
+      return formatDuration(value);
+    
+    case 'platform':
+      return formatPlatformDisplay(value);
     
     default:
       return value;
@@ -288,6 +294,13 @@ export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array
     // Author objects
     case 'authors':
       return 'authorArray';
+      
+    // Special formatters
+    case 'duration':
+      return 'duration';
+    
+    case 'platform':
+      return 'platform';
     
     // Don't format these properties
     default:
