@@ -294,3 +294,60 @@ export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array
       return null;
   }
 }
+
+
+/**
+ * Formats duration in minutes to human-readable format (e.g., "2h 20m", "45m")
+ * 
+ * @param minutes - Duration in minutes
+ * @returns Formatted duration string
+ * 
+ * @example
+ * formatDuration(150)  // "2h 30m"
+ * formatDuration(45)   // "45m"
+ * formatDuration(90)   // "1h 30m"
+ * formatDuration(60)   // "1h"
+ * formatDuration(0)    // undefined
+ */
+export function formatDuration(minutes: number | undefined): string | undefined {
+  if (!minutes || minutes === 0) return undefined;
+  
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  
+  if (hours === 0) {
+    return `${mins}m`;
+  }
+  
+  if (mins === 0) {
+    return `${hours}h`;
+  }
+  
+  return `${hours}h ${mins}m`;
+}
+
+/**
+ * Formats platform identifier to display name
+ * Internal: 'mal', 'simkl' (lowercase for cassette keys)
+ * Display: 'MyAnimeList', 'Simkl' (readable names)
+ * 
+ * @param platform - Platform identifier (e.g., 'mal', 'simkl')
+ * @returns Formatted platform name
+ * 
+ * @example
+ * formatPlatformDisplay('mal')    // "MyAnimeList"
+ * formatPlatformDisplay('simkl')  // "Simkl"
+ * formatPlatformDisplay('anilist') // "AniList"
+ */
+export function formatPlatformDisplay(platform: string | undefined): string | undefined {
+  if (!platform) return undefined;
+  
+  const platformMap: Record<string, string> = {
+    'mal': 'MyAnimeList',
+    'simkl': 'Simkl',
+    'anilist': 'AniList',
+    'kitsu': 'Kitsu',
+  };
+  
+  return platformMap[platform.toLowerCase()] || platform;
+}
