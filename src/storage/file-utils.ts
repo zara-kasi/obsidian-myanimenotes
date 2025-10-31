@@ -174,7 +174,7 @@ export function sanitizeGenreObjectsForTags(genres: Array<{ id: number; name: st
  * Formats mediaType value for display with Obsidian wiki links
  * Converts lowercase/underscore format to Title Case wiki links
  */
-function formatMediaTypeAsWikiLink(mediaType: string): string {
+export function formatMediaTypeAsWikiLink(mediaType: string): string {
   if (!mediaType || mediaType === 'unknown') {
     return '[[Unknown]]';
   }
