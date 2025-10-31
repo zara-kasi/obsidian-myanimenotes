@@ -119,16 +119,7 @@ if (item.genres && item.genres.length > 0) {
     addProperty('numChapters', item.numChapters);
     addProperty('numChaptersRead', item.numChaptersRead);
     
-    
-    // Authors (manga only)
-    if (item.authors && item.authors.length > 0) {
-      const authorNames = item.authors.map(a => 
-        `${a.firstName} ${a.lastName}`.trim()
-      ).filter(Boolean);
-      if (authorNames.length > 0) {
-        addProperty('authors', authorNames);
-      }
-    }
+   addProperty('authors', item.authors);
   }
   
   // User list data (COMMON to both anime and manga)
