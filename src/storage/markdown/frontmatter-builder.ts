@@ -9,7 +9,11 @@
 import type { UniversalMediaItem } from '../../models';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName } from './property-mapping';
-import { sanitizeSynopsis, sanitizeGenreObjectsForTags, sanitizeFilename, formatPropertyAsWikiLink } from '../file-utils';
+import { 
+  sanitizeSynopsis,
+  formatPropertyAsWikiLink,
+  getFormatTypeForProperty 
+} from '../file-utils';
 import * as yaml from 'js-yaml';
 
 /**
@@ -31,9 +35,11 @@ export function buildSyncedFrontmatterProperties(
   if (value !== undefined && value !== null && value !== '') {
     const mappedKey = getMappedPropertyName(key, mapping);
     
-    // Format mediaType and source as wiki links
-    if (key === 'mediaType' || key === 'source') {
-      properties[mappedKey] = formatPropertyAsWikiLink(value);
+    // Auto-detect and format properties that should be wiki links
+    const formatType = getFormatTypeForProperty(key);
+    
+    if (formatType) {
+      properties[mappedKey] = formatPropertyAsWikiLink(value, formatType);
     } else {
       properties[mappedKey] = value;
     }
@@ -82,15 +88,11 @@ export function buildSyncedFrontmatterProperties(
   addProperty('status', item.status);
   addProperty('mean', item.mean);
   
-  // Genres - UPDATED: Now sanitized for Obsidian tags
-  // Converts genres like "Slice of Life" to "slice-of-life"
-  // This allows users to use them as tags directly
-  if (item.genres && item.genres.length > 0) {
-    const sanitizedGenres = sanitizeGenreObjectsForTags(item.genres);
-    if (sanitizedGenres.length > 0) {
-      addProperty('genres', sanitizedGenres);
-    }
-  }
+  // Genres - extract raw names from genre objects
+if (item.genres && item.genres.length > 0) {
+  const genreNames = item.genres.map(g => g.name);
+  addProperty('genres', genreNames);
+}
   
     // Add sync timestamp if available (for sync optimization)
   if (item.syncedAt) {
