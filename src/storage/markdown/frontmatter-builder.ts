@@ -118,8 +118,7 @@ if (item.genres && item.genres.length > 0) {
     addProperty('numVolumesRead', item.numVolumesRead);
     addProperty('numChapters', item.numChapters);
     addProperty('numChaptersRead', item.numChaptersRead);
-    
-   addProperty('authors', item.authors);
+    addProperty('authors', item.authors);
   }
   
   // User list data (COMMON to both anime and manga)
