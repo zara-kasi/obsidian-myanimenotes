@@ -166,12 +166,6 @@ export function formatPropertyAsWikiLink(
     
     case 'authorArray':
       return formatAuthorArray(value);
-      
-    case 'duration':
-      return formatDuration(value);
-    
-    case 'platform':
-      return formatPlatformDisplay(value);
     
     default:
       return value;
@@ -275,7 +269,7 @@ function formatAuthorArray(value: any[]): string[] {
  * Auto-detects the format type based on property key
  * Used in frontmatter-builder to automatically choose the right format
  */
-export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array' | 'nameArray' | 'authorArray' | 'duration' | 'platform' | null {
+export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array' | 'nameArray' | 'authorArray' | null {
   switch (propertyKey) {
     case 'mediaType':
     case 'source':
@@ -290,12 +284,6 @@ export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array
     
     case 'authors':
       return 'authorArray';
-    
-    case 'duration':
-      return 'duration';
-    
-    case 'platform':
-      return 'platform';
     
     default:
       return null;
