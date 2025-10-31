@@ -12,7 +12,9 @@ import { getMappedPropertyName } from './property-mapping';
 import { 
   sanitizeSynopsis,
   formatPropertyAsWikiLink,
-  getFormatTypeForProperty 
+  getFormatTypeForProperty,
+  formatDuration,
+  formatPlatformDisplay 
 } from '../file-utils';
 import * as yaml from 'js-yaml';
 
@@ -35,14 +37,26 @@ export function buildSyncedFrontmatterProperties(
   if (value !== undefined && value !== null && value !== '') {
     const mappedKey = getMappedPropertyName(key, mapping);
     
-    // Auto-detect and format properties that should be wiki links
-    const formatType = getFormatTypeForProperty(key);
-    
-    if (formatType) {
-      properties[mappedKey] = formatPropertyAsWikiLink(value, formatType);
-    } else {
-      properties[mappedKey] = value;
+    // Wiki link formatting (for navigation/linking)
+    const wikiLinkType = getWikiLinkFormatType(key);
+    if (wikiLinkType) {
+      properties[mappedKey] = formatPropertyAsWikiLink(value, wikiLinkType);
+      return;
     }
+    
+    // Display formatting (for readability)
+    if (key === 'duration') {
+      properties[mappedKey] = formatDuration(value);
+      return;
+    }
+    
+    if (key === 'platform') {
+      properties[mappedKey] = formatPlatformDisplay(value);
+      return;
+    }
+    
+    // Default: use value as-is
+    properties[mappedKey] = value;
   }
 };
   
