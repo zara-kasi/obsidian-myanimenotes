@@ -269,7 +269,7 @@ function formatAuthorArray(value: any[]): string[] {
  * Auto-detects the format type based on property key
  * Used in frontmatter-builder to automatically choose the right format
  */
-export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array' | 'nameArray' | 'authorArray' | null {
+ export function getWikiLinkFormatType(propertyKey: string): 'simple' | 'array' | 'nameArray' | 'authorArray' | null {
   switch (propertyKey) {
     case 'mediaType':
     case 'source':
