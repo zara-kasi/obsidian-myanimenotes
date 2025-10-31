@@ -35,7 +35,9 @@ export {
   ensureFolderExists,
   generateUniqueFilename,
   formatPropertyAsWikiLink,
-  getFormatTypeForProperty
+  getFormatTypeForProperty,
+  formatDuration, 
+  formatPlatformDisplay
 } from './file-utils';
 
 // Frontmatter utilities (internal, but exported for testing/advanced use)
