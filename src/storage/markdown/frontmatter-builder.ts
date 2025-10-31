@@ -27,13 +27,19 @@ export function buildSyncedFrontmatterProperties(
   // CRITICAL: Add cassette as the first property (primary key)
   properties.cassette = cassetteSync;
   
-  
   const addProperty = (key: keyof PropertyMapping, value: any) => {
-    if (value !== undefined && value !== null && value !== '') {
-      const mappedKey = getMappedPropertyName(key, mapping);
+  if (value !== undefined && value !== null && value !== '') {
+    const mappedKey = getMappedPropertyName(key, mapping);
+    
+    // Format mediaType as wiki link for display
+    if (key === 'mediaType') {
+      properties[mappedKey] = formatMediaTypeAsWikiLink(value);
+    } else {
       properties[mappedKey] = value;
     }
-  };
+  }
+};
+  
   
   // Basic fields
   addProperty('id', item.id);
