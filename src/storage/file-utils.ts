@@ -171,34 +171,52 @@ export function sanitizeGenreObjectsForTags(genres: Array<{ id: number; name: st
 }
 
 /**
- * Formats mediaType value as Obsidian wiki link
+ * Formats property values as Obsidian wiki links
  * Converts API values (lowercase/underscore) to readable Title Case wiki links
  * 
- * @param mediaType - Raw media type from API (e.g., 'tv', 'light_novel')
- * @returns Formatted wiki link (e.g., '[[TV]]', '[[Light Novel]]')
+ * Works for: mediaType, source, and any similar lowercase_underscore format
+ * 
+ * @param value - Raw value from API (e.g., 'tv', 'light_novel', '4_koma')
+ * @returns Formatted wiki link (e.g., '[[TV]]', '[[Light Novel]]', '[[4 Koma]]')
  * 
  * @example
- * formatMediaTypeAsWikiLink('tv') // '[[TV]]'
- * formatMediaTypeAsWikiLink('light_novel') // '[[Light Novel]]'
- * formatMediaTypeAsWikiLink('ova') // '[[OVA]]'
+ * // Media Types
+ * formatPropertyAsWikiLink('tv') // '[[TV]]'
+ * formatPropertyAsWikiLink('light_novel') // '[[Light Novel]]'
+ * formatPropertyAsWikiLink('one_shot') // '[[One Shot]]'
+ * 
+ * // Source Materials
+ * formatPropertyAsWikiLink('manga') // '[[Manga]]'
+ * formatPropertyAsWikiLink('light_novel') // '[[Light Novel]]'
+ * formatPropertyAsWikiLink('4_koma') // '[[4 Koma]]'
+ * formatPropertyAsWikiLink('web_manga') // '[[Web Manga]]'
+ * formatPropertyAsWikiLink('visual_novel') // '[[Visual Novel]]'
  */
-export function formatMediaTypeAsWikiLink(mediaType: string | undefined): string {
-  if (!mediaType || mediaType === 'unknown') {
+export function formatPropertyAsWikiLink(value: string | undefined): string {
+  if (!value || value === 'unknown') {
     return '[[Unknown]]';
   }
 
   // Special cases for acronyms (should be all caps)
   const acronyms = ['tv', 'ova', 'ona'];
-  const normalized = mediaType.toLowerCase();
+  const normalized = value.toLowerCase();
   
   if (acronyms.includes(normalized)) {
     return `[[${normalized.toUpperCase()}]]`;
   }
 
   // Split by underscore and capitalize each word
-  const formatted = mediaType
+  // Handles: 'light_novel' -> 'Light Novel', '4_koma' -> '4 Koma'
+  const formatted = value
     .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map(word => {
+      // Keep numbers as-is (e.g., '4' in '4_koma')
+      if (/^\d+$/.test(word)) {
+        return word;
+      }
+      // Capitalize first letter of words
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
     .join(' ');
   
   return `[[${formatted}]]`;
