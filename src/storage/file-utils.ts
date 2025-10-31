@@ -275,7 +275,6 @@ export function getFormatTypeForProperty(propertyKey: string): 'simple' | 'array
     case 'mediaType':
     case 'source':
     case 'category':
-    case 'platform':
       return 'simple';
     
     // String array properties (already sanitized)
