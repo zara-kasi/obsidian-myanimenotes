@@ -131,46 +131,6 @@ export function sanitizeSynopsisMultiline(synopsis: string | undefined): string 
 }
 
 /**
- * Sanitizes a single genre name to be compatible with Obsidian tags
- */
-export function sanitizeGenreForTag(genre: string): string {
-  return genre
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\s\-\/]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-/**
- * Sanitizes an array of genre names for use as Obsidian tags
- * Filters out empty results and duplicates
- */
-export function sanitizeGenresForTags(genres: string[]): string[] {
-  if (!genres || !Array.isArray(genres)) {
-    return [];
-  }
-  
-  const sanitized = genres
-    .map(sanitizeGenreForTag)
-    .filter(tag => tag.length > 0);
-  
-  // Remove duplicates while preserving order
-  return [...new Set(sanitized)];
-}
-
-/**
- * Sanitizes genres from UniversalGenre objects for use as Obsidian tags
- */
-export function sanitizeGenreObjectsForTags(genres: Array<{ id: number; name: string }>): string[] {
-  if (!genres || !Array.isArray(genres)) {
-    return [];
-  }
-  
-  return sanitizeGenresForTags(genres.map(g => g.name));
-}
-
-/**
  * Universal property formatter for Obsidian wiki links
  * Handles different data types and formats them appropriately
  * 
