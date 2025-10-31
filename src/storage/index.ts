@@ -34,7 +34,7 @@ export {
   sanitizeSynopsis,
   ensureFolderExists,
   generateUniqueFilename,
-  formatMediaTypeAsWikiLink
+  formatPropertyAsWikiLink
 } from './file-utils';
 
 // Frontmatter utilities (internal, but exported for testing/advanced use)
