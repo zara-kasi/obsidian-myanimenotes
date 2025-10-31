@@ -171,10 +171,18 @@ export function sanitizeGenreObjectsForTags(genres: Array<{ id: number; name: st
 }
 
 /**
- * Formats mediaType value for display with Obsidian wiki links
- * Converts lowercase/underscore format to Title Case wiki links
+ * Formats mediaType value as Obsidian wiki link
+ * Converts API values (lowercase/underscore) to readable Title Case wiki links
+ * 
+ * @param mediaType - Raw media type from API (e.g., 'tv', 'light_novel')
+ * @returns Formatted wiki link (e.g., '[[TV]]', '[[Light Novel]]')
+ * 
+ * @example
+ * formatMediaTypeAsWikiLink('tv') // '[[TV]]'
+ * formatMediaTypeAsWikiLink('light_novel') // '[[Light Novel]]'
+ * formatMediaTypeAsWikiLink('ova') // '[[OVA]]'
  */
-export function formatMediaTypeAsWikiLink(mediaType: string): string {
+export function formatMediaTypeAsWikiLink(mediaType: string | undefined): string {
   if (!mediaType || mediaType === 'unknown') {
     return '[[Unknown]]';
   }
