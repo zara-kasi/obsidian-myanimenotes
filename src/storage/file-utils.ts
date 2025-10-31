@@ -337,7 +337,6 @@ export function formatDuration(minutes: number | undefined): string | undefined 
  * @example
  * formatPlatformDisplay('mal')    // "MyAnimeList"
  * formatPlatformDisplay('simkl')  // "Simkl"
- * formatPlatformDisplay('anilist') // "AniList"
  */
 export function formatPlatformDisplay(platform: string | undefined): string | undefined {
   if (!platform) return undefined;
@@ -345,8 +344,6 @@ export function formatPlatformDisplay(platform: string | undefined): string | un
   const platformMap: Record<string, string> = {
     'mal': 'MyAnimeList',
     'simkl': 'Simkl',
-    'anilist': 'AniList',
-    'kitsu': 'Kitsu',
   };
   
   return platformMap[platform.toLowerCase()] || platform;
