@@ -9,7 +9,7 @@
 import type { UniversalMediaItem } from '../../models';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName } from './property-mapping';
-import { sanitizeSynopsis, sanitizeGenreObjectsForTags, sanitizeFilename } from '../file-utils';
+import { sanitizeSynopsis, sanitizeGenreObjectsForTags, sanitizeFilename, formatMediaTypeAsWikiLink } from '../file-utils';
 import * as yaml from 'js-yaml';
 
 /**
