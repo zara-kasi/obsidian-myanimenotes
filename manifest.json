@@ -1,7 +1,7 @@
 {
   "id": "cassette",
   "name": "Cassette",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minAppVersion": "0.15.0",
   "description": "Sync your anime and manga from MyAnimeList (MAL) directly into your vault",
   "author": "Zarakasi",
