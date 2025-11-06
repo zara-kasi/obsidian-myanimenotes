@@ -185,9 +185,21 @@ function formatSimpleValue(value: string): string {
     return '[[Unknown]]';
   }
 
-  // Special cases for acronyms (should be all caps)
-  const acronyms = ['tv', 'ova', 'ona', 'mal'];
+  // Special mapping for platforms (mal -> MyAnimeList, simkl -> Simkl)
+  const platformMap: Record<string, string> = {
+    'mal': 'MyAnimeList',
+    'simkl': 'Simkl',
+  };
+  
   const normalized = value.toLowerCase();
+  
+  // Check if it's a platform identifier
+  if (platformMap[normalized]) {
+    return `[[${platformMap[normalized]}]]`;
+  }
+
+  // Special cases for acronyms (should be all caps)
+  const acronyms = ['tv', 'ova', 'ona'];  // <-- REMOVED 'mal' FROM HERE
   
   if (acronyms.includes(normalized)) {
     return `[[${normalized.toUpperCase()}]]`;
@@ -274,6 +286,7 @@ function formatAuthorArray(value: any[]): string[] {
     case 'mediaType':
     case 'source':
     case 'category':
+    case 'platform':
       return 'simple';
     
     case 'genres':
@@ -336,10 +349,6 @@ export function formatDuration(minutes: number | undefined): string | undefined 
 export function formatPlatformDisplay(platform: string | undefined): string | undefined {
   if (!platform) return undefined;
   
-  const platformMap: Record<string, string> = {
-    'mal': 'MyAnimeList',
-    'simkl': 'Simkl',
-  };
-  
-  return platformMap[platform.toLowerCase()] || platform;
+  // Use the standard wiki link formatter
+  return formatPropertyAsWikiLink(platform, 'simple');
 }
