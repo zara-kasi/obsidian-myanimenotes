@@ -12,6 +12,16 @@ export interface CassetteSettings {
   malUserInfo?: MALUserInfo | null;
   malAuthenticated: boolean;
   
+  // OAuth flow state (temporary, cleared after auth completes)
+  malAuthState?: {
+    verifier: string;
+    state: string;
+    timestamp: number; // For expiry checking
+  } | null;
+    // Advanced API settings
+  apiMaxRetries?: number;
+  apiRetryDelay?: number;
+  
   // Storage Settings
   animeFolder: string;
   mangaFolder: string;
@@ -22,9 +32,9 @@ export interface CassetteSettings {
   
   // Sync Settings
   forceFullSync: boolean; 
-  syncOnLoad: boolean; // Sync after plugin loads
-  backgroundSync: boolean; // Periodic background sync
-  backgroundSyncInterval: number; // Interval in minutes (min: 30)
+  syncOnLoad: boolean; // Sync shortly after plugin loads (3 seconds)
+  scheduledSync: boolean; // Periodic scheduled sync
+  scheduledSyncInterval: number; // Interval in minutes (min: 30)
   
   // Template Settings (for future use)
   useCustomTemplate: boolean;
@@ -43,6 +53,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malTokenExpiry: null,
   malUserInfo: null,
   malAuthenticated: false,
+  malAuthState: null, 
   
   // Storage defaults
   animeFolder: 'Cassette/Anime',
@@ -55,8 +66,8 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   // Sync defaults
   forceFullSync: false,
   syncOnLoad: false,
-  backgroundSync: false,
-  backgroundSyncInterval: 120, // 120 minutes default
+  scheduledSync: false,
+  scheduledSyncInterval: 90, // 90 minutes default
   
   // Template defaults
   useCustomTemplate: false,

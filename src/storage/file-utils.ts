@@ -131,50 +131,224 @@ export function sanitizeSynopsisMultiline(synopsis: string | undefined): string 
 }
 
 /**
- * Sanitizes a single genre name to be compatible with Obsidian tags
+ * Universal property formatter for Obsidian wiki links
+ * Handles different data types and formats them appropriately
+ * 
+ * Supports:
+ * - Single strings: 'tv' -> '[[TV]]'
+ * - Arrays of strings: ['Action', 'Drama'] -> ['[[Action]]', '[[Drama]]']
+ * - Arrays of objects: [{name: 'Ufotable'}] -> ['[[Ufotable]]']
+ * - Author objects: {firstName: 'Hajime', lastName: 'Isayama'} -> '[[Hajime Isayama]]'
+ * 
+ * @param value - Raw value from API (string, array, or object)
+ * @param formatType - Type of formatting to apply
+ * @returns Formatted value with wiki links
  */
-export function sanitizeGenreForTag(genre: string): string {
-  return genre
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\s\-\/]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
+export function formatPropertyAsWikiLink(
+  value: any,
+  formatType: 'simple' | 'array' | 'nameArray' | 'authorArray' = 'simple'
+): any {
+  if (!value) {
+    return formatType === 'array' || formatType === 'nameArray' || formatType === 'authorArray' 
+      ? [] 
+      : '[[Unknown]]';
+  }
+
+  switch (formatType) {
+    case 'simple':
+      return formatSimpleValue(value);
+    
+    case 'array':
+      return formatStringArray(value);
+    
+    case 'nameArray':
+      return formatObjectNameArray(value);
+    
+    case 'authorArray':
+      return formatAuthorArray(value);
+    
+    default:
+      return value;
+  }
+}
+
+// ============================================================
+// Format Handlers
+// ============================================================
+
+/**
+ * Formats simple string values
+ * Handles: mediaType, source, category, platform
+ */
+function formatSimpleValue(value: string): string {
+  if (!value || value === 'unknown') {
+    return '[[Unknown]]';
+  }
+
+  // Special mapping for platforms (mal -> MyAnimeList, simkl -> Simkl)
+  const platformMap: Record<string, string> = {
+    'mal': 'MyAnimeList',
+    'simkl': 'Simkl',
+  };
+  
+  const normalized = value.toLowerCase();
+  
+  // Check if it's a platform identifier
+  if (platformMap[normalized]) {
+    return `[[${platformMap[normalized]}]]`;
+  }
+
+  // Special cases for acronyms (should be all caps)
+  const acronyms = ['tv', 'ova', 'ona'];  // <-- REMOVED 'mal' FROM HERE
+  
+  if (acronyms.includes(normalized)) {
+    return `[[${normalized.toUpperCase()}]]`;
+  }
+
+  // Split by underscore and capitalize each word
+  const formatted = value
+    .split('_')
+    .map(word => {
+      // Keep numbers as-is (e.g., '4' in '4_koma')
+      if (/^\d+$/.test(word)) {
+        return word;
+      }
+      // Capitalize first letter
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(' ');
+  
+  return `[[${formatted}]]`;
 }
 
 /**
- * Sanitizes an array of genre names for use as Obsidian tags
- * Filters out empty results and duplicates
+ * Formats array of strings
+ * Handles: genres (already tag-sanitized), simple string arrays
+ * Input: ['action', 'drama', 'slice-of-life']
+ * Output: ['[[Action]]', '[[Drama]]', '[[Slice-of-Life]]']
  */
-export function sanitizeGenresForTags(genres: string[]): string[] {
-  if (!genres || !Array.isArray(genres)) {
-    return [];
+function formatStringArray(value: string | string[]): string[] {
+  const array = Array.isArray(value) ? value : [value];
+  
+  return array.map(item => {
+    if (!item || typeof item !== 'string') return '[[Unknown]]';
+    
+    // For genres that are already hyphenated (e.g., 'slice-of-life')
+    // Just capitalize each word
+    const formatted = item
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join('-');
+    
+    return `[[${formatted}]]`;
+  });
+}
+
+/**
+ * Formats array of objects with 'name' property
+ * Handles: studios [{name: 'Ufotable'}]
+ * Output: ['[[Ufotable]]']
+ */
+function formatObjectNameArray(value: any[]): string[] {
+  if (!Array.isArray(value)) return [];
+  
+  return value
+    .filter(item => item && item.name)
+    .map(item => `[[${item.name}]]`);
+}
+
+/**
+ * Formats array of author objects
+ * Handles: authors [{firstName: 'Hajime', lastName: 'Isayama'}]
+ * Output: ['[[Hajime Isayama]]']
+ */
+function formatAuthorArray(value: any[]): string[] {
+  if (!Array.isArray(value)) return [];
+  
+  return value
+    .filter(author => author && (author.firstName || author.lastName))
+    .map(author => {
+      const fullName = `${author.firstName || ''} ${author.lastName || ''}`.trim();
+      return fullName ? `[[${fullName}]]` : '[[Unknown Author]]';
+    });
+}
+
+// ============================================================
+// Type Detection Helper
+// ============================================================
+
+/**
+ * Auto-detects the format type based on property key
+ * Used in frontmatter-builder to automatically choose the right format
+ */
+ export function getWikiLinkFormatType(propertyKey: string): 'simple' | 'array' | 'nameArray' | 'authorArray' | null {
+  switch (propertyKey) {
+    case 'mediaType':
+    case 'source':
+    case 'category':
+    case 'platform':
+      return 'simple';
+    
+    case 'genres':
+      return 'array';
+    
+    case 'studios':
+      return 'nameArray';
+    
+    case 'authors':
+      return 'authorArray';
+    
+    default:
+      return null;
+  }
+}
+
+
+/**
+ * Formats duration in minutes to human-readable format (e.g., "2h 20m", "45m")
+ * 
+ * @param minutes - Duration in minutes
+ * @returns Formatted duration string
+ * 
+ * @example
+ * formatDuration(150)  // "2h 30m"
+ * formatDuration(45)   // "45m"
+ * formatDuration(90)   // "1h 30m"
+ * formatDuration(60)   // "1h"
+ * formatDuration(0)    // undefined
+ */
+export function formatDuration(minutes: number | undefined): string | undefined {
+  if (!minutes || minutes === 0) return undefined;
+  
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  
+  if (hours === 0) {
+    return `${mins}m`;
   }
   
-  const sanitized = genres
-    .map(sanitizeGenreForTag)
-    .filter(tag => tag.length > 0);
-  
-  // Remove duplicates while preserving order
-  return [...new Set(sanitized)];
-}
-
-/**
- * Sanitizes genres from UniversalGenre objects for use as Obsidian tags
- */
-export function sanitizeGenreObjectsForTags(genres: Array<{ id: number; name: string }>): string[] {
-  if (!genres || !Array.isArray(genres)) {
-    return [];
+  if (mins === 0) {
+    return `${hours}h`;
   }
   
-  return sanitizeGenresForTags(genres.map(g => g.name));
+  return `${hours}h ${mins}m`;
 }
 
 /**
- * Formats start_season as "season year" (e.g., "winter 2024")
+ * Formats platform identifier to display name
+ * Internal: 'mal', 'simkl' (lowercase for cassette keys)
+ * Display: 'MyAnimeList', 'Simkl' (readable names)
+ * 
+ * @param platform - Platform identifier (e.g., 'mal', 'simkl')
+ * @returns Formatted platform name
+ * 
+ * @example
+ * formatPlatformDisplay('mal')    // "MyAnimeList"
+ * formatPlatformDisplay('simkl')  // "Simkl"
  */
-export function formatStartSeason(season?: { year?: number; season?: string }): string | undefined {
-  if (!season || !season.year || !season.season) return undefined;
-  return `${season.season} ${season.year}`;
+export function formatPlatformDisplay(platform: string | undefined): string | undefined {
+  if (!platform) return undefined;
+  
+  // Use the standard wiki link formatter
+  return formatPropertyAsWikiLink(platform, 'simple');
 }

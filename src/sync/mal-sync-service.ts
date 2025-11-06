@@ -10,6 +10,7 @@ import {
   fetchMALAnimeByStatus,
   fetchMALMangaByStatus,
   isAuthenticated,
+  throttlePromises,
 } from '../api/mal';
 import {
   transformMALAnimeList,
@@ -50,19 +51,19 @@ async function syncAnimeList(
   
   let rawItems: any[] = [];
 
-  if (statuses && statuses.length > 0) {
-    // Fetch specific statuses
-    for (const status of statuses) {
-      const items = await fetchMALAnimeByStatus(
-        plugin,
-        status as 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch'
-      );
-      rawItems.push(...items);
-    }
-  } else {
-    // Fetch all anime
-    rawItems = await fetchCompleteMALAnimeList(plugin);
-  }
+if (statuses && statuses.length > 0) {
+  const animePromises = statuses.map(status => 
+    fetchMALAnimeByStatus(
+      plugin,
+      status as 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch'
+    )
+  );
+  
+  const animeResults = await throttlePromises(animePromises, 2, 300);
+  rawItems = animeResults.flat();
+} else {
+  rawItems = await fetchCompleteMALAnimeList(plugin);
+}
 
   debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
   
@@ -88,19 +89,20 @@ async function syncMangaList(
   
   let rawItems: any[] = [];
 
-  if (statuses && statuses.length > 0) {
-    // Fetch specific statuses
-    for (const status of statuses) {
-      const items = await fetchMALMangaByStatus(
-        plugin,
-        status as 'reading' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_read'
-      );
-      rawItems.push(...items);
-    }
-  } else {
-    // Fetch all manga
-    rawItems = await fetchCompleteMALMangaList(plugin);
-  }
+// Update mal-sync-service.ts - syncMangaList()
+if (statuses && statuses.length > 0) {
+  const mangaPromises = statuses.map(status => 
+    fetchMALMangaByStatus(
+      plugin,
+      status as 'reading' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_read'
+    )
+  );
+  
+  const mangaResults = await throttlePromises(mangaPromises, 2, 300);
+  rawItems = mangaResults.flat();
+} else {
+  rawItems = await fetchCompleteMALMangaList(plugin);
+}
 
   debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
   

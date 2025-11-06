@@ -9,7 +9,13 @@
 import type { UniversalMediaItem } from '../../models';
 import type { PropertyMapping } from './property-mapping';
 import { getMappedPropertyName } from './property-mapping';
-import { sanitizeSynopsis, sanitizeGenreObjectsForTags, sanitizeFilename } from '../file-utils';
+import { 
+  sanitizeSynopsis,
+  formatPropertyAsWikiLink,
+  getWikiLinkFormatType,
+  formatDuration,
+  formatPlatformDisplay 
+} from '../file-utils';
 import * as yaml from 'js-yaml';
 
 /**
@@ -27,13 +33,28 @@ export function buildSyncedFrontmatterProperties(
   // CRITICAL: Add cassette as the first property (primary key)
   properties.cassette = cassetteSync;
   
-  
   const addProperty = (key: keyof PropertyMapping, value: any) => {
-    if (value !== undefined && value !== null && value !== '') {
-      const mappedKey = getMappedPropertyName(key, mapping);
-      properties[mappedKey] = value;
+  if (value !== undefined && value !== null && value !== '') {
+    const mappedKey = getMappedPropertyName(key, mapping);
+    
+    // Wiki link formatting (for navigation/linking)
+    const wikiLinkType = getWikiLinkFormatType(key);
+    if (wikiLinkType) {
+      properties[mappedKey] = formatPropertyAsWikiLink(value, wikiLinkType);
+      return;
     }
-  };
+    
+    // Display formatting (for readability)
+    if (key === 'duration') {
+      properties[mappedKey] = formatDuration(value);
+      return;
+    }
+    
+    // Default: use value as-is
+    properties[mappedKey] = value;
+  }
+};
+  
   
   // Basic fields
   addProperty('id', item.id);
@@ -76,15 +97,11 @@ export function buildSyncedFrontmatterProperties(
   addProperty('status', item.status);
   addProperty('mean', item.mean);
   
-  // Genres - UPDATED: Now sanitized for Obsidian tags
-  // Converts genres like "Slice of Life" to "slice-of-life"
-  // This allows users to use them as tags directly
-  if (item.genres && item.genres.length > 0) {
-    const sanitizedGenres = sanitizeGenreObjectsForTags(item.genres);
-    if (sanitizedGenres.length > 0) {
-      addProperty('genres', sanitizedGenres);
-    }
-  }
+  // Genres - extract raw names from genre objects
+if (item.genres && item.genres.length > 0) {
+  const genreNames = item.genres.map(g => g.name);
+  addProperty('genres', genreNames);
+}
   
     // Add sync timestamp if available (for sync optimization)
   if (item.syncedAt) {
@@ -110,17 +127,7 @@ export function buildSyncedFrontmatterProperties(
     addProperty('numVolumesRead', item.numVolumesRead);
     addProperty('numChapters', item.numChapters);
     addProperty('numChaptersRead', item.numChaptersRead);
-    
-    
-    // Authors (manga only)
-    if (item.authors && item.authors.length > 0) {
-      const authorNames = item.authors.map(a => 
-        `${a.firstName} ${a.lastName}`.trim()
-      ).filter(Boolean);
-      if (authorNames.length > 0) {
-        addProperty('authors', authorNames);
-      }
-    }
+    addProperty('authors', item.authors);
   }
   
   // User list data (COMMON to both anime and manga)
@@ -161,59 +168,72 @@ export function mergeFrontmatter(
 }
 
 /**
+ * Property ordering configuration for frontmatter serialization
+ * Lower numbers appear first in the output
+ * Properties not listed here will appear at the end in alphabetical order
+ */
+const PROPERTY_ORDER: Record<string, number> = {
+  'title': 1,
+  'aliases': 2,
+  'status': 3,
+  'eps_seen': 4,
+  'chap_read': 5,
+  'vol_read': 6,
+  'rating': 7,
+  'started': 8,
+  'finished': 9,
+  'media': 10,
+  'episodes': 11,
+  'chapters': 12,
+  'volumes': 13,
+  'state': 14,
+  'released': 15,
+  'ended': 16,
+  'studios': 17,
+  'origin': 18,
+  'genres': 19,
+  'authors': 20,
+  'duration': 21,
+  'score': 22,
+  'description': 23,
+  'image': 24,
+  'source': 25,
+  'platform': 26,
+  'category': 27,
+  'id': 28,
+  'cassette': 29,
+  'synced': 30,
+};
+
+/**
+ * Comparator function for sorting frontmatter properties
+ * Maintains the order defined in PROPERTY_ORDER
+ */
+function compareProperties(a: string, b: string): number {
+  const orderA = PROPERTY_ORDER[a] ?? 999;
+  const orderB = PROPERTY_ORDER[b] ?? 999;
+  
+  // If both have defined order, sort by order
+  if (orderA !== 999 || orderB !== 999) {
+    return orderA - orderB;
+  }
+  
+  // If neither have defined order, sort alphabetically
+  return a.localeCompare(b);
+}
+
+/**
  * Serializes frontmatter to YAML string with consistent formatting
- * cassette is always positioned first as the primary key
+ * Properties are ordered according to PROPERTY_ORDER configuration
  */
 export function serializeFrontmatter(frontmatter: Record<string, any>): string {
-  // Define property order with cassette first (primary key position)
-  const propertyOrder = [
-    'title',
-    'aliases',
-    'status',
-    'eps_seen',
-    'chap_read',
-    'vol_read',
-    'rating',
-    'started',    
-    'finished',
-    'media',
-    'episodes',
-    'chapters',
-    'volumes',
-    'state',
-    'released',
-    'ended',
-    'studios',
-    'origin',
-    'genres',
-    'authors',
-    'duration',
-    'score',
-    'description',
-    'image',
-    'source',
-    'platform',
-    'category',
-    'id',
-    'cassette',
-    'synced',
-  ];
-  
-  // Create ordered object
+  // Create ordered object by sorting keys
   const ordered: Record<string, any> = {};
   
-  // Add properties in defined order
-  propertyOrder.forEach(key => {
-    if (frontmatter.hasOwnProperty(key)) {
-      ordered[key] = frontmatter[key];
-    }
-  });
+  const sortedKeys = Object.keys(frontmatter).sort(compareProperties);
   
-  // Add any remaining properties not in the order list (user-defined properties)
-  Object.keys(frontmatter).forEach(key => {
-    if (!ordered.hasOwnProperty(key)) {
-      ordered[key] = frontmatter[key];
-    }
+  sortedKeys.forEach(key => {
+    ordered[key] = frontmatter[key];
   });
   
   // Serialize to YAML with consistent formatting

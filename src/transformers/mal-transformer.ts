@@ -245,12 +245,14 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
 }
 
 /**
- * Transforms MAL studios array
+ * Transforms MAL studios array - keeps objects for wiki link formatting
  */
-function transformStudios(malStudios: any[]): string[] {
+function transformStudios(malStudios: any[]): Array<{name: string}> {
   if (!malStudios || !Array.isArray(malStudios)) return [];
   
-  return malStudios.map(studio => studio.name).filter(Boolean);
+  return malStudios
+    .filter(studio => studio && studio.name)
+    .map(studio => ({ name: studio.name }));
 }
 
 /**

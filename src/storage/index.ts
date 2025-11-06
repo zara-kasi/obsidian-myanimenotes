@@ -32,9 +32,12 @@ export {
 export {
   sanitizeFilename,
   sanitizeSynopsis,
-  formatStartSeason,
   ensureFolderExists,
-  generateUniqueFilename
+  generateUniqueFilename,
+  formatPropertyAsWikiLink,
+  getWikiLinkFormatType,
+  formatDuration, 
+  formatPlatformDisplay
 } from './file-utils';
 
 // Frontmatter utilities (internal, but exported for testing/advanced use)

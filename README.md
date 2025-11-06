@@ -1,6 +1,6 @@
-# Obsidian Cassette Plugin
+# Cassette Obsidian Plugin
 
-Cassette is an Obsidian plugin that syncs your anime and manga lists from MyAnimeList (MAL) into structured Markdown notes, complete with metadata, cover images, and automatic updates.
+Cassette is an Obsidian plugin that syncs your anime and manga lists from MyAnimeList (MAL) into structured Markdown notes, complete with metadata, cover image, and automatic updates.
 
 ## Getting Started
 
@@ -56,7 +56,7 @@ genres:
   - supernatural
 duration: 24
 score: 8.53
-description: Idly indulging in baseless paranormal activities with the Occult Club, high schooler Yuji Itadori spends his days at either the clubroom or the hospital, where he visits his bedridden grandfather...
+description: Idly indulging in baseless paranormal activities with the Occult Club...
 image: https://cdn.myanimelist.net/images/anime/1171/109222l.jpg
 source: https://myanimelist.net/anime/40748
 platform: mal
@@ -84,9 +84,7 @@ Cassette compares the synced timestamp to skip unnecessary updates. If you prefe
 
 Cassette lets you rename synced frontmatter fields to fit your personal workflow. You can configure this under **Settings → Cassette → Property Customization**.
 
-For example, change `status` → `watch_status` or `genres` → `tags` to match your note style.  
-
-> Tip: When genres are used as tags, Cassette automatically sanitizes them to work properly as Obsidian tags.
+For example, change `status` → `watch_status` to match your note style.  
 
 
 ---
@@ -95,6 +93,8 @@ For example, change `status` → `watch_status` or `genres` → `tags` to match 
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for development instructions.  
 Report bugs or suggest new features [here](https://github.com/zara-kasi/cassette/issues).
+
+> For information about data usage and privacy, see [PRIVACY](./PRIVACY.md).
 
 ## License
 

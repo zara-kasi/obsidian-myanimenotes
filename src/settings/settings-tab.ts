@@ -220,7 +220,7 @@ private renderSyncSection(container: HTMLElement): void {
   // Sync on load toggle
   new Setting(container)
     .setName('Sync on plugin load')
-    .setDesc('Automatically sync 5 minutes after opening Obsidian.')
+    .setDesc('Automatically sync shortly after Obsidian starts (1 minute delay to avoid slow startup).')
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.syncOnLoad)
       .onChange(async (value) => {
@@ -234,14 +234,14 @@ private renderSyncSection(container: HTMLElement): void {
         }
       }));
   
-  // Background sync toggle
+  // Scheduled sync toggle
   new Setting(container)
-    .setName('Background sync')
+    .setName('Scheduled sync')
     .setDesc('Automatically sync at regular intervals.')
     .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.backgroundSync)
+      .setValue(this.plugin.settings.scheduledSync)
       .onChange(async (value) => {
-        this.plugin.settings.backgroundSync = value;
+        this.plugin.settings.scheduledSync = value;
         await this.plugin.saveSettings();
         
         // Restart auto-sync manager to apply changes
@@ -254,18 +254,18 @@ private renderSyncSection(container: HTMLElement): void {
         this.display();
       }));
   
-  // Background sync interval (only show if background sync is enabled)
-  if (this.plugin.settings.backgroundSync) {
+  // Scheduled sync interval (only show if scheduled sync is enabled)
+  if (this.plugin.settings.scheduledSync) {
     new Setting(container)
       .setName('Sync interval')
       .setDesc('Time between automatic syncs in minutes (minimum 30).')
       .addText(text => text
-        .setPlaceholder('120')
-        .setValue(String(this.plugin.settings.backgroundSyncInterval))
+        .setPlaceholder('90')
+        .setValue(String(this.plugin.settings.scheduledSyncInterval))
         .onChange(async (value) => {
           const numValue = parseInt(value);
           if (!isNaN(numValue) && numValue >= 30) {
-            this.plugin.settings.backgroundSyncInterval = numValue;
+            this.plugin.settings.scheduledSyncInterval = numValue;
             await this.plugin.saveSettings();
             
             // Restart auto-sync manager to apply new interval

@@ -1,17 +1,17 @@
 import type CassettePlugin from '../main';
 import { createDebugLogger } from '../utils';
 
-const SYNC_ON_LOAD_DELAY = 5 * 60 * 1000; // 5 minutes in milliseconds
-const MIN_BACKGROUND_INTERVAL = 30; // Minimum 30 minutes
+const SYNC_ON_LOAD_DELAY = 1 * 60 * 1000; // 1 minute (fast but non-blocking)
+const MIN_SCHEDULED_INTERVAL = 30; // Minimum 30 minutes
 
 /**
  * Manages auto-sync timers
- * Each sync type (syncOnLoad, backgroundSync) works independently
+ * Each sync type (syncOnLoad, scheduledSync) works independently
  */
 export class AutoSyncManager {
   private plugin: CassettePlugin;
   private syncOnLoadTimer: NodeJS.Timeout | null = null;
-  private backgroundSyncTimer: NodeJS.Timeout | null = null;
+  private scheduledSyncTimer: NodeJS.Timeout | null = null;
   private debug: ReturnType<typeof createDebugLogger>;
 
   constructor(plugin: CassettePlugin) {
@@ -29,9 +29,9 @@ export class AutoSyncManager {
       this.startSyncOnLoad();
     }
 
-    // Start background sync if enabled
-    if (this.plugin.settings.backgroundSync) {
-      this.startBackgroundSync();
+    // Start scheduled sync if enabled
+    if (this.plugin.settings.scheduledSync) {
+      this.startScheduledSync();
     }
   }
 
@@ -40,11 +40,12 @@ export class AutoSyncManager {
    */
   stop(): void {
     this.clearSyncOnLoadTimer();
-    this.clearBackgroundSyncTimer();
+    this.clearScheduledSyncTimer();
   }
 
   /**
-   * Starts the sync-on-load timer (one-time, 5 minutes after load)
+   * Starts the sync-on-load timer (one-time, 1 minute after load)
+   * Uses a short delay to avoid blocking plugin initialization
    */
   private startSyncOnLoad(): void {
     this.clearSyncOnLoadTimer();
@@ -55,10 +56,10 @@ export class AutoSyncManager {
       return;
     }
 
-    this.debug.log('[Sync on Load] Timer started: Will sync in 5 minutes');
+    this.debug.log('[Sync on Load] Timer started: Will sync in 1 minute');
 
     this.syncOnLoadTimer = setTimeout(async () => {
-      this.debug.log('[Sync on Load] Triggered after 5 minutes');
+      this.debug.log('[Sync on Load] Triggered after 1 minute');
       
       // Double-check authentication at execution time
       if (!this.isAuthenticated()) {
@@ -78,54 +79,54 @@ export class AutoSyncManager {
   }
 
   /**
-   * Starts the background sync timer (repeating at configured interval)
+   * Starts the scheduled sync timer (repeating at configured interval)
    */
-  private startBackgroundSync(): void {
-    this.clearBackgroundSyncTimer();
+  private startScheduledSync(): void {
+    this.clearScheduledSyncTimer();
 
     // Check authentication before starting timer
     if (!this.isAuthenticated()) {
-      this.debug.log('[Background Sync] Skipped: Not authenticated with MAL');
+      this.debug.log('[Scheduled Sync] Skipped: Not authenticated with MAL');
       return;
     }
 
     // Validate interval (minimum 30 minutes)
     const intervalMinutes = Math.max(
-      this.plugin.settings.backgroundSyncInterval,
-      MIN_BACKGROUND_INTERVAL
+      this.plugin.settings.scheduledSyncInterval,
+      MIN_SCHEDULED_INTERVAL
     );
     const intervalMs = intervalMinutes * 60 * 1000;
 
-    this.debug.log(`[Background Sync] Timer started: Will sync every ${intervalMinutes} minutes`);
+    this.debug.log(`[Scheduled Sync] Timer started: Will sync every ${intervalMinutes} minutes`);
 
     const runSync = async () => {
-      this.debug.log('[Background Sync] Triggered');
+      this.debug.log('[Scheduled Sync] Triggered');
       
       // Check authentication at execution time
       if (!this.isAuthenticated()) {
-        this.debug.log('[Background Sync] Aborted: Not authenticated with MAL');
+        this.debug.log('[Scheduled Sync] Aborted: Not authenticated with MAL');
         return;
       }
 
       try {
         if (this.plugin.syncManager) {
           await this.plugin.syncManager.syncFromMAL();
-          this.debug.log('[Background Sync] Completed successfully');
+          this.debug.log('[Scheduled Sync] Completed successfully');
         }
       } catch (error) {
-        console.error('[Background Sync] Failed:', error);
+        console.error('[Scheduled Sync] Failed:', error);
       }
 
       // Schedule next sync if still enabled and authenticated
-      if (this.plugin.settings.backgroundSync && this.isAuthenticated()) {
-        this.backgroundSyncTimer = setTimeout(runSync, intervalMs);
+      if (this.plugin.settings.scheduledSync && this.isAuthenticated()) {
+        this.scheduledSyncTimer = setTimeout(runSync, intervalMs);
       } else {
-        this.debug.log('[Background Sync] Stopped: Either disabled or not authenticated');
+        this.debug.log('[Scheduled Sync] Stopped: Either disabled or not authenticated');
       }
     };
 
     // Start the first timer
-    this.backgroundSyncTimer = setTimeout(runSync, intervalMs);
+    this.scheduledSyncTimer = setTimeout(runSync, intervalMs);
   }
 
   /**
@@ -149,12 +150,12 @@ export class AutoSyncManager {
   }
 
   /**
-   * Clears the background sync timer
+   * Clears the scheduled sync timer
    */
-  private clearBackgroundSyncTimer(): void {
-    if (this.backgroundSyncTimer) {
-      clearTimeout(this.backgroundSyncTimer);
-      this.backgroundSyncTimer = null;
+  private clearScheduledSyncTimer(): void {
+    if (this.scheduledSyncTimer) {
+      clearTimeout(this.scheduledSyncTimer);
+      this.scheduledSyncTimer = null;
     }
   }
 }
