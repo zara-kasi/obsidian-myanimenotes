@@ -50,11 +50,6 @@ export function buildSyncedFrontmatterProperties(
       return;
     }
     
-    if (key === 'platform') {
-      properties[mappedKey] = formatPlatformDisplay(value);
-      return;
-    }
-    
     // Default: use value as-is
     properties[mappedKey] = value;
   }
