@@ -84,9 +84,7 @@ Cassette compares the synced timestamp to skip unnecessary updates. If you prefe
 
 Cassette lets you rename synced frontmatter fields to fit your personal workflow. You can configure this under **Settings → Cassette → Property Customization**.
 
-For example, change `status` → `watch_status` or `genres` → `tags` to match your note style.  
-
-> Genres are formatted to match Obsidian’s tag syntax.
+For example, change `status` → `watch_status` to match your note style.  
 
 
 ---
