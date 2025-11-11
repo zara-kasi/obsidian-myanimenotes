@@ -31,21 +31,22 @@ Synced items are saved as markdown notes with frontmatter:
 
 ```yaml
 ---
-title: One Punch Man 3
+title: One Punch Man
 aliases:
-  - One-Punch Man Season 3
-  - ワンパンマン 3
-  - One Punch Man 3rd Season
-  - OPM 3
-status: Watching
-eps_seen: 3
-started: 2025-11-01
+  - One-Punch Man
+  - ワンパンマン
+  - One Punch-Man
+  - OPM
+status: Completed
+eps_seen: 12
+rating: 9
 media: "[[TV]]"
-episodes: 0
-state: Ongoing
-released: 2025-10-12
+episodes: 12
+state: Finished
+released: 2015-10-05
+ended: 2015-12-21
 studios:
-  - "[[J.C.Staff]]"
+  - "[[Madhouse]]"
 origin: "[[Web Manga]]"
 genres:
   - "[[Action]]"
@@ -55,15 +56,15 @@ genres:
   - "[[Seinen]]"
   - "[[Super power]]"
 duration: 24m
-score: 5.93
-description: Third season of One Punch Man.
-image: https://cdn.myanimelist.net/images/anime/1168/148347l.jpg
-source: https://myanimelist.net/anime/52807
+score: 8.48
+description: "The seemingly unimpressive Saitama has a rather unique hobby: being a hero. In order to pursue his childhood dream, Saitama relentlessly trained for three years, losing all of his hair in the process. Now, Saitama is so powerful, he can defeat any enemy with just one punch. However, having no one capable of matching his strength has led Saitama to an unexpected problem—he is no longer able to enjoy the thrill of battling and has become quite bored. One day, Saitama catches the attention of 19-year-old cyborg Genos, who witnesses his power and wishes to become Saitama's disciple. Genos proposes that the two join the Hero Association in order to become certified heroes that will be recognized for their positive contributions to society. Saitama, who is shocked that no one knows who he is, quickly agrees. Meeting new allies and taking on new foes, Saitama embarks on a new journey as a member of the Hero Association to experience the excitement of battle he once felt. [Written by MAL Rewrite]"
+image: https://cdn.myanimelist.net/images/anime/12/76049l.jpg
+source: https://myanimelist.net/anime/30276
 platform: "[[MyAnimeList]]"
 category: "[[Anime]]"
-id: 52807
-cassette: mal:anime:52807
-synced: 2025-10-31T18:43:23+00:00
+id: 30276
+cassette: mal:anime:30276
+synced: 2025-10-23T00:56:20+00:00
 
 ---
 
