@@ -31,39 +31,40 @@ Synced items are saved as markdown notes with frontmatter:
 
 ```yaml
 ---
-title: Jujutsu Kaisen
+title: One Punch Man 3
 aliases:
-  - Jujutsu Kaisen
-  - 呪術廻戦
-  - Sorcery Fight
-  - JJK
-status: completed
-eps_seen: 24
-rating: 9
-media: tv
-episodes: 24
-state: finished
-released: 2020-10-03
-ended: 2021-03-27
+  - One-Punch Man Season 3
+  - ワンパンマン 3
+  - One Punch Man 3rd Season
+  - OPM 3
+status: Watching
+eps_seen: 3
+started: 2025-11-01
+media: "[[TV]]"
+episodes: 0
+state: Ongoing
+released: 2025-10-12
 studios:
-  - MAPPA
-origin: manga
+  - "[[J.C.Staff]]"
+origin: "[[Web Manga]]"
 genres:
-  - action
-  - award-winning
-  - school
-  - shounen
-  - supernatural
-duration: 24
-score: 8.53
-description: Idly indulging in baseless paranormal activities with the Occult Club...
-image: https://cdn.myanimelist.net/images/anime/1171/109222l.jpg
-source: https://myanimelist.net/anime/40748
-platform: mal
-category: anime
-id: 40748
-cassette: mal:anime:40748
-synced: 2025-10-23T00:54:38+00:00
+  - "[[Action]]"
+  - "[[Adult cast]]"
+  - "[[Comedy]]"
+  - "[[Parody]]"
+  - "[[Seinen]]"
+  - "[[Super power]]"
+duration: 24m
+score: 5.93
+description: Third season of One Punch Man.
+image: https://cdn.myanimelist.net/images/anime/1168/148347l.jpg
+source: https://myanimelist.net/anime/52807
+platform: "[[MyAnimeList]]"
+category: "[[Anime]]"
+id: 52807
+cassette: mal:anime:52807
+synced: 2025-10-31T18:43:23+00:00
+
 ---
 
 [Your personal notes and thoughts go here—this content is never touched by sync]
