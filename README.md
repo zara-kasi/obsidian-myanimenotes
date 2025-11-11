@@ -65,7 +65,6 @@ category: "[[Anime]]"
 id: 30276
 cassette: mal:anime:30276
 synced: 2025-10-23T00:56:20+00:00
-
 ---
 
 [Your personal notes and thoughts go here—this content is never touched by sync]
