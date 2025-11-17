@@ -30,7 +30,7 @@ export function renderPropertyMappingSection(
   const commonFields = [
     { key: 'id', label: 'ID (Media id from API)', default: 'id' },
     { key: 'title', label: 'Title (Main Title)', default: 'title' },
-    { key: 'category', label: 'Category (Anime/Manga/Movie/TV)', default: 'category' },
+    { key: 'category', label: 'Category (Anime/Manga)', default: 'category' },
     { key: 'platform', label: 'Platform (MyAnimeList)', default: 'platform' },
     { key: 'url', label: 'source (Platform link)', default: 'source' },
     { key: 'mainPicture', label: 'Image (cover/poster)', default: 'image' },
