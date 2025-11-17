@@ -250,17 +250,6 @@ private renderSyncSection(container: HTMLElement): void {
         }));
   }
   
-   // Force full sync toggle
-  new Setting(container)
-    .setName('Overwrite all')
-    .setDesc('Update all notes on every sync, even if nothing changed.')
-    .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.forceFullSync)
-      .onChange(async (value) => {
-        this.plugin.settings.forceFullSync = value;
-        await this.plugin.saveSettings();
-      }));
-  
   // Sync on load toggle
   new Setting(container)
     .setName('Sync after load')
@@ -276,6 +265,17 @@ private renderSyncSection(container: HTMLElement): void {
           this.plugin.autoSyncManager.stop();
           this.plugin.autoSyncManager.start();
         }
+      }));
+  
+   // Force full sync toggle
+  new Setting(container)
+    .setName('Overwrite all')
+    .setDesc('Update all notes on every sync, even if nothing changed.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.forceFullSync)
+      .onChange(async (value) => {
+        this.plugin.settings.forceFullSync = value;
+        await this.plugin.saveSettings();
       }));
   
 }
