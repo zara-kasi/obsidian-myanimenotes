@@ -38,6 +38,15 @@ export class SyncManager {
   }
 
   /**
+   * Saves the last successful sync timestamp
+   */
+  private async saveLastSyncTimestamp(): Promise<void> {
+    this.plugin.settings.lastSuccessfulSync = Date.now();
+    await this.plugin.saveSettings();
+    this.debug.log('[Sync Manager] Saved last sync timestamp');
+  }
+
+  /**
    * Performs a complete sync from MAL
    * @param options Sync options
    * @returns Synced items and result
@@ -72,6 +81,11 @@ export class SyncManager {
           const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
           new Notice(`⚠️ Synced but failed to save: ${errorMessage}`, 5000);
        }        
+      }
+      
+      // Save last sync timestamp if sync was successful
+      if (result.success) {
+        await this.saveLastSyncTimestamp();
       }
       
       return { items, result, savedPaths };
@@ -166,9 +180,11 @@ export class SyncManager {
    */
   getSyncStats(): {
     totalItems?: number;
+    lastSyncTime?: number;
   } {
     return {
       totalItems: undefined,
+      lastSyncTime: this.plugin.settings.lastSuccessfulSync,
     };
   }
 }
