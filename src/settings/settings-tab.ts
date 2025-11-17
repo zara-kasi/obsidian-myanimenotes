@@ -260,7 +260,7 @@ private renderSyncSection(container: HTMLElement): void {
       .setName('Sync interval')
       .setDesc('Time between automatic syncs in minutes (minimum 30).')
       .addText(text => text
-        .setPlaceholder('90')
+        .setPlaceholder('60')
         .setValue(String(this.plugin.settings.scheduledSyncInterval))
         .onChange(async (value) => {
           const numValue = parseInt(value);
