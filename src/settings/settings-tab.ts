@@ -48,7 +48,7 @@ export class CassetteSettingTab extends PluginSettingTab {
    
     new Setting(containerEl)
     .setName('Debug mode')
-    .setDesc('Enable detailed console logging for troubleshooting.')
+    .setDesc('Enable detailed console logging.')
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.debugMode)
       .onChange(async (value) => {
