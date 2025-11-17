@@ -220,7 +220,7 @@ private renderSyncSection(container: HTMLElement): void {
   // Sync on load toggle
   new Setting(container)
     .setName('Sync on plugin load')
-    .setDesc('Automatically sync shortly after Obsidian starts (1 minute delay to avoid slow startup).')
+    .setDesc('Automatically sync shortly after Obsidian starts')
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.syncOnLoad)
       .onChange(async (value) => {
@@ -276,5 +276,4 @@ private renderSyncSection(container: HTMLElement): void {
           }
         }));
   }
-}
 }
