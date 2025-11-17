@@ -3,7 +3,7 @@
   "name": "Cassette",
   "version": "1.0.2",
   "minAppVersion": "0.15.0",
-  "description": "Sync your anime and manga from MyAnimeList (MAL) directly into your vault",
+  "description": "Sync your anime and manga from MyAnimeList (MAL).",
   "author": "Zarakasi",
   "authorUrl": "https://github.com/zara-kasi",
   "isDesktopOnly": false
