@@ -206,33 +206,6 @@ export class CassetteSettingTab extends PluginSettingTab {
 }
 
 private renderSyncSection(container: HTMLElement): void {
-  // Force full sync toggle
-  new Setting(container)
-    .setName('Overwrite all')
-    .setDesc('Update all notes on every sync, even if nothing changed.')
-    .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.forceFullSync)
-      .onChange(async (value) => {
-        this.plugin.settings.forceFullSync = value;
-        await this.plugin.saveSettings();
-      }));
-  
-  // Sync on load toggle
-  new Setting(container)
-    .setName('Sync after load')
-    .setDesc('Automatically sync shortly after plugin loads or Obsidian starts.')
-    .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.syncOnLoad)
-      .onChange(async (value) => {
-        this.plugin.settings.syncOnLoad = value;
-        await this.plugin.saveSettings();
-        
-        // Restart auto-sync manager to apply changes
-        if (this.plugin.autoSyncManager) {
-          this.plugin.autoSyncManager.stop();
-          this.plugin.autoSyncManager.start();
-        }
-      }));
   
   // Scheduled sync toggle
   new Setting(container)
@@ -276,5 +249,34 @@ private renderSyncSection(container: HTMLElement): void {
           }
         }));
   }
+  
+   // Force full sync toggle
+  new Setting(container)
+    .setName('Overwrite all')
+    .setDesc('Update all notes on every sync, even if nothing changed.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.forceFullSync)
+      .onChange(async (value) => {
+        this.plugin.settings.forceFullSync = value;
+        await this.plugin.saveSettings();
+      }));
+  
+  // Sync on load toggle
+  new Setting(container)
+    .setName('Sync after load')
+    .setDesc('Automatically sync shortly after plugin loads or Obsidian starts.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.syncOnLoad)
+      .onChange(async (value) => {
+        this.plugin.settings.syncOnLoad = value;
+        await this.plugin.saveSettings();
+        
+        // Restart auto-sync manager to apply changes
+        if (this.plugin.autoSyncManager) {
+          this.plugin.autoSyncManager.stop();
+          this.plugin.autoSyncManager.start();
+        }
+      }));
+  
 }
 }
