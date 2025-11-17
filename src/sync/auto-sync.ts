@@ -44,8 +44,41 @@ export class AutoSyncManager {
   }
 
   /**
+   * Checks if enough time has passed since last sync
+   * Uses the same minimum interval as scheduled sync (30 minutes)
+   */
+  private hasMinimumIntervalPassed(): boolean {
+    const lastSync = this.plugin.settings.lastSuccessfulSync;
+    
+    // If no previous sync, allow sync
+    if (!lastSync) {
+      this.debug.log('[Sync on Load] No previous sync found - allowing sync');
+      return true;
+    }
+    
+    const now = Date.now();
+    const timeSinceLastSync = now - lastSync;
+    const minimumIntervalMs = MIN_SCHEDULED_INTERVAL * 60 * 1000; // 30 minutes in ms
+    
+    const hasPassed = timeSinceLastSync >= minimumIntervalMs;
+    
+    if (!hasPassed) {
+      const minutesSinceLastSync = Math.floor(timeSinceLastSync / 60000);
+      const minutesRemaining = MIN_SCHEDULED_INTERVAL - minutesSinceLastSync;
+      this.debug.log(
+        `[Sync on Load] Minimum interval not met: ` +
+        `${minutesSinceLastSync} minutes since last sync, ` +
+        `${minutesRemaining} minutes remaining`
+      );
+    }
+    
+    return hasPassed;
+  }
+
+  /**
    * Starts the sync-on-load timer (one-time, 1 minute after load)
    * Uses a short delay to avoid blocking plugin initialization
+   * Now respects minimum interval between syncs
    */
   private startSyncOnLoad(): void {
     this.clearSyncOnLoadTimer();
@@ -59,11 +92,17 @@ export class AutoSyncManager {
     this.debug.log('[Sync on Load] Timer started: Will sync in 1 minute');
 
     this.syncOnLoadTimer = setTimeout(async () => {
-      this.debug.log('[Sync on Load] Triggered after 1 minute');
+      this.debug.log('[Sync on Load] Timer triggered after 1 minute');
       
       // Double-check authentication at execution time
       if (!this.isAuthenticated()) {
         this.debug.log('[Sync on Load] Aborted: Not authenticated with MAL');
+        return;
+      }
+
+      // Check if minimum interval has passed since last sync
+      if (!this.hasMinimumIntervalPassed()) {
+        this.debug.log('[Sync on Load] Aborted: Minimum interval not met');
         return;
       }
 
