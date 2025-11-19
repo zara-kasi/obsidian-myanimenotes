@@ -12,7 +12,7 @@
 | **Description**      | Make your media a part of your knowledge. Sync your media items from MyAnimeList directly into your Obsidian vault. Build a private, offline library that stays updated and seamlessly integrates with your notes. |
 | **App Redirect URI** | obsidian://cassette-auth/mal                                                                                                                                                                                                            |
 | **Homepage URL**     | https://myanimelist.net/                                                                                                                                                                                                                |
-| **Company Name**     | Cassette (or anything you like)                                                                                                                                                                                                         |
+| **Company Name**     | Cassette                                                                                                                                                                                                          |
 
 
 3. Click **Save** and copy your **Client ID** and **Client Secret**.  
