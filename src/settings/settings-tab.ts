@@ -1,4 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
+import { normalizePath } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
@@ -176,36 +177,40 @@ export class CassetteSettingTab extends PluginSettingTab {
   }
 
   private renderStorageSection(container: HTMLElement): void {
-  new Setting(container)
-    .setName('Anime folder')
-    .setDesc('Folder where anime notes will be saved.')
-    .addText(text => {
-      new FolderSuggest(this.app, text.inputEl);
-      text
-        .setPlaceholder('Cassette/Anime')
-        .setValue(this.plugin.settings.animeFolder)
-        .onChange(async (value) => {
-          this.plugin.settings.animeFolder = value.trim() || 'Cassette/Anime';
-          await this.plugin.saveSettings();
-        });
-    });
+    new Setting(container)
+      .setName('Anime folder')
+      .setDesc('Folder where anime notes will be saved.')
+      .addText(text => {
+        new FolderSuggest(this.app, text.inputEl);
+        text
+          .setPlaceholder('Cassette/Anime')
+          .setValue(this.plugin.settings.animeFolder)
+          .onChange(async (value) => {
+            // Normalize the path to handle cross-platform paths and user input variations
+            const normalizedPath = normalizePath(value.trim() || 'Cassette/Anime');
+            this.plugin.settings.animeFolder = normalizedPath;
+            await this.plugin.saveSettings();
+          });
+      });
 
-  new Setting(container)
-    .setName('Manga folder')
-    .setDesc('Folder where manga notes will be saved.')
-    .addText(text => {
-      new FolderSuggest(this.app, text.inputEl);
-      text
-        .setPlaceholder('Cassette/Manga')
-        .setValue(this.plugin.settings.mangaFolder)
-        .onChange(async (value) => {
-          this.plugin.settings.mangaFolder = value.trim() || 'Cassette/Manga';
-          await this.plugin.saveSettings();
-        });
-    });
-}
+    new Setting(container)
+      .setName('Manga folder')
+      .setDesc('Folder where manga notes will be saved.')
+      .addText(text => {
+        new FolderSuggest(this.app, text.inputEl);
+        text
+          .setPlaceholder('Cassette/Manga')
+          .setValue(this.plugin.settings.mangaFolder)
+          .onChange(async (value) => {
+            // Normalize the path to handle cross-platform paths and user input variations
+            const normalizedPath = normalizePath(value.trim() || 'Cassette/Manga');
+            this.plugin.settings.mangaFolder = normalizedPath;
+            await this.plugin.saveSettings();
+          });
+      });
+  }
 
-private renderSyncSection(container: HTMLElement): void {
+  private renderSyncSection(container: HTMLElement): void {
   
   // Scheduled sync toggle
   new Setting(container)
@@ -252,8 +257,8 @@ private renderSyncSection(container: HTMLElement): void {
   
   // Sync on load toggle
   new Setting(container)
-    .setName('Sync after startup')
-    .setDesc('Automatically sync shortly after Obsidian starts.')
+    .setName('Sync after load')
+    .setDesc('Automatically sync shortly after plugin loads or Obsidian starts.')
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.syncOnLoad)
       .onChange(async (value) => {
