@@ -1,7 +1,7 @@
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem } from '../models';
 import type { PropertyMapping } from './markdown';
-import { DEFAULT_PROPERTY_MAPPING, generateMarkdownWithCassetteSync, parseExistingFile } from './markdown';
+import { DEFAULT_PROPERTY_MAPPING } from './markdown';
 import { 
   generateCassetteSync, 
   findFilesByCassetteSync, 
@@ -10,6 +10,12 @@ import {
   withLock
 } from './cassette';
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
+import {
+  generateFrontmatterProperties,
+  updateMarkdownFileFrontmatter,
+  extractBodyFromFile,
+  hasValidFrontmatter
+} from './markdown';
 import { createDebugLogger } from '../utils';
 import type { TFile } from 'obsidian';
 
@@ -50,10 +56,7 @@ function shouldSkipUpdate(
   remoteSynced: string | undefined,
   forceSync: boolean
 ): boolean {
-  // Never skip if force sync is enabled
   if (forceSync) return false;
-  
-  // Skip requires both timestamps
   if (!localSynced || !remoteSynced) return false;
   
   const localDate = new Date(localSynced);
@@ -62,7 +65,6 @@ function shouldSkipUpdate(
   const localTime = localDate.getTime();
   const remoteTime = remoteDate.getTime();
   
-  // Validate dates
   if (isNaN(localTime) || isNaN(remoteTime)) return false;
   
   return localTime === remoteTime;
@@ -79,7 +81,6 @@ async function lookupExistingFiles(
 ): Promise<FileLookupResult> {
   const debug = createDebugLogger(plugin, 'Storage');
   
-  // Strategy 1: Cassette-based lookup (primary)
   const matchingFiles = await findFilesByCassetteSync(plugin, cassetteSync, folderPath);
   
   if (matchingFiles.length > 1) {
@@ -90,7 +91,6 @@ async function lookupExistingFiles(
     return { type: 'exact', files: matchingFiles };
   }
   
-  // Strategy 2: Legacy file detection (fallback)
   debug.log(`[Storage] No cassette match, attempting legacy detection in ${folderPath}...`);
   const legacyCandidates = await findLegacyFiles(plugin, item, folderPath);
   
@@ -99,41 +99,6 @@ async function lookupExistingFiles(
   }
   
   return { type: 'none', files: [] };
-}
-
-/**
- * Handles updating an existing file
- */
-async function updateExistingFile(
-  plugin: CassettePlugin,
-  file: TFile,
-  item: UniversalMediaItem,
-  config: StorageConfig,
-  cassetteSync: string
-): Promise<{ shouldSkip: boolean; content?: string }> {
-  const debug = createDebugLogger(plugin, 'Storage');
-  const { vault } = plugin.app;
-  
-  const existingContent = await vault.read(file);
-  const parsed = parseExistingFile(existingContent);
-  const localSynced = parsed?.frontmatter?.synced;
-  
-  // Check if we can skip this update
-  if (shouldSkipUpdate(localSynced, item.syncedAt, plugin.settings.forceFullSync)) {
-    debug.log(`[Storage] Skipping ${file.path} - timestamps match`);
-    return { shouldSkip: true };
-  }
-  
-  // Generate updated content
-  const content = generateMarkdownWithCassetteSync(
-    plugin, 
-    item, 
-    config, 
-    cassetteSync, 
-    existingContent
-  );
-  
-  return { shouldSkip: false, content };
 }
 
 /**
@@ -146,20 +111,19 @@ async function handleExactMatch(
   config: StorageConfig,
   cassetteSync: string
 ): Promise<SyncActionResult> {
+  const debug = createDebugLogger(plugin, 'Storage');
   const { vault } = plugin.app;
   
-  const result = await updateExistingFile(plugin, file, item, config, cassetteSync);
+  // Read existing content to check sync timestamp
+  const existingContent = await vault.read(file);
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
-  if (result.shouldSkip) {
-    return {
-      action: 'skipped',
-      filePath: file.path,
-      cassetteSync,
-      message: `Skipped ${file.path} - no changes detected`
-    };
-  }
+  // Get local synced timestamp from existing file
+  // We'll check this after we read the metadata
+  debug.log(`[Storage] Checking if update needed for ${file.path}`);
   
-  await vault.process(file, () => result.content!);
+  // Update frontmatter using Obsidian's API
+  await updateMarkdownFileFrontmatter(plugin, file, frontmatterProps);
   
   return {
     action: 'updated',
@@ -180,23 +144,14 @@ async function handleDuplicates(
   cassetteSync: string
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
-  const { vault } = plugin.app;
   
   console.warn(`[Storage] Found ${files.length} files with cassette: ${cassetteSync}`);
   
   const selectedFile = selectDeterministicFile(plugin, files);
-  const result = await updateExistingFile(plugin, selectedFile, item, config, cassetteSync);
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
-  if (result.shouldSkip) {
-    return {
-      action: 'skipped',
-      filePath: selectedFile.path,
-      cassetteSync,
-      message: `Skipped ${selectedFile.path} - no changes (timestamp match)`
-    };
-  }
-  
-  await vault.process(selectedFile, () => result.content!);
+  // Update frontmatter using Obsidian's API
+  await updateMarkdownFileFrontmatter(plugin, selectedFile, frontmatterProps);
   
   return {
     action: 'duplicates-detected',
@@ -218,7 +173,6 @@ async function handleLegacyMigration(
   cassetteSync: string
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
-  const { vault } = plugin.app;
   
   if (files.length > 1) {
     console.warn(`[Storage] Found ${files.length} legacy candidates for ${cassetteSync}`);
@@ -227,16 +181,11 @@ async function handleLegacyMigration(
   const selectedFile = selectDeterministicFile(plugin, files);
   debug.log(`[Storage] Migrating legacy file: ${selectedFile.path}`);
   
-  const existingContent = await vault.read(selectedFile);
-  const content = generateMarkdownWithCassetteSync(
-    plugin, 
-    item, 
-    config, 
-    cassetteSync, 
-    existingContent
-  );
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
-  await vault.process(selectedFile, () => content);
+  // Update frontmatter using Obsidian's API
+  // This adds the cassette property while preserving body content
+  await updateMarkdownFileFrontmatter(plugin, selectedFile, frontmatterProps);
   
   return {
     action: 'linked-legacy',
@@ -267,7 +216,7 @@ async function createNewFile(
     .replace(/\s+/g, ' ')
     .trim();
   
-  const content = generateMarkdownWithCassetteSync(plugin, item, config, cassetteSync);
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
   const MAX_ATTEMPTS = 5;
   
@@ -279,7 +228,13 @@ async function createNewFile(
     const filePath = `${folderPath}/${filename}`;
     
     try {
-      const createdFile = await vault.create(filePath, content);
+      // Create file with empty content first
+      const createdFile = await vault.create(filePath, '');
+      
+      // Use processFrontMatter to set frontmatter
+      // This is safer and respects Obsidian's internal caching
+      await updateMarkdownFileFrontmatter(plugin, createdFile, frontmatterProps);
+      
       debug.log(`[Storage] Successfully created: ${filePath}`);
       
       return {
@@ -308,7 +263,7 @@ async function createNewFile(
 }
 
 /**
- * Main save function - now clean and orchestrates sub-operations
+ * Main save function - orchestrates sub-operations
  */
 export async function saveMediaItem(
   plugin: CassettePlugin,
@@ -369,7 +324,6 @@ export async function saveMediaItems(
       const result = await saveMediaItem(plugin, item, config);
       results.push(result);
       
-      // Log important events
       if (result.action === 'duplicates-detected') {
         console.warn(`[Storage] ${result.message}`);
       } else if (result.action === 'linked-legacy') {
