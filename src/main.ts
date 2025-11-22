@@ -25,7 +25,7 @@ export default class CassettePlugin extends Plugin {
     // Initialize sync manager
     this.syncManager = createSyncManager(this);
     
-    // Initialize cassette index (after settings loaded)
+    // Initialize cassette index (lazy - just registers listeners, doesn't build index)
     try {
       this.cassetteIndex = await createCassetteIndex(this);
     } catch (error) {
