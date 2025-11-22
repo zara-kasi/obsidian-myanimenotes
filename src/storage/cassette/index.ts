@@ -5,5 +5,5 @@
  */
 
 export * from './cassette-sync-manager';
-export * from './cassette-lock';
+export { CassetteLockManager, createCassetteLockManager } from './cassette-lock';
 export * from './cassette-index';
