@@ -5,6 +5,8 @@
  * to avoid expensive vault-wide searches on every sync operation.
  * 
  * Performance: O(1) lookup instead of O(n) vault scan
+ * 
+ * UPDATED: Lazy initialization - index is built on first sync, not on plugin load
  */
 
 import { TFile, MetadataCache, Vault } from 'obsidian';
@@ -31,6 +33,10 @@ export class CassetteIndex {
   // Secondary index: file path -> cassette (for reverse lookup)
   private fileToCassette: Map<string, string> = new Map();
   
+  // Track initialization state
+  private isInitialized: boolean = false;
+  private initializationPromise: Promise<void> | null = null;
+  
   // Track last rebuild time
   private lastRebuildTime: number = 0;
   private isRebuilding: boolean = false;
@@ -44,17 +50,44 @@ export class CassetteIndex {
   }
   
   /**
-   * Initializes the index by scanning the vault
-   * Should be called once on plugin load
+   * Initializes the index by registering metadata listeners
+   * Does NOT build the index - that happens lazily on first sync
    */
   async initialize(): Promise<void> {
-    this.debug.log('[Index] Initializing cassette index...');
-    await this.rebuildIndex();
+    this.debug.log('[Index] Registering metadata listeners (index will build on first sync)');
     
     // Register metadata cache listeners for automatic updates
     this.registerMetadataListeners();
     
-    this.debug.log('[Index] Index initialized successfully');
+    this.debug.log('[Index] Metadata listeners registered');
+  }
+  
+  /**
+   * Ensures the index is initialized before use
+   * Builds the index on first call, then returns immediately on subsequent calls
+   * Thread-safe: multiple concurrent calls will wait for the same initialization
+   */
+  async ensureInitialized(): Promise<void> {
+    // Already initialized - return immediately
+    if (this.isInitialized) {
+      return;
+    }
+    
+    // Currently initializing - wait for existing promise
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+    
+    // Start initialization
+    this.debug.log('[Index] First sync detected - building index...');
+    
+    this.initializationPromise = this.rebuildIndex().then(() => {
+      this.isInitialized = true;
+      this.initializationPromise = null;
+      this.debug.log('[Index] Index built and ready');
+    });
+    
+    return this.initializationPromise;
   }
   
   /**
@@ -92,7 +125,7 @@ export class CassetteIndex {
       
       const duration = Date.now() - startTime;
       this.debug.log(
-        `[Index] Rebuilt index: ${indexedCount} files scanned, ` +
+        `[Index] Built index: ${indexedCount} files scanned, ` +
         `${this.cassetteToFiles.size} cassettes indexed in ${duration}ms`
       );
       
@@ -182,6 +215,7 @@ export class CassetteIndex {
     totalCassettes: number;
     totalFiles: number;
     duplicates: number;
+    isInitialized: boolean;
   } {
     let totalFiles = 0;
     let duplicates = 0;
@@ -197,6 +231,7 @@ export class CassetteIndex {
       totalCassettes: this.cassetteToFiles.size,
       totalFiles,
       duplicates,
+      isInitialized: this.isInitialized,
     };
   }
   
@@ -265,15 +300,18 @@ export class CassetteIndex {
   clear(): void {
     this.cassetteToFiles.clear();
     this.fileToCassette.clear();
+    this.isInitialized = false;
+    this.initializationPromise = null;
     this.debug.log('[Index] Index cleared');
   }
 }
 
 /**
- * Creates and initializes a cassette index
+ * Creates a cassette index (without initializing the data)
+ * Index will be built lazily on first sync operation
  */
 export async function createCassetteIndex(plugin: CassettePlugin): Promise<CassetteIndex> {
   const index = new CassetteIndex(plugin);
-  await index.initialize();
+  await index.initialize(); // Just registers listeners, doesn't build index
   return index;
 }
