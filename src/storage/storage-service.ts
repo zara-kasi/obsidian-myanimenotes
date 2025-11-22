@@ -159,7 +159,7 @@ async function handleExactMatch(
     };
   }
   
-  await vault.modify(file, result.content!);
+  await vault.process(file, () => result.content!);
   
   return {
     action: 'updated',
@@ -196,7 +196,7 @@ async function handleDuplicates(
     };
   }
   
-  await vault.modify(selectedFile, result.content!);
+  await vault.process(selectedFile, () => result.content!);
   
   return {
     action: 'duplicates-detected',
@@ -236,7 +236,7 @@ async function handleLegacyMigration(
     existingContent
   );
   
-  await vault.modify(selectedFile, content);
+  await vault.process(selectedFile, () => content);
   
   return {
     action: 'linked-legacy',
