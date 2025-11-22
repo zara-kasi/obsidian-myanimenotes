@@ -97,8 +97,8 @@ export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthP
     }
     
     if (!code) {
-      const error = (params as any).error || 'Unknown error';
-      const errorDesc = (params as any).error_description || 'No authorization code received';
+      const error = params.error || 'Unknown error';
+      const errorDesc = params.error_description || 'No authorization code received';
       console.error('[MAL Auth] OAuth error:', { error, errorDesc });
       new Notice(`❌ MAL Authentication failed: ${errorDesc}`, 5000);
       return;
@@ -206,9 +206,9 @@ function extractOAuthParams(params: OAuthParams): { code: string | null; state: 
     const urlParams = new URLSearchParams(paramsStr.startsWith('?') ? paramsStr.slice(1) : paramsStr);
     code = urlParams.get('code');
     state = urlParams.get('state');
-  } else if ((params as any).url) {
+  } else if (params.url) {
     try {
-      const url = new URL((params as any).url);
+      const url = new URL(params.url);
       code = url.searchParams.get('code');
       state = url.searchParams.get('state');
     } catch (e) {
