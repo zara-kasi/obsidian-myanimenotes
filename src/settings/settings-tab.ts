@@ -255,10 +255,10 @@ export class CassetteSettingTab extends PluginSettingTab {
         }));
   }
   
-  // Sync on load toggle
+   // Sync on load toggle
   new Setting(container)
-    .setName('Sync after load')
-    .setDesc('Automatically sync shortly after plugin loads or Obsidian starts.')
+    .setName('Sync after startup')
+    .setDesc('Automatically sync shortly after Obsidian starts.')
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.syncOnLoad)
       .onChange(async (value) => {
