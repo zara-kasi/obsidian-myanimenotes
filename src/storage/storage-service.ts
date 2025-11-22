@@ -6,8 +6,7 @@ import {
   generateCassetteSync, 
   findFilesByCassetteSync, 
   findLegacyFiles, 
-  selectDeterministicFile,
-  withLock
+  selectDeterministicFile
 } from './cassette';
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
 import {
@@ -269,6 +268,7 @@ async function createNewFile(
 
 /**
  * Main save function - orchestrates sub-operations
+ * Now uses instance-based lock manager instead of global state
  */
 export async function saveMediaItem(
   plugin: CassettePlugin,
@@ -280,7 +280,13 @@ export async function saveMediaItem(
   const cassetteSync = generateCassetteSync(item);
   debug.log(`[Storage] Processing item with cassette: ${cassetteSync}`);
   
-  return await withLock(cassetteSync, async () => {
+  // Ensure lock manager is available
+  if (!plugin.lockManager) {
+    throw new Error('Lock manager not initialized');
+  }
+  
+  // Use the instance-based lock manager
+  return await plugin.lockManager.withLock(cassetteSync, async () => {
     // Determine target folder and normalize it
     let folderPath = item.category === 'anime' 
       ? config.animeFolder 
