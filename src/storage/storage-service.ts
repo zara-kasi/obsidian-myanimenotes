@@ -18,6 +18,7 @@ import {
 } from './markdown';
 import { createDebugLogger } from '../utils';
 import type { TFile } from 'obsidian';
+import { normalizePath } from 'obsidian';
 
 /**
  * Storage configuration
@@ -220,12 +221,16 @@ async function createNewFile(
   
   const MAX_ATTEMPTS = 5;
   
+  // Normalize folder path once
+  const normalizedFolderPath = normalizePath(folderPath);
+  
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const filename = attempt === 1 
       ? `${sanitizedTitle}.md`
-      : generateUniqueFilename(plugin, vault, folderPath, `${sanitizedTitle}.md`);
+      : generateUniqueFilename(plugin, vault, normalizedFolderPath, `${sanitizedTitle}.md`);
     
-    const filePath = `${folderPath}/${filename}`;
+    // Normalize the full file path
+    const filePath = normalizePath(`${normalizedFolderPath}/${filename}`);
     
     try {
       // Create file with empty content first
@@ -276,10 +281,13 @@ export async function saveMediaItem(
   debug.log(`[Storage] Processing item with cassette: ${cassetteSync}`);
   
   return await withLock(cassetteSync, async () => {
-    // Determine target folder
-    const folderPath = item.category === 'anime' 
+    // Determine target folder and normalize it
+    let folderPath = item.category === 'anime' 
       ? config.animeFolder 
       : config.mangaFolder;
+    
+    // Normalize folder path to handle cross-platform paths and user input variations
+    folderPath = normalizePath(folderPath);
     
     if (config.createFolders) {
       await ensureFolderExists(plugin, folderPath);
