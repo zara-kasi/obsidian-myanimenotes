@@ -11,9 +11,7 @@ import {
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
 import {
   generateFrontmatterProperties,
-  updateMarkdownFileFrontmatter,
-  extractBodyFromFile,
-  hasValidFrontmatter
+  updateMarkdownFileFrontmatter
 } from './markdown';
 import { createDebugLogger } from '../utils';
 import type { TFile } from 'obsidian';
@@ -49,26 +47,117 @@ interface FileLookupResult {
 }
 
 /**
- * Checks if timestamps match (sync optimization)
+ * Skip check result
  */
-function shouldSkipUpdate(
-  localSynced: string | undefined,
-  remoteSynced: string | undefined,
-  forceSync: boolean
-): boolean {
-  if (forceSync) return false;
-  if (!localSynced || !remoteSynced) return false;
-  
-  const localDate = new Date(localSynced);
-  const remoteDate = new Date(remoteSynced);
-  
-  const localTime = localDate.getTime();
-  const remoteTime = remoteDate.getTime();
-  
-  if (isNaN(localTime) || isNaN(remoteTime)) return false;
-  
-  return localTime === remoteTime;
+interface SkipCheckResult {
+  skip: boolean;
+  reason?: string;
 }
+
+// ============================================================================
+// SKIP LOGIC - OPTIMIZED
+// ============================================================================
+
+/**
+ * Safely gets the synced timestamp from file metadata
+ * Uses cache first, with validation fallback
+ * 
+ * @returns Synced timestamp or undefined if not found/invalid
+ */
+async function getSyncedTimestamp(
+  plugin: CassettePlugin,
+  file: TFile
+): Promise<string | undefined> {
+  const { metadataCache } = plugin.app;
+  
+  // Try cache first (fast path - no I/O)
+  const cache = metadataCache.getFileCache(file);
+  
+  if (cache?.frontmatter?.synced) {
+    // Validate cache freshness: check if cache has position data
+    const hasValidCache = cache.frontmatterPosition?.end.offset !== undefined;
+    
+    // If cache seems valid, trust it
+    if (hasValidCache) {
+      return cache.frontmatter.synced;
+    }
+  }
+  
+  // Cache miss or potentially stale - this should be rare
+  // Wait a moment for cache to update if metadata change just happened
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
+  // Try cache again after brief delay
+  const freshCache = metadataCache.getFileCache(file);
+  if (freshCache?.frontmatter?.synced) {
+    return freshCache.frontmatter.synced;
+  }
+  
+  // Fallback: no valid synced timestamp found
+  // This means either new file or cache corruption - safer to update
+  return undefined;
+}
+
+/**
+ * Checks if a file should be skipped based on sync timestamps
+ * Unified skip logic for all update scenarios
+ * 
+ * @returns Skip decision with reason for logging
+ */
+async function shouldSkipFile(
+  plugin: CassettePlugin,
+  file: TFile,
+  item: UniversalMediaItem
+): Promise<SkipCheckResult> {
+  const debug = createDebugLogger(plugin, 'Storage');
+  
+  // Force sync always updates
+  if (plugin.settings.forceFullSync) {
+    debug.log(`[Storage] Force sync enabled - will update ${file.path}`);
+    return { skip: false, reason: 'force sync enabled' };
+  }
+  
+  // Get local synced timestamp (cache-first with validation)
+  const localSynced = await getSyncedTimestamp(plugin, file);
+  
+  // No local timestamp means new/legacy file - always update
+  if (!localSynced) {
+    debug.log(`[Storage] No synced timestamp in ${file.path} - will update`);
+    return { skip: false, reason: 'no local timestamp' };
+  }
+  
+  // No remote timestamp means API didn't provide it - always update to be safe
+  if (!item.syncedAt) {
+    debug.log(`[Storage] No remote timestamp from API - will update ${file.path}`);
+    return { skip: false, reason: 'no remote timestamp' };
+  }
+  
+  // Compare timestamps
+  const localTime = new Date(localSynced).getTime();
+  const remoteTime = new Date(item.syncedAt).getTime();
+  
+  // Invalid timestamps - update to be safe
+  if (isNaN(localTime) || isNaN(remoteTime)) {
+    debug.log(`[Storage] Invalid timestamp format - will update ${file.path}`);
+    return { skip: false, reason: 'invalid timestamp format' };
+  }
+  
+  // Timestamps match - skip!
+  if (localTime === remoteTime) {
+    debug.log(`[Storage] Timestamps match for ${file.path} - skipping`);
+    return { skip: true, reason: 'timestamps match' };
+  }
+  
+  // Timestamps differ - update needed
+  debug.log(`[Storage] Timestamps differ for ${file.path} - will update`);
+  debug.log(`  Local: ${localSynced} (${localTime})`);
+  debug.log(`  Remote: ${item.syncedAt} (${remoteTime})`);
+  return { skip: false, reason: 'timestamps differ' };
+}
+
+// ============================================================================
+// FILE LOOKUP
+// ============================================================================
 
 /**
  * Performs file lookup using cassette and legacy strategies
@@ -81,6 +170,7 @@ async function lookupExistingFiles(
 ): Promise<FileLookupResult> {
   const debug = createDebugLogger(plugin, 'Storage');
   
+  // Strategy 1: Cassette-based lookup (primary)
   const matchingFiles = await findFilesByCassetteSync(plugin, cassetteSync, folderPath);
   
   if (matchingFiles.length > 1) {
@@ -91,6 +181,7 @@ async function lookupExistingFiles(
     return { type: 'exact', files: matchingFiles };
   }
   
+  // Strategy 2: Legacy file detection (fallback)
   debug.log(`[Storage] No cassette match, attempting legacy detection in ${folderPath}...`);
   const legacyCandidates = await findLegacyFiles(plugin, item, folderPath);
   
@@ -101,8 +192,13 @@ async function lookupExistingFiles(
   return { type: 'none', files: [] };
 }
 
+// ============================================================================
+// FILE HANDLERS
+// ============================================================================
+
 /**
  * Handles exact match case (single file found)
+ * Uses unified skip check with cache-first optimization
  */
 async function handleExactMatch(
   plugin: CassettePlugin,
@@ -112,28 +208,25 @@ async function handleExactMatch(
   cassetteSync: string
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
-  const { metadataCache } = plugin.app;
   
-  // ✅ GOOD: Use cache instead of reading file
-  const cache = metadataCache.getFileCache(file);
-  const localSynced = cache?.frontmatter?.synced;
+  // Unified skip check (cache-first, no file I/O unless needed)
+  const skipCheck = await shouldSkipFile(plugin, file, item);
   
-  // Check if we should skip this update based on timestamps
-  if (shouldSkipUpdate(localSynced, item.syncedAt, plugin.settings.forceFullSync)) {
-    debug.log(`[Storage] Skipping ${file.path} - timestamps match`);
+  if (skipCheck.skip) {
     return {
       action: 'skipped',
       filePath: file.path,
       cassetteSync,
-      message: `Skipped ${file.path} - no changes detected`
+      message: `Skipped ${file.path} - ${skipCheck.reason}`
     };
   }
   
-  debug.log(`[Storage] Updating ${file.path} - timestamp changed or force sync enabled`);
+  // Perform update
+  debug.log(`[Storage] Updating ${file.path} - ${skipCheck.reason}`);
   
   const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
-  // ✅ GOOD: processFrontMatter preserves body automatically
+  // Update frontmatter using Obsidian's API (preserves body automatically)
   await updateMarkdownFileFrontmatter(plugin, file, frontmatterProps);
   
   return {
@@ -146,6 +239,7 @@ async function handleExactMatch(
 
 /**
  * Handles duplicate files case
+ * Uses unified skip check with cache-first optimization
  */
 async function handleDuplicates(
   plugin: CassettePlugin,
@@ -155,33 +249,30 @@ async function handleDuplicates(
   cassetteSync: string
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
-  const { metadataCache } = plugin.app;
   
   console.warn(`[Storage] Found ${files.length} files with cassette: ${cassetteSync}`);
   
   const selectedFile = selectDeterministicFile(plugin, files);
   
-  // Read frontmatter to check sync timestamp
-  const cache = metadataCache.getFileCache(selectedFile);
-  const localSynced = cache?.frontmatter?.synced;
+  // Unified skip check (cache-first, no file I/O unless needed)
+  const skipCheck = await shouldSkipFile(plugin, selectedFile, item);
   
-  // Check if we should skip this update based on timestamps
-  if (shouldSkipUpdate(localSynced, item.syncedAt, plugin.settings.forceFullSync)) {
-    debug.log(`[Storage] Skipping ${selectedFile.path} - timestamps match`);
+  if (skipCheck.skip) {
     return {
       action: 'skipped',
       filePath: selectedFile.path,
       cassetteSync,
       duplicatePaths: files.map(f => f.path),
-      message: `Skipped ${selectedFile.path} - no changes detected (but ${files.length} duplicates exist)`
+      message: `Skipped ${selectedFile.path} - ${skipCheck.reason} (but ${files.length} duplicates exist)`
     };
   }
   
-  debug.log(`[Storage] Updating ${selectedFile.path} - timestamp changed or force sync enabled`);
+  // Perform update
+  debug.log(`[Storage] Updating ${selectedFile.path} - ${skipCheck.reason}`);
   
   const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
-  // Update frontmatter using Obsidian's API
+  // Update frontmatter using Obsidian's API (preserves body automatically)
   await updateMarkdownFileFrontmatter(plugin, selectedFile, frontmatterProps);
   
   return {
@@ -192,8 +283,10 @@ async function handleDuplicates(
     message: `Updated ${selectedFile.path} but found ${files.length} duplicates`
   };
 }
+
 /**
  * Handles legacy file migration
+ * Adds cassette property to existing files without cassette
  */
 async function handleLegacyMigration(
   plugin: CassettePlugin,
@@ -228,6 +321,7 @@ async function handleLegacyMigration(
 
 /**
  * Creates a new file with automatic retry on collision
+ * FIXED: Creates file with minimal valid frontmatter, then uses processFrontMatter
  */
 async function createNewFile(
   plugin: CassettePlugin,
@@ -247,28 +341,29 @@ async function createNewFile(
     .trim();
   
   const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
-  const normalizedFolderPath = normalizePath(folderPath);
   
   const MAX_ATTEMPTS = 5;
+  
+  // Normalize folder path once
+  const normalizedFolderPath = normalizePath(folderPath);
   
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const filename = attempt === 1 
       ? `${sanitizedTitle}.md`
       : generateUniqueFilename(plugin, vault, normalizedFolderPath, `${sanitizedTitle}.md`);
     
+    // Normalize the full file path
     const filePath = normalizePath(`${normalizedFolderPath}/${filename}`);
     
     try {
       // Create file with minimal valid frontmatter structure
+      // This ensures processFrontMatter has something to work with
       const initialContent = '---\n---\n';
       const createdFile = await vault.create(filePath, initialContent);
       
       // Now use processFrontMatter to set properties safely
-      await plugin.app.fileManager.processFrontMatter(createdFile, (frontmatter) => {
-        Object.entries(frontmatterProps).forEach(([key, value]) => {
-          frontmatter[key] = value;
-        });
-      });
+      // This respects Obsidian's frontmatter handling and updates cache
+      await updateMarkdownFileFrontmatter(plugin, createdFile, frontmatterProps);
       
       debug.log(`[Storage] Successfully created: ${filePath}`);
       
@@ -299,9 +394,13 @@ async function createNewFile(
   throw new Error(`Failed to create file for ${cassetteSync}`);
 }
 
+// ============================================================================
+// MAIN SAVE FUNCTION
+// ============================================================================
+
 /**
- * Main save function - orchestrates sub-operations
- * Now uses instance-based lock manager instead of global state
+ * Main save function - orchestrates all file operations
+ * Now uses instance-based lock manager and unified skip logic
  */
 export async function saveMediaItem(
   plugin: CassettePlugin,
@@ -355,8 +454,13 @@ export async function saveMediaItem(
   });
 }
 
+// ============================================================================
+// BATCH OPERATIONS
+// ============================================================================
+
 /**
  * Saves multiple media items
+ * Processes items sequentially to respect locks
  */
 export async function saveMediaItems(
   plugin: CassettePlugin,
@@ -371,6 +475,7 @@ export async function saveMediaItems(
       const result = await saveMediaItem(plugin, item, config);
       results.push(result);
       
+      // Log important events
       if (result.action === 'duplicates-detected') {
         console.warn(`[Storage] ${result.message}`);
       } else if (result.action === 'linked-legacy') {
@@ -388,6 +493,7 @@ export async function saveMediaItems(
 
 /**
  * Saves items grouped by category
+ * Useful for getting separate anime/manga file paths
  */
 export async function saveMediaItemsByCategory(
   plugin: CassettePlugin,
