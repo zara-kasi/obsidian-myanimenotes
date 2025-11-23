@@ -112,15 +112,26 @@ async function handleExactMatch(
   cassetteSync: string
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
-  const { vault } = plugin.app;
+  const { vault, metadataCache } = plugin.app;
   
-  // Read existing content to check sync timestamp
-  const existingContent = await vault.read(file);
+  // Read frontmatter to check sync timestamp
+  const cache = metadataCache.getFileCache(file);
+  const localSynced = cache?.frontmatter?.synced;
+  
+  // Check if we should skip this update based on timestamps
+  if (shouldSkipUpdate(localSynced, item.syncedAt, plugin.settings.forceFullSync)) {
+    debug.log(`[Storage] Skipping ${file.path} - timestamps match (local: ${localSynced}, remote: ${item.syncedAt})`);
+    return {
+      action: 'skipped',
+      filePath: file.path,
+      cassetteSync,
+      message: `Skipped ${file.path} - no changes detected`
+    };
+  }
+  
+  debug.log(`[Storage] Updating ${file.path} - timestamp changed or force sync enabled`);
+  
   const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
-  
-  // Get local synced timestamp from existing file
-  // We'll check this after we read the metadata
-  debug.log(`[Storage] Checking if update needed for ${file.path}`);
   
   // Update frontmatter using Obsidian's API
   await updateMarkdownFileFrontmatter(plugin, file, frontmatterProps);
@@ -144,10 +155,30 @@ async function handleDuplicates(
   cassetteSync: string
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
+  const { metadataCache } = plugin.app;
   
   console.warn(`[Storage] Found ${files.length} files with cassette: ${cassetteSync}`);
   
   const selectedFile = selectDeterministicFile(plugin, files);
+  
+  // Read frontmatter to check sync timestamp
+  const cache = metadataCache.getFileCache(selectedFile);
+  const localSynced = cache?.frontmatter?.synced;
+  
+  // Check if we should skip this update based on timestamps
+  if (shouldSkipUpdate(localSynced, item.syncedAt, plugin.settings.forceFullSync)) {
+    debug.log(`[Storage] Skipping ${selectedFile.path} - timestamps match`);
+    return {
+      action: 'skipped',
+      filePath: selectedFile.path,
+      cassetteSync,
+      duplicatePaths: files.map(f => f.path),
+      message: `Skipped ${selectedFile.path} - no changes detected (but ${files.length} duplicates exist)`
+    };
+  }
+  
+  debug.log(`[Storage] Updating ${selectedFile.path} - timestamp changed or force sync enabled`);
+  
   const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
   // Update frontmatter using Obsidian's API
