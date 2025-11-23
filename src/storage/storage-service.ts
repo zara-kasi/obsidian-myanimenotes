@@ -247,15 +247,17 @@ async function createNewFile(
         cassetteSync,
         message: `Created ${createdFile.path}`
       };
+
     } catch (error) {
-      const isCollision = error.message?.includes('already exists') || 
-                         error.message?.includes('File already exists');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isCollision = errorMessage.includes('already exists') || 
+                         errorMessage.includes('File already exists');
       
       if (!isCollision || attempt >= MAX_ATTEMPTS) {
         throw new Error(
           isCollision 
             ? `Failed to create file after ${MAX_ATTEMPTS} attempts due to naming conflicts`
-            : `Failed to create file: ${error.message}`
+            : `Failed to create file: ${errorMessage}`
         );
       }
       
