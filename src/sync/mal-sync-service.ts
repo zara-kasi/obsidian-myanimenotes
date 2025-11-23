@@ -154,7 +154,8 @@ export async function syncMAL(
         
         
       } catch (error) {
-        const errorMsg = `Failed to sync anime: ${error.message}`;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMsg = `Failed to sync anime: ${errorMessage}`;
         console.error('[MAL Sync]', errorMsg);
         errors.push(errorMsg);
         new Notice(`❌ ${errorMsg}`, 5000);
