@@ -120,7 +120,7 @@ async function handleExactMatch(
   
   // Check if we should skip this update based on timestamps
   if (shouldSkipUpdate(localSynced, item.syncedAt, plugin.settings.forceFullSync)) {
-    debug.log(`[Storage] Skipping ${file.path} - timestamps match (local: ${localSynced}, remote: ${item.syncedAt})`);
+    debug.log(`[Storage] Skipping ${file.path} - timestamps match`);
     return {
       action: 'skipped',
       filePath: file.path,
