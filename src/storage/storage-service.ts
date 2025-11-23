@@ -218,21 +218,6 @@ async function createNewFile(
   
   const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
-  // Build initial frontmatter structure for new file
-  const frontmatterLines = Object.entries(frontmatterProps)
-    .map(([key, value]) => {
-      if (Array.isArray(value)) {
-        return `${key}:\n${value.map(v => `  - ${JSON.stringify(v)}`).join('\n')}`;
-      } else if (typeof value === 'string') {
-        return `${key}: "${value.replace(/"/g, '\\"')}"`;
-      } else {
-        return `${key}: ${value}`;
-      }
-    })
-    .join('\n');
-  
-  const initialContent = `---\n${frontmatterLines}\n---\n`;
-  
   const MAX_ATTEMPTS = 5;
   
   // Normalize folder path once
@@ -247,8 +232,12 @@ async function createNewFile(
     const filePath = normalizePath(`${normalizedFolderPath}/${filename}`);
     
     try {
-      // Create file with initial frontmatter structure (following best practices)
-      const createdFile = await vault.create(filePath, initialContent);
+      // Create file with empty content first
+      const createdFile = await vault.create(filePath, '');
+      
+      // Use processFrontMatter to set frontmatter
+      // This is safer and respects Obsidian's internal caching
+      await updateMarkdownFileFrontmatter(plugin, createdFile, frontmatterProps);
       
       debug.log(`[Storage] Successfully created: ${filePath}`);
       
