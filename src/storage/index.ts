@@ -43,9 +43,7 @@ export {
 // Markdown generation (internal, but exported for testing/advanced use)
 export {
   generateFrontmatterProperties,
-  updateMarkdownFileFrontmatter,
-  extractBodyFromFile,
-  hasValidFrontmatter
+  updateMarkdownFileFrontmatter
 } from './markdown';
 
 // Frontmatter builder
