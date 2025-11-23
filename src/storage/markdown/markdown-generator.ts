@@ -46,10 +46,7 @@ export async function updateMarkdownFileFrontmatter(
         frontmatter[key] = value;
       });
       
-      debug.log('[Markdown] Updated file frontmatter:', {
-        filePath: file.path,
-        properties: Object.keys(frontmatterProps)
-      });
+      
     });
   } catch (error) {
     debug.log('[Markdown] Error updating frontmatter:', error);
