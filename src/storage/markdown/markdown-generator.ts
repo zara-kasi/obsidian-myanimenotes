@@ -4,6 +4,7 @@
  * Now uses Obsidian's FileManager.processFrontMatter() for safe frontmatter handling
  * Separates frontmatter generation from file writing
  */
+import { TFile } from 'obsidian';
 import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../../models';
 import type { StorageConfig } from '../storage-service';
