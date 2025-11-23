@@ -112,9 +112,9 @@ async function handleExactMatch(
   cassetteSync: string
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
-  const { vault, metadataCache } = plugin.app;
+  const { metadataCache } = plugin.app;
   
-  // Read frontmatter to check sync timestamp
+  // ✅ GOOD: Use cache instead of reading file
   const cache = metadataCache.getFileCache(file);
   const localSynced = cache?.frontmatter?.synced;
   
@@ -133,7 +133,7 @@ async function handleExactMatch(
   
   const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
   
-  // Update frontmatter using Obsidian's API
+  // ✅ GOOD: processFrontMatter preserves body automatically
   await updateMarkdownFileFrontmatter(plugin, file, frontmatterProps);
   
   return {
