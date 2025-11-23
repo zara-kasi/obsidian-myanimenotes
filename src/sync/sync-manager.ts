@@ -59,6 +59,13 @@ export class SyncManager {
     this.debug.log('[Sync Manager] Starting MAL sync...', options);
     
     try {
+      // Ensure cassette index is initialized before sync
+      if (this.plugin.cassetteIndex) {
+        this.debug.log('[Sync Manager] Ensuring cassette index is initialized...');
+        await this.plugin.cassetteIndex.ensureInitialized();
+        this.debug.log('[Sync Manager] Cassette index ready');
+      }
+      
       // Perform sync
       const { items, result } = await syncMAL(this.plugin, options);
       

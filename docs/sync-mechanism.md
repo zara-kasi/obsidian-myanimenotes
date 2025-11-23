@@ -363,6 +363,7 @@ The Auto-Sync Manager handles automated background syncing with two independent 
 - Ensures fresh data when opening Obsidian
 - Short delay prevents blocking plugin initialization
 - One-time only (doesn't repeat)
+- Minimum 30 minutes prevents excessive API calls
 
 **Scheduled Sync** (30+ minutes):
 

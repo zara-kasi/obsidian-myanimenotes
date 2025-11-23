@@ -1,4 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
+import { normalizePath } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
@@ -48,7 +49,7 @@ export class CassetteSettingTab extends PluginSettingTab {
    
     new Setting(containerEl)
     .setName('Debug mode')
-    .setDesc('Enable detailed console logging for troubleshooting.')
+    .setDesc('Enable detailed console logging.')
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.debugMode)
       .onChange(async (value) => {
@@ -176,63 +177,40 @@ export class CassetteSettingTab extends PluginSettingTab {
   }
 
   private renderStorageSection(container: HTMLElement): void {
-  new Setting(container)
-    .setName('Anime folder')
-    .setDesc('Folder where anime notes will be saved.')
-    .addText(text => {
-      new FolderSuggest(this.app, text.inputEl);
-      text
-        .setPlaceholder('Cassette/Anime')
-        .setValue(this.plugin.settings.animeFolder)
-        .onChange(async (value) => {
-          this.plugin.settings.animeFolder = value.trim() || 'Cassette/Anime';
-          await this.plugin.saveSettings();
-        });
-    });
+    new Setting(container)
+      .setName('Anime folder')
+      .setDesc('Folder where anime notes will be saved.')
+      .addText(text => {
+        new FolderSuggest(this.app, text.inputEl);
+        text
+          .setPlaceholder('Cassette/Anime')
+          .setValue(this.plugin.settings.animeFolder)
+          .onChange(async (value) => {
+            // Normalize the path to handle cross-platform paths and user input variations
+            const normalizedPath = normalizePath(value.trim() || 'Cassette/Anime');
+            this.plugin.settings.animeFolder = normalizedPath;
+            await this.plugin.saveSettings();
+          });
+      });
 
-  new Setting(container)
-    .setName('Manga folder')
-    .setDesc('Folder where manga notes will be saved.')
-    .addText(text => {
-      new FolderSuggest(this.app, text.inputEl);
-      text
-        .setPlaceholder('Cassette/Manga')
-        .setValue(this.plugin.settings.mangaFolder)
-        .onChange(async (value) => {
-          this.plugin.settings.mangaFolder = value.trim() || 'Cassette/Manga';
-          await this.plugin.saveSettings();
-        });
-    });
-}
+    new Setting(container)
+      .setName('Manga folder')
+      .setDesc('Folder where manga notes will be saved.')
+      .addText(text => {
+        new FolderSuggest(this.app, text.inputEl);
+        text
+          .setPlaceholder('Cassette/Manga')
+          .setValue(this.plugin.settings.mangaFolder)
+          .onChange(async (value) => {
+            // Normalize the path to handle cross-platform paths and user input variations
+            const normalizedPath = normalizePath(value.trim() || 'Cassette/Manga');
+            this.plugin.settings.mangaFolder = normalizedPath;
+            await this.plugin.saveSettings();
+          });
+      });
+  }
 
-private renderSyncSection(container: HTMLElement): void {
-  // Force full sync toggle
-  new Setting(container)
-    .setName('Overwrite all')
-    .setDesc('Update all notes on every sync, even if nothing changed.')
-    .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.forceFullSync)
-      .onChange(async (value) => {
-        this.plugin.settings.forceFullSync = value;
-        await this.plugin.saveSettings();
-      }));
-  
-  // Sync on load toggle
-  new Setting(container)
-    .setName('Sync on plugin load')
-    .setDesc('Automatically sync shortly after Obsidian starts (1 minute delay to avoid slow startup).')
-    .addToggle(toggle => toggle
-      .setValue(this.plugin.settings.syncOnLoad)
-      .onChange(async (value) => {
-        this.plugin.settings.syncOnLoad = value;
-        await this.plugin.saveSettings();
-        
-        // Restart auto-sync manager to apply changes
-        if (this.plugin.autoSyncManager) {
-          this.plugin.autoSyncManager.stop();
-          this.plugin.autoSyncManager.start();
-        }
-      }));
+  private renderSyncSection(container: HTMLElement): void {
   
   // Scheduled sync toggle
   new Setting(container)
@@ -276,5 +254,34 @@ private renderSyncSection(container: HTMLElement): void {
           }
         }));
   }
+  
+   // Sync on load toggle
+  new Setting(container)
+    .setName('Sync after startup')
+    .setDesc('Automatically sync shortly after Obsidian starts.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.syncOnLoad)
+      .onChange(async (value) => {
+        this.plugin.settings.syncOnLoad = value;
+        await this.plugin.saveSettings();
+        
+        // Restart auto-sync manager to apply changes
+        if (this.plugin.autoSyncManager) {
+          this.plugin.autoSyncManager.stop();
+          this.plugin.autoSyncManager.start();
+        }
+      }));
+  
+   // Force full sync toggle
+  new Setting(container)
+    .setName('Overwrite all')
+    .setDesc('Update all notes on every sync, even if nothing changed.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.forceFullSync)
+      .onChange(async (value) => {
+        this.plugin.settings.forceFullSync = value;
+        await this.plugin.saveSettings();
+      }));
+  
 }
 }

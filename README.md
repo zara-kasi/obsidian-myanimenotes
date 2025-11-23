@@ -99,8 +99,6 @@ Report bugs or suggest new features [here](https://github.com/zara-kasi/cassette
 
 ## License
 
-Cassette is released under the MIT License.  [MIT License](./LICENSE).  
-You are free to use, modify, and distribute Cassette in accordance with the license terms.  
-© 2025 [Zara Kasi](https://github.com/zara-kasi)
-
+Cassette is released under the MIT License.  [MIT License](./LICENSE).
+ 
 ---

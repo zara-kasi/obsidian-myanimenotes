@@ -6,10 +6,12 @@
 
 import type CassettePlugin from '../main';
 import { createDebugLogger } from '../utils';
+import { normalizePath } from 'obsidian';
 
 
 /**
  * Ensures a folder exists, creating it if necessary
+ * Normalizes the path before checking/creating
  */
 export async function ensureFolderExists(
   plugin: CassettePlugin,
@@ -17,11 +19,15 @@ export async function ensureFolderExists(
 ): Promise<void> {
   const debug = createDebugLogger(plugin, 'FileUtils');
   const { vault } = plugin.app;
-  const folder = vault.getAbstractFileByPath(folderPath);
+  
+  // Normalize the folder path to handle cross-platform paths
+  const normalizedPath = normalizePath(folderPath);
+  
+  const folder = vault.getAbstractFileByPath(normalizedPath);
   
   if (!folder) {
-    await vault.createFolder(folderPath);
-    debug.log(`[FileUtils] Created folder: ${folderPath}`);
+    await vault.createFolder(normalizedPath);
+    debug.log(`[FileUtils] Created folder: ${normalizedPath}`);
   }
 }
 
@@ -38,6 +44,7 @@ export function sanitizeFilename(filename: string): string {
 /**
  * Generates unique filename if collision occurs
  * Appends -1, -2, etc. until a unique name is found
+ * Normalizes paths before checking
  */
 export function generateUniqueFilename(
   plugin: CassettePlugin,
@@ -46,10 +53,15 @@ export function generateUniqueFilename(
   baseFilename: string
 ): string {
   const debug = createDebugLogger(plugin, 'FileUtils');
+  
+  // Normalize the folder path
+  const normalizedFolderPath = normalizePath(folderPath);
+  
   let filename = baseFilename;
   let counter = 1;
   
-  while (vault.getAbstractFileByPath(`${folderPath}/${filename}`)) {
+  // Check if file exists at normalized path
+  while (vault.getAbstractFileByPath(normalizePath(`${normalizedFolderPath}/${filename}`))) {
     const namePart = baseFilename.replace(/\.md$/, '');
     filename = `${namePart}-${counter}.md`;
     counter++;
@@ -199,7 +211,7 @@ function formatSimpleValue(value: string): string {
   }
 
   // Special cases for acronyms (should be all caps)
-  const acronyms = ['tv', 'ova', 'ona'];  // <-- REMOVED 'mal' FROM HERE
+  const acronyms = ['tv', 'ova', 'ona'];
   
   if (acronyms.includes(normalized)) {
     return `[[${normalized.toUpperCase()}]]`;

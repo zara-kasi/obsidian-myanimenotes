@@ -40,15 +40,15 @@ export {
   formatPlatformDisplay
 } from './file-utils';
 
-// Frontmatter utilities (internal, but exported for testing/advanced use)
-export {
-  buildSyncedFrontmatterProperties,
-  mergeFrontmatter,
-  serializeFrontmatter
-} from './markdown';
-
 // Markdown generation (internal, but exported for testing/advanced use)
 export {
-  parseExistingFile,
-  generateMarkdownWithCassetteSync
+  generateFrontmatterProperties,
+  updateMarkdownFileFrontmatter,
+  extractBodyFromFile,
+  hasValidFrontmatter
+} from './markdown';
+
+// Frontmatter builder
+export {
+  buildSyncedFrontmatterProperties
 } from './markdown';

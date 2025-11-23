@@ -18,9 +18,11 @@ export function generateVerifier(): string {
   
   try {
     crypto.getRandomValues(arr);
+
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `[MAL-AUTH] Failed to generate secure random values: ${error.message}`
+      `[MAL-AUTH] Failed to generate secure random values: ${errorMessage}`
     );
   }
   
@@ -66,9 +68,11 @@ export function generateState(): string {
     const arr = new Uint8Array(16);
     crypto.getRandomValues(arr);
     return Array.from(arr, byte => byte.toString(16).padStart(2, '0')).join('');
+
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `[MAL-AUTH] Failed to generate secure state: ${error.message}`
+      `[MAL-AUTH] Failed to generate secure state: ${errorMessage}`
     );
   }
 }

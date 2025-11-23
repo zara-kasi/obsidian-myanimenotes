@@ -6,6 +6,7 @@ import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager 
 import { MediaCategory } from './models';
 import type { CassetteIndex } from './storage/cassette';
 import { createCassetteIndex } from './storage/cassette';
+import { CassetteLockManager, createCassetteLockManager } from './storage/cassette';
 
 export default class CassettePlugin extends Plugin {
   settings: CassetteSettings = DEFAULT_SETTINGS;
@@ -13,13 +14,18 @@ export default class CassettePlugin extends Plugin {
   syncManager: SyncManager | null = null;
   autoSyncManager: AutoSyncManager | null = null;
   cassetteIndex: CassetteIndex | null = null;
+  lockManager: CassetteLockManager | null = null;
 
   async onload() {
-  await this.loadSettings();
+    await this.loadSettings();
 
-  // Initialize sync manager
-  this.syncManager = createSyncManager(this);
-  // Initialize cassette index (after settings loaded)
+    // Initialize lock manager (instance-based, not global)
+    this.lockManager = createCassetteLockManager();
+
+    // Initialize sync manager
+    this.syncManager = createSyncManager(this);
+    
+    // Initialize cassette index (lazy - just registers listeners, doesn't build index)
     try {
       this.cassetteIndex = await createCassetteIndex(this);
     } catch (error) {
@@ -27,41 +33,46 @@ export default class CassettePlugin extends Plugin {
       // Plugin can still work without index (uses fallback)
     }
   
-  // Initialize auto-sync manager
-  this.autoSyncManager = createAutoSyncManager(this);
-  
-  // Add ribbon icon for sync
-  this.addRibbonIcon('cassette-tape', 'Cassette sync all', async (evt: MouseEvent) => {
-    if (!this.syncManager) return;
-    await this.syncManager.syncFromMAL();
-  });
+    // Initialize auto-sync manager
+    this.autoSyncManager = createAutoSyncManager(this);
+    
+    // Add ribbon icon for sync
+    this.addRibbonIcon('cassette-tape', 'Cassette sync all', async (evt: MouseEvent) => {
+      if (!this.syncManager) return;
+      await this.syncManager.syncFromMAL();
+    });
 
-  // Add settings tab
-  this.settingsTab = new CassetteSettingTab(this.app, this);
-  this.addSettingTab(this.settingsTab);
+    // Add settings tab
+    this.settingsTab = new CassetteSettingTab(this.app, this);
+    this.addSettingTab(this.settingsTab);
 
-  // Register OAuth protocol handler for MAL
-  this.registerObsidianProtocolHandler('cassette-auth/mal', async (params) => {
-    await handleMALRedirect(this, params);
-  });
+    // Register OAuth protocol handler for MAL
+    this.registerObsidianProtocolHandler('cassette-auth/mal', async (params) => {
+      await handleMALRedirect(this, params);
+    });
 
-
-  // Add commands
-  this.addCommands();
-}
+    // Add commands
+    this.addCommands();
+  }
 
   onunload() {
- 
-   // Clear index on unload
-  if (this.cassetteIndex) {
+    // Clear and cleanup lock manager (prevents global state leaks)
+    if (this.lockManager) {
+      this.lockManager.clear();
+      this.lockManager = null;
+    }
+
+    // Clear index on unload
+    if (this.cassetteIndex) {
       this.cassetteIndex.clear();
     }
-  // Stop all auto-sync timers
-  if (this.autoSyncManager) {
-    this.autoSyncManager.stop();
+    
+    // Stop all auto-sync timers
+    if (this.autoSyncManager) {
+      this.autoSyncManager.stop();
+    }
+    this.autoSyncManager = null;
   }
-  this.autoSyncManager = null;
-}
 
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -69,7 +80,6 @@ export default class CassettePlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
-    
   }
   
   refreshSettingsUI(): void {

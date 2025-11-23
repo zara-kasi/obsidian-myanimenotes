@@ -66,7 +66,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   
   // Sync defaults
   forceFullSync: false,
-  syncOnLoad: false,
+  syncOnLoad: true,
   scheduledSync: false,
   scheduledSyncInterval: 60, // 60 minutes default
   lastSuccessfulSync: undefined, // No previous sync (NEW)

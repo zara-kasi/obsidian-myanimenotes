@@ -181,13 +181,14 @@ async function makeMALRequest(
       );
 
     } catch (error) {
-      lastError = error;
+      lastError = error instanceof Error ? error : new Error(String(error));
 
       // Network errors or other exceptions - retry
       if (attempt < MAX_RETRIES) {
         const delay = calculateBackoffDelay(attempt);
+        const errorMessage = error instanceof Error ? error.message : String(error);
         debug.log(
-          `[MAL API] Request failed: ${error.message}. Retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})...`
+          `[MAL API] Request failed: ${errorMessage}. Retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})...`
         );
         await sleep(delay);
         continue; // Retry

@@ -154,7 +154,8 @@ export async function syncMAL(
         
         
       } catch (error) {
-        const errorMsg = `Failed to sync anime: ${error.message}`;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMsg = `Failed to sync anime: ${errorMessage}`;
         console.error('[MAL Sync]', errorMsg);
         errors.push(errorMsg);
         new Notice(`❌ ${errorMsg}`, 5000);
@@ -179,7 +180,8 @@ export async function syncMAL(
         
         
       } catch (error) {
-        const errorMsg = `Failed to sync manga: ${error.message}`;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMsg = `Failed to sync manga: ${errorMessage}`;
         console.error('[MAL Sync]', errorMsg);
         errors.push(errorMsg);
         new Notice(`❌ ${errorMsg}`, 5000);
@@ -208,7 +210,8 @@ export async function syncMAL(
     return { items: allItems, result: syncResult };
 
   } catch (error) {
-    const errorMsg = `MAL sync failed: ${error.message}`;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMsg = `MAL sync failed: ${errorMessage}`;
     console.error('[MAL Sync]', errorMsg);
     errors.push(errorMsg);
     
