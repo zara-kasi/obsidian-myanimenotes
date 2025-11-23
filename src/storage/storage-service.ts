@@ -247,27 +247,28 @@ async function createNewFile(
     .trim();
   
   const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
+  const normalizedFolderPath = normalizePath(folderPath);
   
   const MAX_ATTEMPTS = 5;
-  
-  // Normalize folder path once
-  const normalizedFolderPath = normalizePath(folderPath);
   
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const filename = attempt === 1 
       ? `${sanitizedTitle}.md`
       : generateUniqueFilename(plugin, vault, normalizedFolderPath, `${sanitizedTitle}.md`);
     
-    // Normalize the full file path
     const filePath = normalizePath(`${normalizedFolderPath}/${filename}`);
     
     try {
-      // Create file with empty content first
-      const createdFile = await vault.create(filePath, '');
+      // Create file with minimal valid frontmatter structure
+      const initialContent = '---\n---\n';
+      const createdFile = await vault.create(filePath, initialContent);
       
-      // Use processFrontMatter to set frontmatter
-      // This is safer and respects Obsidian's internal caching
-      await updateMarkdownFileFrontmatter(plugin, createdFile, frontmatterProps);
+      // Now use processFrontMatter to set properties safely
+      await plugin.app.fileManager.processFrontMatter(createdFile, (frontmatter) => {
+        Object.entries(frontmatterProps).forEach(([key, value]) => {
+          frontmatter[key] = value;
+        });
+      });
       
       debug.log(`[Storage] Successfully created: ${filePath}`);
       
