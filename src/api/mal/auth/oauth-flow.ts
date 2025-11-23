@@ -108,7 +108,8 @@ export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthP
     
   } catch (error) {
     console.error('[MAL Auth] Failed to handle OAuth redirect:', error);
-    new Notice(`❌ MAL Authentication failed: ${error.message}`, 5000);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    new Notice(`❌ MAL Authentication failed: ${errorMessage}`, 5000);
   }
 }
 
@@ -183,8 +184,10 @@ async function exchangeCodeForToken(
     // Refresh settings UI after Authentication
     plugin.refreshSettingsUI();
     
+
   } catch (err) {
-    new Notice(`❌ MAL Auth failed: ${err.message}`, 5000);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    new Notice(`❌ MAL Auth failed: ${errorMessage}`, 5000);
     throw err;
   }
 }
