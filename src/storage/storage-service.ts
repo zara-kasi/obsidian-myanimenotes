@@ -192,7 +192,6 @@ async function handleDuplicates(
     message: `Updated ${selectedFile.path} but found ${files.length} duplicates`
   };
 }
-
 /**
  * Handles legacy file migration
  */
