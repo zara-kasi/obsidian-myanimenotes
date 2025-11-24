@@ -55,21 +55,30 @@ export class SyncManager {
     /**
    * Check if sync can proceed, throw error if not
    */
-  private checkSyncGuard(): void {
-    // Prevent overlapping syncs
-    if (this.isSyncing) {
-      throw new Error('Sync already in progress. Please wait for it to complete.');
-    }
-
-    // Enforce cooldown period
-    const timeSinceLastSync = Date.now() - this.lastSyncTime;
-    if (this.lastSyncTime > 0 && timeSinceLastSync < SYNC_COOLDOWN_MS) {
-      const minutesRemaining = Math.ceil((SYNC_COOLDOWN_MS - timeSinceLastSync) / 60000);
-      throw new Error(
-        `Sync cooldown active. Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`
-      );
-    }
+  private checkSyncGuard(): boolean {
+  // Prevent overlapping syncs
+  if (this.isSyncing) {
+    this.debug.log('[Sync Manager] Sync already in progress - blocking new sync request');
+    new Notice('Sync already in progress.', 4000);
+    return false;
   }
+
+  // Enforce cooldown period
+  const timeSinceLastSync = Date.now() - this.lastSyncTime;
+  if (this.lastSyncTime > 0 && timeSinceLastSync < SYNC_COOLDOWN_MS) {
+    const minutesRemaining = Math.ceil((SYNC_COOLDOWN_MS - timeSinceLastSync) / 60000);
+    this.debug.log(
+      `[Sync Manager] Sync cooldown active - ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} remaining`
+    );
+    new Notice(
+      `⏳ Sync cooldown active. Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`,
+      4000
+    );
+    return false;
+  }
+
+  return true;
+}
 
   /**
    * Performs a complete sync from MAL
@@ -81,8 +90,23 @@ export class SyncManager {
     result: SyncResult;
     savedPaths?: { anime: string[]; manga: string[] };
   }> {
-    // Check sync guard
-    this.checkSyncGuard();
+      // Check sync guard
+  if (!this.checkSyncGuard()) {
+    // Guard check failed - return empty result, no error
+    return { 
+      items: [], 
+      result: {
+        success: false,
+        itemsProcessed: 0,
+        itemsSucceeded: 0,
+        itemsFailed: 0,
+        results: [],
+        errors: [],
+        startTime: Date.now(),
+        endTime: Date.now(),
+      }
+    };
+  }
     this.isSyncing = true;
 
     try {
