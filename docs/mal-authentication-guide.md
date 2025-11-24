@@ -28,7 +28,7 @@
 
 ![Steps](../assets/step-1.jpg)
 
-2. 
+2. Go to API page
 
 ![Steps](../assets/step-2.jpg)
 
