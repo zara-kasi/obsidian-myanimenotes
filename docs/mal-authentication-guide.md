@@ -26,4 +26,4 @@
 
 1. Fill the application details
 
-![Step1](./assets/step-1)
+![Step1](../assets/step-1)
