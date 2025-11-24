@@ -488,6 +488,25 @@ export class CassetteIndex {
   }
   
   /**
+ * Forces a complete fresh rebuild of the index
+ * Clears all existing data and rebuilds from scratch
+ * Should be called before every sync to ensure accuracy
+ */
+async forceRebuildFresh(): Promise<void> {
+  this.debug.log('[Index] Force rebuild (fresh start)');
+  
+  // Clear everything
+  this.cassetteToFiles.clear();
+  this.fileToCassette.clear();
+  
+  // Force a full rebuild (ignore cooldown)
+  this.lastRebuildTime = 0;
+  await this.rebuildIndexFull();
+  
+  this.debug.log('[Index] Fresh rebuild complete');
+}
+  
+  /**
    * Clears the entire index
    */
   clear(): void {
