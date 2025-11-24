@@ -44,7 +44,7 @@
 
 ![Steps](../assets/step-5.jpg)
 
-6. Click Allow and it will redirect to obsidian
+6. Click Allow and it will redirect you to Obsidian
 
 ![Steps](../assets/step-6.jpg)
 
