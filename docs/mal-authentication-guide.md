@@ -31,3 +31,23 @@
 2. 
 
 ![Steps](../assets/step-2.jpg)
+
+3.
+
+![Steps](../assets/step-3.jpg)
+
+4.
+
+![Steps](../assets/step-4.jpg)
+
+5.
+
+![Steps](../assets/step-5.jpg)
+
+6.
+
+![Steps](../assets/step-6.jpg)
+
+7.
+
+![Steps](../assets/step-7.jpg)
