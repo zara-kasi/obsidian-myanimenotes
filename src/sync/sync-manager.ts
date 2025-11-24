@@ -56,42 +56,37 @@ export class SyncManager {
     this.debug.log('[Sync Manager] Saved last sync timestamp');
   }
 
-  /**
-   * Ensures cassette index is ready for use
-   * 
-   * CRITICAL: Must be called before any sync operations that create files
-   * This ensures the index doesn't miss any newly created files
-   */
-  private async ensureIndexReady(): Promise<void> {
-    // Index might not be available (plugin loading issue)
-    if (!this.plugin.cassetteIndex) {
-      this.debug.log('[Sync Manager] WARNING: Cassette index not available');
-      return;
-    }
-    
-    try {
-      this.debug.log('[Sync Manager] Ensuring cassette index is initialized...');
-      
-      // This will:
-      // - Return immediately if already initialized
-      // - Build from scratch on first call
-      // - Perform periodic full rebuild every minute
-      await this.plugin.cassetteIndex.ensureInitialized();
-      
-      const stats = this.plugin.cassetteIndex.getStats();
-      this.debug.log('[Sync Manager] Index ready:', {
-        isInitialized: stats.isInitialized,
-        cassettes: stats.totalCassettes,
-        files: stats.totalFiles,
-        duplicates: stats.duplicates
-      });
-      
-    } catch (error) {
-      console.error('[Sync Manager] Failed to ensure index ready:', error);
-      // Don't fail sync - index is optional (fallback to vault scan)
-    }
+/**
+ * Rebuilds the index fresh before sync
+ * Called before EVERY sync to ensure accuracy
+ * 
+ * This is the simple solution: clear and rebuild each time
+ * Prevents stale index issues during the session
+ */
+private async rebuildIndexForSync(): Promise<void> {
+  if (!this.plugin.cassetteIndex) {
+    this.debug.log('[Sync Manager] WARNING: Cassette index not available');
+    return;
   }
-
+  
+  try {
+    this.debug.log('[Sync Manager] Rebuilding index fresh for this sync...');
+    
+    // Force a complete fresh rebuild
+    await this.plugin.cassetteIndex.forceRebuildFresh();
+    
+    const stats = this.plugin.cassetteIndex.getStats();
+    this.debug.log('[Sync Manager] Index fresh rebuild complete:', {
+      cassettes: stats.totalCassettes,
+      files: stats.totalFiles,
+      duplicates: stats.duplicates
+    });
+    
+  } catch (error) {
+    console.error('[Sync Manager] Failed to rebuild index:', error);
+    // Don't fail sync - index is optional
+  }
+}
   /**
    * Performs a complete sync from MAL
    * 
@@ -110,7 +105,9 @@ export class SyncManager {
       // CRITICAL: Ensure index is initialized before sync
       // This must happen before we fetch items so the index is ready
       // for lookups during file creation
-      await this.ensureIndexReady();
+
+      // NEW:
+      await this.rebuildIndexForSync();
       
       // Perform sync
       const { items, result } = await syncMAL(this.plugin, options);
