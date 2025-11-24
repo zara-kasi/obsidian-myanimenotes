@@ -31,6 +31,8 @@ As Cassette's primary function is to create a durable, offline-first personal re
 - **Redistribution:** The plugin has no features for uploading, publishing, or sharing MAL data.
 - **Retention:** Data is stored locally on the user's device as a persistent, personal reference, which is the plugin's primary function.
 
+> For detail compliance analysis see this [MAL Compliance Analysis](./docs/mal-compliance-analysis.md)
+
 ## User Responsibilities
 
 - Use Cassette only for personal, non-commercial purposes.  
