@@ -32,7 +32,7 @@
 
 ![Steps](../assets/step-2.jpg)
 
-3.
+3. Click Edit to view you application client id & secret
 
 ![Steps](../assets/step-3.jpg)
 
