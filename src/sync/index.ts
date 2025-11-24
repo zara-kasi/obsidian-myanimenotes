@@ -10,3 +10,7 @@ export type { MALSyncOptions } from './mal-sync-service';
 
 // Auto-sync functionality
 export { AutoSyncManager, createAutoSyncManager } from './auto-sync';
+
+// Sync guard
+export { SyncGuardManager, createSyncGuardManager } from './sync-guard';
+export type { SyncGuardState } from './sync-guard';
