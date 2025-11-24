@@ -26,4 +26,8 @@
 
 1. Fill the application details
 
-![Step1](../assets/step-1.jpg)
+![Steps](../assets/step-1.jpg)
+
+2. 
+
+![Steps](../assets/step-2.jpg)
