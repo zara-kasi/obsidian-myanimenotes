@@ -13,15 +13,11 @@ Cassette is an Obsidian plugin that syncs your anime and manga lists from MyAnim
 
 After authenticating, use the Command Palette and run `Cassette: Sync all from MyAnimeList` or use the ribbon icon (Cassette symbol). Synced anime and manga appear in your chosen folder (set in plugin settings).
 
----
-
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development instructions.  
-Report bugs or suggest new features [here](https://github.com/zara-kasi/cassette/issues).
+If you'd like to help improve this plugin, see [CONTRIBUTING.md](./CONTRIBUTING.md) for development instructions. You can also report bugs or suggest new features in the [Issues](https://github.com/zara-kasi/cassette/issues) section.
 
-For information about data usage and privacy, see [PRIVACY](./PRIVACY.md).
+For details on data handling, privacy, and compliance with MyAnimeList’s API terms, see the 
+[Privacy, Data Use & API Compliance Policy](./PRIVACY_COMPLIANCE.md).
 
-Cassette is released under the MIT License.  [MIT License](./LICENSE).
- 
----
+License: [MIT License](./LICENSE).
