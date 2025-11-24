@@ -1,20 +1,3 @@
-/**
- * OPTIMIZED Storage Service - Batch Preparation Pattern
- * 
- * Performance improvements:
- * - Eliminated 50ms delays (cache-first approach)
- * - Batch preparation upfront (skip decisions in memory before I/O)
- * - UI yielding every 10 items (prevents freezing)
- * - No per-item locks for batch operations (sequential already)
- * - Progress callback support for real-time feedback
- * 
- * Expected performance:
- * - Skip 500 items: < 1 second (vs ~30 seconds)
- * - Update 500 items: ~8-10 seconds (vs ~45 seconds)
- * - Mixed 80% skip: ~3-4 seconds (vs ~35 seconds)
- * - Zero UI freezing with responsive feedback
- */
-
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem } from '../models';
 import type { PropertyMapping } from './markdown';
@@ -489,7 +472,7 @@ export async function saveMediaItem(
 
 
 // ============================================================================
-// OPTIMIZED BATCH OPERATIONS (with index refresh)
+// OPTIMIZED BATCH OPERATIONS
 // ============================================================================
 
 /**
@@ -499,7 +482,6 @@ export async function saveMediaItem(
  * - UI yielding every 10 items (prevents freezing)
  * - Progress callback for real-time feedback
  * - No per-item locks (sequential processing already safe)
- * - INDEX REFRESH after batch completes (CRITICAL FIX)
  */
 export async function saveMediaItems(
   plugin: CassettePlugin,
@@ -623,22 +605,6 @@ export async function saveMediaItems(
     `[Storage] Batch save complete: ${results.length} results ` +
     `(prep: ${prepDuration}ms, process: ${processDuration}ms, total: ${totalDuration}ms)`
   );
-  
-  // CRITICAL FIX: Refresh index after batch operations complete
-  // This ensures the index captures all newly created files
-  if (plugin.cassetteIndex && itemsToProcess.length > 0) {
-    const refreshStartTime = Date.now();
-    
-    try {
-      debug.log(`[Storage] Refreshing index after batch save...`);
-      await plugin.cassetteIndex.refreshIndex();
-      const refreshDuration = Date.now() - refreshStartTime;
-      debug.log(`[Storage] Index refreshed in ${refreshDuration}ms`);
-    } catch (error) {
-      console.error(`[Storage] Index refresh failed:`, error);
-      // Don't fail sync if index refresh fails - user's files are still created
-    }
-  }
   
   return results;
 }
