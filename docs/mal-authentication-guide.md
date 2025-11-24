@@ -36,7 +36,7 @@
 
 ![Steps](../assets/step-3.jpg)
 
-4.
+4. Copy both Client ID & Client Secret. ( Make sure to save them somewhere safe )
 
 ![Steps](../assets/step-4.jpg)
 
