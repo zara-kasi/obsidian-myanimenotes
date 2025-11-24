@@ -40,7 +40,7 @@
 
 ![Steps](../assets/step-4.jpg)
 
-5. Fill the both Client ID & Secret and click on Authenticate
+5. Fill Client ID & Secret and click on Authenticate
 
 ![Steps](../assets/step-5.jpg)
 
