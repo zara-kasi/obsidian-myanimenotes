@@ -44,7 +44,7 @@
 
 ![Steps](../assets/step-5.jpg)
 
-6.
+6. Click Allow
 
 ![Steps](../assets/step-6.jpg)
 
