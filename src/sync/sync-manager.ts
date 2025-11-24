@@ -71,7 +71,7 @@ export class SyncManager {
       `[Sync Manager] Sync cooldown active - ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} remaining`
     );
     new Notice(
-      `⏳ Sync cooldown active. Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`,
+      `Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`,
       4000
     );
     return false;
