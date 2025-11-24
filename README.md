@@ -1,6 +1,6 @@
 # Cassette Obsidian Plugin
 
-Cassette is an Obsidian plugin that syncs your anime and manga lists from MyAnimeList (MAL) into structured Markdown notes, complete with metadata, cover image, and automatic updates.
+Cassette is an Obsidian plugin that syncs your anime and manga lists from MyAnimeList into structured Markdown notes, complete with metadata, cover image, and automatic updates.
 
 
 ### MyAnimeList Authentication
