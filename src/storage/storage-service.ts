@@ -470,7 +470,6 @@ export async function saveMediaItem(
   });
 }
 
-
 // ============================================================================
 // OPTIMIZED BATCH OPERATIONS
 // ============================================================================
@@ -610,7 +609,7 @@ export async function saveMediaItems(
 }
 
 /**
- * Category-based batch save with progress callback and index refresh
+ * Category-based batch save with progress callback
  */
 export async function saveMediaItemsByCategory(
   plugin: CassettePlugin,
@@ -618,14 +617,11 @@ export async function saveMediaItemsByCategory(
   config: StorageConfig,
   progressCallback?: ProgressCallback
 ): Promise<{ anime: string[]; manga: string[] }> {
-  const debug = createDebugLogger(plugin, 'Storage');
   const animePaths: string[] = [];
   const mangaPaths: string[] = [];
   
   const animeItems = items.filter(item => item.category === 'anime');
   const mangaItems = items.filter(item => item.category === 'manga');
-  
-  debug.log(`[Storage] Category split: ${animeItems.length} anime, ${mangaItems.length} manga`);
   
   if (animeItems.length > 0) {
     const results = await saveMediaItems(plugin, animeItems, config, progressCallback);
