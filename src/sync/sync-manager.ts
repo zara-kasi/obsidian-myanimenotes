@@ -1,13 +1,3 @@
-/**
- * UPDATED Sync Manager with Proper Index Initialization
- * 
- * Key fixes:
- * 1. Ensures index is initialized BEFORE any file lookups
- * 2. Retries initialization if it fails on first attempt
- * 3. Handles index unavailable gracefully (falls back to vault scan)
- * 4. Logs all index operations for debugging
- */
-
 import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem, SyncResult } from '../models';
@@ -56,40 +46,8 @@ export class SyncManager {
     this.debug.log('[Sync Manager] Saved last sync timestamp');
   }
 
-/**
- * Rebuilds the index fresh before sync
- * Called before EVERY sync to ensure accuracy
- * 
- * This is the simple solution: clear and rebuild each time
- * Prevents stale index issues during the session
- */
-private async rebuildIndexForSync(): Promise<void> {
-  if (!this.plugin.cassetteIndex) {
-    this.debug.log('[Sync Manager] WARNING: Cassette index not available');
-    return;
-  }
-  
-  try {
-    this.debug.log('[Sync Manager] Rebuilding index fresh for this sync...');
-    
-    // Force a complete fresh rebuild
-    await this.plugin.cassetteIndex.forceRebuildFresh();
-    
-    const stats = this.plugin.cassetteIndex.getStats();
-    this.debug.log('[Sync Manager] Index fresh rebuild complete:', {
-      cassettes: stats.totalCassettes,
-      files: stats.totalFiles,
-      duplicates: stats.duplicates
-    });
-    
-  } catch (error) {
-    console.error('[Sync Manager] Failed to rebuild index:', error);
-    // Don't fail sync - index is optional
-  }
-}
   /**
    * Performs a complete sync from MAL
-   * 
    * @param options Sync options
    * @returns Synced items and result
    */
@@ -98,16 +56,15 @@ private async rebuildIndexForSync(): Promise<void> {
     result: SyncResult;
     savedPaths?: { anime: string[]; manga: string[] };
   }> {
-    const startTime = Date.now();
     this.debug.log('[Sync Manager] Starting MAL sync...', options);
     
     try {
-      // CRITICAL: Ensure index is initialized before sync
-      // This must happen before we fetch items so the index is ready
-      // for lookups during file creation
-
-      // NEW:
-      await this.rebuildIndexForSync();
+      // Ensure cassette index is initialized before sync
+      if (this.plugin.cassetteIndex) {
+        this.debug.log('[Sync Manager] Ensuring cassette index is initialized...');
+        await this.plugin.cassetteIndex.ensureInitialized();
+        this.debug.log('[Sync Manager] Cassette index ready');
+      }
       
       // Perform sync
       const { items, result } = await syncMAL(this.plugin, options);
@@ -119,19 +76,13 @@ private async rebuildIndexForSync(): Promise<void> {
         try {
           const storageConfig = options.storageConfig || this.getStorageConfig();
           
-          this.debug.log('[Sync Manager] Saving to vault...');
-          
           savedPaths = await saveMediaItemsByCategory(
             this.plugin,
             items,
             storageConfig
           );
           
-          this.debug.log('[Sync Manager] Saved to vault:', {
-            anime: savedPaths.anime.length,
-            manga: savedPaths.manga.length
-          });
-          
+          this.debug.log('[Sync Manager] Saved to vault:', savedPaths);
         } catch (saveError) {
           console.error('[Sync Manager] Failed to save to vault:', saveError);
           const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
@@ -143,13 +94,6 @@ private async rebuildIndexForSync(): Promise<void> {
       if (result.success) {
         await this.saveLastSyncTimestamp();
       }
-      
-      const duration = Date.now() - startTime;
-      this.debug.log(`[Sync Manager] Sync complete (${duration}ms)`, {
-        success: result.success,
-        items: result.itemsProcessed,
-        errors: result.errors.length
-      });
       
       return { items, result, savedPaths };
       
@@ -244,31 +188,11 @@ private async rebuildIndexForSync(): Promise<void> {
   getSyncStats(): {
     totalItems?: number;
     lastSyncTime?: number;
-    indexStats?: {
-      cassettes: number;
-      files: number;
-      duplicates: number;
-    };
   } {
-    const stats: any = {
+    return {
+      totalItems: undefined,
       lastSyncTime: this.plugin.settings.lastSuccessfulSync,
     };
-    
-    // Include index stats if available
-    if (this.plugin.cassetteIndex) {
-      try {
-        const indexStats = this.plugin.cassetteIndex.getStats();
-        stats.indexStats = {
-          cassettes: indexStats.totalCassettes,
-          files: indexStats.totalFiles,
-          duplicates: indexStats.duplicates
-        };
-      } catch (error) {
-        this.debug.log('[Sync Manager] Failed to get index stats:', error);
-      }
-    }
-    
-    return stats;
   }
 }
 
