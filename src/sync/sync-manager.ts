@@ -14,13 +14,19 @@ export interface CompleteSyncOptions extends MALSyncOptions {
   storageConfig?: StorageConfig;
 }
 
+const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+
 /**
  * Sync manager class
  */
 export class SyncManager {
   private debug: DebugLogger;
+  private isSyncing: boolean = false;
+  private lastSyncTime: number = 0;
   constructor(private plugin: CassettePlugin) {
     this.debug = createDebugLogger(plugin, 'Sync Manager');
+        // Load persisted last sync time from settings
+    this.lastSyncTime = plugin.settings.lastSuccessfulSync || 0;
  }
 
   /**
@@ -45,6 +51,25 @@ export class SyncManager {
     await this.plugin.saveSettings();
     this.debug.log('[Sync Manager] Saved last sync timestamp');
   }
+  
+    /**
+   * Check if sync can proceed, throw error if not
+   */
+  private checkSyncGuard(): void {
+    // Prevent overlapping syncs
+    if (this.isSyncing) {
+      throw new Error('Sync already in progress. Please wait for it to complete.');
+    }
+
+    // Enforce cooldown period
+    const timeSinceLastSync = Date.now() - this.lastSyncTime;
+    if (this.lastSyncTime > 0 && timeSinceLastSync < SYNC_COOLDOWN_MS) {
+      const minutesRemaining = Math.ceil((SYNC_COOLDOWN_MS - timeSinceLastSync) / 60000);
+      throw new Error(
+        `Sync cooldown active. Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`
+      );
+    }
+  }
 
   /**
    * Performs a complete sync from MAL
@@ -56,9 +81,13 @@ export class SyncManager {
     result: SyncResult;
     savedPaths?: { anime: string[]; manga: string[] };
   }> {
-    this.debug.log('[Sync Manager] Starting MAL sync...', options);
-    
+    // Check sync guard
+    this.checkSyncGuard();
+    this.isSyncing = true;
+
     try {
+      this.debug.log('[Sync Manager] Starting MAL sync...', options);
+      
       // Ensure cassette index is initialized before sync
       if (this.plugin.cassetteIndex) {
         this.debug.log('[Sync Manager] Ensuring cassette index is initialized...');
@@ -87,19 +116,22 @@ export class SyncManager {
           console.error('[Sync Manager] Failed to save to vault:', saveError);
           const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
           new Notice(`⚠️ Synced but failed to save: ${errorMessage}`, 5000);
-       }        
+        }        
       }
       
-      // Save last sync timestamp if sync was successful
-      if (result.success) {
-        await this.saveLastSyncTimestamp();
-      }
+      // Update last sync time and save to settings
+      this.lastSyncTime = Date.now();
+      this.plugin.settings.lastSuccessfulSync = this.lastSyncTime;
+      await this.plugin.saveSettings();
       
       return { items, result, savedPaths };
       
     } catch (error) {
       console.error('[Sync Manager] Sync failed:', error);
       throw error;
+    } finally {
+      // Always mark sync as complete
+      this.isSyncing = false;
     }
   }
 
