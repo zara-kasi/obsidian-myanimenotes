@@ -1,4 +1,4 @@
-# Cassette: Privacy & Data Use Policy
+# Cassette: Privacy, Data Use & API Compliance
 
 Cassette is an open-source Obsidian plugin that syncs anime and manga lists from [MyAnimeList.net](https://myanimelist.net) into local Markdown files.  
 It runs entirely on the user’s device and does not use any external servers or services.
