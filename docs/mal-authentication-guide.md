@@ -21,3 +21,9 @@
 4. Open Obsidian **Settings** → **Cassette**
 5. Enter your **Client ID** and **Client Secret**
 6. Click **Authenticate** and sign in via your browser
+
+# Screenshots
+
+1. Fill the application details
+
+![Step1](./assets/step-1)
