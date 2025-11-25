@@ -271,6 +271,17 @@ export class CassetteSettingTab extends PluginSettingTab {
           this.plugin.autoSyncManager.start();
         }
       }));
+      
+  // Optimize auto sync toggle
+  new Setting(container)
+    .setName('Optimize auto sync')
+    .setDesc('When enabled, auto-sync only updates entries with active statuses (Watching/Reading) to reduce API usage.')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.optimizeAutoSync)
+      .onChange(async (value) => {
+        this.plugin.settings.optimizeAutoSync = value;
+        await this.plugin.saveSettings();
+      }));
   
    // Force full sync toggle
   new Setting(container)
