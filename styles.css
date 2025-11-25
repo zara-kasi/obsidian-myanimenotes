@@ -37,27 +37,17 @@
 
 /* Remove Authentication Button */
 .cassette-remove-auth-btn {
-  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.5em;
   padding: 4px 8px;
   border-radius: 4px;
-  color: var(--text-muted);
   transition: all 0.2s ease-in-out;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  min-width: 10px;
-  width: 40px;
-  height: 40px;
 }
 
 .cassette-remove-auth-btn:hover {
   color: var(--text-error);
-  background-color: rgba(var(--color-red), 0.1);
-}
-
-/* Confirmation state */
-.cassette-remove-auth-btn.cassette-confirm-removal {
-  background-color: rgba(var(--color-red), 0.15);
-  color: var(--text-error);
-  font-weight: 500;
+  background-color: var(--background-modifier-error);
 }
