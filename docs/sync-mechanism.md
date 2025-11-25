@@ -32,7 +32,7 @@ sequenceDiagram
     SyncMgr->>User: Show success notice
     
     Note over AutoSync: Background Process
-    AutoSync->>AutoSync: Check timer (30min+)
+    AutoSync->>AutoSync: Check timer (60min+)
     AutoSync->>SyncMgr: syncFromMAL()
     SyncMgr->>MALSync: Repeat sync process
 ```
@@ -64,7 +64,7 @@ Before committing sync changes:
 - ✅ Category-specific sync (anime only, manga only)
 - ✅ Status filter sync (e.g., only "watching" anime)
 - ✅ Auto-sync on load (1-minute delay)
-- ✅ Scheduled sync (30+ minute intervals)
+- ✅ Scheduled sync (60+ minute intervals)
 - ✅ Network failure handling (simulate API errors)
 - ✅ Rate limiting behavior (verify throttling)
 - ✅ Unauthenticated state (verify graceful failure)
@@ -354,7 +354,7 @@ These are wrappers around `syncFromMAL()` with pre-configured options for common
 The Auto-Sync Manager handles automated background syncing with two independent timers:
 
 1. **Sync on Load**: One-time sync 1 minute after plugin loads
-2. **Scheduled Sync**: Recurring sync at user-configured intervals (minimum 30 minutes)
+2. **Scheduled Sync**: Recurring sync at user-configured intervals (minimum 60 minutes)
 
 #### Why Two Timers?
 
@@ -363,13 +363,13 @@ The Auto-Sync Manager handles automated background syncing with two independent 
 - Ensures fresh data when opening Obsidian
 - Short delay prevents blocking plugin initialization
 - One-time only (doesn't repeat)
-- Minimum 30 minutes prevents excessive API calls
+- Minimum 60 minutes prevents excessive API calls
 
-**Scheduled Sync** (30+ minutes):
+**Scheduled Sync** (60+ minutes):
 
 - Keeps data fresh during long sessions
 - Repeating timer
-- Minimum 30 minutes prevents excessive API calls
+- Minimum 60 minutes prevents excessive API calls
 
 #### Timer Management
 
@@ -428,7 +428,7 @@ private startScheduledSync(): void {
     return;
   }
 
-  // Validate minimum interval (30 minutes)
+  // Validate minimum interval (60 minutes)
   const intervalMinutes = Math.max(
     this.plugin.settings.scheduledSyncInterval,
     MIN_SCHEDULED_INTERVAL
@@ -455,12 +455,12 @@ private startScheduledSync(): void {
 
 **Recursive scheduling:** After each sync completes, the timer schedules itself again. This is safer than `setInterval()` because it ensures syncs don't overlap if one takes longer than the interval.
 
-**30-minute minimum:**
+**60-minute minimum:**
 
 ```typescript
 const intervalMinutes = Math.max(
   this.plugin.settings.scheduledSyncInterval,
-  MIN_SCHEDULED_INTERVAL  // 30
+  MIN_SCHEDULED_INTERVAL  // 60
 );
 ```
 
