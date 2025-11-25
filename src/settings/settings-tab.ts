@@ -65,41 +65,42 @@ export class CassetteSettingTab extends PluginSettingTab {
 
     // Show user info if authenticated
     if (isAuth && this.plugin.settings.malUserInfo) {
-      const userInfo = this.plugin.settings.malUserInfo;
-      
-      const userSetting = new Setting(container);
-      
-      // Create a container for avatar, name, and remove button
-      const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
-      
-      // Add avatar if available
-      if (userInfo.picture) {
-        userInfoContainer.createEl('img', {
-          cls: 'cassette-user-avatar',
-          attr: {
-            src: userInfo.picture,
-            alt: userInfo.name
-          }
-        });
+  const userInfo = this.plugin.settings.malUserInfo;
+  
+  const userSetting = new Setting(container)
+    .setName('MyAnimeList Account');
+  
+  // Create a container for avatar, name, and remove button
+  const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
+  
+  // Add avatar if available
+  if (userInfo.picture) {
+    userInfoContainer.createEl('img', {
+      cls: 'cassette-user-avatar',
+      attr: {
+        src: userInfo.picture,
+        alt: userInfo.name
       }
-      
-      // Add username
-      userInfoContainer.createEl('span', {
-        cls: 'cassette-user-name',
-        text: userInfo.name
-      });
-
-       // Add remove button
-       userInfoContainer
-        .createEl('button', {
-    cls: 'cassette-remove-auth-btn',
-    text: '×'
-  })
-        .addEventListener('click', async () => {
-    await malLogout(this.plugin);
-    this.display();
+    });
+  }
+  
+  // Add username
+  userInfoContainer.createEl('span', {
+    cls: 'cassette-user-name',
+    text: userInfo.name
   });
-    }
+
+  // Add remove button
+  userInfoContainer
+    .createEl('button', {
+      cls: 'cassette-remove-auth-btn',
+      text: '×'
+    })
+    .addEventListener('click', async () => {
+      await malLogout(this.plugin);
+      this.display();
+    });
+}
     
     // Only show Client ID and Secret when not authenticated
     if (!isAuth) {
