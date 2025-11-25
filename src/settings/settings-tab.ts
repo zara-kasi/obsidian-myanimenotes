@@ -236,13 +236,13 @@ export class CassetteSettingTab extends PluginSettingTab {
   if (this.plugin.settings.scheduledSync) {
     new Setting(container)
       .setName('Sync interval')
-      .setDesc('Time between automatic syncs in minutes (minimum 30).')
+      .setDesc('Time between automatic syncs in minutes (minimum 60).')
       .addText(text => text
         .setPlaceholder('60')
         .setValue(String(this.plugin.settings.scheduledSyncInterval))
         .onChange(async (value) => {
           const numValue = parseInt(value);
-          if (!isNaN(numValue) && numValue >= 30) {
+          if (!isNaN(numValue) && numValue >= 60) {
             this.plugin.settings.scheduledSyncInterval = numValue;
             await this.plugin.saveSettings();
             
