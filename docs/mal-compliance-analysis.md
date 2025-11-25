@@ -406,7 +406,7 @@ Consider adding to README:
 ### 5. **Respect Rate Limits**
 Your implementation is good, but consider:
 - Adding user-facing warning about excessive syncing
-- Documentation about auto-sync intervals (30-minute minimum recommended)
+- Documentation about auto-sync intervals (60-minute minimum recommended)
 - Potential ban risk if users sync too frequently
 
 ---
