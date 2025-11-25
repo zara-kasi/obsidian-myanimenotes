@@ -3,8 +3,6 @@
 
 Cassette is an Obsidian plugin that syncs your anime and manga lists from MyAnimeList into structured Markdown notes, complete with metadata, cover image, and automatic updates.
 
-> This project is not affiliated with MyAnimeList
-
 ### Get started
 
 To authenticate with the MAL API, you’ll need to create your own application. You can follow the steps in this guide [MAL Authentication](https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md)
