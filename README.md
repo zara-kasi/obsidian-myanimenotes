@@ -3,6 +3,7 @@
 
 Cassette is an Obsidian plugin that syncs your anime and manga lists from MyAnimeList into structured Markdown notes, complete with metadata, cover image, and automatic updates.
 
+> This project is not affiliated with MyAnimeList
 
 ### Get started
 
