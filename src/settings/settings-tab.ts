@@ -90,26 +90,28 @@ export class CassetteSettingTab extends PluginSettingTab {
       });
 
       // Add remove button with two-click confirmation
-      userInfoContainer.appendChild(
-        new ButtonComponent(userInfoContainer)
-          .setIcon('lucide-x')
-          .setClass('cassette-remove-auth-btn')
-          .setTooltip('Remove authentication')
-          .onClick(async (event: Event) => {
-            const btn = event.currentTarget as HTMLElement;
-            const buttonComponent = btn as unknown as ButtonComponent;
+      new ButtonComponent(userInfoContainer)
+        .setIcon('lucide-x')
+        .setClass('cassette-remove-auth-btn')
+        .setTooltip('Remove authentication')
+        .onClick(async (event: Event) => {
+          const btn = (event.target as HTMLElement).closest('button');
+          
+          // Check if this is the confirmation click
+          if (btn?.classList.contains('cassette-confirm-removal')) {
+            // User confirmed - proceed with removal
+            await malLogout(this.plugin);
+            this.display();
+          } else {
+            // First click - show confirmation state
+            btn?.classList.add('cassette-confirm-removal');
             
-            // Check if this is the confirmation click
-            if (btn.textContent === '') {
-              btn.textContent = 'Click once more to confirm';
-            } else {
-              // User confirmed - proceed with removal
-              await malLogout(this.plugin);
-              this.display();
-            }
-          })
-          .buttonEl
-      );
+            // Reset after 3 seconds if not clicked again
+            setTimeout(() => {
+              btn?.classList.remove('cassette-confirm-removal');
+            }, 3000);
+          }
+        });
     }
     
     // Only show Client ID and Secret when not authenticated
