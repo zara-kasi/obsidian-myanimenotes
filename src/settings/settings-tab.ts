@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, ButtonComponent } from 'obsidian';
+import { App, PluginSettingTab, Setting } from 'obsidian';
 import { normalizePath } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
@@ -65,42 +65,30 @@ export class CassetteSettingTab extends PluginSettingTab {
 
     // Show user info if authenticated
     if (isAuth && this.plugin.settings.malUserInfo) {
-  const userInfo = this.plugin.settings.malUserInfo;
-  
-  const userSetting = new Setting(container)
-    .setName('MyAnimeList Account');
-  
-  // Create a container for avatar, name, and remove button
-  const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
-  
-  // Add avatar if available
-  if (userInfo.picture) {
-    userInfoContainer.createEl('img', {
-      cls: 'cassette-user-avatar',
-      attr: {
-        src: userInfo.picture,
-        alt: userInfo.name
+      const userInfo = this.plugin.settings.malUserInfo;
+      
+      const userSetting = new Setting(container);
+      
+      // Create a container for avatar and name
+      const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
+      
+      // Add avatar if available
+      if (userInfo.picture) {
+        userInfoContainer.createEl('img', {
+          cls: 'cassette-user-avatar',
+          attr: {
+            src: userInfo.picture,
+            alt: userInfo.name
+          }
+        });
       }
-    });
-  }
-  
-  // Add username
-  userInfoContainer.createEl('span', {
-    cls: 'cassette-user-name',
-    text: userInfo.name
-  });
-
-  // Add remove button
-  userInfoContainer
-    .createEl('button', {
-      cls: 'cassette-remove-auth-btn',
-      text: '×'
-    })
-    .addEventListener('click', async () => {
-      await malLogout(this.plugin);
-      this.display();
-    });
-}
+      
+      // Add username
+      userInfoContainer.createEl('span', {
+        cls: 'cassette-user-name',
+        text: userInfo.name
+      });
+    }
     
     // Only show Client ID and Secret when not authenticated
     if (!isAuth) {
@@ -131,22 +119,39 @@ export class CassetteSettingTab extends PluginSettingTab {
           text.inputEl.type = 'password';
           return text;
         });
+    }
+    
+    // Authentication button
+    new Setting(container)
+      .setName(isAuth ? 'Clear' : 'Authenticate')
+      .setDesc(isAuth 
+        ? 'Clear all MyAnimeList credentials and authentication data.' 
+        : 'Sign in to MyAnimeList to sync your anime list.'
+      )
+      .addButton(button => {
+  button
+    .setButtonText(isAuth ? 'Clear' : 'Authenticate')
+    .onClick(async () => {
+      if (isAuth) {
+        await malLogout(this.plugin);
+        this.display();
+      } else {
+        await startMALAuth(this.plugin);
+        this.display();
+      }
+    });
 
-      // Authentication button
-      new Setting(container)
-        .setName('Authenticate')
-        .setDesc('Sign in to MyAnimeList to sync your anime list.')
-        .addButton(button => {
-          button
-            .setButtonText('Authenticate')
-            .setCta()
-            .onClick(async () => {
-              await startMALAuth(this.plugin);
-              this.display();
-            });
-        });
+  if (isAuth) {
+    // Use native red warning tone
+    button.buttonEl.addClass('mod-warning');
+  } else {
+    // Default authenticate button: blue accent
+    button.setCta();
+  }
+});
 
-      // Add info about getting credentials
+    // Add info about getting credentials
+    if (!isAuth) {
       const credentialSetting = new Setting(container)
         .setName('How to get credentials')
         .then(setting => {
@@ -167,6 +172,7 @@ export class CassetteSettingTab extends PluginSettingTab {
         e.preventDefault();
         window.open('https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md', '_blank');
       });
+      
     }
   }
 
