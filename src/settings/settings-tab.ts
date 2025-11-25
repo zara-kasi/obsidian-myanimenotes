@@ -89,27 +89,16 @@ export class CassetteSettingTab extends PluginSettingTab {
         text: userInfo.name
       });
 
-      // Add remove button with two-click confirmation
-      userInfoContainer.appendChild(
-        new ButtonComponent(userInfoContainer)
-          .setIcon('lucide-x')
-          .setClass('cassette-remove-auth-btn')
-          .setTooltip('Remove authentication')
-          .onClick(async (event: Event) => {
-            const btn = event.currentTarget as HTMLElement;
-            const buttonComponent = btn as unknown as ButtonComponent;
-            
-            // Check if this is the confirmation click
-            if (btn.textContent === '') {
-              btn.textContent = 'Click once more to confirm';
-            } else {
-              // User confirmed - proceed with removal
-              await malLogout(this.plugin);
-              this.display();
-            }
-          })
-          .buttonEl
-      );
+       // Add remove button
+       userInfoContainer
+        .createEl('button', {
+    cls: 'cassette-remove-auth-btn',
+    text: '×'
+  })
+        .addEventListener('click', async () => {
+    await malLogout(this.plugin);
+    this.display();
+  });
     }
     
     // Only show Client ID and Secret when not authenticated
