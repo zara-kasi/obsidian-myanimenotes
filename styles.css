@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  justify-content: flex-start;
+  justify-content: space-between;
   width: 100%;
 }
 
@@ -31,6 +31,33 @@
   font-size: 1.1em;
   font-weight: 500;
   color: var(--text-normal);
+  flex-grow: 1;
+  margin-left: 8px;
 }
 
+/* Remove Authentication Button */
+.cassette-remove-auth-btn {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: all 0.2s ease-in-out;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  min-width: auto;
+  width: auto;
+  height: auto;
+}
 
+.cassette-remove-auth-btn:hover {
+  color: var(--text-error);
+  background-color: rgba(var(--color-red), 0.1);
+}
+
+/* Confirmation state */
+.cassette-remove-auth-btn.cassette-confirm-removal {
+  background-color: rgba(var(--color-red), 0.15);
+  color: var(--text-error);
+  font-weight: 500;
+}
