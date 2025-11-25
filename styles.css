@@ -4,9 +4,16 @@
 .cassette-user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  justify-content: flex-start;
+  justify-content: space-between;
   width: 100%;
+  gap: 12px;
+}
+
+/* User Details (Avatar + Name) */
+.cassette-user-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 /* Setting with user info - remove default flex behavior */
@@ -33,3 +40,37 @@
   color: var(--text-normal);
 }
 
+/* Clear Authentication Button */
+.cassette-clear-auth-button {
+  padding: 6px;
+  border-radius: 4px;
+  border: none;
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cassette-clear-auth-button:hover {
+  background: var(--background-modifier-border-hover);
+  color: var(--text-normal);
+}
+
+.cassette-clear-auth-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Active (clicked) state - turns red */
+.cassette-clear-auth-button-active {
+  background: var(--color-red) !important;
+  color: white !important;
+}
+
+.cassette-clear-auth-button-active:hover {
+  background: var(--color-red) !important;
+}
