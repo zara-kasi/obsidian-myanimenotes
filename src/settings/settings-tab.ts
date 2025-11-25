@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, Setting, ButtonComponent } from 'obsidian';
 import { normalizePath } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
@@ -69,7 +69,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       
       const userSetting = new Setting(container);
       
-      // Create a container for avatar and name
+      // Create a container for avatar, name, and remove button
       const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
       
       // Add avatar if available
@@ -88,6 +88,28 @@ export class CassetteSettingTab extends PluginSettingTab {
         cls: 'cassette-user-name',
         text: userInfo.name
       });
+
+      // Add remove button with two-click confirmation
+      userInfoContainer.appendChild(
+        new ButtonComponent(userInfoContainer)
+          .setIcon('lucide-x')
+          .setClass('cassette-remove-auth-btn')
+          .setTooltip('Remove authentication')
+          .onClick(async (event: Event) => {
+            const btn = event.currentTarget as HTMLElement;
+            const buttonComponent = btn as unknown as ButtonComponent;
+            
+            // Check if this is the confirmation click
+            if (btn.textContent === '') {
+              btn.textContent = 'Click once more to confirm';
+            } else {
+              // User confirmed - proceed with removal
+              await malLogout(this.plugin);
+              this.display();
+            }
+          })
+          .buttonEl
+      );
     }
     
     // Only show Client ID and Secret when not authenticated
@@ -119,39 +141,22 @@ export class CassetteSettingTab extends PluginSettingTab {
           text.inputEl.type = 'password';
           return text;
         });
-    }
-    
-    // Authentication button
-    new Setting(container)
-      .setName(isAuth ? 'Clear' : 'Authenticate')
-      .setDesc(isAuth 
-        ? 'Clear all MyAnimeList credentials and authentication data.' 
-        : 'Sign in to MyAnimeList to sync your anime list.'
-      )
-      .addButton(button => {
-  button
-    .setButtonText(isAuth ? 'Clear' : 'Authenticate')
-    .onClick(async () => {
-      if (isAuth) {
-        await malLogout(this.plugin);
-        this.display();
-      } else {
-        await startMALAuth(this.plugin);
-        this.display();
-      }
-    });
 
-  if (isAuth) {
-    // Use native red warning tone
-    button.buttonEl.addClass('mod-warning');
-  } else {
-    // Default authenticate button: blue accent
-    button.setCta();
-  }
-});
+      // Authentication button
+      new Setting(container)
+        .setName('Authenticate')
+        .setDesc('Sign in to MyAnimeList to sync your anime list.')
+        .addButton(button => {
+          button
+            .setButtonText('Authenticate')
+            .setCta()
+            .onClick(async () => {
+              await startMALAuth(this.plugin);
+              this.display();
+            });
+        });
 
-    // Add info about getting credentials
-    if (!isAuth) {
+      // Add info about getting credentials
       const credentialSetting = new Setting(container)
         .setName('How to get credentials')
         .then(setting => {
@@ -172,7 +177,6 @@ export class CassetteSettingTab extends PluginSettingTab {
         e.preventDefault();
         window.open('https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md', '_blank');
       });
-      
     }
   }
 
