@@ -275,7 +275,7 @@ export class CassetteSettingTab extends PluginSettingTab {
   // Optimize auto sync toggle
   new Setting(container)
     .setName('Optimize auto sync')
-    .setDesc('When enabled, auto-sync only updates entries with active statuses (Watching/Reading) to reduce API usage.')
+    .setDesc('When enabled, auto-sync only syncs Watching anime and Reading manga.')
     .addToggle(toggle => toggle
       .setValue(this.plugin.settings.optimizeAutoSync)
       .onChange(async (value) => {
