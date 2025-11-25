@@ -35,7 +35,8 @@ export interface CassetteSettings {
   syncOnLoad: boolean; // Sync shortly after plugin loads (3 seconds)
   scheduledSync: boolean; // Periodic scheduled sync
   scheduledSyncInterval: number; // Interval in minutes (min: 60)
-  lastSuccessfulSync?: number; // Timestamp of last successful sync (NEW)
+  lastSuccessfulSync?: number; // Timestamp of last successful sync
+  optimizeAutoSync: boolean; // Only sync active statuses during auto-sync
   
   // Template Settings (for future use)
   useCustomTemplate: boolean;
@@ -69,8 +70,8 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   syncOnLoad: true,
   scheduledSync: false,
   scheduledSyncInterval: 60, // 60 minutes default
-  lastSuccessfulSync: undefined, // No previous sync (NEW)
-  
+  lastSuccessfulSync: undefined, // No previous sync 
+  optimizeAutoSync: true,
   // Template defaults
   useCustomTemplate: false,
   customTemplatePath: undefined,
