@@ -203,33 +203,18 @@ export class SyncManager {
     return this.quickSync(MediaCategory.MANGA, saveToVault);
   }
 
-  /**
-   * Syncs items with specific status
-   * @param category anime or manga
-   * @param status Status to sync
-   * @param saveToVault Whether to save to vault
-   * @returns Synced items
+    /**
+   * Syncs active statuses: Watching anime + Reading manga
+   * Used by both the "Sync active" command and optimized auto-sync
    */
-  async syncByStatus(
-    category: MediaCategory,
-    status: string,
-    saveToVault: boolean = true
-  ): Promise<UniversalMediaItem[]> {
-    this.debug.log(`[Sync Manager] Syncing ${category} with status ${status}...`);
-    
-    const malOptions: MALSyncOptions = {
-      syncAnime: category === MediaCategory.ANIME,
-      syncManga: category === MediaCategory.MANGA,
-    };
-    
-    if (category === MediaCategory.ANIME) {
-      malOptions.animeStatuses = [status];
-    } else {
-      malOptions.mangaStatuses = [status];
-    }
+  async syncActiveStatuses(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
+    this.debug.log('[Sync Manager] Syncing active statuses (watching anime + reading manga)...');
     
     const options: CompleteSyncOptions = {
-      ...malOptions,
+      syncAnime: true,
+      syncManga: true,
+      animeStatuses: ['watching'],
+      mangaStatuses: ['reading'],
       saveToVault,
     };
     
