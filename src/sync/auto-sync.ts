@@ -1,5 +1,6 @@
 import type CassettePlugin from '../main';
 import { createDebugLogger } from '../utils';
+import type { MALSyncOptions } from './mal-sync-service';
 
 const SYNC_ON_LOAD_DELAY = 2 * 60 * 1000; // 2 minute (fast but non-blocking)
 const MIN_SCHEDULED_INTERVAL = 60; // Minimum 60 minutes
@@ -44,13 +45,39 @@ export class AutoSyncManager {
   }
 
   /**
+   * Builds sync options based on optimization setting
+   * When optimized: only sync active statuses (watching/reading)
+   * When not optimized: sync full lists (existing behavior)
+   * NEW: This method determines what gets synced
+   */
+  private buildAutoSyncOptions(): MALSyncOptions {
+    if (this.plugin.settings.optimizeAutoSync) {
+      // Optimization ENABLED: only sync watching anime and reading manga
+      this.debug.log('[Auto Sync] Optimization enabled - syncing active statuses only');
+      return {
+        syncAnime: true,
+        syncManga: true,
+        animeStatuses: ['watching'],      // Only "watching" anime
+        mangaStatuses: ['reading'],       // Only "reading" manga
+      };
+    } else {
+      // Optimization DISABLED: sync everything like before
+      this.debug.log('[Auto Sync] Optimization disabled - syncing full lists');
+      return {
+        syncAnime: true,
+        syncManga: true,
+        // No status filters = get full list
+      };
+    }
+  }
+
+  /**
    * Checks if enough time has passed since last sync
    * Uses the same minimum interval as scheduled sync (60 minutes)
    */
   private hasMinimumIntervalPassed(): boolean {
     const lastSync = this.plugin.settings.lastSuccessfulSync;
     
-    // If no previous sync, allow sync
     if (!lastSync) {
       this.debug.log('[Sync on Load] No previous sync found - allowing sync');
       return true;
@@ -58,7 +85,7 @@ export class AutoSyncManager {
     
     const now = Date.now();
     const timeSinceLastSync = now - lastSync;
-    const minimumIntervalMs = MIN_SCHEDULED_INTERVAL * 60 * 1000; // 60 minutes in ms
+    const minimumIntervalMs = MIN_SCHEDULED_INTERVAL * 60 * 1000;
     
     const hasPassed = timeSinceLastSync >= minimumIntervalMs;
     
@@ -76,31 +103,27 @@ export class AutoSyncManager {
   }
 
   /**
-   * Starts the sync-on-load timer (one-time, 1 minute after load)
-   * Uses a short delay to avoid blocking plugin initialization
-   * Now respects minimum interval between syncs
+   * Starts the sync-on-load timer (one-time, 2 minutes after load)
+   * Now uses optimized sync options
    */
   private startSyncOnLoad(): void {
     this.clearSyncOnLoadTimer();
 
-    // Check authentication before starting timer
     if (!this.isAuthenticated()) {
       this.debug.log('[Sync on Load] Skipped: Not authenticated with MAL');
       return;
     }
 
-    this.debug.log('[Sync on Load] Timer started: Will sync in 1 minute');
+    this.debug.log('[Sync on Load] Timer started: Will sync in 2 minutes');
 
     this.syncOnLoadTimer = setTimeout(async () => {
-      this.debug.log('[Sync on Load] Timer triggered after 1 minute');
+      this.debug.log('[Sync on Load] Timer triggered after 2 minutes');
       
-      // Double-check authentication at execution time
       if (!this.isAuthenticated()) {
         this.debug.log('[Sync on Load] Aborted: Not authenticated with MAL');
         return;
       }
 
-      // Check if minimum interval has passed since last sync
       if (!this.hasMinimumIntervalPassed()) {
         this.debug.log('[Sync on Load] Aborted: Minimum interval not met');
         return;
@@ -108,7 +131,12 @@ export class AutoSyncManager {
 
       try {
         if (this.plugin.syncManager) {
-          await this.plugin.syncManager.syncFromMAL();
+          // NEW: Build options based on optimization setting
+          const options = this.buildAutoSyncOptions();
+          await this.plugin.syncManager.syncFromMAL({
+            saveToVault: true,
+            ...options
+          });
           this.debug.log('[Sync on Load] Completed successfully');
         }
       } catch (error) {
@@ -119,17 +147,16 @@ export class AutoSyncManager {
 
   /**
    * Starts the scheduled sync timer (repeating at configured interval)
+   * Now uses optimized sync options
    */
   private startScheduledSync(): void {
     this.clearScheduledSyncTimer();
 
-    // Check authentication before starting timer
     if (!this.isAuthenticated()) {
       this.debug.log('[Scheduled Sync] Skipped: Not authenticated with MAL');
       return;
     }
 
-    // Validate interval (minimum 60 minutes)
     const intervalMinutes = Math.max(
       this.plugin.settings.scheduledSyncInterval,
       MIN_SCHEDULED_INTERVAL
@@ -141,7 +168,6 @@ export class AutoSyncManager {
     const runSync = async () => {
       this.debug.log('[Scheduled Sync] Triggered');
       
-      // Check authentication at execution time
       if (!this.isAuthenticated()) {
         this.debug.log('[Scheduled Sync] Aborted: Not authenticated with MAL');
         return;
@@ -149,14 +175,18 @@ export class AutoSyncManager {
 
       try {
         if (this.plugin.syncManager) {
-          await this.plugin.syncManager.syncFromMAL();
+          // NEW: Build options based on optimization setting
+          const options = this.buildAutoSyncOptions();
+          await this.plugin.syncManager.syncFromMAL({
+            saveToVault: true,
+            ...options
+          });
           this.debug.log('[Scheduled Sync] Completed successfully');
         }
       } catch (error) {
         console.error('[Scheduled Sync] Failed:', error);
       }
 
-      // Schedule next sync if still enabled and authenticated
       if (this.plugin.settings.scheduledSync && this.isAuthenticated()) {
         this.scheduledSyncTimer = setTimeout(runSync, intervalMs);
       } else {
@@ -164,7 +194,6 @@ export class AutoSyncManager {
       }
     };
 
-    // Start the first timer
     this.scheduledSyncTimer = setTimeout(runSync, intervalMs);
   }
 
