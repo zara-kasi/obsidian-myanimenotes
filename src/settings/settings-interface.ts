@@ -34,7 +34,7 @@ export interface CassetteSettings {
   forceFullSync: boolean; 
   syncOnLoad: boolean; // Sync shortly after plugin loads (3 seconds)
   scheduledSync: boolean; // Periodic scheduled sync
-  scheduledSyncInterval: number; // Interval in minutes (min: 30)
+  scheduledSyncInterval: number; // Interval in minutes (min: 60)
   lastSuccessfulSync?: number; // Timestamp of last successful sync (NEW)
   
   // Template Settings (for future use)
