@@ -108,7 +108,11 @@ export class AutoSyncManager {
 
       try {
         if (this.plugin.syncManager) {
-          await this.plugin.syncManager.syncFromMAL();
+          if (this.plugin.settings.optimizeAutoSync) {
+            await this.plugin.syncManager.syncActiveStatuses();
+          } else {
+            await this.plugin.syncManager.syncFromMAL();
+          }
           this.debug.log('[Sync on Load] Completed successfully');
         }
       } catch (error) {
@@ -149,7 +153,11 @@ export class AutoSyncManager {
 
       try {
         if (this.plugin.syncManager) {
-          await this.plugin.syncManager.syncFromMAL();
+          if (this.plugin.settings.optimizeAutoSync) {
+            await this.plugin.syncManager.syncActiveStatuses();
+          } else {
+            await this.plugin.syncManager.syncFromMAL();
+          }
           this.debug.log('[Scheduled Sync] Completed successfully');
         }
       } catch (error) {
