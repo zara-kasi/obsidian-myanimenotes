@@ -16,4 +16,4 @@ If you'd like to help improve this plugin, see [CONTRIBUTING.md](./CONTRIBUTING.
 For details on data handling, privacy, and compliance with MyAnimeList’s API terms, see the 
 [Privacy, Data Use & API Compliance Policy](./PRIVACY_COMPLIANCE.md).
 
-License: [MIT License](./LICENSE).
+License: [MIT License](./LICENSE)
