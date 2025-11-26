@@ -380,6 +380,9 @@ async function createNewFile(
   const MAX_ATTEMPTS = 5;
   const normalizedFolderPath = normalizePath(folderPath);
   
+  // Normalize folder path once
+  const normalizedFolderPath = normalizePath(folderPath);
+  
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const filename = attempt === 1 
       ? `${sanitizedTitle}.md`
