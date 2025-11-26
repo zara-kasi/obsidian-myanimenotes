@@ -41,7 +41,7 @@ export interface CassetteSettings {
   // Template Settings (for future use)
   useCustomTemplate: boolean;
   customTemplatePath?: string;
-  
+  notificationsEnabled: boolean; // Enable/disable user notifications
   // Debug Settings
   debugMode: boolean;
 }
@@ -75,7 +75,8 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   // Template defaults
   useCustomTemplate: false,
   customTemplatePath: undefined,
-  
+  // Notification defaults
+  notificationsEnabled: true,
   // Debug defaults
   debugMode: false,
 };
