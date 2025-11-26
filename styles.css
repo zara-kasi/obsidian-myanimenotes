@@ -60,11 +60,6 @@
   border: none !important;
   box-shadow: none !important;
   padding: 2 !important;
-  color: var(--text-error) !important;
-  font-size: 0.9em;
-  cursor: pointer;
-  text-decoration: none;
-  font-weight: 500;
 }
 
 .cassette-logout-button:hover {
