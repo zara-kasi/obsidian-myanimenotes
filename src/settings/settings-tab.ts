@@ -86,10 +86,24 @@ export class CassetteSettingTab extends PluginSettingTab {
         });
       }
       
-      // Add username
-      userDetailsContainer.createEl('span', {
+      // Add username (clickable link to MAL profile)
+      const usernameLink = userDetailsContainer.createEl('a', {
         cls: 'cassette-user-name',
-        text: userInfo.name
+        text: userInfo.name,
+        href: `https://myanimelist.net/profile/${userInfo.name}`
+      });
+      
+      // Open link in external browser
+      usernameLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
+        
+        if (window.require) {
+          const { shell } = window.require('electron');
+          shell.openExternal(profileUrl);
+        } else {
+          window.open(profileUrl, '_blank');
+        }
       });
       
       // Right side: Logout button
