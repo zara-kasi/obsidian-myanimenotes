@@ -1,4 +1,3 @@
-import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem, SyncResult } from '../models';
 import { MediaCategory } from '../models';
@@ -59,7 +58,7 @@ export class SyncManager {
   // Prevent overlapping syncs
   if (this.isSyncing) {
     this.debug.log('[Sync Manager] Sync already in progress - blocking new sync request');
-    showNotice(plugin, 'Sync already in progress.', 4000);
+    showNotice(this.plugin, 'Sync already in progress.', 4000);
     return false;
   }
 
@@ -70,7 +69,7 @@ export class SyncManager {
     this.debug.log(
       `[Sync Manager] Sync cooldown active - ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} remaining`
     );
-    showNotice(plugin, 
+    showNotice(this.plugin, 
       `Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`,
       4000
     );
@@ -139,7 +138,7 @@ export class SyncManager {
         } catch (saveError) {
           console.error('[Sync Manager] Failed to save to vault:', saveError);
           const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
-          showNotice(plugin, `⚠️ Synced but failed to save: ${errorMessage}`, 5000);
+          showNotice(this.plugin, `⚠️ Synced but failed to save: ${errorMessage}`, 5000);
         }        
       }
       
