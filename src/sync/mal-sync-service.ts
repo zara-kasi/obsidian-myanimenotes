@@ -1,6 +1,5 @@
 // Main service for syncing MAL data
 
-import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem, SyncResult, SyncItemResult } from '../models';
 import { MediaCategory } from '../models';
@@ -16,7 +15,7 @@ import {
   transformMALAnimeList,
   transformMALMangaList,
 } from '../transformers';
-import { createDebugLogger } from '../utils';
+import { createDebugLogger, showNotice } from '../utils';
 /**
  * Sync options
  */
@@ -134,7 +133,7 @@ export async function syncMAL(
       throw new Error('Not authenticated with MyAnimeList');
     }
 
-    new Notice('Starting MAL sync...', 1000);
+    showNotice(plugin, 'Starting MAL sync...', 1000);
 
     // Sync anime if enabled
     if (options.syncAnime !== false) {
@@ -158,7 +157,7 @@ export async function syncMAL(
         const errorMsg = `Failed to sync anime: ${errorMessage}`;
         console.error('[MAL Sync]', errorMsg);
         errors.push(errorMsg);
-        new Notice(`❌ ${errorMsg}`, 5000);
+        showNotice(plugin, `❌ ${errorMsg}`, 5000);
       }
     }
 
@@ -184,7 +183,7 @@ export async function syncMAL(
         const errorMsg = `Failed to sync manga: ${errorMessage}`;
         console.error('[MAL Sync]', errorMsg);
         errors.push(errorMsg);
-        new Notice(`❌ ${errorMsg}`, 5000);
+        showNotice(plugin, `❌ ${errorMsg}`, 5000);
       }
     }
 
@@ -202,7 +201,7 @@ export async function syncMAL(
 
     if (syncResult.success) {
     } else {
-      new Notice(`⚠️ MAL sync completed with ${errors.length} errors`, 4000);
+      showNotice(plugin, `⚠️ MAL sync completed with ${errors.length} errors`, 4000);
     }
 
     debug.log('[MAL Sync] Sync completed:', syncResult);
@@ -215,7 +214,7 @@ export async function syncMAL(
     console.error('[MAL Sync]', errorMsg);
     errors.push(errorMsg);
     
-    new Notice(`❌ ${errorMsg}`, 5000);
+    showNotice(plugin, `❌ ${errorMsg}`, 5000);
 
     const endTime = Date.now();
     const syncResult: SyncResult = {
