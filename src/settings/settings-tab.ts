@@ -69,7 +69,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       
       const userSetting = new Setting(container);
       
-      // Create a container for avatar, name, and clear button
+      // Create a container for avatar, name, and Logout button
       const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info-wrapper' });
       
       // Left side: avatar and name
@@ -92,15 +92,15 @@ export class CassetteSettingTab extends PluginSettingTab {
         text: userInfo.name
       });
       
-      // Right side: clear button
+      // Right side: Logout button
       const buttonContainer = userInfoContainer.createDiv({ cls: 'cassette-button-container' });
       
-      const clearButton = buttonContainer.createEl('button', {
-        cls: 'cassette-clear-button mod-warning',
-        text: 'Clear'
+      const logoutButton = buttonContainer.createEl('button', {
+        cls: 'cassette-logout-button mod-warning',
+        text: 'Logout'
       });
       
-      clearButton.addEventListener('click', async () => {
+      logoutButton.addEventListener('click', async () => {
         await malLogout(this.plugin);
         this.display();
       });
