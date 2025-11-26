@@ -211,6 +211,16 @@ export class CassetteSettingTab extends PluginSettingTab {
   }
 
   private renderSyncSection(container: HTMLElement): void {
+    
+    new Setting(container)
+      .setName('Notifications')
+      .setDesc('Enable or disable notifications from the plugin.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.notificationsEnabled)
+        .onChange(async (value) => {
+          this.plugin.settings.notificationsEnabled = value;
+          await this.plugin.saveSettings();
+        }));
   
   // Scheduled sync toggle
   new Setting(container)
