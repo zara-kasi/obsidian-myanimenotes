@@ -9,7 +9,7 @@
   gap: 16px;
 }
 
-/* User Details (avatar + name) on the left */
+/* User Details (avatar and name) on the left */
 .cassette-user-details {
   display: flex;
   align-items: center;
@@ -18,7 +18,7 @@
   min-width: 0; /* Allow text truncation if needed */
 }
 
-/* Setting with user info - remove default flex behavior */
+/* Setting with user info remove default flex behavior */
 .setting-item:has(.cassette-user-info-wrapper) {
   display: block;
 }
@@ -52,4 +52,24 @@
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+}
+
+/* Logout Button Text only style */
+.cassette-logout-button {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 2 !important;
+  color: var(--text-error) !important;
+  font-size: 0.9em;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.cassette-logout-button:hover {
+  text-decoration: underline;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
