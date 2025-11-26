@@ -47,6 +47,10 @@
   text-overflow: ellipsis;
 }
 
+.cassette-user-name:hover {
+  text-decoration: underline;
+}
+
 /* Button Container on the right */
 .cassette-button-container {
   display: flex;
