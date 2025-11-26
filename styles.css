@@ -64,7 +64,4 @@
 
 .cassette-logout-button:hover {
   text-decoration: underline;
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
 }
