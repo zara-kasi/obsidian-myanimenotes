@@ -139,9 +139,8 @@ export class CassetteSettingTab extends PluginSettingTab {
     
     // Authentication button (only shown when not authenticated)
     if (!isAuth) {
-      new Setting(container)
+      const authSetting = new Setting(container)
         .setName('Authenticate')
-        .setDesc('Sign in to MyAnimeList to sync your anime list.')
         .addButton(button => {
           button
             .setButtonText('Authenticate')
@@ -151,21 +150,12 @@ export class CassetteSettingTab extends PluginSettingTab {
               this.display();
             });
         });
-
-      // Add info about getting credentials
-      const credentialSetting = new Setting(container)
-        .setName('How to get credentials')
-        .then(setting => {
-          setting.settingEl.addClass('cassette-credential-info');
-        });
       
-      const descEl = credentialSetting.descEl;
+      // Add description with "Learn more" link
+      const descEl = authSetting.descEl;
       descEl.createSpan({ 
-        text: 'Create an app at ' 
+        text: 'Sign in to MyAnimeList. ' 
       });
-      descEl.createEl('code', { text: 'https://myanimelist.net/apiconfig/create' });
-      descEl.createSpan({ text: ' to get your Client ID and Secret. Set the redirect URI to: ' });
-      descEl.createEl('code', { text: 'obsidian://cassette-auth/mal.' });
       descEl.createEl('a', {
         text: 'Learn more',
         href: 'https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md'
