@@ -5,7 +5,7 @@ import { MediaCategory } from '../models';
 import { syncMAL, type MALSyncOptions } from './mal-sync-service';
 import { saveMediaItemsByCategory, type StorageConfig } from '../storage';
 import { createDebugLogger, type DebugLogger } from '../utils';
-
+import { showNotice } from '../utils';
 /**
  * Complete sync options
  */
@@ -59,7 +59,7 @@ export class SyncManager {
   // Prevent overlapping syncs
   if (this.isSyncing) {
     this.debug.log('[Sync Manager] Sync already in progress - blocking new sync request');
-    new Notice('Sync already in progress.', 4000);
+    showNotice(plugin, 'Sync already in progress.', 4000);
     return false;
   }
 
@@ -70,7 +70,7 @@ export class SyncManager {
     this.debug.log(
       `[Sync Manager] Sync cooldown active - ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} remaining`
     );
-    new Notice(
+    showNotice(plugin, 
       `Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`,
       4000
     );
@@ -139,7 +139,7 @@ export class SyncManager {
         } catch (saveError) {
           console.error('[Sync Manager] Failed to save to vault:', saveError);
           const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
-          new Notice(`⚠️ Synced but failed to save: ${errorMessage}`, 5000);
+          showNotice(plugin, `⚠️ Synced but failed to save: ${errorMessage}`, 5000);
         }        
       }
       
