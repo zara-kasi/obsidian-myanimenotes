@@ -97,7 +97,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       
       const logoutButton = buttonContainer.createEl('button', {
         cls: 'cassette-logout-button mod-warning',
-        text: 'Logout'
+        text: 'Log out'
       });
       
       logoutButton.addEventListener('click', async () => {
