@@ -67,28 +67,3 @@
   transition: all 0.2s ease;
   white-space: nowrap;
 }
-
-.cassette-logout-button:hover:not(:disabled) {
-  background-color: var(--interactive-accent-rgb, rgba(108, 66, 193, 0.2));
-  transform: translateY(-1px);
-}
-
-.cassette-logout-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.cassette-logout-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Warning variant (red) */
-.cassette-logout-button.mod-warning {
-  border-color: var(--text-error);
-  color: var(--text-error);
-  background-color: rgba(255, 0, 0, 0.05);
-}
-
-.cassette-logout-button.mod-warning:hover:not(:disabled) {
-  background-color: rgba(255, 0, 0, 0.1);
-}
