@@ -1,13 +1,13 @@
 // OAuth 2.0 authorization flow
 
-import { Notice, requestUrl } from 'obsidian';
+import { requestUrl } from 'obsidian';
 import type CassettePlugin from '../../../main';
 import type { MALAuthState, MALTokenResponse, OAuthParams } from './types';
 import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateVerifier, generateChallenge, generateState } from './pkce';
 import { isTokenValid } from './token-manager';
 import { fetchUserInfo } from './user-service';
-import { createDebugLogger } from '../../../utils';
+import { createDebugLogger, showNotice } from '../../../utils';
 
 // Auth state timeout: 10 minutes
 const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
@@ -18,12 +18,12 @@ const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
  */
 export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
   if (!plugin.settings.malClientId) {
-    new Notice('Please enter your MAL Client ID first.', 5000);
+    showNotice(plugin, 'Please enter your MAL Client ID first.', 5000);
     return;
   }
   
   if (isTokenValid(plugin)) {
-    new Notice('Already authenticated with MyAnimeList', 3000);
+    showNotice(plugin, 'Already authenticated with MyAnimeList', 3000);
     return;
   }
 
@@ -52,7 +52,7 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
 
   const authUrl = `${MAL_AUTH_URL}?${params.toString()}`;
 
-  new Notice('Opening MyAnimeList login page…', 2000);
+  showNotice(plugin, 'Opening MyAnimeList login page…', 2000);
   
   // Open in external browser
   if (window.require) {
@@ -100,7 +100,7 @@ export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthP
       const error = params.error || 'Unknown error';
       const errorDesc = params.error_description || 'No authorization code received';
       console.error('[MAL Auth] OAuth error:', { error, errorDesc });
-      new Notice(`❌ MAL Authentication failed: ${errorDesc}`, 5000);
+      showNotice(plugin, `❌ MAL Authentication failed: ${errorDesc}`, 5000);
       return;
     }
 
@@ -109,7 +109,7 @@ export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthP
   } catch (error) {
     console.error('[MAL Auth] Failed to handle OAuth redirect:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    new Notice(`❌ MAL Authentication failed: ${errorMessage}`, 5000);
+    showNotice(plugin, `❌ MAL Authentication failed: ${errorMessage}`, 5000);
   }
 }
 
@@ -125,7 +125,7 @@ async function exchangeCodeForToken(
     throw new Error('Invalid authorization code');
   }
 
-  new Notice('Exchanging authorization code for tokens…', 1500);
+  showNotice(plugin, 'Exchanging authorization code for tokens…', 1500);
 
   const body = new URLSearchParams({
     client_id: plugin.settings.malClientId,
@@ -172,7 +172,7 @@ async function exchangeCodeForToken(
     
     await plugin.saveSettings();
 
-    new Notice('✅ Authenticated successfully!', 3000);
+    showNotice(plugin, '✅ Authenticated successfully!', 3000);
     
     // Fetch user info
     try {
@@ -187,7 +187,7 @@ async function exchangeCodeForToken(
 
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
-    new Notice(`❌ MAL Auth failed: ${errorMessage}`, 5000);
+    showNotice(plugin, `❌ MAL Auth failed: ${errorMessage}`, 5000);
     throw err;
   }
 }

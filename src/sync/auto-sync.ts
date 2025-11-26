@@ -1,8 +1,8 @@
 import type CassettePlugin from '../main';
 import { createDebugLogger } from '../utils';
 
-const SYNC_ON_LOAD_DELAY = 1 * 60 * 1000; // 1 minute (fast but non-blocking)
-const MIN_SCHEDULED_INTERVAL = 30; // Minimum 30 minutes
+const SYNC_ON_LOAD_DELAY = 2 * 60 * 1000; // 2 minute (fast but non-blocking)
+const MIN_SCHEDULED_INTERVAL = 60; // Minimum 60 minutes
 
 /**
  * Manages auto-sync timers
@@ -45,7 +45,7 @@ export class AutoSyncManager {
 
   /**
    * Checks if enough time has passed since last sync
-   * Uses the same minimum interval as scheduled sync (30 minutes)
+   * Uses the same minimum interval as scheduled sync (60 minutes)
    */
   private hasMinimumIntervalPassed(): boolean {
     const lastSync = this.plugin.settings.lastSuccessfulSync;
@@ -58,7 +58,7 @@ export class AutoSyncManager {
     
     const now = Date.now();
     const timeSinceLastSync = now - lastSync;
-    const minimumIntervalMs = MIN_SCHEDULED_INTERVAL * 60 * 1000; // 30 minutes in ms
+    const minimumIntervalMs = MIN_SCHEDULED_INTERVAL * 60 * 1000; // 60 minutes in ms
     
     const hasPassed = timeSinceLastSync >= minimumIntervalMs;
     
@@ -108,7 +108,11 @@ export class AutoSyncManager {
 
       try {
         if (this.plugin.syncManager) {
-          await this.plugin.syncManager.syncFromMAL();
+          if (this.plugin.settings.optimizeAutoSync) {
+            await this.plugin.syncManager.syncActiveStatuses();
+          } else {
+            await this.plugin.syncManager.syncFromMAL();
+          }
           this.debug.log('[Sync on Load] Completed successfully');
         }
       } catch (error) {
@@ -129,7 +133,7 @@ export class AutoSyncManager {
       return;
     }
 
-    // Validate interval (minimum 30 minutes)
+    // Validate interval (minimum 60 minutes)
     const intervalMinutes = Math.max(
       this.plugin.settings.scheduledSyncInterval,
       MIN_SCHEDULED_INTERVAL
@@ -149,7 +153,11 @@ export class AutoSyncManager {
 
       try {
         if (this.plugin.syncManager) {
-          await this.plugin.syncManager.syncFromMAL();
+          if (this.plugin.settings.optimizeAutoSync) {
+            await this.plugin.syncManager.syncActiveStatuses();
+          } else {
+            await this.plugin.syncManager.syncFromMAL();
+          }
           this.debug.log('[Scheduled Sync] Completed successfully');
         }
       } catch (error) {

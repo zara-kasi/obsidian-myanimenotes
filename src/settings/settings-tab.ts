@@ -69,12 +69,15 @@ export class CassetteSettingTab extends PluginSettingTab {
       
       const userSetting = new Setting(container);
       
-      // Create a container for avatar and name
-      const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info' });
+      // Create a container for avatar, name, and Logout button
+      const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info-wrapper' });
+      
+      // Left side: avatar and name
+      const userDetailsContainer = userInfoContainer.createDiv({ cls: 'cassette-user-details' });
       
       // Add avatar if available
       if (userInfo.picture) {
-        userInfoContainer.createEl('img', {
+        userDetailsContainer.createEl('img', {
           cls: 'cassette-user-avatar',
           attr: {
             src: userInfo.picture,
@@ -84,9 +87,22 @@ export class CassetteSettingTab extends PluginSettingTab {
       }
       
       // Add username
-      userInfoContainer.createEl('span', {
+      userDetailsContainer.createEl('span', {
         cls: 'cassette-user-name',
         text: userInfo.name
+      });
+      
+      // Right side: Logout button
+      const buttonContainer = userInfoContainer.createDiv({ cls: 'cassette-button-container' });
+      
+      const logoutButton = buttonContainer.createEl('button', {
+        cls: 'cassette-logout-button mod-warning',
+        text: 'Logout'
+      });
+      
+      logoutButton.addEventListener('click', async () => {
+        await malLogout(this.plugin);
+        this.display();
       });
     }
     
@@ -121,37 +137,22 @@ export class CassetteSettingTab extends PluginSettingTab {
         });
     }
     
-    // Authentication button
-    new Setting(container)
-      .setName(isAuth ? 'Clear' : 'Authenticate')
-      .setDesc(isAuth 
-        ? 'Clear all MyAnimeList credentials and authentication data.' 
-        : 'Sign in to MyAnimeList to sync your anime list.'
-      )
-      .addButton(button => {
-  button
-    .setButtonText(isAuth ? 'Clear' : 'Authenticate')
-    .onClick(async () => {
-      if (isAuth) {
-        await malLogout(this.plugin);
-        this.display();
-      } else {
-        await startMALAuth(this.plugin);
-        this.display();
-      }
-    });
-
-  if (isAuth) {
-    // Use native red warning tone
-    button.buttonEl.addClass('mod-warning');
-  } else {
-    // Default authenticate button: blue accent
-    button.setCta();
-  }
-});
-
-    // Add info about getting credentials
+    // Authentication button (only shown when not authenticated)
     if (!isAuth) {
+      new Setting(container)
+        .setName('Authenticate')
+        .setDesc('Sign in to MyAnimeList to sync your anime list.')
+        .addButton(button => {
+          button
+            .setButtonText('Authenticate')
+            .setCta()
+            .onClick(async () => {
+              await startMALAuth(this.plugin);
+              this.display();
+            });
+        });
+
+      // Add info about getting credentials
       const credentialSetting = new Setting(container)
         .setName('How to get credentials')
         .then(setting => {
@@ -172,7 +173,6 @@ export class CassetteSettingTab extends PluginSettingTab {
         e.preventDefault();
         window.open('https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md', '_blank');
       });
-      
     }
   }
 
@@ -211,6 +211,16 @@ export class CassetteSettingTab extends PluginSettingTab {
   }
 
   private renderSyncSection(container: HTMLElement): void {
+    
+    new Setting(container)
+      .setName('Notifications')
+      .setDesc('Enable or disable notifications from the plugin.')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.notificationsEnabled)
+        .onChange(async (value) => {
+          this.plugin.settings.notificationsEnabled = value;
+          await this.plugin.saveSettings();
+        }));
   
   // Scheduled sync toggle
   new Setting(container)
@@ -236,13 +246,13 @@ export class CassetteSettingTab extends PluginSettingTab {
   if (this.plugin.settings.scheduledSync) {
     new Setting(container)
       .setName('Sync interval')
-      .setDesc('Time between automatic syncs in minutes (minimum 30).')
+      .setDesc('Time between automatic syncs in minutes (minimum 60).')
       .addText(text => text
         .setPlaceholder('60')
         .setValue(String(this.plugin.settings.scheduledSyncInterval))
         .onChange(async (value) => {
           const numValue = parseInt(value);
-          if (!isNaN(numValue) && numValue >= 30) {
+          if (!isNaN(numValue) && numValue >= 60) {
             this.plugin.settings.scheduledSyncInterval = numValue;
             await this.plugin.saveSettings();
             
@@ -270,6 +280,17 @@ export class CassetteSettingTab extends PluginSettingTab {
           this.plugin.autoSyncManager.stop();
           this.plugin.autoSyncManager.start();
         }
+      }));
+      
+  // Optimize auto sync toggle
+  new Setting(container)
+    .setName('Optimize auto-sync')
+    .setDesc('When enabled, auto-sync only syncs Watching anime and Reading manga (Recommended).')
+    .addToggle(toggle => toggle
+      .setValue(this.plugin.settings.optimizeAutoSync)
+      .onChange(async (value) => {
+        this.plugin.settings.optimizeAutoSync = value;
+        await this.plugin.saveSettings();
       }));
   
    // Force full sync toggle

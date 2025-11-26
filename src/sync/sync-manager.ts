@@ -1,11 +1,10 @@
-import { Notice } from 'obsidian';
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem, SyncResult } from '../models';
 import { MediaCategory } from '../models';
 import { syncMAL, type MALSyncOptions } from './mal-sync-service';
 import { saveMediaItemsByCategory, type StorageConfig } from '../storage';
 import { createDebugLogger, type DebugLogger } from '../utils';
-
+import { showNotice } from '../utils';
 /**
  * Complete sync options
  */
@@ -14,13 +13,19 @@ export interface CompleteSyncOptions extends MALSyncOptions {
   storageConfig?: StorageConfig;
 }
 
+const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+
 /**
  * Sync manager class
  */
 export class SyncManager {
   private debug: DebugLogger;
+  private isSyncing: boolean = false;
+  private lastSyncTime: number = 0;
   constructor(private plugin: CassettePlugin) {
     this.debug = createDebugLogger(plugin, 'Sync Manager');
+        // Load persisted last sync time from settings
+    this.lastSyncTime = plugin.settings.lastSuccessfulSync || 0;
  }
 
   /**
@@ -45,6 +50,34 @@ export class SyncManager {
     await this.plugin.saveSettings();
     this.debug.log('[Sync Manager] Saved last sync timestamp');
   }
+  
+    /**
+   * Check if sync can proceed, throw error if not
+   */
+  private checkSyncGuard(): boolean {
+  // Prevent overlapping syncs
+  if (this.isSyncing) {
+    this.debug.log('[Sync Manager] Sync already in progress - blocking new sync request');
+    showNotice(this.plugin, 'Sync already in progress.', 4000);
+    return false;
+  }
+
+  // Enforce cooldown period
+  const timeSinceLastSync = Date.now() - this.lastSyncTime;
+  if (this.lastSyncTime > 0 && timeSinceLastSync < SYNC_COOLDOWN_MS) {
+    const minutesRemaining = Math.ceil((SYNC_COOLDOWN_MS - timeSinceLastSync) / 60000);
+    this.debug.log(
+      `[Sync Manager] Sync cooldown active - ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} remaining`
+    );
+    showNotice(this.plugin, 
+      `Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`,
+      4000
+    );
+    return false;
+  }
+
+  return true;
+}
 
   /**
    * Performs a complete sync from MAL
@@ -56,9 +89,28 @@ export class SyncManager {
     result: SyncResult;
     savedPaths?: { anime: string[]; manga: string[] };
   }> {
-    this.debug.log('[Sync Manager] Starting MAL sync...', options);
-    
+      // Check sync guard
+  if (!this.checkSyncGuard()) {
+    // Guard check failed - return empty result, no error
+    return { 
+      items: [], 
+      result: {
+        success: false,
+        itemsProcessed: 0,
+        itemsSucceeded: 0,
+        itemsFailed: 0,
+        results: [],
+        errors: [],
+        startTime: Date.now(),
+        endTime: Date.now(),
+      }
+    };
+  }
+    this.isSyncing = true;
+
     try {
+      this.debug.log('[Sync Manager] Starting MAL sync...', options);
+      
       // Ensure cassette index is initialized before sync
       if (this.plugin.cassetteIndex) {
         this.debug.log('[Sync Manager] Ensuring cassette index is initialized...');
@@ -86,20 +138,23 @@ export class SyncManager {
         } catch (saveError) {
           console.error('[Sync Manager] Failed to save to vault:', saveError);
           const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
-          new Notice(`⚠️ Synced but failed to save: ${errorMessage}`, 5000);
-       }        
+          showNotice(this.plugin, `⚠️ Synced but failed to save: ${errorMessage}`, 5000);
+        }        
       }
       
-      // Save last sync timestamp if sync was successful
-      if (result.success) {
-        await this.saveLastSyncTimestamp();
-      }
+      // Update last sync time and save to settings
+      this.lastSyncTime = Date.now();
+      this.plugin.settings.lastSuccessfulSync = this.lastSyncTime;
+      await this.plugin.saveSettings();
       
       return { items, result, savedPaths };
       
     } catch (error) {
       console.error('[Sync Manager] Sync failed:', error);
       throw error;
+    } finally {
+      // Always mark sync as complete
+      this.isSyncing = false;
     }
   }
 
@@ -147,33 +202,18 @@ export class SyncManager {
     return this.quickSync(MediaCategory.MANGA, saveToVault);
   }
 
-  /**
-   * Syncs items with specific status
-   * @param category anime or manga
-   * @param status Status to sync
-   * @param saveToVault Whether to save to vault
-   * @returns Synced items
+    /**
+   * Syncs active statuses: Watching anime + Reading manga
+   * Used by both the "Sync active" command and optimized auto-sync
    */
-  async syncByStatus(
-    category: MediaCategory,
-    status: string,
-    saveToVault: boolean = true
-  ): Promise<UniversalMediaItem[]> {
-    this.debug.log(`[Sync Manager] Syncing ${category} with status ${status}...`);
-    
-    const malOptions: MALSyncOptions = {
-      syncAnime: category === MediaCategory.ANIME,
-      syncManga: category === MediaCategory.MANGA,
-    };
-    
-    if (category === MediaCategory.ANIME) {
-      malOptions.animeStatuses = [status];
-    } else {
-      malOptions.mangaStatuses = [status];
-    }
+  async syncActiveStatuses(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
+    this.debug.log('[Sync Manager] Syncing active statuses (watching anime + reading manga)...');
     
     const options: CompleteSyncOptions = {
-      ...malOptions,
+      syncAnime: true,
+      syncManga: true,
+      animeStatuses: ['watching'],
+      mangaStatuses: ['reading'],
       saveToVault,
     };
     

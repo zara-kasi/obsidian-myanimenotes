@@ -1,21 +1,31 @@
 /* Cassette Plugin Styles */
 
-/* MAL User Info Container */
-.cassette-user-info {
+/* MAL User Info Wrapper Container */
+.cassette-user-info-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+}
+
+/* User Details (avatar + name) on the left */
+.cassette-user-details {
   display: flex;
   align-items: center;
   gap: 12px;
-  justify-content: flex-start;
-  width: 100%;
+  flex: 1;
+  min-width: 0; /* Allow text truncation if needed */
 }
 
 /* Setting with user info - remove default flex behavior */
-.setting-item:has(.cassette-user-info) {
+.setting-item:has(.cassette-user-info-wrapper) {
   display: block;
 }
 
-.setting-item:has(.cassette-user-info) .setting-item-control {
+.setting-item:has(.cassette-user-info-wrapper) .setting-item-control {
   justify-content: flex-start;
+  width: 100%;
 }
 
 /* MAL User Avatar */
@@ -24,6 +34,7 @@
   height: 40px;
   border-radius: 50%;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 /* MAL User Name */
@@ -31,6 +42,14 @@
   font-size: 1.1em;
   font-weight: 500;
   color: var(--text-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-
+/* Button Container on the right */
+.cassette-button-container {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}

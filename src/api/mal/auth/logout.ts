@@ -1,6 +1,5 @@
 // Logout and session cleanup
-
-import { Notice } from 'obsidian';
+import { showNotice } from '../../../utils';
 import type CassettePlugin from '../../../main';
 
 /**
@@ -21,5 +20,5 @@ export async function logout(plugin: CassettePlugin): Promise<void> {
   
   await plugin.saveSettings();
   
-  new Notice('✅ Cleared all MyAnimeList credentials', 3000);
+  showNotice(plugin, '✅ Cleared all MyAnimeList credentials', 3000);
 }

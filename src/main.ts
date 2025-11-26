@@ -121,24 +121,14 @@ export default class CassettePlugin extends Plugin {
         await this.syncManager.syncManga();
       },
     });
-
-    // Sync currently watching anime
+    
+    // Sync active statuses (watching anime + reading manga)
     this.addCommand({
-      id: 'sync-mal-watching',
-      name: 'Sync currently watching anime',
+      id: 'sync-mal-active',
+      name: 'Sync currently Watching anime and  Reading manga',
       callback: async () => {
         if (!this.syncManager) return;
-        await this.syncManager.syncByStatus(MediaCategory.ANIME, 'watching');
-      },
-    });
-
-    // Sync currently reading manga
-    this.addCommand({
-      id: 'sync-mal-reading',
-      name: 'Sync currently reading manga',
-      callback: async () => {
-        if (!this.syncManager) return;
-        await this.syncManager.syncByStatus(MediaCategory.MANGA, 'reading');
+        await this.syncManager.syncActiveStatuses();
       },
     });
   }
