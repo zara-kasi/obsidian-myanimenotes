@@ -54,8 +54,8 @@
   flex-shrink: 0;
 }
 
-/* Clear Button Styling */
-.cassette-clear-button {
+/* Logout Button Styling */
+.cassette-logout-button {
   padding: 6px 14px;
   border-radius: 4px;
   border: 1px solid var(--interactive-accent);
@@ -68,27 +68,27 @@
   white-space: nowrap;
 }
 
-.cassette-clear-button:hover:not(:disabled) {
+.cassette-logout-button:hover:not(:disabled) {
   background-color: var(--interactive-accent-rgb, rgba(108, 66, 193, 0.2));
   transform: translateY(-1px);
 }
 
-.cassette-clear-button:active:not(:disabled) {
+.cassette-logout-button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.cassette-clear-button:disabled {
+.cassette-logout-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Warning variant (red) */
-.cassette-clear-button.mod-warning {
+.cassette-logout-button.mod-warning {
   border-color: var(--text-error);
   color: var(--text-error);
   background-color: rgba(255, 0, 0, 0.05);
 }
 
-.cassette-clear-button.mod-warning:hover:not(:disabled) {
+.cassette-logout-button.mod-warning:hover:not(:disabled) {
   background-color: rgba(255, 0, 0, 0.1);
 }
