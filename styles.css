@@ -173,9 +173,9 @@
 }
 
 .cassette-add-property-button {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 4px 8px;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--button-radius);
