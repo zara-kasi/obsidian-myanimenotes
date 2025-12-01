@@ -76,7 +76,7 @@ export class TemplateModal extends Modal {
     // Properties section header
     contentEl.createEl('h3', { text: 'Properties' });
     
-    // Properties list container
+    // Properties list container (no border, just a container)
     this.propertyListEl = contentEl.createDiv({ cls: 'cassette-property-list' });
     this.renderPropertyList();
     
@@ -89,37 +89,7 @@ export class TemplateModal extends Modal {
     setIcon(addButton, 'plus');
     
     addButton.addEventListener('click', () => {
-      this.showAddPropertyMenu(addButton);
-    });
-    
-    // Footer buttons
-    const footerEl = contentEl.createDiv({ cls: 'cassette-modal-footer' });
-    
-    // Reset button (left side)
-    const resetButton = footerEl.createEl('button', { 
-      text: 'Reset to Defaults',
-      cls: 'mod-warning'
-    });
-    resetButton.addEventListener('click', () => {
-      this.resetToDefaults();
-    });
-    
-    // Right side buttons container
-    const rightButtons = footerEl.createDiv({ cls: 'cassette-modal-footer-right' });
-    
-    // Cancel button
-    const cancelButton = rightButtons.createEl('button', { text: 'Cancel' });
-    cancelButton.addEventListener('click', () => {
-      this.close();
-    });
-    
-    // Save button
-    const saveButton = rightButtons.createEl('button', { 
-      text: 'Save',
-      cls: 'mod-cta'
-    });
-    saveButton.addEventListener('click', () => {
-      this.save();
+      this.addEmptyProperty();
     });
   }
   
@@ -153,16 +123,26 @@ export class TemplateModal extends Modal {
     const nameInput = rowEl.createEl('input', {
       cls: 'cassette-property-name',
       type: 'text',
-      value: prop.customName
+      value: prop.customName,
+      attr: {
+        placeholder: 'Property name'
+      }
     });
     nameInput.addEventListener('input', (e) => {
       prop.customName = (e.target as HTMLInputElement).value;
     });
     
-    // Template variable (read-only)
-    const templateVar = rowEl.createDiv({ 
+    // Template variable input (editable)
+    const templateInput = rowEl.createEl('input', {
       cls: 'cassette-template-var',
-      text: `{{${prop.key}}}`
+      type: 'text',
+      value: prop.key,
+      attr: {
+        placeholder: 'Template variable'
+      }
+    });
+    templateInput.addEventListener('input', (e) => {
+      prop.key = (e.target as HTMLInputElement).value;
     });
     
     // Delete button
@@ -223,71 +203,13 @@ export class TemplateModal extends Modal {
   }
   
   /**
-   * Shows dropdown menu for adding properties
+   * Adds an empty property row
    */
-  showAddPropertyMenu(buttonEl: HTMLElement) {
-    const menu = this.app.workspace.trigger('cassette:show-property-menu', buttonEl);
-    
-    // Get available properties (not already added)
-    const addedKeys = new Set(this.config.properties.map(p => p.key));
-    const availableProps = getAvailableProperties(this.templateType)
-      .filter(p => !addedKeys.has(p.key));
-    
-    if (availableProps.length === 0) {
-      // No more properties to add - could show a notice
-      return;
-    }
-    
-    // Create a simple menu using Obsidian's Menu API would be ideal,
-    // but for now we'll use a custom dropdown
-    const dropdown = document.createElement('div');
-    dropdown.addClass('cassette-property-dropdown');
-    
-    availableProps.forEach(metadata => {
-      const item = dropdown.createDiv({ cls: 'cassette-dropdown-item' });
-      item.createSpan({ text: metadata.label });
-      item.createSpan({ 
-        cls: 'cassette-dropdown-key',
-        text: `{{${metadata.key}}}`
-      });
-      
-      item.addEventListener('click', () => {
-        this.addProperty(metadata.key);
-        dropdown.remove();
-      });
-    });
-    
-    // Position dropdown
-    const rect = buttonEl.getBoundingClientRect();
-    dropdown.style.position = 'absolute';
-    dropdown.style.top = `${rect.bottom + 5}px`;
-    dropdown.style.left = `${rect.left}px`;
-    
-    document.body.appendChild(dropdown);
-    
-    // Close on click outside
-    const closeDropdown = (e: MouseEvent) => {
-      if (!dropdown.contains(e.target as Node) && e.target !== buttonEl) {
-        dropdown.remove();
-        document.removeEventListener('click', closeDropdown);
-      }
-    };
-    setTimeout(() => {
-      document.addEventListener('click', closeDropdown);
-    }, 10);
-  }
-  
-  /**
-   * Adds a new property
-   */
-  addProperty(key: string) {
-    const metadata = getPropertyMetadata(key);
-    if (!metadata) return;
-    
+  addEmptyProperty() {
     const newProp: PropertyItem = {
       id: generatePropertyId(),
-      key: key,
-      customName: metadata.defaultName,
+      key: '',
+      customName: '',
       order: this.config.properties.length + 1
     };
     
@@ -334,22 +256,9 @@ export class TemplateModal extends Modal {
   }
   
   /**
-   * Resets to default template
+   * Auto-save when modal closes
    */
-  resetToDefaults() {
-    if (this.templateType === 'anime') {
-      this.config = JSON.parse(JSON.stringify(DEFAULT_ANIME_TEMPLATE));
-    } else {
-      this.config = JSON.parse(JSON.stringify(DEFAULT_MANGA_TEMPLATE));
-    }
-    
-    this.renderPropertyList();
-  }
-  
-  /**
-   * Saves the template configuration
-   */
-  async save() {
+  async autoSave() {
     // Save to plugin settings
     if (this.templateType === 'anime') {
       this.plugin.settings.animeTemplate = this.config;
@@ -358,11 +267,14 @@ export class TemplateModal extends Modal {
     }
     
     await this.plugin.saveSettings();
-    this.close();
   }
   
   onClose() {
     const { contentEl } = this;
+    
+    // Auto-save before closing
+    this.autoSave();
+    
     contentEl.empty();
   }
 }
