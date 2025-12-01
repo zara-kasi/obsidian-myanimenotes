@@ -1,6 +1,8 @@
 import type { MALUserInfo } from '../api/mal';
 import type { PropertyMapping } from '../storage/markdown';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
+import type { TemplateConfig } from './template-config';
+
 
 export interface CassetteSettings {
   // MAL Authentication
