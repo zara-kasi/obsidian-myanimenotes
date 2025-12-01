@@ -251,8 +251,8 @@ export class CassetteSettingTab extends PluginSettingTab {
       .setClass('cassette-template-setting');
     
     // Add collapse/expand icon
-    const iconEl = setting.controlEl.createDiv({ cls: 'cassette-collapse-icon' });
-      setIcon(iconEl, isExpanded ? 'chevron-down' : 'chevron-right');
+    const iconEl = setting.nameEl.createDiv({ cls: 'cassette-collapse-icon' });
+    setIcon(iconEl, isExpanded ? 'chevron-down' : 'chevron-right');
     
     // Make the entire setting clickable to toggle
     setting.settingEl.addClass('cassette-clickable-setting');
@@ -372,7 +372,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       type: 'text',
       value: prop.key ? `{{${prop.key}}}` : '',
       attr: {
-        placeholder: '{{Property value}}'
+        placeholder: 'Property value'
       }
     });
     
