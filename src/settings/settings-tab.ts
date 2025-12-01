@@ -372,7 +372,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       type: 'text',
       value: prop.key ? `{{${prop.key}}}` : '',
       attr: {
-        placeholder: '{{variable}}'
+        placeholder: '{{Property value}}'
       }
     });
     
