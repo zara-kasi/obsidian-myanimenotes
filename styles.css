@@ -168,23 +168,15 @@
 }
 
 /* Add Property Button */
-.cassette-add-property-container {
-  margin: 8px 0;
-}
 
 .cassette-add-property-button {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 8px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--button-radius);
-  background-color: var(--interactive-normal);
-  color: var(--text-normal);
-  cursor: pointer;
-  font-size: var(--font-ui-small);
+  background-color: transparent !important;
+  line-height: 1;
 }
 
-.cassette-add-property-button:hover {
-  background-color: var(--interactive-hover);
+.cassette-button-icon svg {
+  display: block;
 }
