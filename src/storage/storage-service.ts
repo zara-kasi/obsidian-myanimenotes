@@ -1,4 +1,3 @@
-
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem } from '../models';
 import type { PropertyMapping } from './markdown';
