@@ -138,12 +138,21 @@ export class TemplateModal extends Modal {
       type: 'text',
       value: prop.key,
       attr: {
-        placeholder: 'Template variable'
+        placeholder: '{{variable}}'
       }
     });
     templateInput.addEventListener('input', (e) => {
-      prop.key = (e.target as HTMLInputElement).value;
+      const value = (e.target as HTMLInputElement).value;
+      // Remove any existing brackets and store just the key
+      prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
+      // Update display with brackets
+      (e.target as HTMLInputElement).value = prop.key ? `{{${prop.key}}}` : '';
     });
+    
+    // Set initial value with brackets if key exists
+    if (prop.key) {
+      templateInput.value = `{{${prop.key}}}`;
+    }
     
     // Delete button
     const deleteButton = rowEl.createDiv({ cls: 'cassette-delete-button' });
