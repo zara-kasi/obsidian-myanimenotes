@@ -70,3 +70,243 @@
 .cassette-logout-button:hover {
   text-decoration: underline;
 }
+
+/* Template Modal Styles */
+
+.cassette-template-modal {
+  padding: 20px;
+}
+
+.cassette-template-modal h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.cassette-template-modal h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* Property List Container */
+.cassette-property-list {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  background-color: var(--background-primary);
+}
+
+/* Property Row */
+.cassette-property-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  background-color: var(--background-secondary);
+  cursor: move;
+  transition: background-color 0.1s;
+}
+
+.cassette-property-row:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.cassette-property-row.dragging {
+  opacity: 0.5;
+}
+
+.cassette-property-row.drag-over-top {
+  border-top: 2px solid var(--interactive-accent);
+}
+
+.cassette-property-row.drag-over-bottom {
+  border-bottom: 2px solid var(--interactive-accent);
+}
+
+/* Drag Handle */
+.cassette-drag-handle {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.cassette-drag-handle:active {
+  cursor: grabbing;
+}
+
+.cassette-drag-handle svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Property Name Input */
+.cassette-property-name {
+  flex: 0 0 150px;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 13px;
+}
+
+.cassette-property-name:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+/* Template Variable Display */
+.cassette-template-var {
+  flex: 1;
+  padding: 4px 8px;
+  background-color: var(--background-modifier-border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-monospace);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Delete Button */
+.cassette-delete-button {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.1s, background-color 0.1s;
+}
+
+.cassette-delete-button:hover {
+  color: var(--text-error);
+  background-color: var(--background-modifier-error-hover);
+}
+
+.cassette-delete-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Add Property Button */
+.cassette-add-property-container {
+  margin-bottom: 20px;
+}
+
+.cassette-add-property-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.cassette-add-property-button:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.cassette-add-property-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Property Dropdown */
+.cassette-property-dropdown {
+  position: fixed;
+  z-index: 1000;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  box-shadow: var(--shadow-s);
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 250px;
+}
+
+.cassette-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  gap: 12px;
+}
+
+.cassette-dropdown-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.cassette-dropdown-key {
+  font-family: var(--font-monospace);
+  font-size: 11px;
+  color: var(--text-muted);
+  background-color: var(--background-modifier-border);
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Modal Footer */
+.cassette-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.cassette-modal-footer-right {
+  display: flex;
+  gap: 8px;
+}
+
+.cassette-modal-footer button {
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.cassette-modal-footer button:not(.mod-cta):not(.mod-warning) {
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.cassette-modal-footer button:not(.mod-cta):not(.mod-warning):hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.cassette-modal-footer button.mod-cta {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.cassette-modal-footer button.mod-cta:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+.cassette-modal-footer button.mod-warning {
+  background-color: var(--background-secondary);
+  color: var(--text-error);
+}
+
+.cassette-modal-footer button.mod-warning:hover {
+  background-color: var(--background-modifier-error-hover);
+}
