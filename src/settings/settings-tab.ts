@@ -304,25 +304,14 @@ export class CassetteSettingTab extends PluginSettingTab {
       
       this.renderPropertyList(propertyListEl, config, type);
       
-      // Add property button
-const addButtonContainer = contentContainer.createDiv({ cls: 'cassette-add-property-container' });
-const addButton = addButtonContainer.createEl('button', { 
+      const addButton = addButtonContainer.createEl('button', { 
   cls: 'cassette-add-property-button'
 });
 
-// Create icon element inside the button
-const iconEl = addButton.createSpan({ cls: 'cassette-button-icon' });
+const iconEl = createSpan();
 setIcon(iconEl, 'plus');
-
-// Add text after the icon
-addButton.createSpan({ 
-  cls: 'cassette-button-text',
-  text: 'Add Property' 
-});
-
-addButton.addEventListener('click', () => {
-  this.addEmptyProperty(config, type);
-});
+addButton.appendChild(iconEl);
+addButton.appendText('Add Property');
       
     }
   }
