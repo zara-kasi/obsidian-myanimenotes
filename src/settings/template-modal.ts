@@ -22,7 +22,7 @@ export class TemplateModal extends Modal {
   templateType: 'anime' | 'manga';
   config: TemplateConfig;
   originalConfig: TemplateConfig;
-  propertyListEl: HTMLElement;
+  propertyListEl!: HTMLElement;
   draggedElement: HTMLElement | null = null;
   
   constructor(
