@@ -35,6 +35,8 @@ export class CassetteSettingTab extends PluginSettingTab {
     // ========================================================================
     
     renderPropertyMappingSection(containerEl, this.plugin);
+    
+    this.renderTemplateSection(containerEl);
 
     // ========================================================================
     // Sync Section
@@ -213,6 +215,33 @@ export class CassetteSettingTab extends PluginSettingTab {
           });
       });
   }
+  
+  private renderTemplateSection(container: HTMLElement): void {
+  // Section header
+  container.createEl('h3', { text: 'Template Customization' });
+  
+  // Anime template button
+  new Setting(container)
+    .setName('Anime Template')
+    .setDesc('Configure how anime notes are created and which properties to include.')
+    .addButton(button => button
+      .setButtonText('Edit Template')
+      .onClick(async () => {
+        const { TemplateModal } = await import('./template-modal');
+        new TemplateModal(this.app, this.plugin, 'anime').open();
+      }));
+  
+  // Manga template button
+  new Setting(container)
+    .setName('Manga Template')
+    .setDesc('Configure how manga notes are created and which properties to include.')
+    .addButton(button => button
+      .setButtonText('Edit Template')
+      .onClick(async () => {
+        const { TemplateModal } = await import('./template-modal');
+        new TemplateModal(this.app, this.plugin, 'manga').open();
+      }));
+}
 
   private renderSyncSection(container: HTMLElement): void {
     
