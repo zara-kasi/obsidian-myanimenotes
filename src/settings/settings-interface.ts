@@ -26,6 +26,10 @@ export interface CassetteSettings {
   animeFolder: string;
   mangaFolder: string;
   
+  // Template System
+  animeTemplate?: TemplateConfig;
+  mangaTemplate?: TemplateConfig;
+  
   // Property Customization
   propertyMapping: PropertyMapping;
   useCustomPropertyMapping: boolean;
@@ -60,6 +64,10 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   // Storage defaults
   animeFolder: 'Cassette/Anime',
   mangaFolder: 'Cassette/Manga',
+  
+  // Template system defaults
+  animeTemplate: undefined,
+  mangaTemplate: undefined,
   
   // Property customization defaults
   propertyMapping: DEFAULT_PROPERTY_MAPPING,
