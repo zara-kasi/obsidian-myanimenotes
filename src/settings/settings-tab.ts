@@ -232,8 +232,6 @@ export class CassetteSettingTab extends PluginSettingTab {
   }
   
   private renderTemplateSection(container: HTMLElement): void {
-    // Section header
-    container.createEl('h3', { text: 'Template Customization' });
     
     // Anime template expandable section
     this.renderExpandableTemplate(container, 'anime');
@@ -318,21 +316,6 @@ export class CassetteSettingTab extends PluginSettingTab {
         this.addEmptyProperty(config, type);
       });
       
-      // Reset to default button
-      new Setting(contentContainer)
-        .setName('Reset to defaults')
-        .setDesc('Reset this template to its default configuration.')
-        .addButton(button => button
-          .setButtonText('Reset')
-          .setWarning()
-          .onClick(async () => {
-            const defaultConfig = type === 'anime' 
-              ? JSON.parse(JSON.stringify(DEFAULT_ANIME_TEMPLATE))
-              : JSON.parse(JSON.stringify(DEFAULT_MANGA_TEMPLATE));
-            
-            await this.saveTemplateConfig(type, defaultConfig);
-            this.display();
-          }));
     }
   }
 
