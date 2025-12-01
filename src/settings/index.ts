@@ -4,7 +4,7 @@ export { DEFAULT_SETTINGS } from './settings-interface';
 export type { MALUserInfo } from '../api/mal';
 export { renderPropertyMappingSection } from './property-settings';
 
-export { TemplateModal } from './template-modal';
+// Template configuration exports (no modal needed)
 export type { TemplateConfig, PropertyItem, PropertyMetadata } from './template-config';
 export { 
   DEFAULT_ANIME_TEMPLATE, 
