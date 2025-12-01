@@ -64,32 +64,63 @@
   background: none !important;
   border: none !important;
   box-shadow: none !important;
-  padding: 2 !important;
+  padding: 2px !important;
 }
 
 .cassette-logout-button:hover {
   text-decoration: underline;
 }
 
-/* Template Modal Styles */
+/* ========================================================================
+   Template Expandable Section Styles
+   ======================================================================== */
 
-.cassette-template-modal {
-  padding: 20px;
+/* Clickable setting for expand/collapse */
+.cassette-clickable-setting {
+  cursor: pointer;
+  transition: background-color 0.1s;
 }
 
-.cassette-template-modal h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
+.cassette-clickable-setting:hover {
+  background-color: var(--background-modifier-hover);
 }
 
-.cassette-template-modal h3 {
-  margin-top: 20px;
-  margin-bottom: 10px;
+/* Collapse/Expand icon */
+.cassette-collapse-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.cassette-collapse-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Template content container (expanded section) */
+.cassette-template-content {
+  margin-top: 12px;
+  margin-left: 0;
+  padding: 16px;
+  border-left: 2px solid var(--background-modifier-border);
+  background-color: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.cassette-template-content h4 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--text-normal);
 }
 
 /* Property List Container */
 .cassette-property-list {
   margin-bottom: 12px;
+  margin-top: 8px;
 }
 
 /* Property Row */
@@ -100,13 +131,15 @@
   padding: 8px;
   border-radius: 4px;
   margin-bottom: 4px;
-  background-color: var(--background-secondary);
+  background-color: var(--background-primary);
   cursor: move;
   transition: background-color 0.1s;
+  border: 1px solid var(--background-modifier-border);
 }
 
 .cassette-property-row:hover {
   background-color: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border-hover);
 }
 
 .cassette-property-row.dragging {
@@ -196,7 +229,8 @@
 
 /* Add Property Button */
 .cassette-add-property-container {
-  margin-bottom: 20px;
+  margin-top: 8px;
+  margin-bottom: 12px;
 }
 
 .cassette-add-property-button {
