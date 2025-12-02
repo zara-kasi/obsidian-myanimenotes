@@ -1,4 +1,4 @@
-import { Setting, setIcon } from 'obsidian';
+import { Setting, setIcon, normalizePath } from 'obsidian';
 import type CassettePlugin from '../main';
 import { FolderSuggest } from './folder-suggest';
 import { 
@@ -92,7 +92,7 @@ function renderExpandableTemplate(
   if (isExpanded) {
     const contentContainer = container.createDiv({ cls: 'cassette-template-content' });
     
-    // Folder path setting
+    // Folder path setting (using same logic as main folder settings)
     new Setting(contentContainer)
       .setName('Folder Path')
       .setDesc('Where notes will be saved')
@@ -102,8 +102,18 @@ function renderExpandableTemplate(
           .setPlaceholder(`Cassette/${type === 'anime' ? 'Anime' : 'Manga'}`)
           .setValue(config.folderPath)
           .onChange(async (value) => {
-            config.folderPath = value;
+            // Normalize the path to handle cross-platform paths and user input variations
+            const normalizedPath = normalizePath(value.trim() || `Cassette/${type === 'anime' ? 'Anime' : 'Manga'}`);
+            config.folderPath = normalizedPath;
             await saveTemplateConfig(plugin, type, config);
+            
+            // Also update the corresponding main folder setting
+            if (type === 'anime') {
+              plugin.settings.animeFolder = normalizedPath;
+            } else {
+              plugin.settings.mangaFolder = normalizedPath;
+            }
+            await plugin.saveSettings();
           });
       });
     
