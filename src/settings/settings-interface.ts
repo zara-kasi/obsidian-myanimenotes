@@ -1,8 +1,15 @@
-import type { MALUserInfo } from '../api/mal';
-import type { PropertyMapping } from '../storage/markdown';
-import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
-import type { TemplateConfig } from './template-config';
+/**
+ * Settings Interface - Template System Only
+ * 
+ * Completely removed:
+ * - propertyMapping
+ * - useCustomPropertyMapping
+ * - animeFolder (now in templates)
+ * - mangaFolder (now in templates)
+ */
 
+import type { MALUserInfo } from '../api/mal';
+import type { TemplateConfig } from './template-config';
 
 export interface CassetteSettings {
   // MAL Authentication
@@ -18,36 +25,32 @@ export interface CassetteSettings {
   malAuthState?: {
     verifier: string;
     state: string;
-    timestamp: number; // For expiry checking
+    timestamp: number;
   } | null;
-    // Advanced API settings
+  
+  // Advanced API settings
   apiMaxRetries?: number;
   apiRetryDelay?: number;
   
-  // Storage Settings
-  animeFolder: string;
-  mangaFolder: string;
-  
-  // Template System
+  // Template System (Primary Configuration)
   animeTemplate?: TemplateConfig;
   mangaTemplate?: TemplateConfig;
   
-  // Property Customization
-  propertyMapping: PropertyMapping;
-  useCustomPropertyMapping: boolean;
-  
   // Sync Settings
   forceFullSync: boolean; 
-  syncOnLoad: boolean; // Sync shortly after plugin loads (3 seconds)
-  scheduledSync: boolean; // Periodic scheduled sync
+  syncOnLoad: boolean;
+  scheduledSync: boolean;
   scheduledSyncInterval: number; // Interval in minutes (min: 60)
-  lastSuccessfulSync?: number; // Timestamp of last successful sync
-  optimizeAutoSync: boolean; // Only sync active statuses during auto-sync
+  lastSuccessfulSync?: number;
+  optimizeAutoSync: boolean;
   
   // Template Settings (for future use)
   useCustomTemplate: boolean;
   customTemplatePath?: string;
-  notificationsEnabled: boolean; // Enable/disable user notifications
+  
+  // Notification Settings
+  notificationsEnabled: boolean;
+  
   // Debug Settings
   debugMode: boolean;
 }
@@ -63,30 +66,25 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malAuthenticated: false,
   malAuthState: null, 
   
-  // Storage defaults
-  animeFolder: 'Cassette/Anime',
-  mangaFolder: 'Cassette/Manga',
-  
-  // Template system defaults
+  // Template system (primary configuration)
   animeTemplate: undefined,
   mangaTemplate: undefined,
-  
-  // Property customization defaults
-  propertyMapping: DEFAULT_PROPERTY_MAPPING,
-  useCustomPropertyMapping: false,
   
   // Sync defaults
   forceFullSync: false,
   syncOnLoad: true,
   scheduledSync: false,
-  scheduledSyncInterval: 60, // 60 minutes default
-  lastSuccessfulSync: undefined, // No previous sync 
+  scheduledSyncInterval: 60,
+  lastSuccessfulSync: undefined,
   optimizeAutoSync: true,
+  
   // Template defaults
   useCustomTemplate: false,
   customTemplatePath: undefined,
+  
   // Notification defaults
   notificationsEnabled: true,
+  
   // Debug defaults
   debugMode: false,
 };
