@@ -196,10 +196,6 @@ function renderPropertyRow(
   // Check if this is a permanent property
   const isPermanent = prop.key === 'cassette' || prop.key === 'synced';
   
-  if (isPermanent) {
-    rowEl.addClass('cassette-property-permanent');
-  }
-  
   // Drag handle
   const dragHandle = rowEl.createDiv({ cls: 'cassette-drag-handle' });
   setIcon(dragHandle, 'grip-vertical');
