@@ -1,34 +1,44 @@
 /**
- * Markdown Generator - Refactored for Obsidian FileManager API
+ * Markdown Generator - Template System Only
  * 
- * Now uses Obsidian's FileManager.processFrontMatter() for safe frontmatter handling
- * Separates frontmatter generation from file writing
+ * Uses ONLY templates for frontmatter generation
+ * No more PropertyMapping or StorageConfig
  */
 import { TFile } from 'obsidian';
 import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../../models';
-import type { StorageConfig } from '../storage-service';
-import { DEFAULT_PROPERTY_MAPPING } from './property-mapping';
-import { buildSyncedFrontmatterProperties } from './frontmatter-builder';
+import { getTemplate } from './template-helper';
+import { buildFrontmatterFromTemplate } from './frontmatter-builder';
 import { createDebugLogger } from '../../utils';
 
 /**
  * Generates frontmatter properties for a media item
- * This is separated from file I/O for testability
+ * Uses template system from plugin settings
+ * 
+ * @param plugin Plugin instance
+ * @param item Media item to generate properties for
+ * @param cassetteSync Cassette identifier
+ * @returns Frontmatter properties object
  */
 export function generateFrontmatterProperties(
   plugin: CassettePlugin,
   item: UniversalMediaItem,
-  config: StorageConfig,
   cassetteSync: string
 ): Record<string, any> {
-  const mapping = config.propertyMapping || DEFAULT_PROPERTY_MAPPING;
-  return buildSyncedFrontmatterProperties(item, mapping, cassetteSync);
+  // Get template for this category
+  const template = getTemplate(plugin, item.category);
+  
+  // Build frontmatter using the template
+  return buildFrontmatterFromTemplate(item, template, cassetteSync);
 }
 
 /**
  * Updates an existing markdown file's frontmatter
  * Preserves existing body content automatically via processFrontMatter
+ * 
+ * @param plugin Plugin instance
+ * @param file File to update
+ * @param frontmatterProps Properties to merge into frontmatter
  */
 export async function updateMarkdownFileFrontmatter(
   plugin: CassettePlugin,
@@ -45,8 +55,6 @@ export async function updateMarkdownFileFrontmatter(
       Object.entries(frontmatterProps).forEach(([key, value]) => {
         frontmatter[key] = value;
       });
-      
-      
     });
   } catch (error) {
     debug.log('[Markdown] Error updating frontmatter:', error);
