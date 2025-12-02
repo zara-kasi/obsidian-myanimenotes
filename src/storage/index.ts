@@ -1,29 +1,25 @@
 /**
  * Storage Module Exports
  * 
- * Template system only - PropertyMapping removed
+ * Central export point for all storage-related functionality
  */
 
 // Main storage service (public API)
-export type { SyncActionResult } from './storage-service';
+export type { StorageConfig, SyncActionResult } from './storage-service';
 export { 
   saveMediaItem, 
   saveMediaItems, 
   saveMediaItemsByCategory 
 } from './storage-service';
 
-// Template helper utilities
-export {
-  getTemplate,
-  getFolderPath,
-  getPropertyName,
-  hasProperty,
-  getOrderedProperties,
-  getOrderedPropertyKeys,
-  createPropertyMap
+// Property mapping
+export type { PropertyMapping } from './markdown';
+export { 
+  DEFAULT_PROPERTY_MAPPING, 
+  getMappedPropertyName 
 } from './markdown';
 
-// Cassette sync utilities
+// Cassette sync utilities (internal, but exported for testing/advanced use)
 export {
   generateCassetteSync,
   validateCassetteSyncFormat,
@@ -32,7 +28,7 @@ export {
   selectDeterministicFile
 } from './cassette';
 
-// File utilities
+// File utilities (internal, but exported for testing/advanced use)
 export {
   sanitizeFilename,
   sanitizeSynopsis,
@@ -44,7 +40,7 @@ export {
   formatPlatformDisplay
 } from './file-utils';
 
-// Markdown generation
+// Markdown generation (internal, but exported for testing/advanced use)
 export {
   generateFrontmatterProperties,
   updateMarkdownFileFrontmatter
@@ -52,5 +48,5 @@ export {
 
 // Frontmatter builder
 export {
-  buildFrontmatterFromTemplate
+  buildSyncedFrontmatterProperties
 } from './markdown';
