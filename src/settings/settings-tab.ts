@@ -1,9 +1,7 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { normalizePath } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
 import { renderPropertyMappingSection } from './property-settings';
-import { FolderSuggest } from './folder-suggest';
 import { 
   renderTemplateSection,
   createTemplateSettingsState,
@@ -31,22 +29,16 @@ export class CassetteSettingTab extends PluginSettingTab {
     this.renderMALSection(containerEl);
 
     // ========================================================================
-    // Storage Section
+    // Template Section
     // ========================================================================
     
-    this.renderStorageSection(containerEl);
+    renderTemplateSection(containerEl, this.plugin, this.templateState);
 
     // ========================================================================
     // Property Customization Section
     // ========================================================================
     
     renderPropertyMappingSection(containerEl, this.plugin);
-    
-    // ========================================================================
-    // Template Section
-    // ========================================================================
-    
-    renderTemplateSection(containerEl, this.plugin, this.templateState);
 
     // ========================================================================
     // Sync Section
@@ -187,40 +179,6 @@ export class CassetteSettingTab extends PluginSettingTab {
         window.open('https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md', '_blank');
       });
     }
-  }
-
-  private renderStorageSection(container: HTMLElement): void {
-    new Setting(container)
-      .setName('Anime folder')
-      .setDesc('Folder where anime notes will be saved.')
-      .addText(text => {
-        new FolderSuggest(this.app, text.inputEl);
-        text
-          .setPlaceholder('Cassette/Anime')
-          .setValue(this.plugin.settings.animeFolder)
-          .onChange(async (value) => {
-            // Normalize the path to handle cross-platform paths and user input variations
-            const normalizedPath = normalizePath(value.trim() || 'Cassette/Anime');
-            this.plugin.settings.animeFolder = normalizedPath;
-            await this.plugin.saveSettings();
-          });
-      });
-
-    new Setting(container)
-      .setName('Manga folder')
-      .setDesc('Folder where manga notes will be saved.')
-      .addText(text => {
-        new FolderSuggest(this.app, text.inputEl);
-        text
-          .setPlaceholder('Cassette/Manga')
-          .setValue(this.plugin.settings.mangaFolder)
-          .onChange(async (value) => {
-            // Normalize the path to handle cross-platform paths and user input variations
-            const normalizedPath = normalizePath(value.trim() || 'Cassette/Manga');
-            this.plugin.settings.mangaFolder = normalizedPath;
-            await this.plugin.saveSettings();
-          });
-      });
   }
 
   private renderSyncSection(container: HTMLElement): void {
