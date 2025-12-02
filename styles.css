@@ -85,15 +85,17 @@
 .cassette-template-name-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  width: 100%;
 }
 
-/* Collapse/Expand icon - next to the name */
+/* Collapse/Expand icon - pushed to the right */
 .cassette-collapse-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
+  margin-left: auto;
 }
 
 .cassette-collapse-icon svg {
