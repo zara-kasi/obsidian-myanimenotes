@@ -5,8 +5,8 @@
  * This is the ONLY way to configure properties - no more property mapping
  */
 
-import type { TemplateConfig } from '../settings/template-config';
-import { DEFAULT_ANIME_TEMPLATE, DEFAULT_MANGA_TEMPLATE } from '../settings/template-config';
+import type { TemplateConfig, PropertyItem } from '../../settings/template-config';
+import { DEFAULT_ANIME_TEMPLATE, DEFAULT_MANGA_TEMPLATE } from '../../settings/template-config';
 
 /**
  * Gets the template for a specific category from plugin settings
