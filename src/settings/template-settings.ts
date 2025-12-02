@@ -64,15 +64,15 @@ function renderExpandableTemplate(
   
   // Main setting with toggle
   const setting = new Setting(container)
-    .setName(`${type === 'anime' ? 'Anime' : 'Manga'} Template`)
     .setDesc(`Configure how ${type} notes are created and which properties to include.`)
     .setClass('cassette-template-setting');
   
-  // Build the name container with icon
+  // Clear the name and build it with icon
+  setting.nameEl.empty();
   const nameContainer = setting.nameEl.createDiv({ cls: 'cassette-template-name-container' });
   nameContainer.createSpan({ text: `${type === 'anime' ? 'Anime' : 'Manga'} Template` });
   
-  // Add collapse/expand icon
+  // Add collapse/expand icon next to the name
   const iconEl = nameContainer.createDiv({ cls: 'cassette-collapse-icon' });
   setIcon(iconEl, isExpanded ? 'chevron-down' : 'chevron-right');
   
