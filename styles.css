@@ -78,27 +78,24 @@
 /* Clickable setting for expand/collapse */
 .cassette-clickable-setting {
   cursor: pointer;
+  position: relative;
 }
 
 .cassette-clickable-setting:hover {
   background-color: var(--background-modifier-hover);
 }
 
-/* Template name container with icon */
-.cassette-template-name-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-/* Collapse/Expand icon - pushed to the right */
+/* Collapse/Expand icon - absolutely positioned to the right */
 .cassette-collapse-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  margin-left: auto;
+  pointer-events: none; /* Allow clicks to pass through to parent */
 }
 
 .cassette-collapse-icon svg {
