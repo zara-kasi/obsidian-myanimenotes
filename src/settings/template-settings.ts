@@ -68,8 +68,8 @@ function renderExpandableTemplate(
     .setDesc(`Configure how ${type} notes are created and which properties to include.`)
     .setClass('cassette-template-setting');
   
-  // Add collapse/expand icon
-  const iconEl = setting.nameEl.createDiv({ cls: 'cassette-collapse-icon' });
+  // Add collapse/expand icon to the control element (right side)
+  const iconEl = setting.controlEl.createDiv({ cls: 'cassette-collapse-icon' });
   setIcon(iconEl, isExpanded ? 'chevron-down' : 'chevron-right');
   
   // Make the entire setting clickable to toggle
