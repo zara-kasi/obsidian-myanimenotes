@@ -193,57 +193,76 @@ function renderPropertyRow(
   rowEl.setAttribute('draggable', 'true');
   rowEl.setAttribute('data-id', prop.id);
   
+  // Check if this is a permanent property
+  const isPermanent = prop.key === 'cassette' || prop.key === 'synced';
+  
+  if (isPermanent) {
+    rowEl.addClass('cassette-property-permanent');
+  }
+  
   // Drag handle
   const dragHandle = rowEl.createDiv({ cls: 'cassette-drag-handle' });
   setIcon(dragHandle, 'grip-vertical');
   
-  // Property name input
+  // Property name input (read-only for permanent properties)
   const nameInput = rowEl.createEl('input', {
     cls: 'cassette-property-name',
     type: 'text',
     value: prop.customName,
     attr: {
-      placeholder: 'Property name'
+      placeholder: 'Property name',
+      ...(isPermanent && { readonly: 'true' })
     }
   });
-  nameInput.addEventListener('input', async (e) => {
-    prop.customName = (e.target as HTMLInputElement).value;
-    await saveTemplateConfig(plugin, type, config);
-  });
   
-  // Template variable input (editable)
+  if (!isPermanent) {
+    nameInput.addEventListener('input', async (e) => {
+      prop.customName = (e.target as HTMLInputElement).value;
+      await saveTemplateConfig(plugin, type, config);
+    });
+  }
+  
+  // Template variable input (read-only for permanent properties)
   const templateInput = rowEl.createEl('input', {
     cls: 'cassette-template-var',
     type: 'text',
     value: prop.key ? `{{${prop.key}}}` : '',
     attr: {
-      placeholder: 'Property value'
+      placeholder: 'Property value',
+      ...(isPermanent && { readonly: 'true' })
     }
   });
   
-  // Store the raw value without brackets
-  templateInput.addEventListener('blur', async (e) => {
-    const value = (e.target as HTMLInputElement).value;
-    // Remove brackets and store clean key
-    prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
-    // Update display with brackets
-    (e.target as HTMLInputElement).value = prop.key ? `{{${prop.key}}}` : '';
-    await saveTemplateConfig(plugin, type, config);
-  });
+  if (!isPermanent) {
+    // Store the raw value without brackets
+    templateInput.addEventListener('blur', async (e) => {
+      const value = (e.target as HTMLInputElement).value;
+      // Remove brackets and store clean key
+      prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
+      // Update display with brackets
+      (e.target as HTMLInputElement).value = prop.key ? `{{${prop.key}}}` : '';
+      await saveTemplateConfig(plugin, type, config);
+    });
+    
+    templateInput.addEventListener('input', (e) => {
+      // Just store the current value as-is while typing
+      const value = (e.target as HTMLInputElement).value;
+      // Remove brackets for storage
+      prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
+    });
+  }
   
-  templateInput.addEventListener('input', (e) => {
-    // Just store the current value as-is while typing
-    const value = (e.target as HTMLInputElement).value;
-    // Remove brackets for storage
-    prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
-  });
-  
-  // Delete button
-  const deleteButton = rowEl.createDiv({ cls: 'cassette-delete-button' });
-  setIcon(deleteButton, 'trash-2');
-  deleteButton.addEventListener('click', async () => {
-    await removeProperty(plugin, state, prop.id, config, type);
-  });
+  // Delete button (hidden for permanent properties)
+  if (!isPermanent) {
+    const deleteButton = rowEl.createDiv({ cls: 'cassette-delete-button' });
+    setIcon(deleteButton, 'trash-2');
+    deleteButton.addEventListener('click', async () => {
+      await removeProperty(plugin, state, prop.id, config, type);
+    });
+  } else {
+    // Add a spacer to maintain alignment for permanent properties
+    rowEl.createDiv({ cls: 'cassette-delete-button-spacer' });
+  }
   
   // Drag events
   rowEl.addEventListener('dragstart', (e) => {
