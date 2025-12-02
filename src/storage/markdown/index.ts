@@ -1,6 +1,12 @@
+/**
+ * Markdown Module Exports
+ * 
+ * Template system only - PropertyMapping removed
+ */
+
 // Frontmatter builder
 export {
-  buildSyncedFrontmatterProperties
+  buildFrontmatterFromTemplate
 } from './frontmatter-builder';
 
 // Markdown generator
@@ -9,9 +15,13 @@ export {
   updateMarkdownFileFrontmatter
 } from './markdown-generator';
 
-// Property mapping
-export type { PropertyMapping } from './property-mapping';
+// Template helper utilities
 export {
-  DEFAULT_PROPERTY_MAPPING,
-  getMappedPropertyName
-} from './property-mapping';
+  getTemplate,
+  getFolderPath,
+  getPropertyName,
+  hasProperty,
+  getOrderedProperties,
+  getOrderedPropertyKeys,
+  createPropertyMap
+} from './template-helper';
