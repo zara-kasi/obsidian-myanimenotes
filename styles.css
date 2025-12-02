@@ -81,13 +81,19 @@
   background-color: var(--background-modifier-hover);
 }
 
-/* Collapse/Expand icon - positioned on the right */
+/* Template name container with icon */
+.cassette-template-name-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Collapse/Expand icon - next to the name */
 .cassette-collapse-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  margin-left: auto;
 }
 
 .cassette-collapse-icon svg {
