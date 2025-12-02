@@ -1,7 +1,6 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import CassettePlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
-import { renderPropertyMappingSection } from './property-settings';
 import { 
   renderTemplateSection,
   createTemplateSettingsState,
@@ -29,16 +28,15 @@ export class CassetteSettingTab extends PluginSettingTab {
     this.renderMALSection(containerEl);
 
     // ========================================================================
-    // Template Section
+    // Template Section (Primary Configuration)
     // ========================================================================
     
     renderTemplateSection(containerEl, this.plugin, this.templateState);
 
     // ========================================================================
-    // Property Customization Section
+    // Property Customization Section - REMOVED
+    // Now handled entirely through templates
     // ========================================================================
-    
-    renderPropertyMappingSection(containerEl, this.plugin);
 
     // ========================================================================
     // Sync Section
