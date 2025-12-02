@@ -1,9 +1,3 @@
-/**
- * Settings Module Exports
- * 
- * Property customization removed - template system only
- */
-
 export { CassetteSettingTab } from './settings-tab';
 export type { CassetteSettings } from './settings-interface';
 export { DEFAULT_SETTINGS } from './settings-interface';
