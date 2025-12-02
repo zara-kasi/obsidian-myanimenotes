@@ -96,7 +96,7 @@ function renderExpandableTemplate(
   if (isExpanded) {
     const contentContainer = container.createDiv({ cls: 'cassette-template-content' });
     
-    // Folder path setting (using same logic as main folder settings)
+    // Folder path setting
     new Setting(contentContainer)
       .setName('Folder Path')
       .setDesc('Where notes will be saved')
@@ -110,14 +110,6 @@ function renderExpandableTemplate(
             const normalizedPath = normalizePath(value.trim() || `Cassette/${type === 'anime' ? 'Anime' : 'Manga'}`);
             config.folderPath = normalizedPath;
             await saveTemplateConfig(plugin, type, config);
-            
-            // Also update the corresponding main folder setting
-            if (type === 'anime') {
-              plugin.settings.animeFolder = normalizedPath;
-            } else {
-              plugin.settings.mangaFolder = normalizedPath;
-            }
-            await plugin.saveSettings();
           });
       });
     
