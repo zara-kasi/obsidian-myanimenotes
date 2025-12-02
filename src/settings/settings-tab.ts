@@ -21,32 +21,19 @@ export class CassetteSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    // ========================================================================
     // MAL Section
-    // ========================================================================
     
     this.renderMALSection(containerEl);
 
-    // ========================================================================
-    // Template Section (Primary Configuration)
-    // ========================================================================
+    // Template Section
     
     renderTemplateSection(containerEl, this.plugin, this.templateState);
 
-    // ========================================================================
-    // Property Customization Section - REMOVED
-    // Now handled entirely through templates
-    // ========================================================================
-
-    // ========================================================================
     // Sync Section
-    // ========================================================================
     
     this.renderSyncSection(containerEl);
    
-    // ========================================================================
     // Debug Section
-    // ========================================================================
     
     new Setting(containerEl)
       .setName('Debug mode')
