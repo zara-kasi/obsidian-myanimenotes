@@ -1,13 +1,3 @@
-/**
- * Settings Interface - Template System Only
- * 
- * Completely removed:
- * - propertyMapping
- * - useCustomPropertyMapping
- * - animeFolder (now in templates)
- * - mangaFolder (now in templates)
- */
-
 import type { MALUserInfo } from '../api/mal';
 import type { TemplateConfig } from './template-config';
 
@@ -66,7 +56,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malAuthenticated: false,
   malAuthState: null, 
   
-  // Template system (primary configuration)
+  // Template system
   animeTemplate: undefined,
   mangaTemplate: undefined,
   
