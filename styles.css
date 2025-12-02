@@ -127,17 +127,6 @@
   position: relative;
 }
 
-/* Permanent property styling */
-.cassette-property-row.cassette-property-permanent {
-  background-color: var(--background-modifier-border-hover);
-  opacity: 0.8;
-}
-
-.cassette-property-row.cassette-property-permanent input {
-  cursor: default;
-  opacity: 0.7;
-}
-
 .cassette-property-row.dragging {
   opacity: 0.5;
 }
