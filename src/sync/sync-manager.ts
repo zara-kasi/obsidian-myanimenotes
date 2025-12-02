@@ -1,23 +1,16 @@
-/**
- * Sync Manager - Template System Only
- * 
- * No more StorageConfig - everything from templates
- */
-
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem, SyncResult } from '../models';
 import { MediaCategory } from '../models';
 import { syncMAL, type MALSyncOptions } from './mal-sync-service';
-import { saveMediaItemsByCategory } from '../storage';
+import { saveMediaItemsByCategory, type StorageConfig } from '../storage';
 import { createDebugLogger, type DebugLogger } from '../utils';
 import { showNotice } from '../utils';
-
 /**
  * Complete sync options
- * Simplified - no more storageConfig
  */
 export interface CompleteSyncOptions extends MALSyncOptions {
   saveToVault?: boolean;
+  storageConfig?: StorageConfig;
 }
 
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
@@ -29,10 +22,24 @@ export class SyncManager {
   private debug: DebugLogger;
   private isSyncing: boolean = false;
   private lastSyncTime: number = 0;
-  
   constructor(private plugin: CassettePlugin) {
     this.debug = createDebugLogger(plugin, 'Sync Manager');
+        // Load persisted last sync time from settings
     this.lastSyncTime = plugin.settings.lastSuccessfulSync || 0;
+ }
+
+  /**
+   * Gets storage configuration from plugin settings
+   */
+  private getStorageConfig(): StorageConfig {
+    return {
+      animeFolder: this.plugin.settings.animeFolder,
+      mangaFolder: this.plugin.settings.mangaFolder,
+      createFolders: true,
+      propertyMapping: this.plugin.settings.useCustomPropertyMapping 
+        ? this.plugin.settings.propertyMapping 
+        : undefined,
+    };
   }
 
   /**
@@ -44,62 +51,67 @@ export class SyncManager {
     this.debug.log('[Sync Manager] Saved last sync timestamp');
   }
   
-  /**
-   * Check if sync can proceed
+    /**
+   * Check if sync can proceed, throw error if not
    */
   private checkSyncGuard(): boolean {
-    if (this.isSyncing) {
-      this.debug.log('[Sync Manager] Sync already in progress');
-      showNotice(this.plugin, 'Sync already in progress.', 4000);
-      return false;
-    }
-
-    const timeSinceLastSync = Date.now() - this.lastSyncTime;
-    if (this.lastSyncTime > 0 && timeSinceLastSync < SYNC_COOLDOWN_MS) {
-      const minutesRemaining = Math.ceil((SYNC_COOLDOWN_MS - timeSinceLastSync) / 60000);
-      this.debug.log(`[Sync Manager] Sync cooldown active - ${minutesRemaining} minute(s) remaining`);
-      showNotice(
-        this.plugin, 
-        `Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`,
-        4000
-      );
-      return false;
-    }
-
-    return true;
+  // Prevent overlapping syncs
+  if (this.isSyncing) {
+    this.debug.log('[Sync Manager] Sync already in progress - blocking new sync request');
+    showNotice(this.plugin, 'Sync already in progress.', 4000);
+    return false;
   }
+
+  // Enforce cooldown period
+  const timeSinceLastSync = Date.now() - this.lastSyncTime;
+  if (this.lastSyncTime > 0 && timeSinceLastSync < SYNC_COOLDOWN_MS) {
+    const minutesRemaining = Math.ceil((SYNC_COOLDOWN_MS - timeSinceLastSync) / 60000);
+    this.debug.log(
+      `[Sync Manager] Sync cooldown active - ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} remaining`
+    );
+    showNotice(this.plugin, 
+      `Please wait ${minutesRemaining} minute${minutesRemaining > 1 ? 's' : ''} before syncing again.`,
+      4000
+    );
+    return false;
+  }
+
+  return true;
+}
 
   /**
    * Performs a complete sync from MAL
-   * Uses template system automatically
+   * @param options Sync options
+   * @returns Synced items and result
    */
   async syncFromMAL(options: CompleteSyncOptions = {}): Promise<{
     items: UniversalMediaItem[];
     result: SyncResult;
     savedPaths?: { anime: string[]; manga: string[] };
   }> {
-    if (!this.checkSyncGuard()) {
-      return { 
-        items: [], 
-        result: {
-          success: false,
-          itemsProcessed: 0,
-          itemsSucceeded: 0,
-          itemsFailed: 0,
-          results: [],
-          errors: [],
-          startTime: Date.now(),
-          endTime: Date.now(),
-        }
-      };
-    }
-    
+      // Check sync guard
+  if (!this.checkSyncGuard()) {
+    // Guard check failed - return empty result, no error
+    return { 
+      items: [], 
+      result: {
+        success: false,
+        itemsProcessed: 0,
+        itemsSucceeded: 0,
+        itemsFailed: 0,
+        results: [],
+        errors: [],
+        startTime: Date.now(),
+        endTime: Date.now(),
+      }
+    };
+  }
     this.isSyncing = true;
 
     try {
       this.debug.log('[Sync Manager] Starting MAL sync...', options);
       
-      // Ensure cassette index is initialized
+      // Ensure cassette index is initialized before sync
       if (this.plugin.cassetteIndex) {
         this.debug.log('[Sync Manager] Ensuring cassette index is initialized...');
         await this.plugin.cassetteIndex.ensureInitialized();
@@ -114,8 +126,13 @@ export class SyncManager {
       
       if (options.saveToVault !== false && items.length > 0) {
         try {
-          // No config needed - templates handle everything
-          savedPaths = await saveMediaItemsByCategory(this.plugin, items);
+          const storageConfig = options.storageConfig || this.getStorageConfig();
+          
+          savedPaths = await saveMediaItemsByCategory(
+            this.plugin,
+            items,
+            storageConfig
+          );
           
           this.debug.log('[Sync Manager] Saved to vault:', savedPaths);
         } catch (saveError) {
@@ -125,7 +142,7 @@ export class SyncManager {
         }        
       }
       
-      // Update last sync time
+      // Update last sync time and save to settings
       this.lastSyncTime = Date.now();
       this.plugin.settings.lastSuccessfulSync = this.lastSyncTime;
       await this.plugin.saveSettings();
@@ -136,12 +153,16 @@ export class SyncManager {
       console.error('[Sync Manager] Sync failed:', error);
       throw error;
     } finally {
+      // Always mark sync as complete
       this.isSyncing = false;
     }
   }
 
   /**
    * Quick sync for a specific category
+   * @param category anime or manga
+   * @param saveToVault Whether to save to vault
+   * @returns Synced items
    */
   async quickSync(
     category: MediaCategory,
@@ -149,18 +170,24 @@ export class SyncManager {
   ): Promise<UniversalMediaItem[]> {
     this.debug.log(`[Sync Manager] Quick sync for ${category}...`);
     
-    const options: CompleteSyncOptions = {
+    const options: MALSyncOptions = {
       syncAnime: category === MediaCategory.ANIME,
       syncManga: category === MediaCategory.MANGA,
+    };
+    
+    const completeOptions: CompleteSyncOptions = {
+      ...options,
       saveToVault
     };
     
-    const { items } = await this.syncFromMAL(options);
+    const { items } = await this.syncFromMAL(completeOptions);
     return items;
   }
 
   /**
    * Syncs only anime
+   * @param saveToVault Whether to save to vault
+   * @returns Synced anime items
    */
   async syncAnime(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
     return this.quickSync(MediaCategory.ANIME, saveToVault);
@@ -168,16 +195,19 @@ export class SyncManager {
 
   /**
    * Syncs only manga
+   * @param saveToVault Whether to save to vault
+   * @returns Synced manga items
    */
   async syncManga(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
     return this.quickSync(MediaCategory.MANGA, saveToVault);
   }
 
-  /**
+    /**
    * Syncs active statuses: Watching anime + Reading manga
+   * Used by both the "Sync active" command and optimized auto-sync
    */
   async syncActiveStatuses(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
-    this.debug.log('[Sync Manager] Syncing active statuses...');
+    this.debug.log('[Sync Manager] Syncing active statuses (watching anime + reading manga)...');
     
     const options: CompleteSyncOptions = {
       syncAnime: true,
@@ -193,6 +223,7 @@ export class SyncManager {
 
   /**
    * Gets sync statistics
+   * @returns Sync statistics
    */
   getSyncStats(): {
     totalItems?: number;
@@ -207,6 +238,8 @@ export class SyncManager {
 
 /**
  * Creates a sync manager instance
+ * @param plugin Plugin instance
+ * @returns Sync manager
  */
 export function createSyncManager(plugin: CassettePlugin): SyncManager {
   return new SyncManager(plugin);
