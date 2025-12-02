@@ -85,12 +85,11 @@
   background-color: var(--background-modifier-hover);
 }
 
-/* Collapse/Expand icon - absolutely positioned to the right */
+/* Collapse/Expand icon - absolutely positioned to align with setting name */
 .cassette-collapse-icon {
   position: absolute;
   right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 20px; /* Aligns with the setting name line */
   display: flex;
   align-items: center;
   justify-content: center;
