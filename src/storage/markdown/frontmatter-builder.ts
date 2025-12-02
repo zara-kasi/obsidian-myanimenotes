@@ -1,13 +1,16 @@
 /**
  * Frontmatter Builder
  * 
- * Builds frontmatter properties from media items using TemplateConfig
- * ONLY uses templates - no more PropertyMapping
+ * Builds frontmatter properties from media items with cassette as primary key
+ * Handles merging with existing frontmatter while preserving user properties
+ * 
+ * REFACTORED: Removed manual YAML serialization
+ * Now returns plain objects - Obsidian's FileManager.processFrontMatter handles YAML
  */
 
 import type { UniversalMediaItem } from '../../models';
-import type { TemplateConfig } from '../../settings/template-config';
-import { hasProperty, getPropertyName } from './template-helper';
+import type { PropertyMapping } from './property-mapping';
+import { getMappedPropertyName } from './property-mapping';
 import { 
   formatPropertyAsWikiLink,
   getWikiLinkFormatType,
@@ -15,74 +18,50 @@ import {
 } from '../file-utils';
 
 /**
- * Builds synced frontmatter properties from template
+ * Builds synced frontmatter properties including cassette
  * CRITICAL: cassette is always the first property (primary key)
  * 
  * Returns plain JavaScript object - Obsidian's FileManager.processFrontMatter
  * will handle conversion to YAML and safe file writing
  */
-export function buildFrontmatterFromTemplate(
+export function buildSyncedFrontmatterProperties(
   item: UniversalMediaItem,
-  template: TemplateConfig,
+  mapping: PropertyMapping,
   cassetteSync: string
 ): Record<string, any> {
   const properties: Record<string, any> = {};
   
   // CRITICAL: Add cassette as the first property (primary key)
-  // This is hardcoded and always present
   properties.cassette = cassetteSync;
   
-  /**
-   * Helper to add a property if it exists in template
-   */
-  const addProperty = (key: string, value: any) => {
-    // Skip if property not in template
-    if (!hasProperty(template, key)) {
-      return;
+  const addProperty = (key: keyof PropertyMapping, value: any) => {
+    if (value !== undefined && value !== null && value !== '') {
+      const mappedKey = getMappedPropertyName(key, mapping);
+      
+      // Wiki link formatting (for navigation/linking)
+      const wikiLinkType = getWikiLinkFormatType(key);
+      if (wikiLinkType) {
+        properties[mappedKey] = formatPropertyAsWikiLink(value, wikiLinkType);
+        return;
+      }
+      
+      // Display formatting (for readability)
+      if (key === 'duration') {
+        properties[mappedKey] = formatDuration(value);
+        return;
+      }
+      
+      // Default: use value as-is
+      properties[mappedKey] = value;
     }
-    
-    // Skip if value is empty
-    if (value === undefined || value === null || value === '') {
-      return;
-    }
-    
-    // Get custom property name from template
-    const customName = getPropertyName(template, key);
-    if (!customName) {
-      return;
-    }
-    
-    // Wiki link formatting (for navigation/linking)
-    const wikiLinkType = getWikiLinkFormatType(key);
-    if (wikiLinkType) {
-      properties[customName] = formatPropertyAsWikiLink(value, wikiLinkType);
-      return;
-    }
-    
-    // Display formatting (for readability)
-    if (key === 'duration') {
-      properties[customName] = formatDuration(value);
-      return;
-    }
-    
-    // Default: use value as-is
-    properties[customName] = value;
   };
-  
-  // Add sync timestamp (hardcoded, always present)
-  if (hasProperty(template, 'synced') && item.syncedAt) {
-    const syncedName = getPropertyName(template, 'synced');
-    if (syncedName) {
-      properties[syncedName] = item.syncedAt;
-    }
-  }
   
   // Basic fields
   addProperty('id', item.id);
   addProperty('title', item.title);
   
   // Aliases (Obsidian's built-in property for alternative titles)
-  if (item.alternativeTitles && hasProperty(template, 'aliases')) {
+  if (item.alternativeTitles) {
     const aliases: string[] = [];
     if (item.alternativeTitles.en) aliases.push(item.alternativeTitles.en);
     if (item.alternativeTitles.ja) aliases.push(item.alternativeTitles.ja);
@@ -96,7 +75,11 @@ export function buildFrontmatterFromTemplate(
   
   addProperty('category', item.category);
   addProperty('platform', item.platform);
-  addProperty('url', item.url);
+  
+  // Platform URL (e.g., MyAnimeList page)
+  if (item.url) {
+    addProperty('url', item.url);
+  }
   
   // Visual
   if (item.mainPicture) {
@@ -104,7 +87,9 @@ export function buildFrontmatterFromTemplate(
   }
   
   // Synopsis
-  addProperty('synopsis', item.synopsis);
+  if (item.synopsis) {
+    addProperty('synopsis', item.synopsis);
+  }
   
   // Metadata
   addProperty('mediaType', item.mediaType);
@@ -115,6 +100,11 @@ export function buildFrontmatterFromTemplate(
   if (item.genres && item.genres.length > 0) {
     const genreNames = item.genres.map(g => g.name);
     addProperty('genres', genreNames);
+  }
+  
+  // Add sync timestamp if available (for sync optimization)
+  if (item.syncedAt) {
+    addProperty('synced', item.syncedAt);
   }
   
   // Origin material (common to both anime and manga)
