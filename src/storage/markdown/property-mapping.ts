@@ -7,7 +7,7 @@ export interface PropertyMapping {
   // Sync identifier (CRITICAL: Primary key for file lookup)
   cassetteSync?: string;
   
-  synced?: string; // Last sync timestamp - fixed internal property
+  updatedAt?: string; // Last sync timestamp - fixed internal property
   
   // Basic fields (common to both anime and manga)
   id?: string;
@@ -67,7 +67,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // Sync identifier (PRIMARY KEY - never change this)
   cassetteSync: 'cassette',
   
-  synced: 'synced', // Fixed internal sync timestamp
+  updatedAt: 'synced', // Fixed internal sync timestamp
   
   // Basic fields (common)
   id: 'id',
