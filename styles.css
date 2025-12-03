@@ -235,3 +235,21 @@
 .cassette-button-icon svg {
   display: block;
 }
+
+/* Variable Suggestion Styles */
+.cassette-variable-suggestion {
+  padding: 4px 8px;
+}
+
+.cassette-variable-key {
+  font-family: var(--font-monospace);
+  font-weight: 500;
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+}
+
+.cassette-variable-label {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
