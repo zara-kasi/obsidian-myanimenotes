@@ -37,7 +37,7 @@ export interface PropertyMetadata {
 const COMMON_PROPERTIES: PropertyMetadata[] = [
   { key: 'title', label: 'Title', defaultName: 'title' },
   { key: 'alternativeTitles', label: 'Alternative Titles', defaultName: 'aliases' },
-  { key: 'id', label: 'ID', defaultName: 'id' },
+  { key: 'id', label: 'Media ID', defaultName: 'id' },
   { key: 'category', label: 'Category', defaultName: 'category' },
   { key: 'platform', label: 'Platform', defaultName: 'platform' },
   { key: 'url', label: 'Source URL', defaultName: 'source' },
