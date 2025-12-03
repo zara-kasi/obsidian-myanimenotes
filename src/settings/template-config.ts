@@ -36,6 +36,7 @@ export interface PropertyMetadata {
  */
 const COMMON_PROPERTIES: PropertyMetadata[] = [
   { key: 'title', label: 'Title', defaultName: 'title' },
+  { key: 'aliases', label: 'Alternative Titles', defaultName: 'aliases' },
   { key: 'id', label: 'ID', defaultName: 'id' },
   { key: 'category', label: 'Category', defaultName: 'category' },
   { key: 'platform', label: 'Platform', defaultName: 'platform' },
@@ -107,31 +108,32 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
     
     // Common properties
     { id: 'prop-1', key: 'title', customName: 'title', order: 3 },
-    { id: 'prop-2', key: 'id', customName: 'id', order: 4 },
-    { id: 'prop-3', key: 'category', customName: 'category', order: 5 },
-    { id: 'prop-4', key: 'platform', customName: 'platform', order: 6 },
-    { id: 'prop-5', key: 'url', customName: 'source', order: 7 },
-    { id: 'prop-6', key: 'mainPicture', customName: 'image', order: 8 },
-    { id: 'prop-7', key: 'synopsis', customName: 'description', order: 9 },
-    { id: 'prop-8', key: 'mediaType', customName: 'media', order: 10 },
-    { id: 'prop-9', key: 'status', customName: 'state', order: 11 },
-    { id: 'prop-10', key: 'mean', customName: 'score', order: 12 },
-    { id: 'prop-11', key: 'genres', customName: 'genres', order: 13 },
-    { id: 'prop-12', key: 'source', customName: 'origin', order: 14 },
-    { id: 'prop-13', key: 'releasedStart', customName: 'released', order: 15 },
-    { id: 'prop-14', key: 'releasedEnd', customName: 'ended', order: 16 },
+    { id: 'prop-2', key: 'aliases', customName: 'aliases', order: 4 },
+    { id: 'prop-3', key: 'id', customName: 'id', order: 5 },
+    { id: 'prop-4', key: 'category', customName: 'category', order: 6 },
+    { id: 'prop-5', key: 'platform', customName: 'platform', order: 7 },
+    { id: 'prop-6', key: 'url', customName: 'source', order: 8 },
+    { id: 'prop-7', key: 'mainPicture', customName: 'image', order: 9 },
+    { id: 'prop-8', key: 'synopsis', customName: 'description', order: 10 },
+    { id: 'prop-9', key: 'mediaType', customName: 'media', order: 11 },
+    { id: 'prop-10', key: 'status', customName: 'state', order: 12 },
+    { id: 'prop-11', key: 'mean', customName: 'score', order: 13 },
+    { id: 'prop-12', key: 'genres', customName: 'genres', order: 14 },
+    { id: 'prop-13', key: 'source', customName: 'origin', order: 15 },
+    { id: 'prop-14', key: 'releasedStart', customName: 'released', order: 16 },
+    { id: 'prop-15', key: 'releasedEnd', customName: 'ended', order: 17 },
     
     // Anime-specific properties
-    { id: 'prop-15', key: 'numEpisodes', customName: 'episodes', order: 17 },
-    { id: 'prop-16', key: 'numEpisodesWatched', customName: 'eps_seen', order: 18 },
-    { id: 'prop-17', key: 'studios', customName: 'studios', order: 19 },
-    { id: 'prop-18', key: 'duration', customName: 'duration', order: 20 },
+    { id: 'prop-16', key: 'numEpisodes', customName: 'episodes', order: 18 },
+    { id: 'prop-17', key: 'numEpisodesWatched', customName: 'eps_seen', order: 19 },
+    { id: 'prop-18', key: 'studios', customName: 'studios', order: 20 },
+    { id: 'prop-19', key: 'duration', customName: 'duration', order: 21 },
     
     // User data (common)
-    { id: 'prop-19', key: 'userStatus', customName: 'status', order: 21 },
-    { id: 'prop-20', key: 'userScore', customName: 'rating', order: 22 },
-    { id: 'prop-21', key: 'userStartDate', customName: 'started', order: 23 },
-    { id: 'prop-22', key: 'userFinishDate', customName: 'finished', order: 24 },
+    { id: 'prop-20', key: 'userStatus', customName: 'status', order: 22 },
+    { id: 'prop-21', key: 'userScore', customName: 'rating', order: 23 },
+    { id: 'prop-22', key: 'userStartDate', customName: 'started', order: 24 },
+    { id: 'prop-23', key: 'userFinishDate', customName: 'finished', order: 25 },
   ]
 };
 
@@ -149,32 +151,33 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
     
     // Common properties
     { id: 'prop-1', key: 'title', customName: 'title', order: 3 },
-    { id: 'prop-2', key: 'id', customName: 'id', order: 4 },
-    { id: 'prop-3', key: 'category', customName: 'category', order: 5 },
-    { id: 'prop-4', key: 'platform', customName: 'platform', order: 6 },
-    { id: 'prop-5', key: 'url', customName: 'source', order: 7 },
-    { id: 'prop-6', key: 'mainPicture', customName: 'image', order: 8 },
-    { id: 'prop-7', key: 'synopsis', customName: 'description', order: 9 },
-    { id: 'prop-8', key: 'mediaType', customName: 'media', order: 10 },
-    { id: 'prop-9', key: 'status', customName: 'state', order: 11 },
-    { id: 'prop-10', key: 'mean', customName: 'score', order: 12 },
-    { id: 'prop-11', key: 'genres', customName: 'genres', order: 13 },
-    { id: 'prop-12', key: 'source', customName: 'origin', order: 14 },
-    { id: 'prop-13', key: 'releasedStart', customName: 'released', order: 15 },
-    { id: 'prop-14', key: 'releasedEnd', customName: 'ended', order: 16 },
+    { id: 'prop-2', key: 'aliases', customName: 'aliases', order: 4 },
+    { id: 'prop-3', key: 'id', customName: 'id', order: 5 },
+    { id: 'prop-4', key: 'category', customName: 'category', order: 6 },
+    { id: 'prop-5', key: 'platform', customName: 'platform', order: 7 },
+    { id: 'prop-6', key: 'url', customName: 'source', order: 8 },
+    { id: 'prop-7', key: 'mainPicture', customName: 'image', order: 9 },
+    { id: 'prop-8', key: 'synopsis', customName: 'description', order: 10 },
+    { id: 'prop-9', key: 'mediaType', customName: 'media', order: 11 },
+    { id: 'prop-10', key: 'status', customName: 'state', order: 12 },
+    { id: 'prop-11', key: 'mean', customName: 'score', order: 13 },
+    { id: 'prop-12', key: 'genres', customName: 'genres', order: 14 },
+    { id: 'prop-13', key: 'source', customName: 'origin', order: 15 },
+    { id: 'prop-14', key: 'releasedStart', customName: 'released', order: 16 },
+    { id: 'prop-15', key: 'releasedEnd', customName: 'ended', order: 17 },
     
     // Manga-specific properties
-    { id: 'prop-15', key: 'numVolumes', customName: 'volumes', order: 17 },
-    { id: 'prop-16', key: 'numVolumesRead', customName: 'vol_read', order: 18 },
-    { id: 'prop-17', key: 'numChapters', customName: 'chapters', order: 19 },
-    { id: 'prop-18', key: 'numChaptersRead', customName: 'chap_read', order: 20 },
-    { id: 'prop-19', key: 'authors', customName: 'authors', order: 21 },
+    { id: 'prop-16', key: 'numVolumes', customName: 'volumes', order: 18 },
+    { id: 'prop-17', key: 'numVolumesRead', customName: 'vol_read', order: 19 },
+    { id: 'prop-18', key: 'numChapters', customName: 'chapters', order: 20 },
+    { id: 'prop-19', key: 'numChaptersRead', customName: 'chap_read', order: 21 },
+    { id: 'prop-20', key: 'authors', customName: 'authors', order: 22 },
     
     // User data (common)
-    { id: 'prop-20', key: 'userStatus', customName: 'status', order: 22 },
-    { id: 'prop-21', key: 'userScore', customName: 'rating', order: 23 },
-    { id: 'prop-22', key: 'userStartDate', customName: 'started', order: 24 },
-    { id: 'prop-23', key: 'userFinishDate', customName: 'finished', order: 25 },
+    { id: 'prop-21', key: 'userStatus', customName: 'status', order: 23 },
+    { id: 'prop-22', key: 'userScore', customName: 'rating', order: 24 },
+    { id: 'prop-23', key: 'userStartDate', customName: 'started', order: 25 },
+    { id: 'prop-24', key: 'userFinishDate', customName: 'finished', order: 26 },
   ]
 };
 
