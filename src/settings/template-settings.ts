@@ -5,9 +5,11 @@ import {
   TemplateConfig, 
   PropertyItem, 
   generatePropertyId,
+  getAvailableProperties,
   DEFAULT_ANIME_TEMPLATE,
   DEFAULT_MANGA_TEMPLATE
 } from './template-config';
+import { VariableSuggest } from './variable-suggest';
 
 /**
  * Renders the template configuration section
@@ -216,6 +218,10 @@ function renderPropertyRow(
       ...(isPermanent && { readonly: 'true' })
     }
   });
+  
+  // Attach the variable suggester
+const variables = getAvailableProperties(type); // 'anime' or 'manga'
+new VariableSuggest(plugin.app, templateInput, variables);
   
   if (!isPermanent) {
     // Store the raw value without brackets
