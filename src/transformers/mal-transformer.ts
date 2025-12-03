@@ -178,7 +178,7 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
     userFinishDate: listStatus?.finish_date,    
     
     // Sync metadata - MAL's updated_at timestamp
-    syncedAt: listStatus?.updated_at,
+    updatedAt: listStatus?.updated_at,
     // Platform metadata
     platform: 'mal',
   };
@@ -238,7 +238,7 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     userFinishDate: listStatus?.finish_date,  
     
     // Sync metadata - MAL's updated_at timestamp
-    syncedAt: listStatus?.updated_at,
+    updatedAt: listStatus?.updated_at,
     // Platform metadata
     platform: 'mal',
   };
