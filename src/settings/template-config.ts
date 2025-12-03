@@ -36,7 +36,7 @@ export interface PropertyMetadata {
  */
 const COMMON_PROPERTIES: PropertyMetadata[] = [
   { key: 'title', label: 'Title', defaultName: 'title' },
-  { key: 'aliases', label: 'Alternative Titles', defaultName: 'aliases' },
+  { key: 'alternativeTitles', label: 'Alternative Titles', defaultName: 'aliases' },
   { key: 'id', label: 'ID', defaultName: 'id' },
   { key: 'category', label: 'Category', defaultName: 'category' },
   { key: 'platform', label: 'Platform', defaultName: 'platform' },
@@ -96,19 +96,19 @@ export function getAvailableProperties(category: 'anime' | 'manga'): PropertyMet
 
 /**
  * Default anime template
- * NOTE: 'cassette' and 'synced' are permanent properties that cannot be removed
+ * NOTE: 'cassetteSync' and 'syncedAt' are permanent properties that cannot be removed
  * Contains only common + anime-specific properties
  */
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
   folderPath: 'Cassette/Anime',
   properties: [
-    // Permanent properties
-    { id: 'prop-permanent-1', key: 'cassette', customName: 'cassette', order: 1 },
-    { id: 'prop-permanent-2', key: 'synced', customName: 'synced', order: 2 },
+    // Permanent properties (use internal field names, not API field names)
+    { id: 'prop-permanent-1', key: 'cassetteSync', customName: 'cassette', order: 1 },
+    { id: 'prop-permanent-2', key: 'syncedAt', customName: 'synced', order: 2 },
     
     // Common properties
     { id: 'prop-1', key: 'title', customName: 'title', order: 3 },
-    { id: 'prop-2', key: 'aliases', customName: 'aliases', order: 4 },
+    { id: 'prop-2', key: 'alternativeTitles', customName: 'aliases', order: 4 },
     { id: 'prop-3', key: 'id', customName: 'id', order: 5 },
     { id: 'prop-4', key: 'category', customName: 'category', order: 6 },
     { id: 'prop-5', key: 'platform', customName: 'platform', order: 7 },
@@ -139,19 +139,19 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
 
 /**
  * Default manga template
- * NOTE: 'cassette' and 'synced' are permanent properties that cannot be removed
+ * NOTE: 'cassetteSync' and 'syncedAt' are permanent properties that cannot be removed
  * Contains only common + manga-specific properties
  */
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
   folderPath: 'Cassette/Manga',
   properties: [
-    // Permanent properties
-    { id: 'prop-permanent-1', key: 'cassette', customName: 'cassette', order: 1 },
-    { id: 'prop-permanent-2', key: 'synced', customName: 'synced', order: 2 },
+    // Permanent properties (use internal field names, not API field names)
+    { id: 'prop-permanent-1', key: 'cassetteSync', customName: 'cassette', order: 1 },
+    { id: 'prop-permanent-2', key: 'syncedAt', customName: 'synced', order: 2 },
     
     // Common properties
     { id: 'prop-1', key: 'title', customName: 'title', order: 3 },
-    { id: 'prop-2', key: 'aliases', customName: 'aliases', order: 4 },
+    { id: 'prop-2', key: 'alternativeTitles', customName: 'aliases', order: 4 },
     { id: 'prop-3', key: 'id', customName: 'id', order: 5 },
     { id: 'prop-4', key: 'category', customName: 'category', order: 6 },
     { id: 'prop-5', key: 'platform', customName: 'platform', order: 7 },
