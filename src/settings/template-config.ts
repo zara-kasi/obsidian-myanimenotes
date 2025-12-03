@@ -96,7 +96,7 @@ export function getAvailableProperties(category: 'anime' | 'manga'): PropertyMet
 
 /**
  * Default anime template
- * NOTE: 'cassetteSync' and 'syncedAt' are permanent properties that cannot be removed
+ * NOTE: 'cassetteSync' and 'updatedAt' are permanent properties that cannot be removed
  * Contains only common + anime-specific properties
  */
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
@@ -104,7 +104,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
   properties: [
     // Permanent properties (use internal field names, not API field names)
     { id: 'prop-permanent-1', key: 'cassetteSync', customName: 'cassette', order: 1 },
-    { id: 'prop-permanent-2', key: 'syncedAt', customName: 'synced', order: 2 },
+    { id: 'prop-permanent-2', key: 'updatedAt', customName: 'synced', order: 2 },
     
     // Common properties
     { id: 'prop-1', key: 'title', customName: 'title', order: 3 },
@@ -139,7 +139,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
 
 /**
  * Default manga template
- * NOTE: 'cassetteSync' and 'syncedAt' are permanent properties that cannot be removed
+ * NOTE: 'cassetteSync' and 'updatedAt' are permanent properties that cannot be removed
  * Contains only common + manga-specific properties
  */
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
@@ -147,7 +147,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
   properties: [
     // Permanent properties (use internal field names, not API field names)
     { id: 'prop-permanent-1', key: 'cassetteSync', customName: 'cassette', order: 1 },
-    { id: 'prop-permanent-2', key: 'syncedAt', customName: 'synced', order: 2 },
+    { id: 'prop-permanent-2', key: 'updatedAt', customName: 'synced', order: 2 },
     
     // Common properties
     { id: 'prop-1', key: 'title', customName: 'title', order: 3 },
