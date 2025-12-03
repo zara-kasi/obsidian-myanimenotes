@@ -31,6 +31,8 @@ export interface CassetteSettings {
   animeTemplate?: TemplateConfig;
   mangaTemplate?: TemplateConfig;
   
+  // Property Customization
+  propertyMapping: PropertyMapping;
   
   // Sync Settings
   forceFullSync: boolean; 
@@ -40,7 +42,7 @@ export interface CassetteSettings {
   lastSuccessfulSync?: number; // Timestamp of last successful sync
   optimizeAutoSync: boolean; // Only sync active statuses during auto-sync
   
-  // Template Settings (for future use)
+  
   notificationsEnabled: boolean; // Enable/disable user notifications
   // Debug Settings
   debugMode: boolean;
@@ -64,6 +66,9 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   // Template system defaults
   animeTemplate: undefined,
   mangaTemplate: undefined,
+  
+  // Property customization defaults
+  propertyMapping: DEFAULT_PROPERTY_MAPPING,
   
   
   // Sync defaults
