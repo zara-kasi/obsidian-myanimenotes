@@ -250,6 +250,10 @@ function renderPropertyRow(
     rowEl.createDiv({ cls: 'cassette-delete-button-spacer' });
   }
   
+  // Attach the variable suggester
+const variables = getAvailableProperties(type); // 'anime' or 'manga'
+new VariableSuggest(plugin.app, templateInput, variables);
+  
   // Drag events
   rowEl.addEventListener('dragstart', (e) => {
     state.draggedElement = rowEl;
