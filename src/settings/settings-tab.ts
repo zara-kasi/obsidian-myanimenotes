@@ -157,7 +157,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       // Add description with "Learn more" link
       const descEl = authSetting.descEl;
       descEl.createSpan({ 
-        text: 'Sign in to MyAnimeList. ' 
+        text: 'Link your MyAnimeList account. ' 
       });
       descEl.createEl('a', {
         text: 'Learn more',
