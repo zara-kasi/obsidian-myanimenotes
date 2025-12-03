@@ -1,5 +1,4 @@
-import type { MALUserInfo } from '../api/mal';
-import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
+import type { MALUserInfo } from '../api/mal'
 import type { TemplateConfig } from './template-config';
 
 
@@ -31,9 +30,6 @@ export interface CassetteSettings {
   animeTemplate?: TemplateConfig;
   mangaTemplate?: TemplateConfig;
   
-  // Property Customization
-  propertyMapping: PropertyMapping;
-  
   // Sync Settings
   forceFullSync: boolean; 
   syncOnLoad: boolean; // Sync shortly after plugin loads (3 seconds)
@@ -42,7 +38,9 @@ export interface CassetteSettings {
   lastSuccessfulSync?: number; // Timestamp of last successful sync
   optimizeAutoSync: boolean; // Only sync active statuses during auto-sync
   
-  
+  // Template Settings (for future use)
+  useCustomTemplate: boolean;
+  customTemplatePath?: string;
   notificationsEnabled: boolean; // Enable/disable user notifications
   // Debug Settings
   debugMode: boolean;
@@ -65,11 +63,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   
   // Template system defaults
   animeTemplate: undefined,
-  mangaTemplate: undefined,
-  
-  // Property customization defaults
-  propertyMapping: DEFAULT_PROPERTY_MAPPING,
-  
+  mangaTemplate: undefined
   
   // Sync defaults
   forceFullSync: false,
@@ -78,7 +72,9 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   scheduledSyncInterval: 60, // 60 minutes default
   lastSuccessfulSync: undefined, // No previous sync 
   optimizeAutoSync: true,
-
+  // Template defaults
+  useCustomTemplate: false,
+  customTemplatePath: undefined,
   // Notification defaults
   notificationsEnabled: true,
   // Debug defaults
