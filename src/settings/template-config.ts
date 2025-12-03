@@ -29,74 +29,83 @@ export interface PropertyMetadata {
   key: string;              // Template variable (e.g., 'title')
   label: string;            // Display name in dropdown (e.g., 'Title')
   defaultName: string;      // Default property name (e.g., 'title')
-  category: 'anime' | 'manga' | 'common';  // Which template it belongs to
 }
 
 /**
- * All available properties with their metadata
+ * Common properties (shared by both anime and manga)
  */
-export const PROPERTY_METADATA: PropertyMetadata[] = [
-  // Common properties
-  { key: 'title', label: 'Title', defaultName: 'title', category: 'common' },
-  { key: 'id', label: 'ID', defaultName: 'id', category: 'common' },
-  { key: 'category', label: 'Category', defaultName: 'category', category: 'common' },
-  { key: 'platform', label: 'Platform', defaultName: 'platform', category: 'common' },
-  { key: 'url', label: 'Source URL', defaultName: 'source', category: 'common' },
-  { key: 'mainPicture', label: 'Cover Image', defaultName: 'image', category: 'common' },
-  { key: 'synopsis', label: 'Synopsis', defaultName: 'description', category: 'common' },
-  { key: 'mediaType', label: 'Media Type', defaultName: 'media', category: 'common' },
-  { key: 'status', label: 'Status', defaultName: 'state', category: 'common' },
-  { key: 'mean', label: 'Average Score', defaultName: 'score', category: 'common' },
-  { key: 'genres', label: 'Genres', defaultName: 'genres', category: 'common' },
-  { key: 'releasedStart', label: 'Released Start', defaultName: 'released', category: 'common' },
-  { key: 'releasedEnd', label: 'Released End', defaultName: 'ended', category: 'common' },
-  { key: 'source', label: 'Source Material', defaultName: 'origin', category: 'common' },
-  
-  // Anime-specific
-  { key: 'numEpisodes', label: 'Episodes', defaultName: 'episodes', category: 'anime' },
-  { key: 'numEpisodesWatched', label: 'Episodes Watched', defaultName: 'eps_seen', category: 'anime' },
-  { key: 'studios', label: 'Studios', defaultName: 'studios', category: 'anime' },
-  { key: 'duration', label: 'Duration', defaultName: 'duration', category: 'anime' },
-  
-  // Manga-specific
-  { key: 'numVolumes', label: 'Volumes', defaultName: 'volumes', category: 'manga' },
-  { key: 'numVolumesRead', label: 'Volumes Read', defaultName: 'vol_read', category: 'manga' },
-  { key: 'numChapters', label: 'Chapters', defaultName: 'chapters', category: 'manga' },
-  { key: 'numChaptersRead', label: 'Chapters Read', defaultName: 'chap_read', category: 'manga' },
-  { key: 'authors', label: 'Authors', defaultName: 'authors', category: 'manga' },
-  
-  // User data (common)
-  { key: 'userStatus', label: 'User Status', defaultName: 'status', category: 'common' },
-  { key: 'userScore', label: 'User Rating', defaultName: 'rating', category: 'common' },
-  { key: 'userStartDate', label: 'Started Date', defaultName: 'started', category: 'common' },
-  { key: 'userFinishDate', label: 'Finished Date', defaultName: 'finished', category: 'common' },
+const COMMON_PROPERTIES: PropertyMetadata[] = [
+  { key: 'title', label: 'Title', defaultName: 'title' },
+  { key: 'id', label: 'ID', defaultName: 'id' },
+  { key: 'category', label: 'Category', defaultName: 'category' },
+  { key: 'platform', label: 'Platform', defaultName: 'platform' },
+  { key: 'url', label: 'Source URL', defaultName: 'source' },
+  { key: 'mainPicture', label: 'Cover Image', defaultName: 'image' },
+  { key: 'synopsis', label: 'Synopsis', defaultName: 'description' },
+  { key: 'mediaType', label: 'Media Type', defaultName: 'media' },
+  { key: 'status', label: 'Status', defaultName: 'state' },
+  { key: 'mean', label: 'Average Score', defaultName: 'score' },
+  { key: 'genres', label: 'Genres', defaultName: 'genres' },
+  { key: 'releasedStart', label: 'Released Start', defaultName: 'released' },
+  { key: 'releasedEnd', label: 'Released End', defaultName: 'ended' },
+  { key: 'source', label: 'Source Material', defaultName: 'origin' },
+  { key: 'userStatus', label: 'User Status', defaultName: 'status' },
+  { key: 'userScore', label: 'User Rating', defaultName: 'rating' },
+  { key: 'userStartDate', label: 'Started Date', defaultName: 'started' },
+  { key: 'userFinishDate', label: 'Finished Date', defaultName: 'finished' },
+];
+
+/**
+ * Anime-specific properties (including common)
+ */
+export const ANIME_PROPERTIES: PropertyMetadata[] = [
+  ...COMMON_PROPERTIES,
+  { key: 'numEpisodes', label: 'Episodes', defaultName: 'episodes' },
+  { key: 'numEpisodesWatched', label: 'Episodes Watched', defaultName: 'eps_seen' },
+  { key: 'studios', label: 'Studios', defaultName: 'studios' },
+  { key: 'duration', label: 'Duration', defaultName: 'duration' },
+];
+
+/**
+ * Manga-specific properties (including common)
+ */
+export const MANGA_PROPERTIES: PropertyMetadata[] = [
+  ...COMMON_PROPERTIES,
+  { key: 'numVolumes', label: 'Volumes', defaultName: 'volumes' },
+  { key: 'numVolumesRead', label: 'Volumes Read', defaultName: 'vol_read' },
+  { key: 'numChapters', label: 'Chapters', defaultName: 'chapters' },
+  { key: 'numChaptersRead', label: 'Chapters Read', defaultName: 'chap_read' },
+  { key: 'authors', label: 'Authors', defaultName: 'authors' },
 ];
 
 /**
  * Gets property metadata by key
  */
-export function getPropertyMetadata(key: string): PropertyMetadata | undefined {
-  return PROPERTY_METADATA.find(p => p.key === key);
+export function getPropertyMetadata(key: string, category: 'anime' | 'manga'): PropertyMetadata | undefined {
+  const properties = category === 'anime' ? ANIME_PROPERTIES : MANGA_PROPERTIES;
+  return properties.find(p => p.key === key);
 }
 
 /**
  * Gets available properties for a category
  */
 export function getAvailableProperties(category: 'anime' | 'manga'): PropertyMetadata[] {
-  return PROPERTY_METADATA.filter(p => 
-    p.category === 'common' || p.category === category
-  );
+  return category === 'anime' ? ANIME_PROPERTIES : MANGA_PROPERTIES;
 }
 
 /**
  * Default anime template
  * NOTE: 'cassette' and 'synced' are permanent properties that cannot be removed
+ * Contains only common + anime-specific properties
  */
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
   folderPath: 'Cassette/Anime',
   properties: [
+    // Permanent properties
     { id: 'prop-permanent-1', key: 'cassette', customName: 'cassette', order: 1 },
     { id: 'prop-permanent-2', key: 'synced', customName: 'synced', order: 2 },
+    
+    // Common properties
     { id: 'prop-1', key: 'title', customName: 'title', order: 3 },
     { id: 'prop-2', key: 'id', customName: 'id', order: 4 },
     { id: 'prop-3', key: 'category', customName: 'category', order: 5 },
@@ -111,10 +120,14 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
     { id: 'prop-12', key: 'source', customName: 'origin', order: 14 },
     { id: 'prop-13', key: 'releasedStart', customName: 'released', order: 15 },
     { id: 'prop-14', key: 'releasedEnd', customName: 'ended', order: 16 },
+    
+    // Anime-specific properties
     { id: 'prop-15', key: 'numEpisodes', customName: 'episodes', order: 17 },
     { id: 'prop-16', key: 'numEpisodesWatched', customName: 'eps_seen', order: 18 },
     { id: 'prop-17', key: 'studios', customName: 'studios', order: 19 },
     { id: 'prop-18', key: 'duration', customName: 'duration', order: 20 },
+    
+    // User data (common)
     { id: 'prop-19', key: 'userStatus', customName: 'status', order: 21 },
     { id: 'prop-20', key: 'userScore', customName: 'rating', order: 22 },
     { id: 'prop-21', key: 'userStartDate', customName: 'started', order: 23 },
@@ -125,12 +138,16 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
 /**
  * Default manga template
  * NOTE: 'cassette' and 'synced' are permanent properties that cannot be removed
+ * Contains only common + manga-specific properties
  */
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
   folderPath: 'Cassette/Manga',
   properties: [
+    // Permanent properties
     { id: 'prop-permanent-1', key: 'cassette', customName: 'cassette', order: 1 },
     { id: 'prop-permanent-2', key: 'synced', customName: 'synced', order: 2 },
+    
+    // Common properties
     { id: 'prop-1', key: 'title', customName: 'title', order: 3 },
     { id: 'prop-2', key: 'id', customName: 'id', order: 4 },
     { id: 'prop-3', key: 'category', customName: 'category', order: 5 },
@@ -145,11 +162,15 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
     { id: 'prop-12', key: 'source', customName: 'origin', order: 14 },
     { id: 'prop-13', key: 'releasedStart', customName: 'released', order: 15 },
     { id: 'prop-14', key: 'releasedEnd', customName: 'ended', order: 16 },
+    
+    // Manga-specific properties
     { id: 'prop-15', key: 'numVolumes', customName: 'volumes', order: 17 },
     { id: 'prop-16', key: 'numVolumesRead', customName: 'vol_read', order: 18 },
     { id: 'prop-17', key: 'numChapters', customName: 'chapters', order: 19 },
     { id: 'prop-18', key: 'numChaptersRead', customName: 'chap_read', order: 20 },
     { id: 'prop-19', key: 'authors', customName: 'authors', order: 21 },
+    
+    // User data (common)
     { id: 'prop-20', key: 'userStatus', customName: 'status', order: 22 },
     { id: 'prop-21', key: 'userScore', customName: 'rating', order: 23 },
     { id: 'prop-22', key: 'userStartDate', customName: 'started', order: 24 },
