@@ -184,7 +184,7 @@ function renderPropertyRow(
   rowEl.setAttribute('data-id', prop.id);
   
   // Check if this is a permanent property
-  const isPermanent = prop.key === 'cassette' || prop.key === 'synced';
+  const isPermanent = prop.key === 'cassetteSync' || prop.key === 'syncedAt';
   
   // Drag handle
   const dragHandle = rowEl.createDiv({ cls: 'cassette-drag-handle' });
