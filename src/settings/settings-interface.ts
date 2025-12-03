@@ -1,5 +1,4 @@
 import type { MALUserInfo } from '../api/mal';
-import type { PropertyMapping } from '../storage/markdown';
 import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
 import type { TemplateConfig } from './template-config';
 
@@ -32,9 +31,6 @@ export interface CassetteSettings {
   animeTemplate?: TemplateConfig;
   mangaTemplate?: TemplateConfig;
   
-  // Property Customization
-  propertyMapping: PropertyMapping;
-  useCustomPropertyMapping: boolean;
   
   // Sync Settings
   forceFullSync: boolean; 
@@ -45,8 +41,6 @@ export interface CassetteSettings {
   optimizeAutoSync: boolean; // Only sync active statuses during auto-sync
   
   // Template Settings (for future use)
-  useCustomTemplate: boolean;
-  customTemplatePath?: string;
   notificationsEnabled: boolean; // Enable/disable user notifications
   // Debug Settings
   debugMode: boolean;
@@ -71,9 +65,6 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   animeTemplate: undefined,
   mangaTemplate: undefined,
   
-  // Property customization defaults
-  propertyMapping: DEFAULT_PROPERTY_MAPPING,
-  useCustomPropertyMapping: false,
   
   // Sync defaults
   forceFullSync: false,
@@ -82,9 +73,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   scheduledSyncInterval: 60, // 60 minutes default
   lastSuccessfulSync: undefined, // No previous sync 
   optimizeAutoSync: true,
-  // Template defaults
-  useCustomTemplate: false,
-  customTemplatePath: undefined,
+
   // Notification defaults
   notificationsEnabled: true,
   // Debug defaults
