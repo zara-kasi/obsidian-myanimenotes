@@ -6,7 +6,6 @@ import {
   createTemplateSettingsState,
   TemplateSettingsState
 } from './template-settings';
-import { renderPropertyMappingSection } from './property-settings';
 
 export class CassetteSettingTab extends PluginSettingTab {
   plugin: CassettePlugin;
@@ -30,7 +29,6 @@ export class CassetteSettingTab extends PluginSettingTab {
     
     renderTemplateSection(containerEl, this.plugin, this.templateState);
     
-    renderPropertyMappingSection(containerEl, this.plugin);
 
     // Sync Section
     
