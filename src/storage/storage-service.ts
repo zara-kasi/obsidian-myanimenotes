@@ -216,7 +216,7 @@ async function prepareBatchItems(
   for (const batch of batchItems) {
     const skipResult = shouldSkipByTimestamp(
       batch.cachedTimestamp,
-      batch.item.syncedAt,
+      batch.item.updatedAt,
       plugin.settings.forceFullSync
     );
     
