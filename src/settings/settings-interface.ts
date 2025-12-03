@@ -63,7 +63,7 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   
   // Template system defaults
   animeTemplate: undefined,
-  mangaTemplate: undefined
+  mangaTemplate: undefined,
   
   // Sync defaults
   forceFullSync: false,
