@@ -219,10 +219,6 @@ function renderPropertyRow(
     }
   });
   
-  // Attach the variable suggester
-const variables = getAvailableProperties(type); // 'anime' or 'manga'
-new VariableSuggest(plugin.app, templateInput, variables);
-  
   if (!isPermanent) {
     // Store the raw value without brackets
     templateInput.addEventListener('blur', async (e) => {
@@ -253,6 +249,10 @@ new VariableSuggest(plugin.app, templateInput, variables);
     // Add a spacer to maintain alignment for permanent properties
     rowEl.createDiv({ cls: 'cassette-delete-button-spacer' });
   }
+  
+  // Attach the variable suggester
+const variables = getAvailableProperties(type); // 'anime' or 'manga'
+new VariableSuggest(plugin.app, templateInput, variables);
   
   // Drag events
   rowEl.addEventListener('dragstart', (e) => {
