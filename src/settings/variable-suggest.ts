@@ -79,21 +79,43 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
   }
   
   /**
-   * Called when user selects a suggestion
-   * Inserts the variable key into the input (without brackets)
-   * 
-   * @param variable The selected variable
-   */
+ * Called when user selects a suggestion
+ * Inserts the variable key with proper bracket handling
+ * 
+ * @param variable The selected variable
+ */
   selectSuggestion(variable: PropertyMetadata): void {
-    // Insert the variable key (without brackets - user adds them if needed)
-    this.inputEl.value = variable.key;
-    
-    // Trigger input event so any listeners are notified
-    this.inputEl.trigger('input');
-    
-    // Close the suggestion dropdown
-    this.close();
+  const currentValue = this.inputEl.value.trim();
+  
+  // Check if there are already opening brackets
+  const hasOpeningBrackets = currentValue.startsWith('{{');
+  // Check if there are already closing brackets
+  const hasClosingBrackets = currentValue.endsWith('}}');
+  
+  let newValue: string;
+  
+  if (hasOpeningBrackets && hasClosingBrackets) {
+    // Already has both brackets, just replace content
+    newValue = `{{${variable.key}}}`;
+  } else if (hasOpeningBrackets) {
+    // Has opening brackets, add closing
+    newValue = `{{${variable.key}}}`;
+  } else if (hasClosingBrackets) {
+    // Has closing brackets, add opening
+    newValue = `{{${variable.key}}}`;
+  } else {
+    // No brackets, add both
+    newValue = `{{${variable.key}}}`;
   }
+  
+  this.inputEl.value = newValue;
+  
+  // Trigger input event so any listeners are notified
+  this.inputEl.trigger('input');
+  
+  // Close the suggestion dropdown
+  this.close();
+}
   
   /**
    * Updates the list of available variables
