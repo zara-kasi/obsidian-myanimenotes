@@ -103,8 +103,8 @@ export function buildSyncedFrontmatterProperties(
   }
   
   // Add sync timestamp if available (for sync optimization)
-  if (item.syncedAt) {
-    addProperty('synced', item.syncedAt);
+  if (item.updatedAt) {
+    addProperty('synced', item.updatedAt);
   }
   
   // Origin material (common to both anime and manga)
