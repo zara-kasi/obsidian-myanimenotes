@@ -116,7 +116,7 @@ function renderExpandableTemplate(
     
     // Add description
     contentContainer.createEl('p', { 
-  text: 'Properties to add to the top of the note. Use variables to pre-populate data from the MAL.',
+  text: 'Properties to add to the top of the media note. Use variables to populate data from MAL.',
   cls: 'setting-item-description'
 });
     
