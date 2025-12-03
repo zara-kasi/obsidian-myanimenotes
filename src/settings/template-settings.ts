@@ -96,8 +96,8 @@ function renderExpandableTemplate(
     
     // Folder path setting
     new Setting(contentContainer)
-      .setName('Folder Path')
-      .setDesc('Where notes will be saved')
+      .setName('Note location')
+      .setDesc('The folder or path of the note.')
       .addText(text => {
         new FolderSuggest(plugin.app, text.inputEl);
         text
@@ -113,6 +113,12 @@ function renderExpandableTemplate(
     
     // Properties section header
     contentContainer.createEl('h4', { text: 'Properties' });
+    
+    // Add description
+    contentContainer.createEl('p', { 
+  text: 'Properties to add to the top of the note. Use variables to pre-populate data from the MAL.',
+  cls: 'setting-item-description'
+});
     
     // Properties list container
     const propertyListEl = contentContainer.createDiv({ cls: 'cassette-property-list' });
