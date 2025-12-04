@@ -1,8 +1,7 @@
-
 import type CassettePlugin from '../main';
 import type { UniversalMediaItem } from '../models';
-import type { PropertyMapping } from './markdown';
-import { DEFAULT_PROPERTY_MAPPING } from './markdown';
+import type { TemplateConfig } from '../settings/template-config';
+import { DEFAULT_ANIME_TEMPLATE, DEFAULT_MANGA_TEMPLATE } from '../settings/template-config'
 import { 
   generateCassetteSync, 
   findFilesByCassetteSync, 
@@ -26,7 +25,6 @@ export interface StorageConfig {
   animeFolder: string;
   mangaFolder: string;
   createFolders: boolean;
-  propertyMapping?: PropertyMapping;
 }
 
 export interface SyncActionResult {
@@ -217,7 +215,7 @@ async function prepareBatchItems(
   for (const batch of batchItems) {
     const skipResult = shouldSkipByTimestamp(
       batch.cachedTimestamp,
-      batch.item.syncedAt,
+      batch.item.updatedAt,
       plugin.settings.forceFullSync
     );
     
@@ -303,7 +301,12 @@ async function handleExactMatch(
   config: StorageConfig,
   cassetteSync: string
 ): Promise<SyncActionResult> {
-  const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
+  // Get template based on category
+  const template = item.category === 'anime'
+    ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
+    : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
+  
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
   await updateMarkdownFileFrontmatter(plugin, file, frontmatterProps);
   
   return {
@@ -324,7 +327,12 @@ async function handleDuplicates(
   console.warn(`[Storage] Found ${files.length} files with cassette: ${cassetteSync}`);
   const selectedFile = selectDeterministicFile(plugin, files);
   
-  const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
+  // Get template based on category
+  const template = item.category === 'anime'
+    ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
+    : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
+  
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
   await updateMarkdownFileFrontmatter(plugin, selectedFile, frontmatterProps);
   
   return {
@@ -348,7 +356,12 @@ async function handleLegacyMigration(
   }
   
   const selectedFile = selectDeterministicFile(plugin, files);
-  const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
+  // Get template based on category
+  const template = item.category === 'anime'
+    ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
+    : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
+  
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
   await updateMarkdownFileFrontmatter(plugin, selectedFile, frontmatterProps);
   
   return {
@@ -375,7 +388,12 @@ async function createNewFile(
     .replace(/\s+/g, ' ')
     .trim();
   
-  const frontmatterProps = generateFrontmatterProperties(plugin, item, config, cassetteSync);
+  // Get template based on category
+  const template = item.category === 'anime'
+    ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
+    : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
+  
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
   
   const MAX_ATTEMPTS = 5;
   const normalizedFolderPath = normalizePath(folderPath);

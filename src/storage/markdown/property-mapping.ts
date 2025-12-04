@@ -1,13 +1,18 @@
 /**
- * Property Mapping with cassette as controlled property
- * CHANGE: Added 'url' property for platform links
+ * Property Mapping - INTERNAL USE ONLY
+ * 
+ * This module is used internally to map template variable keys to their default
+ * property names. Users configure properties via the Template system in settings.
+ * 
+ * The PropertyMapping interface and DEFAULT_PROPERTY_MAPPING serve as reference
+ * for what properties are available and their conventional names.
  */
 
 export interface PropertyMapping {
   // Sync identifier (CRITICAL: Primary key for file lookup)
   cassetteSync?: string;
   
-  synced?: string; // Last sync timestamp - fixed internal property
+  updatedAt?: string; // Last sync timestamp - fixed internal property
   
   // Basic fields (common to both anime and manga)
   id?: string;
@@ -67,7 +72,7 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   // Sync identifier (PRIMARY KEY - never change this)
   cassetteSync: 'cassette',
   
-  synced: 'synced', // Fixed internal sync timestamp
+  updatedAt: 'synced', // Fixed internal sync timestamp
   
   // Basic fields (common)
   id: 'id',
@@ -121,13 +126,3 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   userStartDate: 'started',   
   userFinishDate: 'finished',
 };
-
-/**
- * Gets the mapped property name
- */
-export function getMappedPropertyName(
-  key: keyof PropertyMapping,
-  mapping: PropertyMapping
-): string {
-  return mapping[key] || DEFAULT_PROPERTY_MAPPING[key] || key;
-}

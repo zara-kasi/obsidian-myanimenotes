@@ -93,29 +93,35 @@ function transformAlternativeTitles(malTitles: any): UniversalAlternativeTitles 
 }
 
 /**
- * Transforms MAL genres
+ * Transforms MAL genres - with strict null filtering
  */
 function transformGenres(malGenres: any[]): UniversalGenre[] {
   if (!malGenres || !Array.isArray(malGenres)) return [];
   
-  return malGenres.map(genre => ({
-    id: genre.id,
-    name: genre.name
-  }));
+  return malGenres
+    .filter(genre => genre != null && genre.id != null && genre.name != null)
+    .map(genre => ({
+      id: genre.id,
+      name: genre.name
+    }));
 }
 
 /**
- * Transforms MAL authors (for manga)
+ * Transforms MAL authors (for manga) - with strict null filtering
  */
 function transformAuthors(malAuthors: any[]): UniversalAuthor[] {
   if (!malAuthors || !Array.isArray(malAuthors)) return [];
   
-  return malAuthors.map(author => ({
-    firstName: author.node?.first_name || '',
-    lastName: author.node?.last_name || '',
-    role: author.role
-  }));
+  return malAuthors
+    .filter(author => author != null && author.node != null)
+    .map(author => ({
+      firstName: author.node?.first_name || '',
+      lastName: author.node?.last_name || '',
+      role: author.role
+    }))
+    .filter(author => author.firstName || author.lastName); // Filter out empty authors
 }
+
 
 
 /**
@@ -178,7 +184,7 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
     userFinishDate: listStatus?.finish_date,    
     
     // Sync metadata - MAL's updated_at timestamp
-    syncedAt: listStatus?.updated_at,
+    updatedAt: listStatus?.updated_at,
     // Platform metadata
     platform: 'mal',
   };
@@ -238,7 +244,7 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
     userFinishDate: listStatus?.finish_date,  
     
     // Sync metadata - MAL's updated_at timestamp
-    syncedAt: listStatus?.updated_at,
+    updatedAt: listStatus?.updated_at,
     // Platform metadata
     platform: 'mal',
   };
@@ -246,12 +252,13 @@ export function transformMALManga(plugin: CassettePlugin, malItem: any): Univers
 
 /**
  * Transforms MAL studios array - keeps objects for wiki link formatting
+ * Filters out null, undefined, and invalid entries
  */
 function transformStudios(malStudios: any[]): Array<{name: string}> {
   if (!malStudios || !Array.isArray(malStudios)) return [];
   
   return malStudios
-    .filter(studio => studio && studio.name)
+    .filter(studio => studio != null && studio.name != null && studio.name !== '')
     .map(studio => ({ name: studio.name }));
 }
 

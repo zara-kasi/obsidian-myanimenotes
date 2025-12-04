@@ -326,7 +326,8 @@ function formatAuthorArray(value: any[]): string[] {
  * formatDuration(150)  // "2h 30m"
  * formatDuration(45)   // "45m"
  * formatDuration(90)   // "1h 30m"
- * formatDuration(60)   // "1h"
+ * formatDuration(60)   // "1h 0m"
+ * formatDuration(1440) // "24h 0m"
  * formatDuration(0)    // undefined
  */
 export function formatDuration(minutes: number | undefined): string | undefined {
@@ -339,10 +340,7 @@ export function formatDuration(minutes: number | undefined): string | undefined 
     return `${mins}m`;
   }
   
-  if (mins === 0) {
-    return `${hours}h`;
-  }
-  
+  // Always include minutes when there are hours
   return `${hours}h ${mins}m`;
 }
 

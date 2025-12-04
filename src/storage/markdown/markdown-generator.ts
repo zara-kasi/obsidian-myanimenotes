@@ -7,23 +7,25 @@
 import { TFile } from 'obsidian';
 import type CassettePlugin from '../../main';
 import type { UniversalMediaItem } from '../../models';
-import type { StorageConfig } from '../storage-service';
-import { DEFAULT_PROPERTY_MAPPING } from './property-mapping';
-import { buildSyncedFrontmatterProperties } from './frontmatter-builder';
+import type { TemplateConfig } from '../../settings/template-config';
+import { buildFrontmatterFromTemplate } from './frontmatter-builder';
 import { createDebugLogger } from '../../utils';
 
 /**
- * Generates frontmatter properties for a media item
- * This is separated from file I/O for testability
+ * Generates frontmatter properties for a media item using template configuration
+ * @param plugin Plugin instance
+ * @param item Media item to generate frontmatter for
+ * @param template Template configuration (anime or manga)
+ * @param cassetteSync Cassette identifier
+ * @returns Frontmatter properties object
  */
 export function generateFrontmatterProperties(
   plugin: CassettePlugin,
   item: UniversalMediaItem,
-  config: StorageConfig,
+  template: TemplateConfig,
   cassetteSync: string
 ): Record<string, any> {
-  const mapping = config.propertyMapping || DEFAULT_PROPERTY_MAPPING;
-  return buildSyncedFrontmatterProperties(item, mapping, cassetteSync);
+  return buildFrontmatterFromTemplate(item, template, cassetteSync);
 }
 
 /**

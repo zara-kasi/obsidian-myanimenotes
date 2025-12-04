@@ -36,9 +36,6 @@ export class SyncManager {
       animeFolder: this.plugin.settings.animeFolder,
       mangaFolder: this.plugin.settings.mangaFolder,
       createFolders: true,
-      propertyMapping: this.plugin.settings.useCustomPropertyMapping 
-        ? this.plugin.settings.propertyMapping 
-        : undefined,
     };
   }
 
