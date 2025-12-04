@@ -5,21 +5,13 @@ import type { PropertyMetadata } from './template-config';
  * Variable Suggester for Template System
  * 
  * Provides autocomplete suggestions for template variables while typing.
- * Supports mixed content and multiple variables in one template string.
  * Uses Obsidian's native AbstractInputSuggest API.
- * 
- * Features:
- * - Triggers when user types {{
- * - Supports multiple variables in one field
- * - Works with mixed content (text + variables)
- * - Inserts variables at cursor position
  * 
  * Usage:
  * ```typescript
  * const suggester = new VariableSuggest(app, inputEl, availableVariables);
  * ```
  */
- 
 export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
   private inputEl: HTMLInputElement;
   private availableVariables: PropertyMetadata[];
@@ -40,45 +32,42 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
     this.availableVariables = availableVariables;
   }
   
-  /**
+   /**
  * Gets matching suggestions based on user input
- * Intelligently detects when user is typing a variable and filters accordingly
+ * Filters variables by key or label (case-insensitive)
+ * Triggers on {{ brackets for multiple variable support
  * 
- * @param inputStr Current input string (full value of input field)
+ * @param inputStr Current input string
  * @returns Array of matching variables
  */
-getSuggestions(inputStr: string): PropertyMetadata[] {
-  // Find the cursor position (we'll use end of string as proxy since we can't access cursor directly)
-  // Find the last occurrence of {{ before cursor to detect if user is typing a variable
-  const lastOpenBracket = inputStr.lastIndexOf('{{');
-  
-  // If no {{ found or it's already closed, don't show suggestions
-  if (lastOpenBracket === -1) {
-    return [];
+   getSuggestions(inputStr: string): PropertyMetadata[] {
+  // Check if user just typed {{ to trigger suggestions
+  if (inputStr.endsWith('{{')) {
+    // Show all available variables when {{ is typed
+    return this.availableVariables;
   }
   
-  // Extract text after the last {{
-  const afterBracket = inputStr.substring(lastOpenBracket + 2);
+  // Find the last occurrence of {{ to support multiple variables
+  const lastBracketIndex = inputStr.lastIndexOf('{{');
   
-  // If there's a closing }} after the last {{, user is not typing a variable
-  const closeBracketIndex = afterBracket.indexOf('}}');
-  if (closeBracketIndex !== -1 && closeBracketIndex < afterBracket.length - 2) {
-    // The }} is not at the end, so user is past this variable
-    return [];
+  let cleanInput: string;
+  if (lastBracketIndex !== -1) {
+    // Extract text after the last {{
+    cleanInput = inputStr.substring(lastBracketIndex + 2).trim().replace(/\}\}$/g, '').toLowerCase();
+  } else {
+    // No brackets found, use the whole input
+    cleanInput = inputStr.trim().replace(/^\{\{|\}\}$/g, '').toLowerCase();
   }
   
-  // Extract the partial variable name (text between {{ and cursor/end)
-  const partialVariable = afterBracket.replace(/\}\}$/, '').trim().toLowerCase();
-  
-  // If user just typed {{ (empty or only whitespace after it), show all variables
-  if (!partialVariable) {
+  // If input is empty (after extracting from brackets), show all available variables
+  if (!cleanInput) {
     return this.availableVariables;
   }
   
   // Filter variables by matching key or label
   return this.availableVariables.filter(variable => 
-    variable.key.toLowerCase().includes(partialVariable) ||
-    variable.label.toLowerCase().includes(partialVariable)
+    variable.key.toLowerCase().includes(cleanInput) ||
+    variable.label.toLowerCase().includes(cleanInput)
   );
 }
   
@@ -107,47 +96,44 @@ getSuggestions(inputStr: string): PropertyMetadata[] {
   
  /**
  * Called when user selects a suggestion
- * Inserts the variable with {{brackets}} at the correct position
- * Handles mixed content and multiple variables gracefully
+ * Inserts the variable key with proper bracket handling
+ * Supports multiple variables in one property
  * 
  * @param variable The selected variable
  */
 selectSuggestion(variable: PropertyMetadata): void {
   const currentValue = this.inputEl.value;
   
-  // Find the last occurrence of {{ to determine insertion point
-  const lastOpenBracket = currentValue.lastIndexOf('{{');
+  // Find the last occurrence of {{ to support multiple variables
+  const lastBracketIndex = currentValue.lastIndexOf('{{');
   
-  if (lastOpenBracket === -1) {
-    // No brackets found - shouldn't happen, but handle gracefully
-    this.inputEl.value = `{{${variable.key}}}`;
-  } else {
-    // Split the string at the last {{
-    const beforeBrackets = currentValue.substring(0, lastOpenBracket);
-    const afterBrackets = currentValue.substring(lastOpenBracket + 2);
+  if (lastBracketIndex !== -1) {
+    // User is adding another variable or completing an existing one
+    const beforeBrackets = currentValue.substring(0, lastBracketIndex);
+    const afterBrackets = currentValue.substring(lastBracketIndex + 2);
     
-    // Check if there's already a }} after the {{
-    const closeBracketIndex = afterBrackets.indexOf('}}');
+    // Check if there's already a closing bracket after the variable
+    const hasClosingBracket = afterBrackets.includes('}}');
     
-    if (closeBracketIndex !== -1) {
-      // Replace the content between {{ and }}
-      const afterCloseBracket = afterBrackets.substring(closeBracketIndex + 2);
-      this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${afterCloseBracket}`;
+    if (hasClosingBracket) {
+      // Replace content between {{ and }}
+      const closingIndex = afterBrackets.indexOf('}}');
+      const remaining = afterBrackets.substring(closingIndex + 2);
+      this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${remaining}`;
     } else {
-      // No closing bracket yet - add variable and close bracket
-      // Keep any text that was after the {{
+      // Add closing brackets
       this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${afterBrackets}`;
     }
+  } else {
+    // First variable, no brackets yet
+    this.inputEl.value = `{{${variable.key}}}`;
   }
   
   // Trigger input event so any listeners are notified
-  this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+  this.inputEl.trigger('input');
   
   // Close the suggestion dropdown
   this.close();
-  
-  // Focus back on the input
-  this.inputEl.focus();
 }
   
   /**
