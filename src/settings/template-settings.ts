@@ -215,26 +215,34 @@ function renderPropertyRow(
   }
   
   // Template variable input (read-only for permanent properties)
- const templateInput = rowEl.createEl('input', {
-  cls: 'cassette-template-var',
-  type: 'text',
-  value: prop.key || '',  // Display the value exactly as stored
-  attr: {
-    placeholder: 'Property value',
-    ...(isPermanent && { readonly: 'true' })
-  }
-});
-  
-  if (!isPermanent) {
-  // Store the value exactly as the user types it
-  templateInput.addEventListener('blur', async (e) => {
-    const value = (e.target as HTMLInputElement).value;
-    // Store exactly what the user typed - no manipulation
-    prop.key = value;
-    await saveTemplateConfig(plugin, type, config);
+  const templateInput = rowEl.createEl('input', {
+    cls: 'cassette-template-var',
+    type: 'text',
+    value: prop.key ? `{{${prop.key}}}` : '',
+    attr: {
+      placeholder: 'Property value',
+      ...(isPermanent && { readonly: 'true' })
+    }
   });
   
-}
+  if (!isPermanent) {
+    // Store the raw value without brackets
+    templateInput.addEventListener('blur', async (e) => {
+      const value = (e.target as HTMLInputElement).value;
+      // Remove brackets and store clean key
+      prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
+      // Update display with brackets
+      (e.target as HTMLInputElement).value = prop.key ? `{{${prop.key}}}` : '';
+      await saveTemplateConfig(plugin, type, config);
+    });
+    
+    templateInput.addEventListener('input', (e) => {
+      // Just store the current value as-is while typing
+      const value = (e.target as HTMLInputElement).value;
+      // Remove brackets for storage
+      prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
+    });
+  }
   
   // Delete button (hidden for permanent properties)
   if (!isPermanent) {
