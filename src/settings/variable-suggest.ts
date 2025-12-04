@@ -36,6 +36,7 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
  * Gets matching suggestions based on user input
  * Filters variables by key or label (case-insensitive)
  * Triggers on {{ brackets for multiple variable support
+ * Only shows suggestions when actively typing inside an incomplete variable
  * 
  * @param inputStr Current input string
  * @returns Array of matching variables
@@ -47,25 +48,28 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
     return this.availableVariables;
   }
   
-  // Find the last occurrence of {{ that doesn't have a closing }}
-  const lastBracketIndex = inputStr.lastIndexOf('{{');
+  // Find the last occurrence of {{
+  const lastOpenBracketIndex = inputStr.lastIndexOf('{{');
   
   // If no opening brackets found, don't show suggestions
-  if (lastBracketIndex === -1) {
+  if (lastOpenBracketIndex === -1) {
     return [];
   }
   
-  // Check if there's a closing }} after the last {{
-  const textAfterBracket = inputStr.substring(lastBracketIndex + 2);
-  const closingBracketIndex = textAfterBracket.indexOf('}}');
+  // Get text after the last {{
+  const textAfterOpen = inputStr.substring(lastOpenBracketIndex + 2);
   
-  // If there's already a closing }}, don't show suggestions
+  // Check if there's a closing }} after the last {{
+  const closingBracketIndex = textAfterOpen.indexOf('}}');
+  
+  // If there's already a closing }}, check cursor position
   if (closingBracketIndex !== -1) {
+    // Variable is complete - don't show suggestions
     return [];
   }
   
   // Extract text after the last {{ for filtering
-  const cleanInput = textAfterBracket.trim().toLowerCase();
+  const cleanInput = textAfterOpen.trim().toLowerCase();
   
   // If input is empty (after extracting from brackets), show all available variables
   if (!cleanInput) {
