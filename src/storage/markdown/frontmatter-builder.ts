@@ -53,7 +53,7 @@ function resolvePropertyValue(
   
   // Direct property access for everything else
   return (item as any)[key];
-
+}
 
 /**
  * Applies special formatting to evaluated template values
@@ -174,9 +174,3 @@ export function buildFrontmatterFromTemplate(
   
   return properties;
 }
-
-/**
- * Legacy export for backwards compatibility
- * @deprecated Use buildFrontmatterFromTemplate instead
- */
-export const buildSyncedFrontmatterProperties = buildFrontmatterFromTemplate;
