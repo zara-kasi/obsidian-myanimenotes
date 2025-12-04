@@ -47,17 +47,25 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
     return this.availableVariables;
   }
   
-  // Find the last occurrence of {{ to support multiple variables
+  // Find the last occurrence of {{ that doesn't have a closing }}
   const lastBracketIndex = inputStr.lastIndexOf('{{');
   
-  let cleanInput: string;
-  if (lastBracketIndex !== -1) {
-    // Extract text after the last {{
-    cleanInput = inputStr.substring(lastBracketIndex + 2).trim().replace(/\}\}$/g, '').toLowerCase();
-  } else {
-    // No brackets found, use the whole input
-    cleanInput = inputStr.trim().replace(/^\{\{|\}\}$/g, '').toLowerCase();
+  // If no opening brackets found, don't show suggestions
+  if (lastBracketIndex === -1) {
+    return [];
   }
+  
+  // Check if there's a closing }} after the last {{
+  const textAfterBracket = inputStr.substring(lastBracketIndex + 2);
+  const closingBracketIndex = textAfterBracket.indexOf('}}');
+  
+  // If there's already a closing }}, don't show suggestions
+  if (closingBracketIndex !== -1) {
+    return [];
+  }
+  
+  // Extract text after the last {{ for filtering
+  const cleanInput = textAfterBracket.trim().toLowerCase();
   
   // If input is empty (after extracting from brackets), show all available variables
   if (!cleanInput) {
@@ -108,20 +116,20 @@ selectSuggestion(variable: PropertyMetadata): void {
   const lastBracketIndex = currentValue.lastIndexOf('{{');
   
   if (lastBracketIndex !== -1) {
-    // User is adding another variable or completing an existing one
+    // Get the text before and after the {{
     const beforeBrackets = currentValue.substring(0, lastBracketIndex);
     const afterBrackets = currentValue.substring(lastBracketIndex + 2);
     
-    // Check if there's already a closing bracket after the variable
-    const hasClosingBracket = afterBrackets.includes('}}');
+    // Check if there's already a closing bracket
+    const closingIndex = afterBrackets.indexOf('}}');
     
-    if (hasClosingBracket) {
-      // Replace content between {{ and }}
-      const closingIndex = afterBrackets.indexOf('}}');
+    if (closingIndex !== -1) {
+      // Replace content between {{ and existing }}
       const remaining = afterBrackets.substring(closingIndex + 2);
       this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${remaining}`;
     } else {
-      // Add closing brackets
+      // No closing bracket yet - add variable and closing brackets
+      // This keeps any text after the variable (like " ep")
       this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${afterBrackets}`;
     }
   } else {
