@@ -215,15 +215,15 @@ function renderPropertyRow(
   }
   
   // Template variable input (read-only for permanent properties)
-  const templateInput = rowEl.createEl('input', {
-    cls: 'cassette-template-var',
-    type: 'text',
-    value: prop.key ? `{{${prop.key}}}` : '',
-    attr: {
-      placeholder: 'Property value',
-      ...(isPermanent && { readonly: 'true' })
-    }
-  });
+ const templateInput = rowEl.createEl('input', {
+  cls: 'cassette-template-var',
+  type: 'text',
+  value: prop.key || '',  // Display the value exactly as stored
+  attr: {
+    placeholder: 'Property value',
+    ...(isPermanent && { readonly: 'true' })
+  }
+});
   
   if (!isPermanent) {
   // Store the value exactly as the user types it
