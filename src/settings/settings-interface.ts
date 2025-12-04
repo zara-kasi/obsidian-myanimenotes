@@ -1,6 +1,4 @@
-import type { MALUserInfo } from '../api/mal';
-import type { PropertyMapping } from '../storage/markdown';
-import { DEFAULT_PROPERTY_MAPPING } from '../storage/markdown';
+import type { MALUserInfo } from '../api/mal'
 import type { TemplateConfig } from './template-config';
 
 
@@ -31,10 +29,6 @@ export interface CassetteSettings {
   // Template System
   animeTemplate?: TemplateConfig;
   mangaTemplate?: TemplateConfig;
-  
-  // Property Customization
-  propertyMapping: PropertyMapping;
-  useCustomPropertyMapping: boolean;
   
   // Sync Settings
   forceFullSync: boolean; 
@@ -70,10 +64,6 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   // Template system defaults
   animeTemplate: undefined,
   mangaTemplate: undefined,
-  
-  // Property customization defaults
-  propertyMapping: DEFAULT_PROPERTY_MAPPING,
-  useCustomPropertyMapping: false,
   
   // Sync defaults
   forceFullSync: false,

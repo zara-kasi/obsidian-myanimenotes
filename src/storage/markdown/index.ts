@@ -1,6 +1,6 @@
 // Frontmatter builder
 export {
-  buildSyncedFrontmatterProperties
+  buildFrontmatterFromTemplate
 } from './frontmatter-builder';
 
 // Markdown generator
@@ -9,9 +9,8 @@ export {
   updateMarkdownFileFrontmatter
 } from './markdown-generator';
 
-// Property mapping
+// Property mapping (internal use only)
 export type { PropertyMapping } from './property-mapping';
 export {
-  DEFAULT_PROPERTY_MAPPING,
-  getMappedPropertyName
+  DEFAULT_PROPERTY_MAPPING
 } from './property-mapping';

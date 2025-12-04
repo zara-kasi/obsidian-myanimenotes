@@ -1,6 +1,11 @@
 /**
- * Property Mapping with cassette as controlled property
- * CHANGE: Added 'url' property for platform links
+ * Property Mapping - INTERNAL USE ONLY
+ * 
+ * This module is used internally to map template variable keys to their default
+ * property names. Users configure properties via the Template system in settings.
+ * 
+ * The PropertyMapping interface and DEFAULT_PROPERTY_MAPPING serve as reference
+ * for what properties are available and their conventional names.
  */
 
 export interface PropertyMapping {
@@ -121,13 +126,3 @@ export const DEFAULT_PROPERTY_MAPPING: PropertyMapping = {
   userStartDate: 'started',   
   userFinishDate: 'finished',
 };
-
-/**
- * Gets the mapped property name
- */
-export function getMappedPropertyName(
-  key: keyof PropertyMapping,
-  mapping: PropertyMapping
-): string {
-  return mapping[key] || DEFAULT_PROPERTY_MAPPING[key] || key;
-}
