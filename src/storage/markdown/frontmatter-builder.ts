@@ -121,6 +121,7 @@ function extractAliases(alternativeTitles: any): string[] | undefined {
  * @param cassetteSync - Cassette identifier
  * @returns Frontmatter properties object
  */
+
 export function buildFrontmatterFromTemplate(
   item: UniversalMediaItem,
   template: TemplateConfig,
@@ -130,7 +131,14 @@ export function buildFrontmatterFromTemplate(
   
   // Process each template property in order
   for (const prop of template.properties) {
-    const templateString = prop.template.trim();
+    // Get the actual property names (handle both old and new formats)
+    const propName = (prop as any).propertyName || (prop as any).customName;
+    const templateString = ((prop as any).template || `{{${(prop as any).key}}}`).trim();
+    
+    // Skip if we don't have a property name
+    if (!propName) {
+      continue;
+    }
     
     // Skip empty templates
     if (!templateString) {
@@ -139,14 +147,14 @@ export function buildFrontmatterFromTemplate(
     
     // Handle special {{cassette}} variable
     if (templateString === '{{cassette}}' || templateString === '{{cassetteSync}}') {
-      properties[prop.propertyName] = cassetteSync;
+      properties[propName] = cassetteSync;
       continue;
     }
     
     // Handle special {{updatedAt}} variable
     if (templateString === '{{updatedAt}}') {
       if (item.updatedAt) {
-        properties[prop.propertyName] = item.updatedAt;
+        properties[propName] = item.updatedAt;
       }
       continue;
     }
@@ -161,14 +169,14 @@ export function buildFrontmatterFromTemplate(
     
     // Apply special formatting (wiki links for single variables, etc.)
     const formattedValue = applySpecialFormatting(
-      prop.propertyName,
+      propName,
       evaluatedValue,
       templateString
     );
     
     // Add to properties if we have a value after formatting
     if (formattedValue !== undefined && formattedValue !== null && formattedValue !== '') {
-      properties[prop.propertyName] = formattedValue;
+      properties[propName] = formattedValue;
     }
   }
   
