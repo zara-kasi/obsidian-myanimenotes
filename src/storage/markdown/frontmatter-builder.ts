@@ -15,13 +15,14 @@ import {
   getWikiLinkFormatType,
   formatDuration,
 } from '../file-utils';
+import { evaluateTemplate } from './template-evaluator';
 
 /**
- * Resolves a template key to its value in UniversalMediaItem
- * Maps template variable names to actual item properties
+ * Resolves a single variable from the template
+ * This is a simplified version that directly accesses UniversalMediaItem properties
  * 
  * @param item - The media item
- * @param key - Template variable key (e.g., 'numEpisodes', 'title')
+ * @param key - Variable name (e.g., 'numEpisodes', 'title')
  * @returns The resolved value or undefined if not found
  */
 function resolvePropertyValue(
@@ -29,92 +30,70 @@ function resolvePropertyValue(
   key: string
 ): any {
   // Handle special permanent properties
-  if (key === 'cassetteSync' || key === 'updatedAt') {
-    return undefined; // These are handled separately
+  if (key === 'cassetteSync' || key === 'cassette') {
+    return undefined; // These are handled separately in buildFrontmatterFromTemplate
   }
   
-  // Map of template keys to item properties
-  const valueMap: Record<string, any> = {
-    // Basic fields
-    'id': item.id,
-    'title': item.title,
-    'category': item.category,
-    'platform': item.platform,
-    'url': item.url,
-    
-    // Visual
-    'mainPicture': item.mainPicture?.large || item.mainPicture?.medium,
-    
-    // Alternative titles - extract as array for aliases
-    'alternativeTitles': extractAliases(item.alternativeTitles),
-    
-    // Description
-    'synopsis': item.synopsis,
-    
-    // Metadata
-    'mediaType': item.mediaType,
-    'status': item.status,
-    'mean': item.mean,
-    
-    // Genres - extract names from genre objects
-    'genres': item.genres?.map(g => g.name),
-    
-    // Dates
-    'releasedStart': item.releasedStart,
-    'releasedEnd': item.releasedEnd,
-    
-    // Source material
-    'source': item.source,
-    
-    // Anime-specific
-    'numEpisodes': item.numEpisodes,
-    'numEpisodesWatched': item.numEpisodesWatched,
-    'studios': item.studios,
-    'duration': item.duration,
-    
-    // Manga-specific
-    'numVolumes': item.numVolumes,
-    'numVolumesRead': item.numVolumesRead,
-    'numChapters': item.numChapters,
-    'numChaptersRead': item.numChaptersRead,
-    'authors': item.authors,
-    
-    // User data
-    'userStatus': item.userStatus,
-    'userScore': item.userScore,
-    'userStartDate': item.userStartDate,
-    'userFinishDate': item.userFinishDate,
-  };
+  if (key === 'updatedAt') {
+    return item.updatedAt;
+  }
   
-  return valueMap[key];
-}
+  // Handle special extractions
+  if (key === 'mainPicture') {
+    return item.mainPicture?.large || item.mainPicture?.medium;
+  }
+  
+  if (key === 'genres') {
+    return item.genres?.map(g => g.name);
+  }
+  
+  if (key === 'alternativeTitles') {
+    return extractAliases(item.alternativeTitles);
+  }
+  
+  // Direct property access for everything else
+  return (item as any)[key];
+
 
 /**
- * Formats a property value based on its key type
- * Applies wiki links, duration formatting, etc.
+ * Applies special formatting to evaluated template values
+ * Only applies formatting for specific known patterns
  * 
- * @param key - Template variable key
- * @param value - Raw value to format
+ * @param propertyName - The YAML property name (not the variable name)
+ * @param evaluatedValue - The value after template evaluation
+ * @param templateString - Original template string to check for patterns
  * @returns Formatted value
  */
-function formatPropertyValue(key: string, value: any): any {
-  if (value === undefined || value === null || value === '') {
+function applySpecialFormatting(
+  propertyName: string,
+  evaluatedValue: any,
+  templateString: string
+): any {
+  if (evaluatedValue === undefined || evaluatedValue === null || evaluatedValue === '') {
     return undefined;
   }
   
-  // Wiki link formatting
-  const wikiLinkType = getWikiLinkFormatType(key);
-  if (wikiLinkType) {
-    return formatPropertyAsWikiLink(value, wikiLinkType);
+  // If template contains only a single variable (no mixed content),
+  // apply wiki link formatting based on the variable name
+  const singleVariableMatch = templateString.match(/^\{\{([^}]+)\}\}$/);
+  if (singleVariableMatch) {
+    const variableName = singleVariableMatch[1].trim();
+    
+    // Wiki link formatting for specific single-variable properties
+    const wikiLinkType = getWikiLinkFormatType(variableName);
+    if (wikiLinkType) {
+      return formatPropertyAsWikiLink(evaluatedValue, wikiLinkType);
+    }
+    
+    // Duration formatting (minutes -> "2h 30m")
+    if (variableName === 'duration') {
+      return formatDuration(evaluatedValue as number);
+    }
   }
   
-  // Duration formatting (minutes -> "2h 30m")
-  if (key === 'duration') {
-    return formatDuration(value);
-  }
-  
-  // Default: return as-is
-  return value;
+  // For mixed content templates, return as-is
+  // User gets full control over the format
+  return evaluatedValue;
 }
 
 /**
@@ -135,7 +114,7 @@ function extractAliases(alternativeTitles: any): string[] | undefined {
 
 /**
  * Builds frontmatter properties from template configuration
- * Processes template properties in order and resolves values from media item
+ * Evaluates template strings and replaces {{variables}} with actual values
  * 
  * @param item - Universal media item
  * @param template - Template configuration with property definitions
@@ -151,33 +130,45 @@ export function buildFrontmatterFromTemplate(
   
   // Process each template property in order
   for (const prop of template.properties) {
-    // Handle permanent properties specially
-    if (prop.key === 'cassetteSync') {
-      properties[prop.customName] = cassetteSync;
+    const templateString = prop.template.trim();
+    
+    // Skip empty templates
+    if (!templateString) {
       continue;
     }
     
-    if (prop.key === 'updatedAt') {
+    // Handle special {{cassette}} variable
+    if (templateString === '{{cassette}}' || templateString === '{{cassetteSync}}') {
+      properties[prop.propertyName] = cassetteSync;
+      continue;
+    }
+    
+    // Handle special {{updatedAt}} variable
+    if (templateString === '{{updatedAt}}') {
       if (item.updatedAt) {
-        properties[prop.customName] = item.updatedAt;
+        properties[prop.propertyName] = item.updatedAt;
       }
       continue;
     }
     
-    // Resolve value from item
-    const rawValue = resolvePropertyValue(item, prop.key);
+    // Evaluate the template string (handles mixed content)
+    const evaluatedValue = evaluateTemplate(templateString, item);
     
-    // Skip if no value
-    if (rawValue === undefined || rawValue === null || rawValue === '') {
+    // Skip if evaluation resulted in empty/undefined
+    if (evaluatedValue === undefined || evaluatedValue === null || evaluatedValue === '') {
       continue;
     }
     
-    // Apply formatting based on key type
-    const formattedValue = formatPropertyValue(prop.key, rawValue);
+    // Apply special formatting (wiki links for single variables, etc.)
+    const formattedValue = applySpecialFormatting(
+      prop.propertyName,
+      evaluatedValue,
+      templateString
+    );
     
     // Add to properties if we have a value after formatting
     if (formattedValue !== undefined && formattedValue !== null && formattedValue !== '') {
-      properties[prop.customName] = formattedValue;
+      properties[prop.propertyName] = formattedValue;
     }
   }
   
