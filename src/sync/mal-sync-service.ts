@@ -1,8 +1,8 @@
 // Main service for syncing MAL data
 
 import type CassettePlugin from '../main';
-import type { UniversalMediaItem, SyncResult, SyncItemResult } from '../models';
-import { MediaCategory } from '../models';
+import type { UniversalMediaItem } from '../transformers';
+import type { SyncResult, SyncItemResult } from './sync.types';
 import {
   fetchCompleteMALAnimeList,
   fetchCompleteMALMangaList,
@@ -14,6 +14,7 @@ import {
 import {
   transformMALAnimeList,
   transformMALMangaList,
+	MediaCategory,
 } from '../transformers';
 import { createDebugLogger, showNotice } from '../utils';
 /**
