@@ -9,7 +9,7 @@
 
 import { TFile } from 'obsidian';
 import type CassettePlugin from '../../main';
-import type { UniversalMediaItem } from '../../models';
+import type { UniversalMediaItem } from '../../transformers';
 import { createDebugLogger } from '../../utils';
 
 /**
