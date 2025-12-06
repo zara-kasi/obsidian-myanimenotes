@@ -1,6 +1,7 @@
 import type CassettePlugin from '../main';
-import type { UniversalMediaItem, SyncResult } from '../models';
-import { MediaCategory } from '../models';
+import type { UniversalMediaItem } from '../transformers';
+import type { SyncResult } from './sync.types';
+import { MediaCategory } from '../transformers';
 import { syncMAL, type MALSyncOptions } from './mal-sync-service';
 import { saveMediaItemsByCategory, type StorageConfig } from '../storage';
 import { createDebugLogger, type DebugLogger } from '../utils';
