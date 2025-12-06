@@ -1,5 +1,5 @@
 import type CassettePlugin from '../main';
-import type { UniversalMediaItem } from '../models';
+import type { UniversalMediaItem } from '../transformers';
 import type { TemplateConfig } from '../settings/template-config';
 import { DEFAULT_ANIME_TEMPLATE, DEFAULT_MANGA_TEMPLATE } from '../settings/template-config'
 import { 
