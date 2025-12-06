@@ -12,12 +12,6 @@ export {
   saveMediaItemsByCategory 
 } from './storage-service';
 
-// Property mapping (internal reference only)
-export type { PropertyMapping } from './markdown';
-export { 
-  DEFAULT_PROPERTY_MAPPING
-} from './markdown';
-
 // Cassette sync utilities (internal, but exported for testing/advanced use)
 export {
   generateCassetteSync,
