@@ -9,7 +9,7 @@
  * - User-controlled formatting: "[[{{studio}}]]" (user adds wiki links)
  */
 
-import type { UniversalMediaItem } from '../../models';
+import type { UniversalMediaItem } from '../../transformers';
 
 /**
  * Extracts all variable names from a template string
