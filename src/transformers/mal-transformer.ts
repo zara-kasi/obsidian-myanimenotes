@@ -6,8 +6,8 @@ import type {
   UniversalAlternativeTitles,
   UniversalGenre,
   UniversalAuthor,
-} from '../models';
-import { MediaStatus, UserListStatus, MediaCategory } from '../models';
+} from './media.types';
+import { MediaStatus, UserListStatus, MediaCategory } from './media.types';
 
 
 /**
