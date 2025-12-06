@@ -190,7 +190,7 @@ function renderPropertyRow(
   rowEl.setAttribute('data-id', prop.id);
   
   // Check if this is a permanent property
-  const isPermanent = prop.key === 'cassetteSync' || prop.key === 'updatedAt';
+  const isPermanent = prop.template === 'cassette' || prop.template === 'synced';
   
   // Drag handle
   const dragHandle = rowEl.createDiv({ cls: 'cassette-drag-handle' });
@@ -218,29 +218,22 @@ function renderPropertyRow(
   const templateInput = rowEl.createEl('input', {
     cls: 'cassette-template-var',
     type: 'text',
-    value: prop.key ? `{{${prop.key}}}` : '',
+    value: prop.template || '',
     attr: {
-      placeholder: 'Property value',
+      placeholder: '{{numEpisodes}} episodes',
       ...(isPermanent && { readonly: 'true' })
     }
   });
   
   if (!isPermanent) {
-    // Store the raw value without brackets
+    // Store template string directly
     templateInput.addEventListener('blur', async (e) => {
-      const value = (e.target as HTMLInputElement).value;
-      // Remove brackets and store clean key
-      prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
-      // Update display with brackets
-      (e.target as HTMLInputElement).value = prop.key ? `{{${prop.key}}}` : '';
+      prop.template = (e.target as HTMLInputElement).value.trim();
       await saveTemplateConfig(plugin, type, config);
     });
     
     templateInput.addEventListener('input', (e) => {
-      // Just store the current value as-is while typing
-      const value = (e.target as HTMLInputElement).value;
-      // Remove brackets for storage
-      prop.key = value.replace(/^\{\{|\}\}$/g, '').trim();
+      prop.template = (e.target as HTMLInputElement).value;
     });
   }
   
@@ -317,15 +310,15 @@ new VariableSuggest(plugin.app, templateInput, variables);
 /**
  * Adds an empty property to the template
  */
+
 function addEmptyProperty(
   plugin: CassettePlugin,
   state: TemplateSettingsState,
   config: TemplateConfig,
-  type: 'anime' | 'manga'
-): void {
+  type: 'anime' | 'manga'): void {
   const newProp: PropertyItem = {
     id: generatePropertyId(),
-    key: '',
+    template: '',
     customName: '',
     order: config.properties.length + 1
   };
