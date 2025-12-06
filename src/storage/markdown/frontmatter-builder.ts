@@ -8,7 +8,7 @@
  * Now returns plain objects - Obsidian's FileManager.processFrontMatter handles YAML
  */
 
-import type { UniversalMediaItem } from '../../models';
+import type { UniversalMediaItem } from '../../transformers';
 import type { TemplateConfig } from '../../settings/template-config';
 import { resolveTemplate } from './template-parser';
 
