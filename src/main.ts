@@ -3,7 +3,7 @@ import { CassetteSettingTab } from './settings';
 import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
-import { MediaCategory } from './models';
+import { MediaCategory } from './transformers';
 import type { CassetteIndex } from './storage/cassette';
 import { createCassetteIndex } from './storage/cassette';
 import { CassetteLockManager, createCassetteLockManager } from './storage/cassette';
