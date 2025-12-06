@@ -19,3 +19,10 @@ export {
   createTemplateSettingsState
 } from './template-settings';
 export type { TemplateSettingsState } from './template-settings';
+
+
+// Property mapping
+export type { PropertyMapping } from './property-mapping';
+export {
+  DEFAULT_PROPERTY_MAPPING
+} from './property-mapping';
