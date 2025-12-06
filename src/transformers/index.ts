@@ -4,3 +4,5 @@ export {
   transformMALAnimeList,
   transformMALMangaList
 } from './mal-transformer';
+
+export * from './media.types';
