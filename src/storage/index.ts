@@ -29,14 +29,8 @@ export {
 
 // File utilities (internal, but exported for testing/advanced use)
 export {
-  sanitizeFilename,
-  sanitizeSynopsis,
   ensureFolderExists,
-  generateUniqueFilename,
-  formatPropertyAsWikiLink,
-  getWikiLinkFormatType,
-  formatDuration, 
-  formatPlatformDisplay
+  generateUniqueFilename
 } from './file-utils';
 
 // Markdown generation (internal, but exported for testing/advanced use)
