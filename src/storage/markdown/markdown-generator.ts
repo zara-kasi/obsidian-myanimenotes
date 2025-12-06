@@ -6,7 +6,7 @@
  */
 import { TFile } from 'obsidian';
 import type CassettePlugin from '../../main';
-import type { UniversalMediaItem } from '../../models';
+import type { UniversalMediaItem } from '../../transformers';
 import type { TemplateConfig } from '../../settings/template-config';
 import { buildFrontmatterFromTemplate } from './frontmatter-builder';
 import { createDebugLogger } from '../../utils';
