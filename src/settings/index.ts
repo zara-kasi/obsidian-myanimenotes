@@ -1,6 +1,6 @@
 export { CassetteSettingTab } from './settings-tab';
-export type { CassetteSettings } from './settings-interface';
-export { DEFAULT_SETTINGS } from './settings-interface';
+export type { CassetteSettings, PropertyMapping } from './settings-interface';
+export { DEFAULT_SETTINGS, DEFAULT_PROPERTY_MAPPING } from './settings-interface';
 export type { MALUserInfo } from '../api/mal';
 
 // Template configuration exports
@@ -19,10 +19,3 @@ export {
   createTemplateSettingsState
 } from './template-settings';
 export type { TemplateSettingsState } from './template-settings';
-
-
-// Property mapping
-export type { PropertyMapping } from './property-mapping';
-export {
-  DEFAULT_PROPERTY_MAPPING
-} from './property-mapping';
