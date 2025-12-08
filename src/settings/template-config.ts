@@ -62,7 +62,7 @@ const COMMON_PROPERTIES: PropertyMetadata[] = [
  */
 export const ANIME_PROPERTIES: PropertyMetadata[] = [
   ...COMMON_PROPERTIES,
-  { key: 'numEpisodes', label: 'Episodes', defaultName: 'episodes' },
+  { key: 'numEpisodes', label: 'Total Episodes', defaultName: 'episodes' },
   { key: 'numEpisodesWatched', label: 'Episodes Watched', defaultName: 'eps_seen' },
   { key: 'studios', label: 'Studios', defaultName: 'studios' },
   { key: 'duration', label: 'Duration', defaultName: 'duration' },
@@ -73,9 +73,9 @@ export const ANIME_PROPERTIES: PropertyMetadata[] = [
  */
 export const MANGA_PROPERTIES: PropertyMetadata[] = [
   ...COMMON_PROPERTIES,
-  { key: 'numVolumes', label: 'Volumes', defaultName: 'volumes' },
+  { key: 'numVolumes', label: 'Total Volumes', defaultName: 'volumes' },
   { key: 'numVolumesRead', label: 'Volumes Read', defaultName: 'vol_read' },
-  { key: 'numChapters', label: 'Chapters', defaultName: 'chapters' },
+  { key: 'numChapters', label: 'Total Chapters', defaultName: 'chapters' },
   { key: 'numChaptersRead', label: 'Chapters Read', defaultName: 'chap_read' },
   { key: 'authors', label: 'Authors', defaultName: 'authors' },
 ];
