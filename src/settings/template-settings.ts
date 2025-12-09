@@ -174,6 +174,10 @@ function renderExpandableTemplate(
     textarea.style.width = '100%';
     textarea.style.fontFamily = 'monospace';
     
+    // Attach variable suggester to textarea
+    const variables = getAvailableProperties(type);
+    new VariableSuggest(plugin.app, textarea, variables);
+    
     textarea.addEventListener('input', async (e) => {
       config.noteContent = (e.target as HTMLTextAreaElement).value;
       await saveTemplateConfig(plugin, type, config);
