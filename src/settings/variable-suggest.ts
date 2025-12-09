@@ -13,7 +13,7 @@ import type { PropertyMetadata } from './template-config';
  * ```
  */
 export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
-  private inputEl: HTMLInputElement;
+  private inputEl: HTMLInputElement | HTMLTextAreaElement;
   private availableVariables: PropertyMetadata[];
   
   /**
@@ -24,7 +24,7 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
    */
   constructor(
     app: App,
-    inputEl: HTMLInputElement,
+    inputEl: HTMLInputElement | HTMLTextAreaElement,
     availableVariables: PropertyMetadata[]
   ) {
     super(app, inputEl);
@@ -170,7 +170,7 @@ selectSuggestion(variable: PropertyMetadata): void {
  */
 export function createVariableSuggest(
   app: App,
-  inputEl: HTMLInputElement,
+  inputEl: HTMLInputElement | HTMLTextAreaElement,
   variables: PropertyMetadata[]
 ): VariableSuggest {
   return new VariableSuggest(app, inputEl, variables);
