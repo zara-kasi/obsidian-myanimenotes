@@ -160,11 +160,10 @@ function renderExpandableTemplate(
       cls: 'setting-item-description'
     });
     
-    new Setting(contentContainer)
       .addTextArea(text => {
         
         text
-          .setPlaceholder('#\n{{title}}\n\n{{synopsis}}\n')
+          .setPlaceholder('# {{title}}\n\n{{synopsis}}\n')
           .setValue(config.noteContent || '')
           .onChange(async (value) => {
             config.noteContent = value;
