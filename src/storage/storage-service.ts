@@ -11,7 +11,8 @@ import {
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
 import {
   generateFrontmatterProperties,
-  updateMarkdownFileFrontmatter
+  updateMarkdownFileFrontmatter,
+  generateInitialFileContent
 } from './markdown';
 import { createDebugLogger } from '../utils';
 import type { TFile, MetadataCache } from 'obsidian';
@@ -373,7 +374,7 @@ async function handleLegacyMigration(
   };
 }
 
-async function createNewFile(
+ async function createNewFile(
   plugin: CassettePlugin,
   item: UniversalMediaItem,
   config: StorageConfig,
@@ -395,6 +396,13 @@ async function createNewFile(
   
   const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
   
+  // NEW: Generate initial content with frontmatter + body
+  const initialContent = generateInitialFileContent(
+    frontmatterProps,
+    template.noteContent || '',
+    item
+  );
+  
   const MAX_ATTEMPTS = 5;
   const normalizedFolderPath = normalizePath(folderPath);
   
@@ -406,9 +414,8 @@ async function createNewFile(
     const filePath = normalizePath(`${normalizedFolderPath}/${filename}`);
     
     try {
-      const initialContent = '---\n---\n';
+      // CHANGED: Use generated content instead of '---\n---\n'
       const createdFile = await vault.create(filePath, initialContent);
-      await updateMarkdownFileFrontmatter(plugin, createdFile, frontmatterProps);
       
       debug.log(`[Storage] Created: ${filePath}`);
       
