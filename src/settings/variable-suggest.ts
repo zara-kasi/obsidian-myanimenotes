@@ -13,18 +13,18 @@ import type { PropertyMetadata } from './template-config';
  * ```
  */
 export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
-  private inputEl: HTMLInputElement | HTMLTextAreaElement;
+  private inputEl: HTMLInputElement;
   private availableVariables: PropertyMetadata[];
   
   /**
    * Creates a new variable suggester
    * @param app Obsidian app instance
-   * @param inputEl Input element or textarea to attach suggestions to
+   * @param inputEl Input element to attach suggestions to
    * @param availableVariables List of variables to suggest (e.g., ANIME_PROPERTIES or MANGA_PROPERTIES)
    */
   constructor(
     app: App,
-    inputEl: HTMLInputElement | HTMLTextAreaElement,
+    inputEl: HTMLInputElement,
     availableVariables: PropertyMetadata[]
   ) {
     super(app, inputEl);
