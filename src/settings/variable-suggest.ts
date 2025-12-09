@@ -35,55 +35,60 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
   }
   
    /**
- * Gets matching suggestions based on user input
- * Filters variables by key or label (case-insensitive)
- * Triggers on {{ brackets for multiple variable support
- * Only shows suggestions when actively typing inside an incomplete variable
- * 
- * @param inputStr Current input string
- * @returns Array of matching variables
- */
-   getSuggestions(inputStr: string): PropertyMetadata[] {
-  // Check if user just typed {{ to trigger suggestions
-  if (inputStr.endsWith('{{')) {
-    // Show all available variables when {{ is typed
-    return this.availableVariables;
+   * Gets matching suggestions based on user input
+   * For textarea: uses cursor position to find variables
+   * For input: uses full string
+   * 
+   * @param inputStr Current input string
+   * @returns Array of matching variables
+   */
+  getSuggestions(inputStr: string): PropertyMetadata[] {
+    // Get cursor position for textarea
+    let textBeforeCursor = inputStr;
+    
+    if (this.inputEl instanceof HTMLTextAreaElement) {
+      const cursorPos = this.inputEl.selectionStart;
+      textBeforeCursor = inputStr.substring(0, cursorPos);
+    }
+    
+    // Check if user just typed {{ to trigger suggestions
+    if (textBeforeCursor.endsWith('{{')) {
+      return this.availableVariables;
+    }
+    
+    // Find the last occurrence of {{ before cursor
+    const lastOpenBracketIndex = textBeforeCursor.lastIndexOf('{{');
+    
+    // If no opening brackets found, don't show suggestions
+    if (lastOpenBracketIndex === -1) {
+      return [];
+    }
+    
+    // Get text after the last {{
+    const textAfterOpen = textBeforeCursor.substring(lastOpenBracketIndex + 2);
+    
+    // Check if there's a closing }} after the last {{
+    const closingBracketIndex = textAfterOpen.indexOf('}}');
+    
+    // If there's already a closing }}, don't show suggestions
+    if (closingBracketIndex !== -1) {
+      return [];
+    }
+    
+    // Extract text after the last {{ for filtering
+    const cleanInput = textAfterOpen.trim().toLowerCase();
+    
+    // If input is empty (after extracting from brackets), show all available variables
+    if (!cleanInput) {
+      return this.availableVariables;
+    }
+    
+    // Filter variables by matching key or label
+    return this.availableVariables.filter(variable => 
+      variable.key.toLowerCase().includes(cleanInput) ||
+      variable.label.toLowerCase().includes(cleanInput)
+    );
   }
-  
-  // Find the last occurrence of {{
-  const lastOpenBracketIndex = inputStr.lastIndexOf('{{');
-  
-  // If no opening brackets found, don't show suggestions
-  if (lastOpenBracketIndex === -1) {
-    return [];
-  }
-  
-  // Get text after the last {{
-  const textAfterOpen = inputStr.substring(lastOpenBracketIndex + 2);
-  
-  // Check if there's a closing }} after the last {{
-  const closingBracketIndex = textAfterOpen.indexOf('}}');
-  
-  // If there's already a closing }}, check cursor position
-  if (closingBracketIndex !== -1) {
-    // Variable is complete - don't show suggestions
-    return [];
-  }
-  
-  // Extract text after the last {{ for filtering
-  const cleanInput = textAfterOpen.trim().toLowerCase();
-  
-  // If input is empty (after extracting from brackets), show all available variables
-  if (!cleanInput) {
-    return this.availableVariables;
-  }
-  
-  // Filter variables by matching key or label
-  return this.availableVariables.filter(variable => 
-    variable.key.toLowerCase().includes(cleanInput) ||
-    variable.label.toLowerCase().includes(cleanInput)
-  );
-}
   
   /**
    * Renders a suggestion item in the dropdown
@@ -109,46 +114,67 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
   }
   
  /**
- * Called when user selects a suggestion
- * Inserts the variable key with proper bracket handling
- * Supports multiple variables in one property
- * 
- * @param variable The selected variable
- */
-selectSuggestion(variable: PropertyMetadata): void {
-  const currentValue = this.inputEl.value;
-  
-  // Find the last occurrence of {{ to support multiple variables
-  const lastBracketIndex = currentValue.lastIndexOf('{{');
-  
-  if (lastBracketIndex !== -1) {
-    // Get the text before and after the {{
-    const beforeBrackets = currentValue.substring(0, lastBracketIndex);
-    const afterBrackets = currentValue.substring(lastBracketIndex + 2);
+   * Called when user selects a suggestion
+   * Inserts the variable key with proper bracket handling
+   * Handles cursor position for textarea
+   * 
+   * @param variable The selected variable
+   */
+  selectSuggestion(variable: PropertyMetadata): void {
+    const currentValue = this.inputEl.value;
+    let cursorPos = currentValue.length;
     
-    // Check if there's already a closing bracket
-    const closingIndex = afterBrackets.indexOf('}}');
-    
-    if (closingIndex !== -1) {
-      // Replace content between {{ and existing }}
-      const remaining = afterBrackets.substring(closingIndex + 2);
-      this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${remaining}`;
-    } else {
-      // No closing bracket yet - add variable and closing brackets
-      // This keeps any text after the variable (like " ep")
-      this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${afterBrackets}`;
+    // Get cursor position for textarea
+    if (this.inputEl instanceof HTMLTextAreaElement) {
+      cursorPos = this.inputEl.selectionStart;
     }
-  } else {
-    // First variable, no brackets yet
-    this.inputEl.value = `{{${variable.key}}}`;
+    
+    // Get text before and after cursor
+    const textBeforeCursor = currentValue.substring(0, cursorPos);
+    const textAfterCursor = currentValue.substring(cursorPos);
+    
+    // Find the last occurrence of {{ before cursor
+    const lastBracketIndex = textBeforeCursor.lastIndexOf('{{');
+    
+    if (lastBracketIndex !== -1) {
+      // Get text before {{ and after cursor
+      const beforeBrackets = currentValue.substring(0, lastBracketIndex);
+      const afterBrackets = currentValue.substring(lastBracketIndex + 2);
+      
+      // Find closing }} in text after {{
+      const textAfterOpen = textBeforeCursor.substring(lastBracketIndex + 2);
+      const closingIndex = afterBrackets.indexOf('}}');
+      
+      if (closingIndex !== -1) {
+        // Replace content between {{ and existing }}
+        const remaining = afterBrackets.substring(closingIndex + 2);
+        this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${remaining}`;
+      } else {
+        // No closing bracket yet - add variable and closing brackets
+        this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${afterBrackets}`;
+      }
+      
+      // Set cursor position after the inserted variable
+      const newCursorPos = lastBracketIndex + variable.key.length + 4; // {{ + key + }}
+      if (this.inputEl instanceof HTMLTextAreaElement) {
+        this.inputEl.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    } else {
+      // First variable, no brackets yet
+      this.inputEl.value = `${textBeforeCursor}{{${variable.key}}}${textAfterCursor}`;
+      
+      const newCursorPos = cursorPos + variable.key.length + 4;
+      if (this.inputEl instanceof HTMLTextAreaElement) {
+        this.inputEl.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }
+    
+    // Trigger input event so any listeners are notified
+    this.inputEl.trigger('input');
+    
+    // Close the suggestion dropdown
+    this.close();
   }
-  
-  // Trigger input event so any listeners are notified
-  this.inputEl.trigger('input');
-  
-  // Close the suggestion dropdown
-  this.close();
-}
   
   /**
    * Updates the list of available variables
