@@ -156,7 +156,7 @@ function renderExpandableTemplate(
     contentContainer.createEl('h4', { text: 'Note Content', cls: 'cassette-section-header' });
     
     contentContainer.createEl('p', { 
-      text: 'Template content added to new notes (one-time, during creation only). Use variables like {{title}}, {{synopsis}}, etc.',
+      text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
       cls: 'setting-item-description'
     });
     
@@ -165,7 +165,7 @@ function renderExpandableTemplate(
       .addTextArea(text => {
         
         text
-          .setPlaceholder('## Synopsis\n{{synopsis}}\n\n## My Notes\n')
+          .setPlaceholder('#\n{{title}}\n\n{{synopsis}}\n')
           .setValue(config.noteContent || '')
           .onChange(async (value) => {
             config.noteContent = value;
