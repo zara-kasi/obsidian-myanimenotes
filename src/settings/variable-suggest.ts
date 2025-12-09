@@ -19,7 +19,7 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
   /**
    * Creates a new variable suggester
    * @param app Obsidian app instance
-   * @param inputEl Input element to attach suggestions to
+   * @param inputEl Input or textarea element to attach suggestions to
    * @param availableVariables List of variables to suggest (e.g., ANIME_PROPERTIES or MANGA_PROPERTIES)
    */
   constructor(
@@ -27,7 +27,9 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
     inputEl: HTMLInputElement | HTMLTextAreaElement,
     availableVariables: PropertyMetadata[]
   ) {
-    super(app, inputEl);
+    // Cast to HTMLInputElement for AbstractInputSuggest compatibility
+    // TextArea works because it has the same .value and event handling
+    super(app, inputEl as HTMLInputElement);
     this.inputEl = inputEl;
     this.availableVariables = availableVariables;
   }
