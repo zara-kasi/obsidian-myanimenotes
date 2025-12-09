@@ -160,20 +160,24 @@ function renderExpandableTemplate(
       cls: 'setting-item-description'
     });
     
-      .addTextArea(text => {
-        
-        text
-          .setPlaceholder('#\n{{title}}\n\n{{synopsis}}\n')
-          .setValue(config.noteContent || '')
-          .onChange(async (value) => {
-            config.noteContent = value;
-            await saveTemplateConfig(plugin, type, config);
-          });
-        
-        text.inputEl.rows = 8;
-        text.inputEl.style.width = '100%';
-        text.inputEl.style.fontFamily = 'monospace';
-      });
+    // Create textarea directly without Setting wrapper to avoid the line
+    const textareaContainer = contentContainer.createDiv({ cls: 'cassette-textarea-container' });
+    const textarea = textareaContainer.createEl('textarea', {
+      cls: 'cassette-content-template',
+      attr: {
+        placeholder: '#\n{{title}}\n\n{{synopsis}}\n',
+        rows: '8'
+      }
+    });
+    
+    textarea.value = config.noteContent || '';
+    textarea.style.width = '100%';
+    textarea.style.fontFamily = 'monospace';
+    
+    textarea.addEventListener('input', async (e) => {
+      config.noteContent = (e.target as HTMLTextAreaElement).value;
+      await saveTemplateConfig(plugin, type, config);
+    });
   }
 }
 
