@@ -21,6 +21,7 @@ export interface PropertyItem {
 export interface TemplateConfig {
   folderPath: string;
   properties: PropertyItem[];
+  noteContent: string
 }
 
 /**
@@ -103,6 +104,7 @@ export function getAvailableProperties(category: 'anime' | 'manga'): PropertyMet
 
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
   folderPath: 'Cassette/Anime',
+  noteContent: '',  
   properties: [
     // Core properties (order: 1-9)
     { id: 'prop-1', template: '{{title}}', customName: 'title', order: 1 },
@@ -147,6 +149,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
 
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
   folderPath: 'Cassette/Manga',
+  noteContent: '',
   properties: [
     // Core properties (order: 1-8)
     { id: 'prop-1', template: '{{title}}', customName: 'title', order: 1 },
