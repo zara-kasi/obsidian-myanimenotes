@@ -163,8 +163,6 @@ function renderExpandableTemplate(
     new Setting(contentContainer)
       .setName('Content template')
       .addTextArea(text => {
-        const variables = getAvailableProperties(type);
-        new VariableSuggest(plugin.app, text.inputEl, variables);
         
         text
           .setPlaceholder('## Synopsis\n{{synopsis}}\n\n## My Notes\n')
