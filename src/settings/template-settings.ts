@@ -165,7 +165,7 @@ function renderExpandableTemplate(
     const textarea = textareaContainer.createEl('textarea', {
       cls: 'cassette-content-template',
       attr: {
-        placeholder: '#\n{{title}}\n\n{{synopsis}}\n',
+        placeholder: '# {{title}}\n\n{{synopsis}}\n',
         rows: '8'
       }
     });
