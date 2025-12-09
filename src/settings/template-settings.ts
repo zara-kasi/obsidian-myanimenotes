@@ -163,7 +163,7 @@ function renderExpandableTemplate(
       .addTextArea(text => {
         
         text
-          .setPlaceholder('# {{title}}\n\n{{synopsis}}\n')
+          .setPlaceholder('#\n{{title}}\n\n{{synopsis}}\n')
           .setValue(config.noteContent || '')
           .onChange(async (value) => {
             config.noteContent = value;
