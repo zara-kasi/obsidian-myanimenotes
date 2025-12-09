@@ -5,6 +5,7 @@
  * Body content is only applied once during file creation
  */
 
+import { stringifyYaml } from 'obsidian';
 import type { UniversalMediaItem } from '../../transformers';
 import { resolveTemplate } from './template-parser';
 
@@ -22,8 +23,8 @@ export function generateInitialFileContent(
   noteContentTemplate: string,
   item: UniversalMediaItem
 ): string {
-  // Generate frontmatter section
-  const frontmatterYaml = generateFrontmatterYaml(frontmatterProps);
+  // Use Obsidian's built-in YAML serializer
+  const frontmatterYaml = stringifyYaml(frontmatterProps);
   
   // Resolve variables in note content template
   const resolvedContent = noteContentTemplate.trim()
@@ -36,38 +37,4 @@ export function generateInitialFileContent(
   } else {
     return `---\n${frontmatterYaml}---\n`;
   }
-}
-
-/**
- * Generates YAML frontmatter string from properties object
- * Simple serialization - handles strings, numbers, arrays
- * 
- * @param props - Frontmatter properties
- * @returns YAML string (without --- delimiters)
- */
-function generateFrontmatterYaml(props: Record<string, any>): string {
-  const lines: string[] = [];
-  
-  for (const [key, value] of Object.entries(props)) {
-    if (value === undefined || value === null) continue;
-    
-    if (Array.isArray(value)) {
-      // Array: use YAML list format
-      lines.push(`${key}:`);
-      value.forEach(item => {
-        const escaped = String(item).replace(/"/g, '\\"');
-        lines.push(`  - "${escaped}"`);
-      });
-    } else if (typeof value === 'string') {
-      // String: quote if contains special characters
-      const needsQuotes = value.includes(':') || value.includes('#') || value.includes('\n');
-      const escaped = value.replace(/"/g, '\\"');
-      lines.push(`${key}: ${needsQuotes ? `"${escaped}"` : value}`);
-    } else {
-      // Number, boolean, etc.
-      lines.push(`${key}: ${value}`);
-    }
-  }
-  
-  return lines.join('\n') + '\n';
 }
