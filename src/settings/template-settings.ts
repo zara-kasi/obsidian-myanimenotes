@@ -151,6 +151,33 @@ function renderExpandableTemplate(
     addButton.addEventListener('click', () => {
       addEmptyProperty(plugin, state, config, type);
     });
+    
+    // NEW: Note content template section
+    contentContainer.createEl('h4', { text: 'Note Content', cls: 'cassette-section-header' });
+    
+    contentContainer.createEl('p', { 
+      text: 'Template content added to new notes (one-time, during creation only). Use variables like {{title}}, {{synopsis}}, etc.',
+      cls: 'setting-item-description'
+    });
+    
+    new Setting(contentContainer)
+      .setName('Content template')
+      .addTextArea(text => {
+        const variables = getAvailableProperties(type);
+        new VariableSuggest(plugin.app, text.inputEl, variables);
+        
+        text
+          .setPlaceholder('## Synopsis\n{{synopsis}}\n\n## My Notes\n')
+          .setValue(config.noteContent || '')
+          .onChange(async (value) => {
+            config.noteContent = value;
+            await saveTemplateConfig(plugin, type, config);
+          });
+        
+        text.inputEl.rows = 8;
+        text.inputEl.style.width = '100%';
+        text.inputEl.style.fontFamily = 'monospace';
+      });
   }
 }
 
