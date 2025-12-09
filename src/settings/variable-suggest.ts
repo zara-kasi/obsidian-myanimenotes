@@ -120,7 +120,7 @@ selectSuggestion(variable: PropertyMetadata): void {
   const lastBracketIndex = currentValue.lastIndexOf('{{');
   
   if (lastBracketIndex !== -1) {
-    // Get the text before and after the {{
+    // Get the text before the {{
     const beforeBrackets = currentValue.substring(0, lastBracketIndex);
     const afterBrackets = currentValue.substring(lastBracketIndex + 2);
     
@@ -132,9 +132,10 @@ selectSuggestion(variable: PropertyMetadata): void {
       const remaining = afterBrackets.substring(closingIndex + 2);
       this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${remaining}`;
     } else {
-      // No closing bracket yet - add variable and closing brackets
-      // This keeps any text after the variable (like " ep")
-      this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${afterBrackets}`;
+      // No closing bracket yet - remove any partial text before adding the variable
+      // Find where the actual remaining text starts (after any partial variable name)
+      // We need to remove the partial text that matched the suggestion
+      this.inputEl.value = `${beforeBrackets}{{${variable.key}}}`;
     }
   } else {
     // First variable, no brackets yet
