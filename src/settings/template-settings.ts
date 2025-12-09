@@ -161,7 +161,6 @@ function renderExpandableTemplate(
     });
     
     new Setting(contentContainer)
-      .setName('Content template')
       .addTextArea(text => {
         
         text
