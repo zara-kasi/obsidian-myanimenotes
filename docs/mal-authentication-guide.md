@@ -32,6 +32,8 @@
 
 ![Steps](../assets/Imagepipe_19.webp)
 
+3. Open API page
+
 ![Steps](../assets/Imagepipe_20.webp)
 
 4. Click Edit to view you application client id & secret
