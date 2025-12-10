@@ -92,96 +92,91 @@ function renderExpandableTemplate(
   
   // Expanded content container
   if (isExpanded) {
-    const contentContainer = container.createDiv({ cls: 'myanimenotes-template-content' });
-    
-    // Folder path setting
-    new Setting(contentContainer)
-      .setName('Note location')
-      .setDesc('The folder or path of the note.')
-      .addText(text => {
-        new FolderSuggest(plugin.app, text.inputEl);
-        text
-          .setPlaceholder(`MyAnimeNotes/${type === 'anime' ? 'Anime' : 'Manga'}`)
-          .setValue(config.folderPath)
-          .onChange(async (value) => {
-            // Normalize the path to handle cross-platform paths and user input variations
-            const normalizedPath = normalizePath(value.trim() || `MyAnimeNotes/${type === 'anime' ? 'Anime' : 'Manga'}`);
-            config.folderPath = normalizedPath;
-            await saveTemplateConfig(plugin, type, config);
-          });
-      });
-    
-    // Properties section header
-    contentContainer.createEl('h4', { text: 'Properties' });
-    
-    // Add description
-    contentContainer.createEl('p', { 
-  text: 'Properties to add to the top of the media note. Use variables to populate data from the MAL API.',
-  cls: 'setting-item-description'
-});
-    
-    // Properties list container
-    const propertyListEl = contentContainer.createDiv({ cls: 'myanimenotes-property-list' });
-    
-    // Store reference for drag operations
-    if (type === 'anime') {
-      state.animePropertyListEl = propertyListEl;
-    } else {
-      state.mangaPropertyListEl = propertyListEl;
-    }
-    
-    renderPropertyList(propertyListEl, plugin, state, config, type);
-    
-    // Add property button
-    const addButtonContainer = contentContainer.createDiv({ cls: 'myanimenotes-add-property-container' });
-    const addButton = addButtonContainer.createEl('button', { 
-      cls: 'myanimenotes-add-property-button'
+  const contentContainer = container.createDiv({ cls: 'myanimenotes-template-content' });
+  
+  // Folder path setting
+  new Setting(contentContainer)
+    .setName('Note location')
+    .setDesc('The folder or path of the note.')
+    .addText(text => {
+      new FolderSuggest(plugin.app, text.inputEl);
+      text
+        .setPlaceholder(`MyAnimeNotes/${type === 'anime' ? 'Anime' : 'Manga'}`)
+        .setValue(config.folderPath)
+        .onChange(async (value) => {
+          // Normalize the path to handle cross-platform paths and user input variations
+          const normalizedPath = normalizePath(value.trim() || `MyAnimeNotes/${type === 'anime' ? 'Anime' : 'Manga'}`);
+          config.folderPath = normalizedPath;
+          await saveTemplateConfig(plugin, type, config);
+        });
     });
-
-    // Create icon element inside the button
-    const iconEl = addButton.createSpan({ cls: 'myanimenotes-button-icon' });
-    setIcon(iconEl, 'plus');
-
-    // Add text after the icon
-    addButton.createSpan({ 
-      cls: 'myanimenotes-button-text',
-      text: 'Add Property' 
-    });
-
-    addButton.addEventListener('click', () => {
-      addEmptyProperty(plugin, state, config, type);
-    });
-    
-    // NEW: Note content template section
-   contentContainer.createEl('h4', { text: 'Note Content', cls: 'myanimenotes-section-header' });
-
-   contentContainer.createEl('p', { 
-  text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
-  cls: 'setting-item-description'
-});
-
-// Use Setting wrapper but with custom class to hide separator
-    new Setting(contentContainer)
-  .setClass('myanimenotes-textarea-setting')
-  .addTextArea(textarea => {
-    textarea
-      .setPlaceholder('# {{title}}\n\n{{synopsis}}\n')
-      .setValue(config.noteContent || '')
-      .onChange(async (value) => {
-        config.noteContent = value;
-        await saveTemplateConfig(plugin, type, config);
-      });
-    
-    textarea.inputEl.rows = 8;
-    textarea.inputEl.style.width = '100%';
-    textarea.inputEl.style.fontFamily = 'monospace';
+  
+  // Properties section header
+  contentContainer.createEl('h4', { text: 'Properties' });
+  
+  // Add description
+  contentContainer.createEl('p', { 
+    text: 'Properties to add to the top of the media note. Use variables to populate data from the MAL API.',
+    cls: 'setting-item-description'
   });
-    
-    textarea.addEventListener('input', async (e) => {
-      config.noteContent = (e.target as HTMLTextAreaElement).value;
-      await saveTemplateConfig(plugin, type, config);
-    });
+  
+  // Properties list container
+  const propertyListEl = contentContainer.createDiv({ cls: 'myanimenotes-property-list' });
+  
+  // Store reference for drag operations
+  if (type === 'anime') {
+    state.animePropertyListEl = propertyListEl;
+  } else {
+    state.mangaPropertyListEl = propertyListEl;
   }
+  
+  renderPropertyList(propertyListEl, plugin, state, config, type);
+  
+  // Add property button
+  const addButtonContainer = contentContainer.createDiv({ cls: 'myanimenotes-add-property-container' });
+  const addButton = addButtonContainer.createEl('button', { 
+    cls: 'myanimenotes-add-property-button'
+  });
+  
+  // Create icon element inside the button
+  const iconEl = addButton.createSpan({ cls: 'myanimenotes-button-icon' });
+  setIcon(iconEl, 'plus');
+  
+  // Add text after the icon
+  addButton.createSpan({ 
+    cls: 'myanimenotes-button-text',
+    text: 'Add Property' 
+  });
+  
+  addButton.addEventListener('click', () => {
+    addEmptyProperty(plugin, state, config, type);
+  });
+  
+  // Note content template section
+  contentContainer.createEl('h4', { text: 'Note Content', cls: 'myanimenotes-section-header' });
+  
+  contentContainer.createEl('p', { 
+    text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
+    cls: 'setting-item-description'
+  });
+  
+  // Use Setting wrapper with custom class to hide separator line
+  new Setting(contentContainer)
+    .setClass('myanimenotes-textarea-setting')
+    .addTextArea(textarea => {
+      textarea
+        .setPlaceholder('# {{title}}\n\n{{synopsis}}\n')
+        .setValue(config.noteContent || '')
+        .onChange(async (value) => {
+          config.noteContent = value;
+          await saveTemplateConfig(plugin, type, config);
+        });
+      
+      textarea.inputEl.rows = 8;
+      textarea.inputEl.style.width = '100%';
+      textarea.inputEl.style.fontFamily = 'monospace';
+    });
+}
 }
 
 /**
