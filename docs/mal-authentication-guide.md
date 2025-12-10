@@ -24,30 +24,33 @@
 
 # Screenshots
 
-1. Fill the application details
+1. Go to API page
 
-![Steps](../assets/step-1.jpg)
+![Steps](../assets/Imagepipe_18.webp)
 
 2. Go to API page
 
-![Steps](../assets/step-2.jpg)
+![Steps](../assets/Imagepipe_19.webp)
 
 3. Click Edit to view you application client id & secret
 
-![Steps](../assets/step-3.jpg)
+![Steps](../assets/Imagepipe_20.webp)
 
 4. Copy both Client ID & Client Secret. ( Make sure to save them somewhere safe )
 
-![Steps](../assets/step-4.jpg)
+![Steps](../assets/Imagepipe_21.webp)
 
 5. Fill Client ID & Secret and click on Authenticate
 
-![Steps](../assets/step-5.jpg)
+![Steps](../assets/Imagepipe_22.webp)
 
 6. Click Allow and it will redirect you to Obsidian
 
-![Steps](../assets/step-6.jpg)
+![Steps](../assets/Imagepipe_23.webp)
 
 7. Done 👍 
 
-![Steps](../assets/step-7.jpg)
+![Steps](../assets/Imagepipe_24.webp)
+
+
+![Steps](../assets/Imagepipe_25.webp)
