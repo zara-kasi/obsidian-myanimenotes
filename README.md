@@ -1,5 +1,5 @@
 
-![demo image](assets/demo-image.png)
+![MyAnimeNotes_image](assets/MyAnimeNotes_image.webp)
 
 MyAnimeNotes is an [Obsidian](https://obsidian.md/) plugin that syncs your anime and manga lists from [MyAnimeList](https://myanimelist.net/) into structured Markdown notes, complete with metadata, cover image, and automatic updates.
 
