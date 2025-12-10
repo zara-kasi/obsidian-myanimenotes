@@ -254,13 +254,20 @@
   margin-top: 2px;
 }
 
-
-/* Note Content TextArea Setting - remove separator line */
+/* Note Content TextArea Setting - remove separator line for cleaner appearance */
 .myanimenotes-textarea-setting {
   border-top: none !important;
   padding-top: 0 !important;
 }
 
+.myanimenotes-textarea-setting .setting-item-info {
+  display: none; /* Hide the info column since we don't need it */
+}
+
 .myanimenotes-textarea-setting .setting-item-control {
   width: 100%;
+}
+
+.myanimenotes-textarea-setting textarea {
+  resize: vertical; /* Allow users to resize vertically if needed */
 }
