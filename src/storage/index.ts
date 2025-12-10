@@ -12,14 +12,14 @@ export {
   saveMediaItemsByCategory 
 } from './storage-service';
 
-// Cassette sync utilities (internal, but exported for testing/advanced use)
+// MyAnimeNotes sync utilities (internal, but exported for testing/advanced use)
 export {
-  generateCassetteSync,
-  validateCassetteSyncFormat,
-  findFilesByCassetteSync,
+  generateMyAnimeNotesSync,
+  validateMyAnimeNotesSyncFormat,
+  findFilesByMyAnimeNotesSync,
   findLegacyFiles,
   selectDeterministicFile
-} from './cassette';
+} from './myanimenotes';
 
 // File utilities (internal, but exported for testing/advanced use)
 export {
