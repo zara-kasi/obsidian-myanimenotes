@@ -1,7 +1,7 @@
 // Token validation, refresh, and management
 
 import { requestUrl } from 'obsidian';
-import type CassettePlugin from '../../../main';
+import type MyAnimeNotesPlugin from '../../../main';
 import type { MALTokenResponse } from './types';
 import { MAL_TOKEN_URL, TOKEN_EXPIRY_BUFFER } from './constants';
 import { createDebugLogger } from '../../../utils';
@@ -12,7 +12,7 @@ import { createDebugLogger } from '../../../utils';
  * @param plugin Plugin instance
  * @returns True if token exists and hasn't expired
  */
-export function isTokenValid(plugin: CassettePlugin): boolean {
+export function isTokenValid(plugin: MyAnimeNotesPlugin): boolean {
   return !!(
     plugin.settings.malAccessToken && 
     plugin.settings.malTokenExpiry && 
@@ -25,7 +25,7 @@ export function isTokenValid(plugin: CassettePlugin): boolean {
  * @param plugin Plugin instance
  * @returns True if authenticated
  */
-export function isAuthenticated(plugin: CassettePlugin): boolean {
+export function isAuthenticated(plugin: MyAnimeNotesPlugin): boolean {
   return plugin.settings.malAuthenticated && isTokenValid(plugin);
 }
 
@@ -34,7 +34,7 @@ export function isAuthenticated(plugin: CassettePlugin): boolean {
  * @param plugin Plugin instance
  * @throws Error if refresh fails
  */
-export async function refreshAccessToken(plugin: CassettePlugin): Promise<void> {
+export async function refreshAccessToken(plugin: MyAnimeNotesPlugin): Promise<void> {
   if (!plugin.settings.malRefreshToken) {
     throw new Error('No refresh token available');
   }
@@ -76,7 +76,7 @@ export async function refreshAccessToken(plugin: CassettePlugin): Promise<void> 
  * @param plugin Plugin instance
  * @throws Error if not authenticated or refresh fails
  */
-export async function ensureValidToken(plugin: CassettePlugin): Promise<void> {
+export async function ensureValidToken(plugin: MyAnimeNotesPlugin): Promise<void> {
   const debug = createDebugLogger(plugin, 'MAL Auth');
   if (!isTokenValid(plugin)) {
     if (!plugin.settings.malRefreshToken) {
@@ -100,7 +100,7 @@ export async function ensureValidToken(plugin: CassettePlugin): Promise<void> {
  * @param plugin Plugin instance
  * @returns Authorization headers or null if not authenticated
  */
-export function getAuthHeaders(plugin: CassettePlugin): Record<string, string> | null {
+export function getAuthHeaders(plugin: MyAnimeNotesPlugin): Record<string, string> | null {
   if (!isTokenValid(plugin)) return null;
   return { Authorization: `Bearer ${plugin.settings.malAccessToken}` };
 }
