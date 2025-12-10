@@ -1,6 +1,6 @@
 // Main service for syncing MAL data
 
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 import type { UniversalMediaItem } from '../transformers';
 import type { SyncResult, SyncItemResult } from './sync.types';
 import {
@@ -42,7 +42,7 @@ const DEFAULT_SYNC_OPTIONS: MALSyncOptions = {
  * @returns Array of transformed anime items
  */
 async function syncAnimeList(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   statuses?: string[]
 ): Promise<UniversalMediaItem[]> {
   const debug = createDebugLogger(plugin, 'MAL Sync');
@@ -80,7 +80,7 @@ if (statuses && statuses.length > 0) {
  * @returns Array of transformed manga items
  */
 async function syncMangaList(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   statuses?: string[]
 ): Promise<UniversalMediaItem[]> {
   const debug = createDebugLogger(plugin, 'MAL Sync');
@@ -119,7 +119,7 @@ if (statuses && statuses.length > 0) {
  * @returns Sync result with all synced items
  */
 export async function syncMAL(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   options: MALSyncOptions = DEFAULT_SYNC_OPTIONS
 ): Promise<{ items: UniversalMediaItem[]; result: SyncResult }> {
   const debug = createDebugLogger(plugin, 'MAL Sync');
@@ -240,7 +240,7 @@ export async function syncMAL(
  * @returns Synced items
  */
 export async function quickSyncMAL(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   category: MediaCategory
 ): Promise<UniversalMediaItem[]> {
   const options: MALSyncOptions = {
