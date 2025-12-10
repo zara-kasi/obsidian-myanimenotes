@@ -6,7 +6,7 @@
  */
 
 import { Notice } from 'obsidian';
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 
 /**
  * Shows a notification if notifications are enabled in settings
@@ -15,7 +15,7 @@ import type CassettePlugin from '../main';
  * @param duration Duration in milliseconds (0 = persistent)
  */
 export function showNotice(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   message: string,
   duration?: number
 ): void {
@@ -32,7 +32,7 @@ export function showNotice(
  * @param duration Duration in milliseconds (default: 3000)
  */
 export function showSuccessNotice(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   message: string,
   duration: number = 3000
 ): void {
@@ -46,7 +46,7 @@ export function showSuccessNotice(
  * @param duration Duration in milliseconds (default: 5000)
  */
 export function showErrorNotice(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   message: string,
   duration: number = 5000
 ): void {
@@ -60,7 +60,7 @@ export function showErrorNotice(
  * @param duration Duration in milliseconds (default: 3000)
  */
 export function showInfoNotice(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   message: string,
   duration: number = 3000
 ): void {
