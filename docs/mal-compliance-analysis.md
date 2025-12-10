@@ -11,7 +11,7 @@
 
 **COMPLIANCE STATUS:** ✅ **COMPLIANT** (with minor considerations)
 
-Your Cassette plugin appears to comply with the MyAnimeList API License and Developer Agreement (last modified August 8, 2019). The plugin follows the core requirements for non-commercial applications and properly handles user data.
+Your MyAnimeNotes plugin appears to comply with the MyAnimeList API License and Developer Agreement (last modified August 8, 2019). The plugin follows the core requirements for non-commercial applications and properly handles user data.
 
 ---
 
@@ -109,9 +109,9 @@ This is the most important compliance point. Your plugin correctly implements th
 const createdFile = await vault.create(filePath, initialContent);
 await updateMarkdownFileFrontmatter(plugin, createdFile, frontmatterProps);
 
-// src/storage/cassette/cassette-index.ts
+// src/storage/myanimenotes/myanimenotes-index.ts
 // Index is stored in-memory only, not persisted remotely
-private cassetteToFiles: Map<string, Set<TFile>> = new Map();
+private myanimenotesToFiles: Map<string, Set<TFile>> = new Map();
 ```
 
 **PRIVACY_COMPLIANCE.md Explicitly Addresses This:**
@@ -150,7 +150,7 @@ third party or stored remotely."
    - Uses industry-standard PKCE security
    - Code verifier generated cryptographically
    - State parameter for CSRF protection
-   - Redirect URI properly configured: `obsidian://cassette-auth/mal`
+   - Redirect URI properly configured: `obsidian://myanimenotes-auth/mal`
 
 ---
 
@@ -179,7 +179,7 @@ const MAL_API_BASE = 'https://api.myanimelist.net/v2';
 
 // Proper API usage with pagination
 async function fetchAllPages(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   endpoint: string,
   params: Record<string, string> = {}
 ): Promise<any[]> {
@@ -277,7 +277,7 @@ The agreement states:
 
 **Recommendation:**
 - Consider notifying MAL at `support@myanimelist.net` or via their API club
-- Provide link to GitHub repository: `https://github.com/zara-kasi/cassette`
+- Provide link to GitHub repository: `https://github.com/zara-kasi/obsidian-myanimenotes`
 - This is optional (MAL has discretion to review) but recommended
 
 ---
@@ -322,11 +322,11 @@ All development is volunteer, open-source, community-driven.
 
 ---
 
-### ⚠️ Issue 2: Cassette Index In-Memory Storage
+### ⚠️ Issue 2: MyAnimeNotes Index In-Memory Storage
 
-**Location:** `src/storage/cassette/cassette-index.ts`
+**Location:** `src/storage/myanimenotes/myanimenotes-index.ts`
 
-**Description:** You maintain an in-memory index of cassette IDs for performance.
+**Description:** You maintain an in-memory index of myanimenotes IDs for performance.
 
 **Analysis:** Fully compliant. This is:
 - Temporary runtime data (cleared on app close)
@@ -339,7 +339,7 @@ All development is volunteer, open-source, community-driven.
 
 ### ⚠️ Issue 3: Lock Manager State
 
-**Location:** `src/storage/cassette/cassette-lock.ts`
+**Location:** `src/storage/myanimenotes/myanimenotes-lock.ts`
 
 **Description:** In-memory concurrency locks
 
@@ -381,8 +381,8 @@ Contact via:
 - Or support contact form
 
 Provide:
-- Plugin name: Cassette
-- Repository: https://github.com/zara-kasi/cassette
+- Plugin name: MyAnimeNotes
+- Repository: https://github.com/zara-kasi/obsidian-myanimenotes
 - License: MIT (open-source)
 - Classification: Non-commercial personal knowledge base
 
@@ -400,7 +400,7 @@ Your `PRIVACY_COMPLIANCE.md` is excellent. Continue maintaining clear documentat
 
 ### 4. **Document Limitations**
 Consider adding to README:
-- "Cassette is a personal sync tool and is not affiliated with MyAnimeList"
+- "MyAnimeNotes is a personal sync tool and is not affiliated with MyAnimeList"
 - "Data synced is for personal use only"
 
 ### 5. **Respect Rate Limits**
@@ -415,7 +415,7 @@ Your implementation is good, but consider:
 
 **FINAL VERDICT: ✅ COMPLIANT**
 
-Your Cassette plugin fully complies with the MyAnimeList API License and Developer Agreement. The implementation is security-conscious, respects user privacy, and follows the spirit and letter of the terms.
+Your MyAnimeNotes plugin fully complies with the MyAnimeList API License and Developer Agreement. The implementation is security-conscious, respects user privacy, and follows the spirit and letter of the terms.
 
 **Key Strengths:**
 1. ✅ Correctly classified as non-commercial
