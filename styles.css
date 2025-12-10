@@ -253,3 +253,14 @@
   color: var(--text-muted);
   margin-top: 2px;
 }
+
+
+/* Note Content TextArea Setting - remove separator line */
+.myanimenotes-textarea-setting {
+  border-top: none !important;
+  padding-top: 0 !important;
+}
+
+.myanimenotes-textarea-setting .setting-item-control {
+  width: 100%;
+}
