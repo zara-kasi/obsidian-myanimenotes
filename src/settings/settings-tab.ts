@@ -22,19 +22,19 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     // MAL Section
-    
+    new Setting(containerEl).setHeading().setName('MyAnimeList Authentication');
     this.renderMALSection(containerEl);
 
     // Template Section
-    
+    new Setting(containerEl).setHeading().setName('Templates');
     renderTemplateSection(containerEl, this.plugin, this.templateState);
 
     // Sync Section
-    
+    new Setting(containerEl).setHeading().setName('Sync Settings');
     this.renderSyncSection(containerEl);
    
     // Debug Section
-    
+    new Setting(containerEl).setHeading().setName('Advanced');
     new Setting(containerEl)
       .setName('Debug mode')
       .setDesc('Enable detailed console logging.')
