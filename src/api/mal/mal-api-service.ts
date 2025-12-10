@@ -288,7 +288,7 @@ async function fetchAllPages(
 
     // Safety check to prevent infinite loops
     if (offset > 10000) {
-      console.warn('[MAL API] Safety limit reached (10000 items), stopping pagination');
+      debug.log('[MAL API] Safety limit reached (10000 items), stopping pagination');
       break;
     }
 
