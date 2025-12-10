@@ -1,7 +1,7 @@
 // User information management
 
 import { requestUrl } from 'obsidian';
-import type CassettePlugin from '../../../main';
+import type MyAnimeNotesPlugin from '../../../main';
 import type { MALUserInfo } from './types';
 import { MAL_USER_URL } from './constants';
 
@@ -10,7 +10,7 @@ import { MAL_USER_URL } from './constants';
  * @param plugin Plugin instance
  * @throws Error if fetch fails
  */
-export async function fetchUserInfo(plugin: CassettePlugin): Promise<void> {
+export async function fetchUserInfo(plugin: MyAnimeNotesPlugin): Promise<void> {
   const res = await requestUrl({
     url: MAL_USER_URL,
     method: 'GET',
@@ -41,6 +41,6 @@ export async function fetchUserInfo(plugin: CassettePlugin): Promise<void> {
  * @param plugin Plugin instance
  * @returns User info or null if not available
  */
-export function getUserInfo(plugin: CassettePlugin): MALUserInfo | null {
+export function getUserInfo(plugin: MyAnimeNotesPlugin): MALUserInfo | null {
   return plugin.settings.malUserInfo || null;
 }
