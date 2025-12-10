@@ -8,46 +8,50 @@
 
 | Field                | Value                                                                                                                                                                                                                                   |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **App Name**         | Cassette                                                                                                                                                                                                                                |
-| **Description**      | Make your media a part of your knowledge. Sync your media items from MyAnimeList directly into your Obsidian vault. Build a private, offline library that stays updated and seamlessly integrates with your notes. |
-| **App Redirect URI** | obsidian://cassette-auth/mal                                                                                                                                                                                                            |
+| **App Name**         | MyAnimeNotes                                                                                                                                                                                                                                |
+| **Description**      | Sync your media items from MyAnimeList directly into your Obsidian vault. Build a private, offline library that stays updated and seamlessly integrates with your notes. |
+| **App Redirect URI** | obsidian://myanimenotes-auth/mal                                                                                                                                                                                                            |
 | **Homepage URL**     | https://myanimelist.net/                                                                                                                                                                                                                |
-| **Company Name**     | Cassette                                                                                                                                                                                                          |
+| **Company Name**     | MyAnimeNotes                                                                                                                                                                                                          |
 
 
-> ⚠️ The Redirect URI must be exactly `obsidian://cassette-auth/mal`, or authentication will fail.
+> ⚠️ The Redirect URI must be exactly `obsidian://myanimenotes-auth/mal`, or authentication will fail.
 
 3. Click **Save** and copy your **Client ID** and **Client Secret**.  
-4. Open Obsidian **Settings** → **Cassette**
+4. Open Obsidian **Settings** → **MyAnimeNotes**
 5. Enter your **Client ID** and **Client Secret**
 6. Click **Authenticate** and sign in via your browser
 
 # Screenshots
 
-1. Fill the application details
+1. Go to App creation page
 
-![Steps](../assets/step-1.jpg)
+![Steps](../assets/Imagepipe_18.webp)
 
-2. Go to API page
+2. Fill the App information from the table
 
-![Steps](../assets/step-2.jpg)
+![Steps](../assets/Imagepipe_19.webp)
 
-3. Click Edit to view you application client id & secret
+3. Open API page
 
-![Steps](../assets/step-3.jpg)
+![Steps](../assets/Imagepipe_20.webp)
 
-4. Copy both Client ID & Client Secret. ( Make sure to save them somewhere safe )
+4. Click Edit to view you application client id & secret
 
-![Steps](../assets/step-4.jpg)
+![Steps](../assets/Imagepipe_21.webp)
 
-5. Fill Client ID & Secret and click on Authenticate
+5. Copy both Client ID & Client Secret. ( Make sure to save them somewhere safe )
 
-![Steps](../assets/step-5.jpg)
+![Steps](../assets/Imagepipe_22.webp)
 
-6. Click Allow and it will redirect you to Obsidian
+6.  Fill Client ID & Secret and click on Authenticate
+![Steps](../assets/Imagepipe_23.webp)
 
-![Steps](../assets/step-6.jpg)
+7.  Click Allow and it will redirect you to Obsidian
 
-7. Done 👍 
 
-![Steps](../assets/step-7.jpg)
+![Steps](../assets/Imagepipe_24.webp)
+
+8. Done  👍 
+
+![Steps](../assets/Imagepipe_25.webp)

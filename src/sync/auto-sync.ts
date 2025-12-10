@@ -1,4 +1,4 @@
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 import { createDebugLogger } from '../utils';
 
 const SYNC_ON_LOAD_DELAY = 2 * 60 * 1000; // 2 minute (fast but non-blocking)
@@ -9,12 +9,12 @@ const MIN_SCHEDULED_INTERVAL = 60; // Minimum 60 minutes
  * Each sync type (syncOnLoad, scheduledSync) works independently
  */
 export class AutoSyncManager {
-  private plugin: CassettePlugin;
+  private plugin: MyAnimeNotesPlugin;
   private syncOnLoadTimer: NodeJS.Timeout | null = null;
   private scheduledSyncTimer: NodeJS.Timeout | null = null;
   private debug: ReturnType<typeof createDebugLogger>;
 
-  constructor(plugin: CassettePlugin) {
+  constructor(plugin: MyAnimeNotesPlugin) {
     this.plugin = plugin;
     this.debug = createDebugLogger(plugin, 'Auto Sync');
   }
@@ -210,7 +210,7 @@ export class AutoSyncManager {
 /**
  * Creates and starts the auto-sync manager
  */
-export function createAutoSyncManager(plugin: CassettePlugin): AutoSyncManager {
+export function createAutoSyncManager(plugin: MyAnimeNotesPlugin): AutoSyncManager {
   const manager = new AutoSyncManager(plugin);
   manager.start();
   return manager;

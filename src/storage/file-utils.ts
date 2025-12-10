@@ -4,7 +4,7 @@
  * Helper functions for file operations, path handling
  */
 
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 import { createDebugLogger } from '../utils';
 import { normalizePath } from 'obsidian';
 
@@ -14,7 +14,7 @@ import { normalizePath } from 'obsidian';
  * Normalizes the path before checking/creating
  */
 export async function ensureFolderExists(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   folderPath: string
 ): Promise<void> {
   const debug = createDebugLogger(plugin, 'FileUtils');
@@ -47,7 +47,7 @@ export function sanitizeFilename(filename: string): string {
  * Normalizes paths before checking
  */
 export function generateUniqueFilename(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   vault: any,
   folderPath: string,
   baseFilename: string

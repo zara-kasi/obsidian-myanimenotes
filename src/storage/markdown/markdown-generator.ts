@@ -5,7 +5,7 @@
  * Separates frontmatter generation from file writing
  */
 import { TFile } from 'obsidian';
-import type CassettePlugin from '../../main';
+import type MyAnimeNotesPlugin from '../../main';
 import type { UniversalMediaItem } from '../../transformers';
 import type { TemplateConfig } from '../../settings/template-config';
 import { buildFrontmatterFromTemplate } from './frontmatter-builder';
@@ -16,16 +16,16 @@ import { createDebugLogger } from '../../utils';
  * @param plugin Plugin instance
  * @param item Media item to generate frontmatter for
  * @param template Template configuration (anime or manga)
- * @param cassetteSync Cassette identifier
+ * @param myanimenotesSync MyAnimeNotes identifier
  * @returns Frontmatter properties object
  */
 export function generateFrontmatterProperties(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   template: TemplateConfig,
-  cassetteSync: string
+  myanimenotesSync: string
 ): Record<string, any> {
-  return buildFrontmatterFromTemplate(item, template, cassetteSync);
+  return buildFrontmatterFromTemplate(item, template, myanimenotesSync);
 }
 
 /**
@@ -33,7 +33,7 @@ export function generateFrontmatterProperties(
  * Preserves existing body content automatically via processFrontMatter
  */
 export async function updateMarkdownFileFrontmatter(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   file: TFile,
   frontmatterProps: Record<string, any>
 ): Promise<void> {

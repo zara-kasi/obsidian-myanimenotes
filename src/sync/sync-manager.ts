@@ -1,4 +1,4 @@
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 import type { UniversalMediaItem } from '../transformers';
 import type { SyncResult } from './sync.types';
 import { MediaCategory } from '../transformers';
@@ -23,7 +23,7 @@ export class SyncManager {
   private debug: DebugLogger;
   private isSyncing: boolean = false;
   private lastSyncTime: number = 0;
-  constructor(private plugin: CassettePlugin) {
+  constructor(private plugin: MyAnimeNotesPlugin) {
     this.debug = createDebugLogger(plugin, 'Sync Manager');
         // Load persisted last sync time from settings
     this.lastSyncTime = plugin.settings.lastSuccessfulSync || 0;
@@ -109,11 +109,11 @@ export class SyncManager {
     try {
       this.debug.log('[Sync Manager] Starting MAL sync...', options);
       
-      // Ensure cassette index is initialized before sync
-      if (this.plugin.cassetteIndex) {
-        this.debug.log('[Sync Manager] Ensuring cassette index is initialized...');
-        await this.plugin.cassetteIndex.ensureInitialized();
-        this.debug.log('[Sync Manager] Cassette index ready');
+      // Ensure myanimenotes index is initialized before sync
+      if (this.plugin.myanimenotesIndex) {
+        this.debug.log('[Sync Manager] Ensuring myanimenotes index is initialized...');
+        await this.plugin.myanimenotesIndex.ensureInitialized();
+        this.debug.log('[Sync Manager] MyAnimeNotes index ready');
       }
       
       // Perform sync
@@ -239,6 +239,6 @@ export class SyncManager {
  * @param plugin Plugin instance
  * @returns Sync manager
  */
-export function createSyncManager(plugin: CassettePlugin): SyncManager {
+export function createSyncManager(plugin: MyAnimeNotesPlugin): SyncManager {
   return new SyncManager(plugin);
 }

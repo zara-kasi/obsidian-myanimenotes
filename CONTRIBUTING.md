@@ -1,6 +1,6 @@
-# Contributing to Cassette
+# Contributing to MyAnimeNotes
 
-Thank you for your interest in contributing to Cassette! This guide will help you understand the plugin architecture and get started with development.
+Thank you for your interest in contributing to MyAnimeNotes! This guide will help you understand the plugin architecture and get started with development.
 
 ## Table of Contents
 
@@ -31,8 +31,8 @@ Thank you for your interest in contributing to Cassette! This guide will help yo
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/zara-kasi/cassette.git
-   cd cassette
+   git clone https://github.com/zara-kasi/obsidian-myanimenotes.git
+   cd myanimenotes
    ```
 
 2. **Install dependencies**
@@ -48,13 +48,13 @@ Thank you for your interest in contributing to Cassette! This guide will help yo
 4. **Link to your test vault**
    ```bash
    # Create symlink to your test vault's plugins folder
-   ln -s $(pwd) /path/to/your/test-vault/.obsidian/plugins/cassette
+   ln -s $(pwd) /path/to/your/test-vault/.obsidian/plugins/myanimenotes
    ```
 
 5. **Enable the plugin in Obsidian**
    - Open your test vault
    - Go to Settings → Community Plugins
-   - Enable "Cassette"
+   - Enable "MyAnimeNotes"
 
 6. **Set up MAL credentials**
    - Follow the [MAL Authentication Guide](./docs/mal-authentication-guide.md)
@@ -74,7 +74,7 @@ After code changes, reload Obsidian (`Ctrl+R` or `Cmd+R`) to see updates.
 
 ## Architecture Overview
 
-Cassette is built on a **layered architecture** with clear separation of concerns:
+MyAnimeNotes is built on a **layered architecture** with clear separation of concerns:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -102,7 +102,7 @@ Cassette is built on a **layered architecture** with clear separation of concern
 ### Core Principles
 
 1. **Provider-Agnostic**: Uses `UniversalMediaItem` format to support multiple APIs (MAL, Simkl, etc.)
-2. **Performance-First**: O(1) indexed lookups via `CassetteIndex` instead of O(n) vault scans
+2. **Performance-First**: O(1) indexed lookups via `MyAnimeNotesIndex` instead of O(n) vault scans
 3. **User Content Preservation**: Never destroys user notes or edits
 4. **Graceful Degradation**: Falls back to legacy methods if optimizations fail
 5. **Type Safety**: Comprehensive TypeScript types throughout
@@ -112,7 +112,7 @@ Cassette is built on a **layered architecture** with clear separation of concern
 ## Codebase Structure
 
 ```
-cassette/
+myanimenotes/
 ├── src/
 │   ├── main.ts                    # Plugin entry point
 │   ├── api/                       # External API integrations
@@ -132,10 +132,10 @@ cassette/
 │   ├── storage/                   # Vault file operations
 │   │   ├── storage-service.ts     # Main save orchestration
 │   │   ├── file-utils.ts          # File operations & sanitization
-│   │   ├── cassette/              # Cassette system (unique IDs)
-│   │   │   ├── cassette-index.ts  # O(1) lookup index
-│   │   │   ├── cassette-lock.ts   # Concurrency control
-│   │   │   └── cassette-sync-manager.ts # ID generation & lookup
+│   │   ├── myanimenotes/              # MyAnimeNotes system (unique IDs)
+│   │   │   ├── myanimenotes-index.ts  # O(1) lookup index
+│   │   │   ├── myanimenotes-lock.ts   # Concurrency control
+│   │   │   └── myanimenotes-sync-manager.ts # ID generation & lookup
 │   │   └── markdown/              # Markdown generation
 │   │       ├── frontmatter-builder.ts # YAML frontmatter
 │   │       ├── markdown-generator.ts  # Complete file generation
@@ -160,7 +160,7 @@ cassette/
 │   ├── oauth-2.0-authentication-flow-for-mal.md
 │   ├── storage-system.md
 │   ├── sync-mechanism.md
-│   ├── cassette-index.md
+│   ├── myanimenotes-index.md
 │   └── ...
 │
 └── tests/                         # Tests (future)
@@ -181,22 +181,22 @@ Implements **OAuth 2.0 with PKCE** for secure MAL authentication.
 
 **Read More:** [OAuth 2.0 Authentication Flow](./docs/oauth-2.0-authentication-flow-for-mal.md)
 
-### 2. Cassette System (`src/storage/cassette/`)
+### 2. MyAnimeNotes System (`src/storage/myanimenotes/`)
 
 The **unique identifier system** that enables O(1) file lookups.
 
-**What is a Cassette?**
+**What is a MyAnimeNotes?**
 ```
 Format: provider:category:id
 Example: mal:anime:1245
 ```
 
 **Key Components:**
-- `cassette-index.ts` - In-memory index (O(1) lookups)
-- `cassette-sync-manager.ts` - ID generation & file lookup
-- `cassette-lock.ts` - Concurrency control (prevents race conditions)
+- `myanimenotes-index.ts` - In-memory index (O(1) lookups)
+- `myanimenotes-sync-manager.ts` - ID generation & file lookup
+- `myanimenotes-lock.ts` - Concurrency control (prevents race conditions)
 
-**Read More:** [Cassette Index System](./docs/cassette-index.md)
+**Read More:** [MyAnimeNotes Index System](./docs/myanimenotes-index.md)
 
 ### 3. Storage System (`src/storage/`)
 
@@ -310,7 +310,7 @@ MAL API Response → transformMALAnime() → UniversalMediaItem
 - ✅ New file creation (empty vault)
 - ✅ Existing file updates (preserve user content)
 - ✅ Duplicate file detection
-- ✅ Legacy file migration (files without cassette)
+- ✅ Legacy file migration (files without myanimenotes)
 - ✅ Concurrent saves (same item multiple times)
 - ✅ Special characters in titles
 - ✅ Filename collisions (auto-numbering)
@@ -331,8 +331,8 @@ plugin.settings.debugMode = true
 Check browser console (Ctrl+Shift+I) for detailed logs:
 ```
 [MAL Auth] Received OAuth redirect
-[Storage] Processing item with cassette: mal:anime:1245
-[CassetteIndex] Found 1 file(s) via index
+[Storage] Processing item with myanimenotes: mal:anime:1245
+[MyAnimeNotesIndex] Found 1 file(s) via index
 ```
 
 ### Test Vault Setup
@@ -340,7 +340,7 @@ Check browser console (Ctrl+Shift+I) for detailed logs:
 **Never test on your personal vault!**
 
 1. Create a new test vault
-2. Install Cassette (symlink method)
+2. Install MyAnimeNotes (symlink method)
 3. Use a test MAL account with limited data
 4. Test with 10-20 items first, then scale up
 
@@ -358,7 +358,7 @@ Check browser console (Ctrl+Shift+I) for detailed logs:
 ```typescript
 // ✅ Good
 export async function saveMediaItem(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   config: StorageConfig
 ): Promise<SyncActionResult> {
@@ -374,9 +374,9 @@ export async function saveMediaItem(plugin, item, config) {
 ### Naming Conventions
 
 - **Functions**: camelCase, descriptive verbs
-  - `generateCassetteSync()`, `saveMediaItem()`, `fetchUserInfo()`
+  - `generateMyAnimeNotesSync()`, `saveMediaItem()`, `fetchUserInfo()`
 - **Classes**: PascalCase
-  - `CassetteIndex`, `SyncManager`, `AutoSyncManager`
+  - `MyAnimeNotesIndex`, `SyncManager`, `AutoSyncManager`
 - **Interfaces**: PascalCase with descriptive names
   - `UniversalMediaItem`, `StorageConfig`, `SyncActionResult`
 - **Constants**: UPPER_SNAKE_CASE
@@ -389,10 +389,10 @@ export async function saveMediaItem(plugin, item, config) {
 - **Group related functionality** in folders
 
 ```typescript
-// src/storage/cassette/index.ts
-export * from './cassette-sync-manager';
-export * from './cassette-lock';
-export * from './cassette-index';
+// src/storage/myanimenotes/index.ts
+export * from './myanimenotes-sync-manager';
+export * from './myanimenotes-lock';
+export * from './myanimenotes-index';
 ```
 
 ### Comments & Documentation
@@ -403,14 +403,14 @@ export * from './cassette-index';
 
 ```typescript
 /**
- * Generates cassette identifier from media item
+ * Generates myanimenotes identifier from media item
  * Format: provider:category:id (e.g., mal:anime:1245)
  * 
  * @param item Media item from API
- * @returns Cassette identifier
+ * @returns MyAnimeNotes identifier
  * @throws {Error} If generated format is invalid
  */
-export function generateCassetteSync(item: UniversalMediaItem): string {
+export function generateMyAnimeNotesSync(item: UniversalMediaItem): string {
   // Use lowercase for consistency with vault file paths
   const provider = item.platform.toLowerCase();
   // ...
@@ -577,7 +577,7 @@ Start here for deep dives:
 - [OAuth 2.0 Authentication Flow](./docs/oauth-2.0-authentication-flow-for-mal.md)
 - [Storage System Documentation](./docs/storage-system.md)
 - [Sync Mechanism Documentation](./docs/sync-mechanism.md)
-- [Cassette Index System](./docs/cassette-index.md)
+- [MyAnimeNotes Index System](./docs/myanimenotes-index.md)
 - [Lock Manager](./docs/lock-manager.md)
 
 ### Community
@@ -622,8 +622,8 @@ Start here for deep dives:
 → Read: [Storage System Documentation](./docs/storage-system.md)
 
 **How the index works:**
-→ Start: `src/storage/cassette/cassette-index.ts`
-→ Read: [Cassette Index System](./docs/cassette-index.md)
+→ Start: `src/storage/myanimenotes/myanimenotes-index.ts`
+→ Read: [MyAnimeNotes Index System](./docs/myanimenotes-index.md)
 
 ---
 
@@ -631,7 +631,7 @@ Start here for deep dives:
 
 All contributors will be:
 - ✅ Listed in release notes
-- ✅ Added to [Contributors](https://github.com/zara-kasi/cassette/graphs/contributors)
+- ✅ Added to [Contributors](https://github.com/zara-kasi/obsidian-myanimenotes/graphs/contributors)
 - ✅ Credited in the README (for significant contributions)
 
 ---
@@ -644,6 +644,6 @@ By contributing, you agree that your contributions will be licensed under the sa
 
 ## Thank You!
 
-Your contributions make Cassette better for everyone.
+Your contributions make MyAnimeNotes better for everyone.
 
 ---

@@ -1,11 +1,11 @@
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 
 /**
  * Debug logger that respects the debugMode setting
  * Only logs when debugMode is enabled in plugin settings
  */
 export class DebugLogger {
-  constructor(private plugin: CassettePlugin, private prefix: string = '') {}
+  constructor(private plugin: MyAnimeNotesPlugin, private prefix: string = '') {}
 
   /**
    * Log a debug message (only if debug mode is enabled)
@@ -37,6 +37,6 @@ export class DebugLogger {
  * @param plugin Plugin instance
  * @param prefix Optional prefix for all log messages
  */
-export function createDebugLogger(plugin: CassettePlugin, prefix?: string): DebugLogger {
+export function createDebugLogger(plugin: MyAnimeNotesPlugin, prefix?: string): DebugLogger {
   return new DebugLogger(plugin, prefix);
 }

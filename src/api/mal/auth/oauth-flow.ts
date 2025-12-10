@@ -1,7 +1,7 @@
 // OAuth 2.0 authorization flow
 
 import { requestUrl } from 'obsidian';
-import type CassettePlugin from '../../../main';
+import type MyAnimeNotesPlugin from '../../../main';
 import type { MALAuthState, MALTokenResponse, OAuthParams } from './types';
 import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateVerifier, generateChallenge, generateState } from './pkce';
@@ -16,7 +16,7 @@ const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
  * Initiates the OAuth authorization flow
  * Stores PKCE parameters in plugin settings for persistence
  */
-export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
+export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
   if (!plugin.settings.malClientId) {
     showNotice(plugin, 'Please enter your MAL Client ID first.', 5000);
     return;
@@ -67,7 +67,7 @@ export async function startAuthFlow(plugin: CassettePlugin): Promise<void> {
  * Handles the OAuth redirect callback
  * Retrieves PKCE parameters from plugin settings
  */
-export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthParams): Promise<void> {
+export async function handleOAuthRedirect(plugin: MyAnimeNotesPlugin, params: OAuthParams): Promise<void> {
   const debug = createDebugLogger(plugin, 'MAL Auth');
   try {
     debug.log('[MAL Auth] Received OAuth redirect:', params);
@@ -117,7 +117,7 @@ export async function handleOAuthRedirect(plugin: CassettePlugin, params: OAuthP
  * Exchanges authorization code for access token
  */
 async function exchangeCodeForToken(
-  plugin: CassettePlugin, 
+  plugin: MyAnimeNotesPlugin, 
   code: string, 
   verifier: string
 ): Promise<void> {

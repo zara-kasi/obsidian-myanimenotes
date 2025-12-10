@@ -1,8 +1,8 @@
 /**
- * Cassette Lock Manager
+ * MyAnimeNotes Lock Manager
  * 
  * WHAT THIS IS:
- * In-memory mutex for cassette operations. Prevents race conditions when multiple
+ * In-memory mutex for myanimenotes operations. Prevents race conditions when multiple
  * sync operations try to modify the same file simultaneously.
  * 
  * WHY WE NEED THIS:
@@ -13,7 +13,7 @@
  * Result: Lost data, corrupted frontmatter, user frustration.
  * 
  * HOW IT WORKS:
- * - Each cassette ID gets a promise-based lock
+ * - Each myanimenotes ID gets a promise-based lock
  * - Operations wait their turn using Promise.race() with timeouts
  * - Locks auto-expire after 30s to prevent deadlocks from crashes
  * - Everything is in-memory (doesn't survive restarts, which is fine)

@@ -1,35 +1,35 @@
 import { Plugin } from 'obsidian';
-import { CassetteSettingTab } from './settings';
-import { CassetteSettings, DEFAULT_SETTINGS } from './settings';
+import { MyAnimeNotesSettingTab } from './settings';
+import { MyAnimeNotesSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
 import { MediaCategory } from './transformers';
-import type { CassetteIndex } from './storage/cassette';
-import { createCassetteIndex } from './storage/cassette';
-import { CassetteLockManager, createCassetteLockManager } from './storage/cassette';
+import type { MyAnimeNotesIndex } from './storage/myanimenotes';
+import { createMyAnimeNotesIndex } from './storage/myanimenotes';
+import { MyAnimeNotesLockManager, createMyAnimeNotesLockManager } from './storage/myanimenotes';
 
-export default class CassettePlugin extends Plugin {
-  settings: CassetteSettings = DEFAULT_SETTINGS;
-  settingsTab: CassetteSettingTab | null = null;
+export default class MyAnimeNotesPlugin extends Plugin {
+  settings: MyAnimeNotesSettings = DEFAULT_SETTINGS;
+  settingsTab: MyAnimeNotesSettingTab | null = null;
   syncManager: SyncManager | null = null;
   autoSyncManager: AutoSyncManager | null = null;
-  cassetteIndex: CassetteIndex | null = null;
-  lockManager: CassetteLockManager | null = null;
+  myanimenotesIndex: MyAnimeNotesIndex | null = null;
+  lockManager: MyAnimeNotesLockManager | null = null;
 
   async onload() {
     await this.loadSettings();
 
     // Initialize lock manager (instance-based, not global)
-    this.lockManager = createCassetteLockManager();
+    this.lockManager = createMyAnimeNotesLockManager();
 
     // Initialize sync manager
     this.syncManager = createSyncManager(this);
     
-    // Initialize cassette index (lazy - just registers listeners, doesn't build index)
+    // Initialize myanimenotes index (lazy - just registers listeners, doesn't build index)
     try {
-      this.cassetteIndex = await createCassetteIndex(this);
+      this.myanimenotesIndex = await createMyAnimeNotesIndex(this);
     } catch (error) {
-      console.error('[Cassette] Failed to initialize index:', error);
+      console.error('[MyAnimeNotes] Failed to initialize index:', error);
       // Plugin can still work without index (uses fallback)
     }
   
@@ -37,17 +37,17 @@ export default class CassettePlugin extends Plugin {
     this.autoSyncManager = createAutoSyncManager(this);
     
     // Add ribbon icon for sync
-    this.addRibbonIcon('cassette-tape', 'Cassette sync all', async (evt: MouseEvent) => {
+    this.addRibbonIcon('cassette-tape', 'MyAnimeNotes sync all', async (evt: MouseEvent) => {
       if (!this.syncManager) return;
       await this.syncManager.syncFromMAL();
     });
 
     // Add settings tab
-    this.settingsTab = new CassetteSettingTab(this.app, this);
+    this.settingsTab = new MyAnimeNotesSettingTab(this.app, this);
     this.addSettingTab(this.settingsTab);
 
     // Register OAuth protocol handler for MAL
-    this.registerObsidianProtocolHandler('cassette-auth/mal', async (params) => {
+    this.registerObsidianProtocolHandler('myanimenotes-auth/mal', async (params) => {
       await handleMALRedirect(this, params);
     });
 
@@ -63,8 +63,8 @@ export default class CassettePlugin extends Plugin {
     }
 
     // Clear index on unload
-    if (this.cassetteIndex) {
-      this.cassetteIndex.clear();
+    if (this.myanimenotesIndex) {
+      this.myanimenotesIndex.clear();
     }
     
     // Stop all auto-sync timers

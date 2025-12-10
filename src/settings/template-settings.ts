@@ -1,5 +1,5 @@
 import { Setting, setIcon, normalizePath } from 'obsidian';
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 import { FolderSuggest } from './folder-suggest';
 import { 
   TemplateConfig, 
@@ -16,7 +16,7 @@ import { VariableSuggest } from './variable-suggest';
  */
 export function renderTemplateSection(
   container: HTMLElement,
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   templateState: TemplateSettingsState
 ): void {
   // Anime template expandable section
@@ -57,7 +57,7 @@ export function createTemplateSettingsState(refreshCallback: () => void): Templa
  */
 function renderExpandableTemplate(
   container: HTMLElement,
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   state: TemplateSettingsState,
   type: 'anime' | 'manga'
 ): void {
@@ -68,17 +68,17 @@ function renderExpandableTemplate(
   const setting = new Setting(container)
     .setName(`${type === 'anime' ? 'Anime' : 'Manga'} Template`)
     .setDesc(`Configure how ${type} notes are created and which properties to include.`)
-    .setClass('cassette-template-setting');
+    .setClass('myanimenotes-template-setting');
   
   // Add collapse/expand icon to the setting element (not nameEl)
-  const iconEl = setting.settingEl.createDiv({ cls: 'cassette-collapse-icon' });
+  const iconEl = setting.settingEl.createDiv({ cls: 'myanimenotes-collapse-icon' });
   setIcon(iconEl, isExpanded ? 'chevron-down' : 'chevron-right');
   
   // Make the entire setting clickable to toggle
-  setting.settingEl.addClass('cassette-clickable-setting');
+  setting.settingEl.addClass('myanimenotes-clickable-setting');
   setting.settingEl.addEventListener('click', (e) => {
     // Don't toggle if clicking on input fields or buttons inside the expanded content
-    if ((e.target as HTMLElement).closest('.cassette-template-content')) {
+    if ((e.target as HTMLElement).closest('.myanimenotes-template-content')) {
       return;
     }
     
@@ -92,7 +92,7 @@ function renderExpandableTemplate(
   
   // Expanded content container
   if (isExpanded) {
-    const contentContainer = container.createDiv({ cls: 'cassette-template-content' });
+    const contentContainer = container.createDiv({ cls: 'myanimenotes-template-content' });
     
     // Folder path setting
     new Setting(contentContainer)
@@ -101,11 +101,11 @@ function renderExpandableTemplate(
       .addText(text => {
         new FolderSuggest(plugin.app, text.inputEl);
         text
-          .setPlaceholder(`Cassette/${type === 'anime' ? 'Anime' : 'Manga'}`)
+          .setPlaceholder(`MyAnimeNotes/${type === 'anime' ? 'Anime' : 'Manga'}`)
           .setValue(config.folderPath)
           .onChange(async (value) => {
             // Normalize the path to handle cross-platform paths and user input variations
-            const normalizedPath = normalizePath(value.trim() || `Cassette/${type === 'anime' ? 'Anime' : 'Manga'}`);
+            const normalizedPath = normalizePath(value.trim() || `MyAnimeNotes/${type === 'anime' ? 'Anime' : 'Manga'}`);
             config.folderPath = normalizedPath;
             await saveTemplateConfig(plugin, type, config);
           });
@@ -121,7 +121,7 @@ function renderExpandableTemplate(
 });
     
     // Properties list container
-    const propertyListEl = contentContainer.createDiv({ cls: 'cassette-property-list' });
+    const propertyListEl = contentContainer.createDiv({ cls: 'myanimenotes-property-list' });
     
     // Store reference for drag operations
     if (type === 'anime') {
@@ -133,18 +133,18 @@ function renderExpandableTemplate(
     renderPropertyList(propertyListEl, plugin, state, config, type);
     
     // Add property button
-    const addButtonContainer = contentContainer.createDiv({ cls: 'cassette-add-property-container' });
+    const addButtonContainer = contentContainer.createDiv({ cls: 'myanimenotes-add-property-container' });
     const addButton = addButtonContainer.createEl('button', { 
-      cls: 'cassette-add-property-button'
+      cls: 'myanimenotes-add-property-button'
     });
 
     // Create icon element inside the button
-    const iconEl = addButton.createSpan({ cls: 'cassette-button-icon' });
+    const iconEl = addButton.createSpan({ cls: 'myanimenotes-button-icon' });
     setIcon(iconEl, 'plus');
 
     // Add text after the icon
     addButton.createSpan({ 
-      cls: 'cassette-button-text',
+      cls: 'myanimenotes-button-text',
       text: 'Add Property' 
     });
 
@@ -153,7 +153,7 @@ function renderExpandableTemplate(
     });
     
     // NEW: Note content template section
-    contentContainer.createEl('h4', { text: 'Note Content', cls: 'cassette-section-header' });
+    contentContainer.createEl('h4', { text: 'Note Content', cls: 'myanimenotes-section-header' });
     
     contentContainer.createEl('p', { 
       text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
@@ -161,9 +161,9 @@ function renderExpandableTemplate(
     });
     
     // Create textarea directly without Setting wrapper to avoid the line
-    const textareaContainer = contentContainer.createDiv({ cls: 'cassette-textarea-container' });
+    const textareaContainer = contentContainer.createDiv({ cls: 'myanimenotes-textarea-container' });
     const textarea = textareaContainer.createEl('textarea', {
-      cls: 'cassette-content-template',
+      cls: 'myanimenotes-content-template',
       attr: {
         placeholder: '# {{title}}\n\n{{synopsis}}\n',
         rows: '8'
@@ -186,7 +186,7 @@ function renderExpandableTemplate(
  */
 function renderPropertyList(
   container: HTMLElement,
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   state: TemplateSettingsState,
   config: TemplateConfig,
   type: 'anime' | 'manga'
@@ -206,26 +206,26 @@ function renderPropertyList(
  */
 function renderPropertyRow(
   container: HTMLElement,
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   state: TemplateSettingsState,
   prop: PropertyItem,
   config: TemplateConfig,
   type: 'anime' | 'manga'
 ): void {
-  const rowEl = container.createDiv({ cls: 'cassette-property-row' });
+  const rowEl = container.createDiv({ cls: 'myanimenotes-property-row' });
   rowEl.setAttribute('draggable', 'true');
   rowEl.setAttribute('data-id', prop.id);
   
   // Check if this is a permanent property
-  const isPermanent = prop.template === 'cassette' || prop.template === 'synced';
+  const isPermanent = prop.template === 'myanimenotes' || prop.template === 'synced';
   
   // Drag handle
-  const dragHandle = rowEl.createDiv({ cls: 'cassette-drag-handle' });
+  const dragHandle = rowEl.createDiv({ cls: 'myanimenotes-drag-handle' });
   setIcon(dragHandle, 'grip-vertical');
   
   // Property name input (read-only for permanent properties)
   const nameInput = rowEl.createEl('input', {
-    cls: 'cassette-property-name',
+    cls: 'myanimenotes-property-name',
     type: 'text',
     value: prop.customName,
     attr: {
@@ -243,7 +243,7 @@ function renderPropertyRow(
   
   // Template variable input (read-only for permanent properties)
   const templateInput = rowEl.createEl('input', {
-    cls: 'cassette-template-var',
+    cls: 'myanimenotes-template-var',
     type: 'text',
     value: prop.template || '',
     attr: {
@@ -266,14 +266,14 @@ function renderPropertyRow(
   
   // Delete button (hidden for permanent properties)
   if (!isPermanent) {
-    const deleteButton = rowEl.createDiv({ cls: 'cassette-delete-button' });
+    const deleteButton = rowEl.createDiv({ cls: 'myanimenotes-delete-button' });
     setIcon(deleteButton, 'trash-2');
     deleteButton.addEventListener('click', async () => {
       await removeProperty(plugin, state, prop.id, config, type);
     });
   } else {
     // Add a spacer to maintain alignment for permanent properties
-    rowEl.createDiv({ cls: 'cassette-delete-button-spacer' });
+    rowEl.createDiv({ cls: 'myanimenotes-delete-button-spacer' });
   }
   
   // Attach the variable suggester
@@ -339,7 +339,7 @@ new VariableSuggest(plugin.app, templateInput, variables);
  */
 
 function addEmptyProperty(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   state: TemplateSettingsState,
   config: TemplateConfig,
   type: 'anime' | 'manga'): void {
@@ -364,7 +364,7 @@ function addEmptyProperty(
  * Removes a property from the template
  */
 async function removeProperty(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   state: TemplateSettingsState,
   id: string,
   config: TemplateConfig,
@@ -385,7 +385,7 @@ async function removeProperty(
  * Reorders properties via drag and drop
  */
 async function reorderProperties(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   state: TemplateSettingsState,
   draggedId: string,
   targetId: string,
@@ -427,7 +427,7 @@ function reorderPropertiesSequentially(config: TemplateConfig): void {
 /**
  * Gets the template configuration for anime or manga
  */
-function getTemplateConfig(plugin: CassettePlugin, type: 'anime' | 'manga'): TemplateConfig {
+function getTemplateConfig(plugin: MyAnimeNotesPlugin, type: 'anime' | 'manga'): TemplateConfig {
   if (type === 'anime') {
     return plugin.settings.animeTemplate 
       ? JSON.parse(JSON.stringify(plugin.settings.animeTemplate))
@@ -443,7 +443,7 @@ function getTemplateConfig(plugin: CassettePlugin, type: 'anime' | 'manga'): Tem
  * Saves the template configuration
  */
 async function saveTemplateConfig(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   type: 'anime' | 'manga',
   config: TemplateConfig
 ): Promise<void> {

@@ -1,7 +1,7 @@
 /**
  * Frontmatter Builder
  * 
- * Builds frontmatter properties from media items with cassette as primary key
+ * Builds frontmatter properties from media items with myanimenotes as primary key
  * Handles merging with existing frontmatter while preserving user properties
  * 
  * REFACTORED: Removed manual YAML serialization
@@ -21,22 +21,22 @@ import { resolveTemplate } from './template-parser';
  * 
  * @param item - Universal media item
  * @param template - Template configuration with property definitions
- * @param cassetteSync - Cassette identifier
+ * @param myanimenotesSync - MyAnimeNotes identifier
  * @returns Frontmatter properties object
  */
 
 export function buildFrontmatterFromTemplate(
   item: UniversalMediaItem,
   template: TemplateConfig,
-  cassetteSync: string
+  myanimenotesSync: string
 ): Record<string, any> {
   const properties: Record<string, any> = {};
   
   // Process each template property in order
   for (const prop of template.properties) {
     // Handle permanent properties (special keywords)
-    if (prop.template === 'cassette') {
-      properties[prop.customName] = cassetteSync;
+    if (prop.template === 'myanimenotes') {
+      properties[prop.customName] = myanimenotesSync;
       continue;
     }
     

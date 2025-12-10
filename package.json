@@ -1,7 +1,7 @@
 {
-  "name": "cassette",
+  "name": "MyAnimeNotes",
   "version": "1.0.7",
-  "description": "Make your media a part of your knowledge. Sync your media items from MyAnimeList, AniList, and Simkl directly into your vault.",
+  "description": "Make your media a part of your knowledge. Sync your media items from MyAnimeList directly into your vault.",
   "main": "main.js",
   "scripts": {
     "typecheck": "tsc -noEmit -skipLibCheck",
