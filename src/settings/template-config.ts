@@ -1,6 +1,6 @@
 /**
  * Default anime template
- * NOTE: Properties with template='cassette' and template='synced' are permanent and cannot be removed
+ * NOTE: Properties with template='myanimenotes' and template='synced' are permanent and cannot be removed
  * Contains only common + anime-specific properties
  */
 
@@ -98,12 +98,12 @@ export function getAvailableProperties(category: 'anime' | 'manga'): PropertyMet
 
 /**
  * Default anime template
- * NOTE: 'cassetteSync' and 'updatedAt' are permanent properties that cannot be removed
+ * NOTE: 'myanimenotesSync' and 'updatedAt' are permanent properties that cannot be removed
  * Contains only common + anime-specific properties
  */
 
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
-  folderPath: 'Cassette/Anime',
+  folderPath: 'MyAnimeNotes/Anime',
   noteContent: '',  
   properties: [
     // Core properties (order: 1-9)
@@ -136,19 +136,19 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
     { id: 'prop-3', template: '{{id}}', customName: 'id', order: 23 },
     
     // Permanent properties (order: 24-25) - use special keywords
-    { id: 'prop-permanent-1', template: 'cassette', customName: 'cassette', order: 24 },
+    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 24 },
     { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 25 },
   ]
 };
 
 /**
  * Default manga template
- * NOTE: 'cassetteSync' and 'updatedAt' are permanent properties that cannot be removed
+ * NOTE: 'myanimenotesSync' and 'updatedAt' are permanent properties that cannot be removed
  * Contains only common + manga-specific properties
  */
 
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
-  folderPath: 'Cassette/Manga',
+  folderPath: 'MyAnimeNotes/Manga',
   noteContent: '',
   properties: [
     // Core properties (order: 1-8)
@@ -182,7 +182,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
     { id: 'prop-3', template: '{{id}}', customName: 'id', order: 24 },
     
     // Permanent properties (order: 25-26) - use special keywords
-    { id: 'prop-permanent-1', template: 'cassette', customName: 'cassette', order: 25 },
+    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 25 },
     { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 26 },
   ]
 };
