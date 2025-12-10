@@ -91,17 +91,17 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
    * @param el The HTML element to render into
    */
   renderSuggestion(variable: PropertyMetadata, el: HTMLElement): void {
-    const container = el.createDiv({ cls: 'cassette-variable-suggestion' });
+    const container = el.createDiv({ cls: 'myanimenotes-variable-suggestion' });
     
     // Variable key (main text)
     container.createDiv({ 
-      cls: 'cassette-variable-key',
+      cls: 'myanimenotes-variable-key',
       text: variable.key
     });
     
     // Variable label (description)
     container.createDiv({ 
-      cls: 'cassette-variable-label',
+      cls: 'myanimenotes-variable-label',
       text: variable.label
     });
   }
