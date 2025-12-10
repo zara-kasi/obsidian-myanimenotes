@@ -1,13 +1,13 @@
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 import type { UniversalMediaItem } from '../transformers';
 import type { TemplateConfig } from '../settings/template-config';
 import { DEFAULT_ANIME_TEMPLATE, DEFAULT_MANGA_TEMPLATE } from '../settings/template-config'
 import { 
-  generateCassetteSync, 
-  findFilesByCassetteSync, 
+  generateMyAnimeNotesSync, 
+  findFilesByMyAnimeNotesSync, 
   findLegacyFiles, 
   selectDeterministicFile
-} from './cassette';
+} from './myanimenotes';
 import { ensureFolderExists, generateUniqueFilename } from './file-utils';
 import {
   generateFrontmatterProperties,
@@ -31,7 +31,7 @@ export interface StorageConfig {
 export interface SyncActionResult {
   action: 'created' | 'updated' | 'linked-legacy' | 'duplicates-detected' | 'skipped';
   filePath: string;
-  cassetteSync: string;
+  myanimenotesSync: string;
   duplicatePaths?: string[];
   message?: string;
 }
@@ -52,7 +52,7 @@ interface SkipCheckResult {
  */
 interface BatchItem {
   item: UniversalMediaItem;
-  cassetteSync: string;
+  myanimenotesSync: string;
   cachedTimestamp: string | undefined;
   lookup: FileLookupResult;
   shouldSkip: boolean;
@@ -165,7 +165,7 @@ function shouldSkipByTimestamp(
  * @returns Array of batch items with computed decisions
  */
 async function prepareBatchItems(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   items: UniversalMediaItem[],
   config: StorageConfig,
   folderPath: string
@@ -176,17 +176,17 @@ async function prepareBatchItems(
   
   const batchItems: BatchItem[] = [];
   
-  // Phase 1: Generate cassettes and read cache for all items upfront
+  // Phase 1: Generate myanimenotes and read cache for all items upfront
   // This is a single pass through metadata cache - NO delays
   debug.log(`[Storage] Batch prep phase 1: Reading cache for ${items.length} items...`);
   
   const cacheMap = new Map<string, string | undefined>();
   
   for (const item of items) {
-    const cassette = generateCassetteSync(item);
+    const myanimenotes = generateMyAnimeNotesSync(item);
     
     // Lookup file (index O(1) if available, or vault scan)
-    const lookup = await lookupExistingFiles(plugin, cassette, item, folderPath);
+    const lookup = await lookupExistingFiles(plugin, myanimenotes, item, folderPath);
     
     // For exact/duplicates/legacy matches, get cache immediately
     let cachedTimestamp: string | undefined;
@@ -194,12 +194,12 @@ async function prepareBatchItems(
       const file = lookup.files[0];
       const cache = metadataCache.getFileCache(file);
       cachedTimestamp = getSyncedTimestampFast(cache);
-      cacheMap.set(cassette, cachedTimestamp);
+      cacheMap.set(myanimenotes, cachedTimestamp);
     }
     
     batchItems.push({
       item,
-      cassetteSync: cassette,
+      myanimenotesSync: myanimenotes,
       cachedTimestamp,
       lookup,
       shouldSkip: false, // Will compute in phase 2
@@ -252,7 +252,7 @@ function createSkipResults(skippedItems: BatchItem[]): SyncActionResult[] {
   return skippedItems.map(batch => ({
     action: 'skipped',
     filePath: batch.lookup.files[0]?.path || '',
-    cassetteSync: batch.cassetteSync,
+    myanimenotesSync: batch.myanimenotesSync,
     message: `Skipped - ${batch.skipReason}`
   }));
 }
@@ -262,16 +262,16 @@ function createSkipResults(skippedItems: BatchItem[]): SyncActionResult[] {
 // ============================================================================
 
 /**
- * Performs file lookup using cassette and legacy strategies
+ * Performs file lookup using myanimenotes and legacy strategies
  */
 async function lookupExistingFiles(
-  plugin: CassettePlugin,
-  cassetteSync: string,
+  plugin: MyAnimeNotesPlugin,
+  myanimenotesSync: string,
   item: UniversalMediaItem,
   folderPath: string
 ): Promise<FileLookupResult> {
-  // Strategy 1: Cassette-based lookup (primary)
-  const matchingFiles = await findFilesByCassetteSync(plugin, cassetteSync, folderPath);
+  // Strategy 1: MyAnimeNotes-based lookup (primary)
+  const matchingFiles = await findFilesByMyAnimeNotesSync(plugin, myanimenotesSync, folderPath);
   
   if (matchingFiles.length > 1) {
     return { type: 'duplicates', files: matchingFiles };
@@ -296,36 +296,36 @@ async function lookupExistingFiles(
 // ============================================================================
 
 async function handleExactMatch(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   file: TFile,
   item: UniversalMediaItem,
   config: StorageConfig,
-  cassetteSync: string
+  myanimenotesSync: string
 ): Promise<SyncActionResult> {
   // Get template based on category
   const template = item.category === 'anime'
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
-  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, myanimenotesSync);
   await updateMarkdownFileFrontmatter(plugin, file, frontmatterProps);
   
   return {
     action: 'updated',
     filePath: file.path,
-    cassetteSync,
+    myanimenotesSync,
     message: `Updated ${file.path}`
   };
 }
 
 async function handleDuplicates(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   files: TFile[],
   item: UniversalMediaItem,
   config: StorageConfig,
-  cassetteSync: string
+  myanimenotesSync: string
 ): Promise<SyncActionResult> {
-  console.warn(`[Storage] Found ${files.length} files with cassette: ${cassetteSync}`);
+  console.warn(`[Storage] Found ${files.length} files with myanimenotes: ${myanimenotesSync}`);
   const selectedFile = selectDeterministicFile(plugin, files);
   
   // Get template based on category
@@ -333,27 +333,27 @@ async function handleDuplicates(
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
-  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, myanimenotesSync);
   await updateMarkdownFileFrontmatter(plugin, selectedFile, frontmatterProps);
   
   return {
     action: 'duplicates-detected',
     filePath: selectedFile.path,
-    cassetteSync,
+    myanimenotesSync,
     duplicatePaths: files.map(f => f.path),
     message: `Updated ${selectedFile.path} but found ${files.length} duplicates`
   };
 }
 
 async function handleLegacyMigration(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   files: TFile[],
   item: UniversalMediaItem,
   config: StorageConfig,
-  cassetteSync: string
+  myanimenotesSync: string
 ): Promise<SyncActionResult> {
   if (files.length > 1) {
-    console.warn(`[Storage] Found ${files.length} legacy candidates for ${cassetteSync}`);
+    console.warn(`[Storage] Found ${files.length} legacy candidates for ${myanimenotesSync}`);
   }
   
   const selectedFile = selectDeterministicFile(plugin, files);
@@ -362,23 +362,23 @@ async function handleLegacyMigration(
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
-  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, myanimenotesSync);
   await updateMarkdownFileFrontmatter(plugin, selectedFile, frontmatterProps);
   
   return {
     action: 'linked-legacy',
     filePath: selectedFile.path,
-    cassetteSync,
+    myanimenotesSync,
     duplicatePaths: files.length > 1 ? files.map(f => f.path) : undefined,
     message: `Migrated legacy file ${selectedFile.path}`
   };
 }
 
  async function createNewFile(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   config: StorageConfig,
-  cassetteSync: string,
+  myanimenotesSync: string,
   folderPath: string
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
@@ -394,7 +394,7 @@ async function handleLegacyMigration(
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
-  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, cassetteSync);
+  const frontmatterProps = generateFrontmatterProperties(plugin, item, template, myanimenotesSync);
   
   // NEW: Generate initial content with frontmatter + body
   const initialContent = generateInitialFileContent(
@@ -422,7 +422,7 @@ async function handleLegacyMigration(
       return {
         action: 'created',
         filePath: createdFile.path,
-        cassetteSync,
+        myanimenotesSync,
         message: `Created ${createdFile.path}`
       };
 
@@ -442,7 +442,7 @@ async function handleLegacyMigration(
     }
   }
   
-  throw new Error(`Failed to create file for ${cassetteSync}`);
+  throw new Error(`Failed to create file for ${myanimenotesSync}`);
 }
 
 // ============================================================================
@@ -454,21 +454,21 @@ async function handleLegacyMigration(
  * Kept for existing code that calls this directly
  */
 export async function saveMediaItem(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   config: StorageConfig
 ): Promise<SyncActionResult> {
   const debug = createDebugLogger(plugin, 'Storage');
-  const cassetteSync = generateCassetteSync(item);
+  const myanimenotesSync = generateMyAnimeNotesSync(item);
   
-  debug.log(`[Storage] Saving item: ${cassetteSync}`);
+  debug.log(`[Storage] Saving item: ${myanimenotesSync}`);
   
   if (!plugin.lockManager) {
     throw new Error('Lock manager not initialized');
   }
   
   // Single-item operations use lock for safety
-  return await plugin.lockManager.withLock(cassetteSync, async () => {
+  return await plugin.lockManager.withLock(myanimenotesSync, async () => {
     let folderPath = item.category === 'anime' 
       ? config.animeFolder 
       : config.mangaFolder;
@@ -479,17 +479,17 @@ export async function saveMediaItem(
       await ensureFolderExists(plugin, folderPath);
     }
     
-    const lookup = await lookupExistingFiles(plugin, cassetteSync, item, folderPath);
+    const lookup = await lookupExistingFiles(plugin, myanimenotesSync, item, folderPath);
     
     switch (lookup.type) {
       case 'exact':
-        return handleExactMatch(plugin, lookup.files[0], item, config, cassetteSync);
+        return handleExactMatch(plugin, lookup.files[0], item, config, myanimenotesSync);
       case 'duplicates':
-        return handleDuplicates(plugin, lookup.files, item, config, cassetteSync);
+        return handleDuplicates(plugin, lookup.files, item, config, myanimenotesSync);
       case 'legacy':
-        return handleLegacyMigration(plugin, lookup.files, item, config, cassetteSync);
+        return handleLegacyMigration(plugin, lookup.files, item, config, myanimenotesSync);
       case 'none':
-        return createNewFile(plugin, item, config, cassetteSync, folderPath);
+        return createNewFile(plugin, item, config, myanimenotesSync, folderPath);
       default:
         throw new Error(`Unknown lookup type: ${(lookup as any).type}`);
     }
@@ -510,7 +510,7 @@ export async function saveMediaItem(
  * - No per-item locks (sequential processing already safe)
  */
 export async function saveMediaItems(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   items: UniversalMediaItem[],
   config: StorageConfig,
   progressCallback?: ProgressCallback
@@ -569,7 +569,7 @@ export async function saveMediaItems(
             batch.lookup.files[0],
             batch.item,
             config,
-            batch.cassetteSync
+            batch.myanimenotesSync
           );
           break;
         
@@ -579,7 +579,7 @@ export async function saveMediaItems(
             batch.lookup.files,
             batch.item,
             config,
-            batch.cassetteSync
+            batch.myanimenotesSync
           );
           break;
         
@@ -589,7 +589,7 @@ export async function saveMediaItems(
             batch.lookup.files,
             batch.item,
             config,
-            batch.cassetteSync
+            batch.myanimenotesSync
           );
           break;
         
@@ -598,7 +598,7 @@ export async function saveMediaItems(
             plugin,
             batch.item,
             config,
-            batch.cassetteSync,
+            batch.myanimenotesSync,
             folderPath
           );
           break;
@@ -639,7 +639,7 @@ export async function saveMediaItems(
  * Category-based batch save with progress callback 
  */
 export async function saveMediaItemsByCategory(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   items: UniversalMediaItem[],
   config: StorageConfig,
   progressCallback?: ProgressCallback
