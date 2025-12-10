@@ -1,8 +1,8 @@
 /**
- * Cassette Lock Manager
+ * MyAnimeNotes Lock Manager
  * 
- * Provides in-memory concurrency control for cassette operations.
- * Prevents race conditions when multiple operations target the same cassette ID.
+ * Provides in-memory concurrency control for myanimenotes operations.
+ * Prevents race conditions when multiple operations target the same myanimenotes ID.
  * 
  * REFACTORED: No longer uses module-level global state.
  * Now uses class-based instance to avoid global mutable state issues.
@@ -18,45 +18,45 @@ const LOCK_TIMEOUT_MS = 30000; // 30 seconds timeout
 const LOCK_CHECK_INTERVAL_MS = 100; // Check every 100ms
 
 /**
- * Cassette Lock Manager - Instance-based concurrency control
+ * MyAnimeNotes Lock Manager - Instance-based concurrency control
  * 
- * Manages file locks to prevent concurrent modifications to the same cassette.
+ * Manages file locks to prevent concurrent modifications to the same myanimenotes.
  * Each instance maintains its own lock state, avoiding global mutable state issues.
  */
-export class CassetteLockManager {
+export class MyAnimeNotesLockManager {
   // Instance-level state - not global
   private syncLocks: Map<string, LockEntry> = new Map();
   
   /**
-   * Acquires an in-memory lock for a cassette ID
+   * Acquires an in-memory lock for a myanimenotes ID
    * Prevents concurrent save operations on the same item
    * 
-   * @param cassetteSync - The cassette identifier (format: provider:category:id)
+   * @param myanimenotesSync - The myanimenotes identifier (format: provider:category:id)
    * @throws {Error} If lock acquisition times out
    */
-  async acquireSyncLock(cassetteSync: string): Promise<void> {
+  async acquireSyncLock(myanimenotesSync: string): Promise<void> {
     const startTime = Date.now();
     
     // Wait for any existing lock to release with timeout protection
-    while (this.syncLocks.has(cassetteSync)) {
+    while (this.syncLocks.has(myanimenotesSync)) {
       // Check for timeout
       if (Date.now() - startTime > LOCK_TIMEOUT_MS) {
         // Force release the stale lock
-        const staleLock = this.syncLocks.get(cassetteSync);
+        const staleLock = this.syncLocks.get(myanimenotesSync);
         if (staleLock) {
           console.warn(
-            `[CassetteLock] Force-releasing stale lock for ${cassetteSync} ` +
+            `[MyAnimeNotesLock] Force-releasing stale lock for ${myanimenotesSync} ` +
             `(held for ${Date.now() - staleLock.acquiredAt}ms)`
           );
-          this.releaseSyncLock(cassetteSync);
+          this.releaseSyncLock(myanimenotesSync);
         }
         throw new Error(
-          `Lock acquisition timeout for ${cassetteSync} after ${LOCK_TIMEOUT_MS}ms`
+          `Lock acquisition timeout for ${myanimenotesSync} after ${LOCK_TIMEOUT_MS}ms`
         );
       }
       
       // Wait for the existing lock's promise to resolve
-      const existingLock = this.syncLocks.get(cassetteSync);
+      const existingLock = this.syncLocks.get(myanimenotesSync);
       if (existingLock) {
         try {
           await Promise.race([
@@ -84,54 +84,54 @@ export class CassetteLockManager {
       acquiredAt: Date.now()
     };
     
-    this.syncLocks.set(cassetteSync, lockEntry);
+    this.syncLocks.set(myanimenotesSync, lockEntry);
   }
 
   /**
-   * Releases a lock for a cassette ID
+   * Releases a lock for a myanimenotes ID
    * Safe to call even if no lock exists
    * 
-   * @param cassetteSync - The cassette identifier to release
+   * @param myanimenotesSync - The myanimenotes identifier to release
    */
-  releaseSyncLock(cassetteSync: string): void {
-    const lockEntry = this.syncLocks.get(cassetteSync);
+  releaseSyncLock(myanimenotesSync: string): void {
+    const lockEntry = this.syncLocks.get(myanimenotesSync);
     
     if (lockEntry) {
       // Resolve the promise to release any waiting operations
       lockEntry.resolve();
       
       // Remove the lock entry
-      this.syncLocks.delete(cassetteSync);
+      this.syncLocks.delete(myanimenotesSync);
     }
   }
 
   /**
-   * Checks if a lock is currently held for a cassette ID
+   * Checks if a lock is currently held for a myanimenotes ID
    * Useful for debugging or status checks
    * 
-   * @param cassetteSync - The cassette identifier to check
+   * @param myanimenotesSync - The myanimenotes identifier to check
    * @returns true if lock is held, false otherwise
    */
-  isLocked(cassetteSync: string): boolean {
-    return this.syncLocks.has(cassetteSync);
+  isLocked(myanimenotesSync: string): boolean {
+    return this.syncLocks.has(myanimenotesSync);
   }
 
   /**
    * Gets information about a currently held lock
    * Useful for debugging lock contention issues
    * 
-   * @param cassetteSync - The cassette identifier to check
+   * @param myanimenotesSync - The myanimenotes identifier to check
    * @returns Lock info or undefined if not locked
    */
-  getLockInfo(cassetteSync: string): { 
+  getLockInfo(myanimenotesSync: string): { 
     heldFor: number;
-    cassetteSync: string;
+    myanimenotesSync: string;
   } | undefined {
-    const lockEntry = this.syncLocks.get(cassetteSync);
+    const lockEntry = this.syncLocks.get(myanimenotesSync);
     
     if (lockEntry) {
       return {
-        cassetteSync,
+        myanimenotesSync,
         heldFor: Date.now() - lockEntry.acquiredAt
       };
     }
@@ -155,7 +155,7 @@ export class CassetteLockManager {
     this.syncLocks.clear();
     
     if (count > 0) {
-      console.warn(`[CassetteLock] Force-released ${count} locks`);
+      console.warn(`[MyAnimeNotesLock] Force-released ${count} locks`);
     }
     
     return count;
@@ -174,21 +174,21 @@ export class CassetteLockManager {
    * Executes a function while holding a lock
    * Automatically acquires and releases the lock
    * 
-   * @param cassetteSync - The cassette identifier to lock
+   * @param myanimenotesSync - The myanimenotes identifier to lock
    * @param fn - The function to execute while holding the lock
    * @returns The result of the function
    * @throws {Error} If lock acquisition fails or function throws
    */
   async withLock<T>(
-    cassetteSync: string,
+    myanimenotesSync: string,
     fn: () => Promise<T>
   ): Promise<T> {
-    await this.acquireSyncLock(cassetteSync);
+    await this.acquireSyncLock(myanimenotesSync);
     
     try {
       return await fn();
     } finally {
-      this.releaseSyncLock(cassetteSync);
+      this.releaseSyncLock(myanimenotesSync);
     }
   }
 
@@ -208,9 +208,9 @@ export class CassetteLockManager {
 }
 
 /**
- * Creates a new Cassette Lock Manager instance
- * @returns New CassetteLockManager instance
+ * Creates a new MyAnimeNotes Lock Manager instance
+ * @returns New MyAnimeNotesLockManager instance
  */
-export function createCassetteLockManager(): CassetteLockManager {
-  return new CassetteLockManager();
+export function createMyAnimeNotesLockManager(): MyAnimeNotesLockManager {
+  return new MyAnimeNotesLockManager();
 }
