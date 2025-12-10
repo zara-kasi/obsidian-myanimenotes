@@ -2,7 +2,7 @@ import type { MALUserInfo } from '../api/mal'
 import type { TemplateConfig } from './template-config';
 
 
-export interface CassetteSettings {
+export interface MyAnimeNotesSettings {
   // MAL Authentication
   malClientId: string;
   malClientSecret?: string;
@@ -46,7 +46,7 @@ export interface CassetteSettings {
   debugMode: boolean;
 }
 
-export const DEFAULT_SETTINGS: CassetteSettings = {
+export const DEFAULT_SETTINGS: MyAnimeNotesSettings = {
   // MAL defaults
   malClientId: '',
   malClientSecret: '',
@@ -58,8 +58,8 @@ export const DEFAULT_SETTINGS: CassetteSettings = {
   malAuthState: null, 
   
   // Storage defaults
-  animeFolder: 'Cassette/Anime',
-  mangaFolder: 'Cassette/Manga',
+  animeFolder: 'MyAnimeNotes/Anime',
+  mangaFolder: 'MyAnimeNotes/Manga',
   
   // Template system defaults
   animeTemplate: undefined,
