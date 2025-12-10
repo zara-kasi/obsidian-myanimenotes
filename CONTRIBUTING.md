@@ -403,7 +403,7 @@ export * from './myanimenotes-index';
 
 ```typescript
 /**
- * Generates MyAnimeNotes identifier from media item
+ * Generates myanimenotes identifier from media item
  * Format: provider:category:id (e.g., mal:anime:1245)
  * 
  * @param item Media item from API
