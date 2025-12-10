@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import CassettePlugin from '../main';
+import MyAnimeNotesPlugin from '../main';
 import { startAuthFlow as startMALAuth, logout as malLogout, isAuthenticated as isMALAuthenticated } from '../api/mal';
 import { 
   renderTemplateSection,
@@ -7,11 +7,11 @@ import {
   TemplateSettingsState
 } from './template-settings';
 
-export class CassetteSettingTab extends PluginSettingTab {
-  plugin: CassettePlugin;
+export class MyAnimeNotesSettingTab extends PluginSettingTab {
+  plugin: MyAnimeNotesPlugin;
   private templateState: TemplateSettingsState;
 
-  constructor(app: App, plugin: CassettePlugin) {
+  constructor(app: App, plugin: MyAnimeNotesPlugin) {
     super(app, plugin);
     this.plugin = plugin;
     this.templateState = createTemplateSettingsState(() => this.display());
@@ -56,15 +56,15 @@ export class CassetteSettingTab extends PluginSettingTab {
       const userSetting = new Setting(container);
       
       // Create a container for avatar, name, and Logout button
-      const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'cassette-user-info-wrapper' });
+      const userInfoContainer = userSetting.controlEl.createDiv({ cls: 'myanimenotes-user-info-wrapper' });
       
       // Left side: avatar and name
-      const userDetailsContainer = userInfoContainer.createDiv({ cls: 'cassette-user-details' });
+      const userDetailsContainer = userInfoContainer.createDiv({ cls: 'myanimenotes-user-details' });
       
       // Add avatar if available
       if (userInfo.picture) {
         userDetailsContainer.createEl('img', {
-          cls: 'cassette-user-avatar',
+          cls: 'myanimenotes-user-avatar',
           attr: {
             src: userInfo.picture,
             alt: userInfo.name
@@ -74,7 +74,7 @@ export class CassetteSettingTab extends PluginSettingTab {
       
       // Add username (clickable link to MAL profile)
       const usernameLink = userDetailsContainer.createEl('a', {
-        cls: 'cassette-user-name',
+        cls: 'myanimenotes-user-name',
         text: userInfo.name,
         href: `https://myanimelist.net/profile/${userInfo.name}`
       });
@@ -93,10 +93,10 @@ export class CassetteSettingTab extends PluginSettingTab {
       });
       
       // Right side: Logout button
-      const buttonContainer = userInfoContainer.createDiv({ cls: 'cassette-button-container' });
+      const buttonContainer = userInfoContainer.createDiv({ cls: 'myanimenotes-button-container' });
       
       const logoutButton = buttonContainer.createEl('button', {
-        cls: 'cassette-logout-button mod-warning',
+        cls: 'myanimenotes-logout-button mod-warning',
         text: 'Log out'
       });
       
@@ -158,10 +158,10 @@ export class CassetteSettingTab extends PluginSettingTab {
       });
       descEl.createEl('a', {
         text: 'Learn more',
-        href: 'https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md'
+        href: 'https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md'
       }).addEventListener('click', (e) => {
         e.preventDefault();
-        window.open('https://github.com/zara-kasi/cassette/blob/main/docs/mal-authentication-guide.md', '_blank');
+        window.open('https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md', '_blank');
       });
     }
   }
