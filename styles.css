@@ -1,7 +1,7 @@
-/* Cassette Plugin Styles */
+/* myanimenotes Plugin Styles */
 
 /* MAL User Info Wrapper Container */
-.cassette-user-info-wrapper {
+.myanimenotes-user-info-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -10,7 +10,7 @@
 }
 
 /* User Details (avatar and name) on the left */
-.cassette-user-details {
+.myanimenotes-user-details {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -19,17 +19,17 @@
 }
 
 /* Setting with user info remove default flex behavior */
-.setting-item:has(.cassette-user-info-wrapper) {
+.setting-item:has(.myanimenotes-user-info-wrapper) {
   display: block;
 }
 
-.setting-item:has(.cassette-user-info-wrapper) .setting-item-control {
+.setting-item:has(.myanimenotes-user-info-wrapper) .setting-item-control {
   justify-content: flex-start;
   width: 100%;
 }
 
 /* MAL User Avatar */
-.cassette-user-avatar {
+.myanimenotes-user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -38,26 +38,26 @@
 }
 
 /* MAL User Name */
-.cassette-user-name {
+.myanimenotes-user-name {
   font-size: 1.1em;
   font-weight: 500;
   color: var(--text-normal);
   text-decoration: none;
 }
 
-.cassette-user-name:hover {
+.myanimenotes-user-name:hover {
   text-decoration: underline;
 }
 
 /* Button Container on the right */
-.cassette-button-container {
+.myanimenotes-button-container {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
 }
 
 /* Logout Button */
-.cassette-logout-button {
+.myanimenotes-logout-button {
   background: none !important;
   border: none !important;
   box-shadow: none !important;
@@ -67,7 +67,7 @@
   text-decoration: none;
 }
 
-.cassette-logout-button:hover {
+.myanimenotes-logout-button:hover {
   text-decoration: underline;
 }
 
@@ -76,17 +76,17 @@
    ======================================================================== */
 
 /* Clickable setting for expand/collapse */
-.cassette-clickable-setting {
+.myanimenotes-clickable-setting {
   cursor: pointer;
   position: relative;
 }
 
-.cassette-clickable-setting:hover {
+.myanimenotes-clickable-setting:hover {
   background-color: var(--background-modifier-hover);
 }
 
 /* Collapse/Expand icon - absolutely positioned to align with setting name */
-.cassette-collapse-icon {
+.myanimenotes-collapse-icon {
   position: absolute;
   right: 16px;
   top: 20px; /* Aligns with the setting name line */
@@ -97,24 +97,24 @@
   pointer-events: none; /* Allow clicks to pass through to parent */
 }
 
-.cassette-collapse-icon svg {
+.myanimenotes-collapse-icon svg {
   width: 16px;
   height: 16px;
 }
 
 /* Template content container */
-.cassette-template-content {
+.myanimenotes-template-content {
   padding-left: 16px;
   margin-top: 8px;
 }
 
 /* Property List */
-.cassette-property-list {
+.myanimenotes-property-list {
   margin: 8px 0;
 }
 
 /* Property Row */
-.cassette-property-row {
+.myanimenotes-property-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -126,12 +126,12 @@
   position: relative;
 }
 
-.cassette-property-row.dragging {
+.myanimenotes-property-row.dragging {
   opacity: 0.5;
 }
 
-.cassette-property-row.drag-over-top::before,
-.cassette-property-row.drag-over-bottom::after {
+.myanimenotes-property-row.drag-over-top::before,
+.myanimenotes-property-row.drag-over-bottom::after {
   content: '';
   position: absolute;
   left: 0;
@@ -143,16 +143,16 @@
   pointer-events: none;
 }
 
-.cassette-property-row.drag-over-top::before {
+.myanimenotes-property-row.drag-over-top::before {
   top: -2px;
 }
 
-.cassette-property-row.drag-over-bottom::after {
+.myanimenotes-property-row.drag-over-bottom::after {
   bottom: -2px;
 }
 
 /* Drag Handle */
-.cassette-drag-handle {
+.myanimenotes-drag-handle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -161,18 +161,18 @@
   flex-shrink: 0;
 }
 
-.cassette-drag-handle svg {
+.myanimenotes-drag-handle svg {
   width: 16px;
   height: 16px;
 }
 
-.cassette-drag-handle:active {
+.myanimenotes-drag-handle:active {
   cursor: grabbing;
 }
 
 /* Property Inputs */
-.cassette-property-name,
-.cassette-template-var {
+.myanimenotes-property-name,
+.myanimenotes-template-var {
   padding: 4px 8px;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--input-radius);
@@ -181,22 +181,22 @@
   font-size: var(--font-ui-small);
 }
 
-.cassette-property-name {
+.myanimenotes-property-name {
   flex: 0 0 150px;
 }
 
-.cassette-template-var {
+.myanimenotes-template-var {
   flex: 1;
   font-family: var(--font-monospace);
 }
 
-.cassette-property-name:focus,
-.cassette-template-var:focus {
+.myanimenotes-property-name:focus,
+.myanimenotes-template-var:focus {
   border-color: var(--interactive-accent);
 }
 
 /* Delete Button */
-.cassette-delete-button {
+.myanimenotes-delete-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -206,17 +206,17 @@
   flex-shrink: 0;
 }
 
-.cassette-delete-button svg {
+.myanimenotes-delete-button svg {
   width: 16px;
   height: 16px;
 }
 
-.cassette-delete-button:hover {
+.myanimenotes-delete-button:hover {
   color: var(--text-muted);
 }
 
 /* Delete button spacer for permanent properties */
-.cassette-delete-button-spacer {
+.myanimenotes-delete-button-spacer {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
@@ -224,7 +224,7 @@
 
 /* Add Property Button */
 
-.cassette-add-property-button {
+.myanimenotes-add-property-button {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -232,23 +232,23 @@
   line-height: 1;
 }
 
-.cassette-button-icon svg {
+.myanimenotes-button-icon svg {
   display: block;
 }
 
 /* Variable Suggestion Styles */
-.cassette-variable-suggestion {
+.myanimenotes-variable-suggestion {
   padding: 4px 8px;
 }
 
-.cassette-variable-key {
+.myanimenotes-variable-key {
   font-family: var(--font-monospace);
   font-weight: 500;
   color: var(--text-normal);
   font-size: var(--font-ui-small);
 }
 
-.cassette-variable-label {
+.myanimenotes-variable-label {
   font-size: var(--font-ui-smaller);
   color: var(--text-muted);
   margin-top: 2px;
