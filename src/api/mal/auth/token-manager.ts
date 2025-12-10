@@ -87,7 +87,7 @@ export async function ensureValidToken(plugin: MyAnimeNotesPlugin): Promise<void
       await refreshAccessToken(plugin);
       debug.log('[MAL-AUTH] Token automatically refreshed');
     } catch (e) {
-      console.error('[MAL-AUTH] Automatic token refresh failed', e);
+      debug.log('[MAL-AUTH] Automatic token refresh failed', e);
       plugin.settings.malAuthenticated = false;
       await plugin.saveSettings();
       throw new Error('MAL authentication expired. Please re-authenticate.');
