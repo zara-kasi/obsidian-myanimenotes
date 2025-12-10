@@ -212,7 +212,7 @@ export class MyAnimeNotesIndex {
    * Gets index statistics
    */
   getStats(): {
-    totalmyanimenotes: number;
+    totalMyAnimeNotes: number;
     totalFiles: number;
     duplicates: number;
     isInitialized: boolean;
@@ -228,7 +228,7 @@ export class MyAnimeNotesIndex {
     }
     
     return {
-      totalmyanimenotes: this.myanimenotesToFiles.size,
+      totalMyAnimeNotes: this.myanimenotesToFiles.size,
       totalFiles,
       duplicates,
       isInitialized: this.isInitialized,
