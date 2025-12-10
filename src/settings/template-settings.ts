@@ -153,26 +153,29 @@ function renderExpandableTemplate(
     });
     
     // NEW: Note content template section
-    contentContainer.createEl('h4', { text: 'Note Content', cls: 'myanimenotes-section-header' });
+   contentContainer.createEl('h4', { text: 'Note Content', cls: 'myanimenotes-section-header' });
+
+   contentContainer.createEl('p', { 
+  text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
+  cls: 'setting-item-description'
+});
+
+// Use Setting wrapper but with custom class to hide separator
+    new Setting(contentContainer)
+  .setClass('myanimenotes-textarea-setting')
+  .addTextArea(textarea => {
+    textarea
+      .setPlaceholder('# {{title}}\n\n{{synopsis}}\n')
+      .setValue(config.noteContent || '')
+      .onChange(async (value) => {
+        config.noteContent = value;
+        await saveTemplateConfig(plugin, type, config);
+      });
     
-    contentContainer.createEl('p', { 
-      text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
-      cls: 'setting-item-description'
-    });
-    
-    // Create textarea directly without Setting wrapper to avoid the line
-    const textareaContainer = contentContainer.createDiv({ cls: 'myanimenotes-textarea-container' });
-    const textarea = textareaContainer.createEl('textarea', {
-      cls: 'myanimenotes-content-template',
-      attr: {
-        placeholder: '# {{title}}\n\n{{synopsis}}\n',
-        rows: '8'
-      }
-    });
-    
-    textarea.value = config.noteContent || '';
-    textarea.style.width = '100%';
-    textarea.style.fontFamily = 'monospace';
+    textarea.inputEl.rows = 8;
+    textarea.inputEl.style.width = '100%';
+    textarea.inputEl.style.fontFamily = 'monospace';
+  });
     
     textarea.addEventListener('input', async (e) => {
       config.noteContent = (e.target as HTMLTextAreaElement).value;
