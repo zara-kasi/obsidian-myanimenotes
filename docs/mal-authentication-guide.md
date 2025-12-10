@@ -24,33 +24,32 @@
 
 # Screenshots
 
-1. Go to API page
+1. Go to App creation page
 
 ![Steps](../assets/Imagepipe_18.webp)
 
-2. Go to API page
+2. Fill the App information from the table
 
 ![Steps](../assets/Imagepipe_19.webp)
 
-3. Click Edit to view you application client id & secret
-
 ![Steps](../assets/Imagepipe_20.webp)
 
-4. Copy both Client ID & Client Secret. ( Make sure to save them somewhere safe )
+4. Click Edit to view you application client id & secret
 
 ![Steps](../assets/Imagepipe_21.webp)
 
-5. Fill Client ID & Secret and click on Authenticate
+5. Copy both Client ID & Client Secret. ( Make sure to save them somewhere safe )
 
 ![Steps](../assets/Imagepipe_22.webp)
 
-6. Click Allow and it will redirect you to Obsidian
-
+6.  Fill Client ID & Secret and click on Authenticate
 ![Steps](../assets/Imagepipe_23.webp)
 
-7. Done 👍 
+7.  Click Allow and it will redirect you to Obsidian
+
 
 ![Steps](../assets/Imagepipe_24.webp)
 
+8. Done  👍 
 
 ![Steps](../assets/Imagepipe_25.webp)
