@@ -1,12 +1,12 @@
 // Logout and session cleanup
 import { showNotice } from '../../../utils';
-import type CassettePlugin from '../../../main';
+import type MyAnimeNotesPlugin from '../../../main';
 
 /**
  * Clears all authentication data and credentials
  * @param plugin Plugin instance
  */
-export async function logout(plugin: CassettePlugin): Promise<void> {
+export async function logout(plugin: MyAnimeNotesPlugin): Promise<void> {
   // Clear credentials
   plugin.settings.malClientId = '';
   plugin.settings.malClientSecret = '';
