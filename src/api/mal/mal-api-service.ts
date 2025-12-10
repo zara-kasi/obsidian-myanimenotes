@@ -1,5 +1,5 @@
 import { requestUrl } from 'obsidian';
-import type CassettePlugin from '../../main';
+import type MyAnimeNotesPlugin from '../../main';
 import { ensureValidToken, getAuthHeaders } from './auth';
 import { createDebugLogger } from '../../utils';
 
@@ -100,7 +100,7 @@ function calculateBackoffDelay(attempt: number): number {
  * Implements exponential backoff for rate limits and transient errors
  */
 async function makeMALRequest(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   endpoint: string,
   params: Record<string, string> = {}
 ): Promise<any> {
@@ -249,7 +249,7 @@ export async function throttlePromises<T>(
  * Fetches all pages of a paginated MAL endpoint
  */
 async function fetchAllPages(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   endpoint: string,
   params: Record<string, string> = {}
 ): Promise<any[]> {
@@ -302,7 +302,7 @@ async function fetchAllPages(
  * Fetches complete anime list for authenticated user
  * Note: User list data (status, score, episodes watched) must be explicitly requested via list_status field
  */
-export async function fetchCompleteMALAnimeList(plugin: CassettePlugin): Promise<any[]> {
+export async function fetchCompleteMALAnimeList(plugin: MyAnimeNotesPlugin): Promise<any[]> {
   return fetchAllPages(plugin, '/users/@me/animelist', {
     fields: ANIME_FIELDS,
     nsfw: 'true'
@@ -313,7 +313,7 @@ export async function fetchCompleteMALAnimeList(plugin: CassettePlugin): Promise
  * Fetches complete manga list for authenticated user
  * Note: User list data (status, score, volumes/chapters read) must be explicitly requested via list_status field
  */
-export async function fetchCompleteMALMangaList(plugin: CassettePlugin): Promise<any[]> {
+export async function fetchCompleteMALMangaList(plugin: MyAnimeNotesPlugin): Promise<any[]> {
   return fetchAllPages(plugin, '/users/@me/mangalist', {
     fields: MANGA_FIELDS,
     nsfw: 'true'
@@ -324,7 +324,7 @@ export async function fetchCompleteMALMangaList(plugin: CassettePlugin): Promise
  * Fetches anime list filtered by status
  */
 export async function fetchMALAnimeByStatus(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   status: 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch'
 ): Promise<any[]> {
   return fetchAllPages(plugin, '/users/@me/animelist', {
@@ -338,7 +338,7 @@ export async function fetchMALAnimeByStatus(
  * Fetches manga list filtered by status
  */
 export async function fetchMALMangaByStatus(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   status: 'reading' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_read'
 ): Promise<any[]> {
   return fetchAllPages(plugin, '/users/@me/mangalist', {
@@ -352,7 +352,7 @@ export async function fetchMALMangaByStatus(
  * Fetches detailed information for a specific anime
  */
 export async function fetchMALAnimeDetails(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   animeId: number
 ): Promise<any> {
   return makeMALRequest(plugin, `/anime/${animeId}`, {
@@ -364,7 +364,7 @@ export async function fetchMALAnimeDetails(
  * Fetches detailed information for a specific manga
  */
 export async function fetchMALMangaDetails(
-  plugin: CassettePlugin,
+  plugin: MyAnimeNotesPlugin,
   mangaId: number
 ): Promise<any> {
   return makeMALRequest(plugin, `/manga/${mangaId}`, {
