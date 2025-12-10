@@ -1,4 +1,4 @@
-import type CassettePlugin from '../main';
+import type MyAnimeNotesPlugin from '../main';
 import { createDebugLogger } from '../utils';
 import type {
   UniversalMediaItem,
@@ -128,7 +128,7 @@ function transformAuthors(malAuthors: any[]): UniversalAuthor[] {
  * Transforms a single MAL anime item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/animelist response
  */
-export function transformMALAnime(plugin: CassettePlugin, malItem: any): UniversalMediaItem {
+export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: any): UniversalMediaItem {
   const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
@@ -194,7 +194,7 @@ export function transformMALAnime(plugin: CassettePlugin, malItem: any): Univers
  * Transforms a single MAL manga item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
  */
-export function transformMALManga(plugin: CassettePlugin, malItem: any): UniversalMediaItem {
+export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: any): UniversalMediaItem {
   const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
@@ -274,7 +274,7 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
 /**
  * Transforms an array of MAL anime items
  */
-export function transformMALAnimeList(plugin: CassettePlugin, malItems: any[]): UniversalMediaItem[] {
+export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: any[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
@@ -286,7 +286,7 @@ export function transformMALAnimeList(plugin: CassettePlugin, malItems: any[]): 
 /**
  * Transforms an array of MAL manga items
  */
-export function transformMALMangaList(plugin: CassettePlugin, malItems: any[]): UniversalMediaItem[] {
+export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: any[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
