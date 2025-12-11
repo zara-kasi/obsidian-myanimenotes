@@ -51,7 +51,7 @@ export function generateState(): string {
       return crypto.randomUUID();
     } catch (error) {
       // Fall through to getRandomValues approach
-      debug.log('[MAL-AUTH] crypto.randomUUID failed, using getRandomValues', error);
+    //  debug.log('[MAL-AUTH] crypto.randomUUID failed, using getRandomValues', error);
     }
   }
   
