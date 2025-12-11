@@ -111,7 +111,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
   
     // Force full sync toggle
     new Setting(containerEl)
-      .setName('Overwrite all')
+      .setName('Update all')
       .setDesc('Update all notes on every sync, even if nothing changed.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.forceFullSync)
