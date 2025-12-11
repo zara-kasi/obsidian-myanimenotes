@@ -99,7 +99,7 @@ export function getAvailableProperties(category: 'anime' | 'manga'): PropertyMet
 // Update the DEFAULT_ANIME_TEMPLATE to showcase filters
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
   folderPath: 'MyAnimeNotes/Anime',
-  noteContent: '',  
+  noteContent: '# {{title}}\n\n{{synopsis}}',  
   properties: [
     // Core properties with filters
     { id: 'prop-1', template: '{{title}}', customName: 'title', order: 1 },
@@ -138,7 +138,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
 
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
   folderPath: 'MyAnimeNotes/Manga',
-  noteContent: '',
+  noteContent: '# {{title}}\n\n{{synopsis}}',
   properties: [
     // Core properties with filters
     { id: 'prop-1', template: '{{title}}', customName: 'title', order: 1 },
