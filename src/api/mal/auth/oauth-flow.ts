@@ -99,7 +99,7 @@ export async function handleOAuthRedirect(plugin: MyAnimeNotesPlugin, params: OA
     if (!code) {
       const error = params.error || 'Unknown error';
       const errorDesc = params.error_description || 'No authorization code received';
-      debug.log('[MAL Auth] OAuth error:', { error, errorDesc });
+      console.error('[MAL Auth] OAuth error:', { error, errorDesc });
       showNotice(plugin, `❌ MAL Authentication failed: ${errorDesc}`, 5000);
       return;
     }
@@ -107,7 +107,7 @@ export async function handleOAuthRedirect(plugin: MyAnimeNotesPlugin, params: OA
     await exchangeCodeForToken(plugin, code, authState.verifier);
     
   } catch (error) {
-    debug.log('[MAL Auth] Failed to handle OAuth redirect:', error);
+    console.error('[MAL Auth] Failed to handle OAuth redirect:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     showNotice(plugin, `❌ MAL Authentication failed: ${errorMessage}`, 5000);
   }
@@ -178,7 +178,7 @@ async function exchangeCodeForToken(
     try {
       await fetchUserInfo(plugin);
     } catch (userError) {
-      debug.log('[MAL Auth] Failed to fetch user info but auth succeeded', userError);
+      console.warn('[MAL Auth] Failed to fetch user info but auth succeeded', userError);
     }
     
     // Refresh settings UI after Authentication
@@ -215,7 +215,7 @@ function extractOAuthParams(params: OAuthParams): { code: string | null; state: 
       code = url.searchParams.get('code');
       state = url.searchParams.get('state');
     } catch (e) {
-      debug.log('[MAL Auth] Failed to parse URL from params:', e);
+      console.warn('[MAL Auth] Failed to parse URL from params:', e);
     }
   }
   
