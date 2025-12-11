@@ -72,7 +72,7 @@ export async function handleOAuthRedirect(plugin: MyAnimeNotesPlugin, params: OA
   try {
     debug.log('[MAL Auth] Received OAuth redirect:', params);
     
-    const { code, state } = extractOAuthParams(plugin, params);
+    const { code, state } = extractOAuthParams(params);
     
     // Retrieve stored auth state
     const authState = plugin.settings.malAuthState;
@@ -121,7 +121,6 @@ async function exchangeCodeForToken(
   code: string, 
   verifier: string
 ): Promise<void> {
-  const debug = createDebugLogger(plugin, 'MAL Auth');
   if (!code || code.length < 10) {
     throw new Error('Invalid authorization code');
   }
@@ -198,8 +197,9 @@ async function exchangeCodeForToken(
 /**
  * Extracts code and state from various OAuth redirect formats
  */
-function extractOAuthParams(plugin: MyAnimeNotesPlugin, params: OAuthParams): { code: string | null; state: string | null } {
-  const debug = createDebugLogger(plugin, 'MAL Auth');
+function extractOAuthParams(params: OAuthParams): { code: string | null; state: string | null } {
+  let code: string | null = null;
+  let state: string | null = null;
   
   if (params.code) {
     code = params.code;
