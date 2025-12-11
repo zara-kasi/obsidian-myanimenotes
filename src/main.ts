@@ -37,7 +37,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     this.autoSyncManager = createAutoSyncManager(this);
     
     // Add ribbon icon for sync
-    this.addRibbonIcon('cassette-tape', 'MyAnimeNotes sync all', async (evt: MouseEvent) => {
+    this.addRibbonIcon('cloud-download', 'MyAnimeNotes sync all', async (evt: MouseEvent) => {
       if (!this.syncManager) return;
       await this.syncManager.syncFromMAL();
     });
