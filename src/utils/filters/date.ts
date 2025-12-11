@@ -1,13 +1,10 @@
 /**
  * Date Filter
  * 
- * Formats dates using dayjs
+ * Formats dates using Obsidian's built-in moment.js
  */
 
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-
-dayjs.extend(customParseFormat);
+import { moment } from 'obsidian';
 
 export function date(value: any, format: string = 'YYYY-MM-DD'): string {
   if (!value || value === '') {
@@ -15,7 +12,7 @@ export function date(value: any, format: string = 'YYYY-MM-DD'): string {
   }
 
   const dateStr = String(value);
-  const parsed = dayjs(dateStr);
+  const parsed = moment(dateStr);
 
   if (!parsed.isValid()) {
     console.warn(`Invalid date: ${dateStr}`);
