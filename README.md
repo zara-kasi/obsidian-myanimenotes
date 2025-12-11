@@ -7,7 +7,7 @@ MyAnimeNotes is an [Obsidian](https://obsidian.md/) plugin that syncs your anime
 
 To authenticate with the MAL API, you’ll need to create your own application. You can follow the steps in this guide [MAL Authentication](https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md)
 
-After authenticating, use the Command Palette and run `MyAnimeNotes: Sync all from MyAnimeList` or use the ribbon icon (Cassette symbol). Synced anime and manga appear in your chosen folder.
+After authenticating, use the Command Palette and run `MyAnimeNotes: Sync all from MyAnimeList` or use the ribbon icon (cloud-download). Synced anime and manga appear in your chosen folder.
 
 ### Contributing
 
