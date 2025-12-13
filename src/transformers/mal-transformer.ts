@@ -208,7 +208,6 @@ export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: Record<st
  * Transforms a single MAL manga item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
  */export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: Record<string, unknown>): UniversalMediaItem {
-  const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = (malItem.node || malItem) as Record<string, unknown>;
   const listStatus = malItem.list_status as Record<string, unknown> | undefined;  // User-specific data
 
