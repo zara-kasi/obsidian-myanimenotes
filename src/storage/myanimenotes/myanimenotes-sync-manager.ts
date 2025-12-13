@@ -50,11 +50,11 @@ export function generateMyAnimeNotesSync(item: UniversalMediaItem): string {
  * @param folderPath Folder path (kept for API compatibility but not used)
  * @returns Array of files with matching myanimenotes
  */
-export async function findFilesByMyAnimeNotesSync(
+export function findFilesByMyAnimeNotesSync(
   plugin: MyAnimeNotesPlugin,
   myanimenotesSync: string,
   folderPath: string
-): Promise<TFile[]> {
+): TFile[] {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   
   // Use indexed lookup if available
@@ -68,19 +68,19 @@ export async function findFilesByMyAnimeNotesSync(
     return files;
   }
   
-  // Fallback to old method if index not available (shouldn't happen)
+  // Fallback to old method if index not available
   debug.log('[MyAnimeNotesSync] WARNING: Index not available, falling back to vault scan');
-  return await findFilesByMyAnimeNotesSyncLegacy(plugin, myanimenotesSync);
+  return findFilesByMyAnimeNotesSyncLegacy(plugin, myanimenotesSync);
 }
 
 /**
  * Legacy fallback method for finding files (only used if index unavailable)
  * Kept for safety but should rarely be called
  */
-async function findFilesByMyAnimeNotesSyncLegacy(
+function findFilesByMyAnimeNotesSyncLegacy(
   plugin: MyAnimeNotesPlugin,
   myanimenotesSync: string
-): Promise<TFile[]> {
+): TFile[] {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   const { vault, metadataCache } = plugin.app;
   const matchingFiles: TFile[] = [];
@@ -107,11 +107,11 @@ async function findFilesByMyAnimeNotesSyncLegacy(
  * OPTIMIZATION: Limited to folderPath scope to avoid full vault scan
  * Only called when no myanimenotes match exists (fallback path)
  */
-export async function findLegacyFiles(
+export function findLegacyFiles(
   plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   folderPath: string
-): Promise<TFile[]> {
+): TFile[] {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   const { vault, metadataCache } = plugin.app;
   const candidates: TFile[] = [];
