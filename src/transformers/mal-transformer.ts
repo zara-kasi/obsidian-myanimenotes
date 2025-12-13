@@ -70,56 +70,69 @@ function mapMALUserStatus(malStatus: string): UserListStatus {
 /**
  * Transforms MAL picture object
  */
-function transformPicture(malPicture: any): UniversalPicture | undefined {
+function transformPicture(malPicture: Record<string, unknown> | undefined): UniversalPicture | undefined {
   if (!malPicture) return undefined;
   
   return {
-    medium: malPicture.medium,
-    large: malPicture.large
+    medium: typeof malPicture.medium === 'string' ? malPicture.medium : undefined,
+    large: typeof malPicture.large === 'string' ? malPicture.large : undefined
   };
 }
 
 /**
  * Transforms MAL alternative titles
  */
-function transformAlternativeTitles(malTitles: any): UniversalAlternativeTitles | undefined {
+function transformAlternativeTitles(malTitles: Record<string, unknown> | undefined): UniversalAlternativeTitles | undefined {
   if (!malTitles) return undefined;
   
   return {
-    en: malTitles.en,
-    ja: malTitles.ja,
-    synonyms: malTitles.synonyms || []
+    en: typeof malTitles.en === 'string' ? malTitles.en : undefined,
+    ja: typeof malTitles.ja === 'string' ? malTitles.ja : undefined,
+    synonyms: Array.isArray(malTitles.synonyms) ? malTitles.synonyms : []
   };
 }
 
 /**
  * Transforms MAL genres - with strict null filtering
  */
-function transformGenres(malGenres: any[]): UniversalGenre[] {
+function transformGenres(malGenres: unknown[]): UniversalGenre[] {
   if (!malGenres || !Array.isArray(malGenres)) return [];
   
   return malGenres
-    .filter(genre => genre != null && genre.id != null && genre.name != null)
+    .filter((genre): genre is Record<string, unknown> => 
+      genre != null && 
+      typeof genre === 'object' &&
+      'id' in genre &&
+      'name' in genre
+    )
     .map(genre => ({
-      id: genre.id,
-      name: genre.name
+      id: Number(genre.id),
+      name: String(genre.name)
     }));
 }
+
 
 /**
  * Transforms MAL authors (for manga) - with strict null filtering
  */
-function transformAuthors(malAuthors: any[]): UniversalAuthor[] {
+function transformAuthors(malAuthors: unknown[]): UniversalAuthor[] {
   if (!malAuthors || !Array.isArray(malAuthors)) return [];
   
   return malAuthors
-    .filter(author => author != null && author.node != null)
-    .map(author => ({
-      firstName: author.node?.first_name || '',
-      lastName: author.node?.last_name || '',
-      role: author.role
-    }))
-    .filter(author => author.firstName || author.lastName); // Filter out empty authors
+    .filter((author): author is Record<string, unknown> => 
+      author != null && 
+      typeof author === 'object' &&
+      'node' in author
+    )
+    .map(author => {
+      const node = author.node as Record<string, unknown>;
+      return {
+        firstName: typeof node.first_name === 'string' ? node.first_name : '',
+        lastName: typeof node.last_name === 'string' ? node.last_name : '',
+        role: typeof author.role === 'string' ? author.role : undefined
+      };
+    })
+    .filter(author => author.firstName || author.lastName);
 }
 
 
@@ -128,10 +141,11 @@ function transformAuthors(malAuthors: any[]): UniversalAuthor[] {
  * Transforms a single MAL anime item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/animelist response
  */
-export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: any): UniversalMediaItem {
+export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: Record<string, unknown>): UniversalMediaItem {
   const debug = createDebugLogger(plugin, 'MAL Transformer');
-  const node = malItem.node || malItem;
-  const listStatus = malItem.list_status; // User-specific data
+  const node = (malItem.node || malItem) as Record<string, unknown>;
+  const listStatus = malItem.list_status as Record<string, unknown> | undefined;
+   // User-specific data
 
   debug.log('[MAL Transformer] Processing anime:', {
     title: node.title,
@@ -193,11 +207,10 @@ export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: any): Uni
 /**
  * Transforms a single MAL manga item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
- */
-export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: any): UniversalMediaItem {
+ */export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: Record<string, unknown>): UniversalMediaItem {
   const debug = createDebugLogger(plugin, 'MAL Transformer');
-  const node = malItem.node || malItem;
-  const listStatus = malItem.list_status; // User-specific data
+  const node = (malItem.node || malItem) as Record<string, unknown>;
+  const listStatus = malItem.list_status as Record<string, unknown> | undefined;  // User-specific data
 
 
   return {
@@ -254,12 +267,18 @@ export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: any): Uni
  * Transforms MAL studios array - keeps objects for wiki link formatting
  * Filters out null, undefined, and invalid entries
  */
-function transformStudios(malStudios: any[]): Array<{name: string}> {
+function transformStudios(malStudios: unknown[]): Array<{name: string}> {
   if (!malStudios || !Array.isArray(malStudios)) return [];
   
   return malStudios
-    .filter(studio => studio != null && studio.name != null && studio.name !== '')
-    .map(studio => ({ name: studio.name }));
+    .filter((studio): studio is Record<string, unknown> => 
+      studio != null && 
+      typeof studio === 'object' &&
+      'name' in studio &&
+      typeof studio.name === 'string' &&
+      studio.name !== ''
+    )
+    .map(studio => ({ name: String(studio.name) }));
 }
 
 /**
@@ -274,23 +293,24 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
 /**
  * Transforms an array of MAL anime items
  */
-export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: any[]): UniversalMediaItem[] {
+export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: unknown[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
   }
   
-  return malItems.map(item => transformMALAnime(plugin, item));
+  return malItems.map(item => transformMALAnime(plugin, item as Record<string, unknown>));
 }
+
 
 /**
  * Transforms an array of MAL manga items
  */
-export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: any[]): UniversalMediaItem[] {
+export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: unknown[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
   }
   
-  return malItems.map(item => transformMALManga(plugin, item));
+  return malItems.map(item => transformMALManga(plugin, item as Record<string, unknown>));
 }
