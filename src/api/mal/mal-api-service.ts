@@ -223,8 +223,6 @@ function parseErrorMessage(response: { status: number; text?: string; json?: Rec
       const error = data as { error?: string; message?: string };
       return error.message || error.error || 'Unknown error';
     }
-  } catch (e) {
-    // Ignore parse errors
   }
   return response.text || 'Unknown error';
 }
