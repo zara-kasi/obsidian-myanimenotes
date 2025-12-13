@@ -49,7 +49,7 @@ async function syncAnimeList(
   
   debug.log('[MAL Sync] Starting anime sync...');
   
-  let rawItems: any[] = [];
+  let rawItems: unknown[] = [];
 
 if (statuses && statuses.length > 0) {
   const animePromises = statuses.map(status => 
@@ -87,7 +87,7 @@ async function syncMangaList(
   
   debug.log('[MAL Sync] Starting manga sync...');
   
-  let rawItems: any[] = [];
+  let rawItems: unknown[] = [];
 
 // Update mal-sync-service.ts - syncMangaList()
 if (statuses && statuses.length > 0) {
