@@ -54,13 +54,13 @@ export class MyAnimeNotesIndex {
    * Does NOT build the index - that happens lazily on first sync
    */
   async initialize(): Promise<void> {
-    this.debug.log('[Index] Registering metadata listeners (index will build on first sync)');
-    
-    // Register metadata cache listeners for automatic updates
-    this.registerMetadataListeners();
-    
-    this.debug.log('[Index] Metadata listeners registered');
-  }
+  this.debug.log('[Index] Registering metadata listeners (index will build on first sync)');
+  
+  // Register metadata cache listeners for automatic updates
+  await this.registerMetadataListeners();
+  
+  this.debug.log('[Index] Metadata listeners registered');
+}
   
   /**
    * Ensures the index is initialized before use
@@ -140,26 +140,26 @@ export class MyAnimeNotesIndex {
    * Indexes a single file
    * Extracts myanimenotes from frontmatter and updates indexes
    */
-  private async indexFile(file: TFile, metadataCache: MetadataCache): Promise<void> {
-    try {
-      const cache = metadataCache.getFileCache(file);
-      const myanimenotes = cache?.frontmatter?.myanimenotes;
-      
-      if (myanimenotes && typeof myanimenotes === 'string') {
-        // Add to myanimenotes -> files mapping
-        if (!this.myanimenotesToFiles.has(myanimenotes)) {
-          this.myanimenotesToFiles.set(myanimenotes, new Set());
-        }
-        this.myanimenotesToFiles.get(myanimenotes)!.add(file);
-        
-        // Add to file -> myanimenotes mapping
-        this.fileToMyAnimeNotes.set(file.path, myanimenotes);
+  private indexFile(file: TFile, metadataCache: MetadataCache): void {
+  try {
+    const cache = metadataCache.getFileCache(file);
+    const myanimenotes = cache?.frontmatter?.myanimenotes;
+    
+    if (myanimenotes && typeof myanimenotes === 'string') {
+      // Add to myanimenotes -> files mapping
+      if (!this.myanimenotesToFiles.has(myanimenotes)) {
+        this.myanimenotesToFiles.set(myanimenotes, new Set());
       }
-    } catch (error) {
-      // Silently skip files that can't be indexed
-      this.debug.log(`[Index] Failed to index file ${file.path}:`, error);
+      this.myanimenotesToFiles.get(myanimenotes)!.add(file);
+      
+      // Add to file -> myanimenotes mapping
+      this.fileToMyAnimeNotes.set(file.path, myanimenotes);
     }
+  } catch (error) {
+    // Silently skip files that can't be indexed
+    this.debug.log(`[Index] Failed to index file ${file.path}:`, error);
   }
+}
   
   /**
    * Removes a file from the index
@@ -243,16 +243,15 @@ export class MyAnimeNotesIndex {
     
     // Update index when file metadata changes
     this.plugin.registerEvent(
-      metadataCache.on('changed', async (file) => {
-        if (file instanceof TFile && file.extension === 'md') {
-          // Remove old entry
-          this.removeFileFromIndex(file);
-          
-          // Re-index file
-          await this.indexFile(file, metadataCache);
-        }
-      })
-    );
+  vault.on('create', (file) => {
+    if (file instanceof TFile && file.extension === 'md') {
+      // Wait a bit for metadata to be available
+      setTimeout(() => {
+        this.indexFile(file, metadataCache);
+      }, 100);
+    }
+  })
+);
     
     // Handle file deletion
     this.plugin.registerEvent(
