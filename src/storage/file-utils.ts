@@ -48,7 +48,7 @@ export function sanitizeFilename(filename: string): string {
  */
 export function generateUniqueFilename(
   plugin: MyAnimeNotesPlugin,
-  vault: any,
+  vault: { getAbstractFileByPath: (path: string) => unknown },
   folderPath: string,
   baseFilename: string
 ): string {
