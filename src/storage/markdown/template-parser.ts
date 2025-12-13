@@ -91,9 +91,9 @@ export function extractVariables(template: string): Array<{ varName: string; fil
 function resolvePropertyValue(
   item: UniversalMediaItem,
   variableName: string
-): any {
+): unknown {
   // Map of variable names to item properties
-  const valueMap: Record<string, any> = {
+  const valueMap: Record<string, unknown> = {
     // Basic fields
     'id': item.id,
     'title': item.title,
@@ -166,7 +166,7 @@ function resolvePropertyValue(
 export function resolveTemplate(
   template: string,
   item: UniversalMediaItem
-): any {
+): unknown {
   if (!template || template.trim() === '') {
     return undefined;
   }
@@ -250,7 +250,11 @@ export function resolveTemplate(
 /**
  * Extracts alternative titles into array format for Obsidian aliases
  */
-function extractAliases(alternativeTitles: any): string[] | undefined {
+function extractAliases(alternativeTitles: { 
+  en?: string; 
+  ja?: string; 
+  synonyms?: string[] 
+} | undefined): string[] | undefined {
   if (!alternativeTitles) return undefined;
   
   const aliases: string[] = [];
@@ -291,7 +295,11 @@ function formatDuration(minutes: number | undefined): string | undefined {
  * formatAuthors([{firstName: "Hajime", lastName: "Isayama"}])
  * // Returns: "Hajime Isayama"
  */
-function formatAuthors(authors: any[] | undefined): string | undefined {
+function formatAuthors(authors: Array<{
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+}> | undefined): string | undefined {
   if (!authors || authors.length === 0) return undefined;
   
   const authorNames = authors
