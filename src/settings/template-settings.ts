@@ -116,7 +116,7 @@ function renderExpandableTemplate(
   
   // Add description
   contentContainer.createEl('p', { 
-    text: 'Properties to add to the top of the media note. Use variables to populate data from the MAL API.',
+    text: 'Properties to add to the top of the media note. Use variables to populate data from the mal api.',
     cls: 'setting-item-description'
   });
   
@@ -145,7 +145,7 @@ function renderExpandableTemplate(
   // Add text after the icon
   addButton.createSpan({ 
     cls: 'myanimenotes-button-text',
-    text: 'Add Property' 
+    text: 'Add property' 
   });
   
   addButton.addEventListener('click', () => {
@@ -153,10 +153,10 @@ function renderExpandableTemplate(
   });
   
   // Note content template section
-  contentContainer.createEl('h4', { text: 'Note Content', cls: 'myanimenotes-section-header' });
+  contentContainer.createEl('h4', { text: 'Note content', cls: 'myanimenotes-section-header' });
   
   contentContainer.createEl('p', { 
-    text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
+    text: 'Customize the content of the note. Use variables to populate data from the mal api.',
     cls: 'setting-item-description'
   });
   
