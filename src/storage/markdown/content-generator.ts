@@ -19,7 +19,7 @@ import { resolveTemplate } from './template-parser';
  * @returns Complete markdown content with frontmatter + body
  */
 export function generateInitialFileContent(
-  frontmatterProps: Record<string, any>,
+  frontmatterProps: Record<string, unknown>,
   noteContentTemplate: string,
   item: UniversalMediaItem
 ): string {
