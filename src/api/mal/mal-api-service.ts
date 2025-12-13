@@ -5,6 +5,14 @@ import { createDebugLogger } from '../../utils';
 
 const MAL_API_BASE = 'https://api.myanimelist.net/v2';
 
+interface MALAPIResponse {
+  data?: unknown[];
+  paging?: {
+    next?: string;
+  };
+  [key: string]: unknown;
+}
+
 // Optimized field sets - only fields we actually use from the reference document
 const ANIME_FIELDS = [
   // Basic info
@@ -103,7 +111,7 @@ async function makeMALRequest(
   plugin: MyAnimeNotesPlugin,
   endpoint: string,
   params: Record<string, string> = {}
-): Promise<any> {
+): Promise<MALAPIResponse> {
   const debug = createDebugLogger(plugin, 'MAL API');
   
   await ensureValidToken(plugin);
@@ -208,11 +216,12 @@ async function makeMALRequest(
 /**
  * Parses error message from MAL API response
  */
-function parseErrorMessage(response: any): string {
+function parseErrorMessage(response: { status: number; text?: string; json?: Record<string, unknown> }): string {
   try {
     const data = response.json || (response.text ? JSON.parse(response.text) : {});
-    if (data.error) {
-      return data.message || data.error;
+    if (data && typeof data === 'object' && 'error' in data) {
+      const error = data as { error?: string; message?: string };
+      return error.message || error.error || 'Unknown error';
     }
   } catch (e) {
     // Ignore parse errors
@@ -252,9 +261,9 @@ async function fetchAllPages(
   plugin: MyAnimeNotesPlugin,
   endpoint: string,
   params: Record<string, string> = {}
-): Promise<any[]> {
-    const debug = createDebugLogger(plugin, 'MAL API');
-  const allItems: any[] = [];
+): Promise<unknown[]> {
+  const debug = createDebugLogger(plugin, 'MAL API');
+  const allItems: unknown[] = [];
   let nextUrl: string | null = null;
   let offset = 0;
   const limit = 100; // MAL's max limit per request
@@ -302,7 +311,7 @@ async function fetchAllPages(
  * Fetches complete anime list for authenticated user
  * Note: User list data (status, score, episodes watched) must be explicitly requested via list_status field
  */
-export async function fetchCompleteMALAnimeList(plugin: MyAnimeNotesPlugin): Promise<any[]> {
+export async function fetchCompleteMALAnimeList(plugin: MyAnimeNotesPlugin): Promise<unknown[]> {
   return fetchAllPages(plugin, '/users/@me/animelist', {
     fields: ANIME_FIELDS,
     nsfw: 'true'
@@ -313,7 +322,7 @@ export async function fetchCompleteMALAnimeList(plugin: MyAnimeNotesPlugin): Pro
  * Fetches complete manga list for authenticated user
  * Note: User list data (status, score, volumes/chapters read) must be explicitly requested via list_status field
  */
-export async function fetchCompleteMALMangaList(plugin: MyAnimeNotesPlugin): Promise<any[]> {
+export async function fetchCompleteMALMangaList(plugin: MyAnimeNotesPlugin): Promise<unknown[]> {
   return fetchAllPages(plugin, '/users/@me/mangalist', {
     fields: MANGA_FIELDS,
     nsfw: 'true'
@@ -326,7 +335,7 @@ export async function fetchCompleteMALMangaList(plugin: MyAnimeNotesPlugin): Pro
 export async function fetchMALAnimeByStatus(
   plugin: MyAnimeNotesPlugin,
   status: 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch'
-): Promise<any[]> {
+): Promise<unknown[]> {
   return fetchAllPages(plugin, '/users/@me/animelist', {
     fields: ANIME_FIELDS,
     status,
@@ -340,7 +349,7 @@ export async function fetchMALAnimeByStatus(
 export async function fetchMALMangaByStatus(
   plugin: MyAnimeNotesPlugin,
   status: 'reading' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_read'
-): Promise<any[]> {
+): Promise<unknown[]> {
   return fetchAllPages(plugin, '/users/@me/mangalist', {
     fields: MANGA_FIELDS,
     status,
@@ -348,13 +357,14 @@ export async function fetchMALMangaByStatus(
   });
 }
 
+
 /**
  * Fetches detailed information for a specific anime
  */
 export async function fetchMALAnimeDetails(
   plugin: MyAnimeNotesPlugin,
   animeId: number
-): Promise<any> {
+): Promise<unknown> {
   return makeMALRequest(plugin, `/anime/${animeId}`, {
     fields: ANIME_FIELDS
   });
@@ -363,10 +373,11 @@ export async function fetchMALAnimeDetails(
 /**
  * Fetches detailed information for a specific manga
  */
+
 export async function fetchMALMangaDetails(
   plugin: MyAnimeNotesPlugin,
   mangaId: number
-): Promise<any> {
+): Promise<unknown> {
   return makeMALRequest(plugin, `/manga/${mangaId}`, {
     fields: MANGA_FIELDS
   });
