@@ -66,7 +66,7 @@ function renderExpandableTemplate(
   
   // Main setting with toggle
   const setting = new Setting(container)
-    .setName(`${type === 'anime' ? 'Anime' : 'Manga'} Template`)
+    .setName(`${type === 'anime' ? 'Anime' : 'Manga'} template`)
     .setDesc(`Configure how ${type} notes are created and which properties to include.`)
     .setClass('myanimenotes-template-setting');
   
