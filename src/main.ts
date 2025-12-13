@@ -29,7 +29,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     try {
       this.myanimenotesIndex = await createMyAnimeNotesIndex(this);
     } catch (error) {
-      console.error('[MyAnimeNotes] Failed to initialize index:', error);
+      console.error('[Myanimenotes] Failed to initialize index:', error);
       // Plugin can still work without index (uses fallback)
     }
   
@@ -37,7 +37,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     this.autoSyncManager = createAutoSyncManager(this);
     
     // Add ribbon icon for sync
-    this.addRibbonIcon('cloud-download', 'MyAnimeNotes sync all', async (evt: MouseEvent) => {
+    this.addRibbonIcon('cloud-download', 'Myanimenotes sync all', async (evt: MouseEvent) => {
       if (!this.syncManager) return;
       await this.syncManager.syncFromMAL();
     });
@@ -95,7 +95,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync all from MAL
     this.addCommand({
       id: 'sync-mal-all',
-      name: 'Sync all from MyAnimeList',
+      name: 'Sync all from Myanimelist',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncFromMAL();
@@ -105,7 +105,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync anime only
     this.addCommand({
       id: 'sync-mal-anime',
-      name: 'Sync anime from MyAnimeList',
+      name: 'Sync anime from Myanimelist',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncAnime();
@@ -115,7 +115,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync manga only
     this.addCommand({
       id: 'sync-mal-manga',
-      name: 'Sync manga from MyAnimeList',
+      name: 'Sync manga from Myanimelist',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncManga();
