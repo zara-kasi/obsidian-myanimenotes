@@ -18,11 +18,16 @@ export interface MALAuthState {
   state: string;
 }
 
+
 export interface OAuthParams {
   code?: string;
   state?: string;
   error?: string;
   error_description?: string;
   url?: string;
-  [key: string]: any;
+}
+
+// If you need additional properties, define them explicitly:
+export interface OAuthParamsExtended extends OAuthParams {
+  [key: string]: string | undefined;
 }
