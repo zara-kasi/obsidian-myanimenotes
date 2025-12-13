@@ -225,7 +225,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
     
     // Authentication button (only shown when not authenticated)
     if (!isAuth) {
-      const authSetting = new Setting(container)
+      constauthSetting = new Setting(container)
         .setName('Authenticate')
         .addButton(button => {
           button
