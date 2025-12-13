@@ -24,7 +24,7 @@ export function generateFrontmatterProperties(
   item: UniversalMediaItem,
   template: TemplateConfig,
   myanimenotesSync: string
-): Record<string, any> {
+): Record<string, unknown> {
   return buildFrontmatterFromTemplate(item, template, myanimenotesSync);
 }
 
@@ -35,7 +35,7 @@ export function generateFrontmatterProperties(
 export async function updateMarkdownFileFrontmatter(
   plugin: MyAnimeNotesPlugin,
   file: TFile,
-  frontmatterProps: Record<string, any>
+  frontmatterProps: Record<string, unknown>
 ): Promise<void> {
   const debug = createDebugLogger(plugin, 'Markdown');
   const { fileManager } = plugin.app;
