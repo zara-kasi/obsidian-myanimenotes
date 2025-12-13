@@ -271,3 +271,8 @@
 .myanimenotes-textarea-setting textarea {
   resize: vertical; /* Allow users to resize vertically if needed */
 }
+
+.myanimenotes-textarea-input {
+  width: 100%;
+  font-family: var(--font-monospace);
+}
