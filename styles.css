@@ -272,7 +272,7 @@
   resize: vertical; /* Allow users to resize vertically if needed */
 }
 
-.myanimenotes-textarea-input {
+.myanimenotes-template-textarea {
   width: 100%;
   font-family: var(--font-monospace);
 }
