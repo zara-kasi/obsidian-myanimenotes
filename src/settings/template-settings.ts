@@ -265,7 +265,7 @@ function renderPropertyRow(
   if (!isPermanent) {
     const deleteButton = rowEl.createDiv({ cls: 'myanimenotes-delete-button' });
     setIcon(deleteButton, 'trash-2');
-    deleteButton.addEventListener('click', async () => {
+    ', async () => {
       await removeProperty(plugin, state, prop.id, config, type);
     });
   } else {
@@ -348,7 +348,7 @@ function addEmptyProperty(
   };
   
   config.properties.push(newProp);
-  saveTemplateConfig(plugin, type, config);
+  await saveTemplateConfig(plugin, type, config);
   
   // Re-render just the property list
   const listEl = type === 'anime' ? state.animePropertyListEl : state.mangaPropertyListEl;
