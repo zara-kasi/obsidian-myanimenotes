@@ -3,6 +3,7 @@ import { MyAnimeNotesSettingTab } from './settings';
 import { MyAnimeNotesSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
+import { MediaCategory } from './transformers';
 import type { MyAnimeNotesIndex } from './storage/myanimenotes';
 import { createMyAnimeNotesIndex } from './storage/myanimenotes';
 import { MyAnimeNotesLockManager, createMyAnimeNotesLockManager } from './storage/myanimenotes';
@@ -28,7 +29,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     try {
       this.myanimenotesIndex = await createMyAnimeNotesIndex(this);
     } catch (error) {
-      console.error('[Myanimenotes] Failed to initialize index:', error);
+      console.error('[MyAnimeNotes] Failed to initialize index:', error);
       // Plugin can still work without index (uses fallback)
     }
   
@@ -94,7 +95,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync all from MAL
     this.addCommand({
       id: 'sync-mal-all',
-      name: 'Sync all from Myanimelist',
+      name: 'Sync all from myanimelist',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncFromMAL();
@@ -104,7 +105,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync anime only
     this.addCommand({
       id: 'sync-mal-anime',
-      name: 'Sync anime from Myanimelist',
+      name: 'Sync anime from myanimelist',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncAnime();
@@ -114,7 +115,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync manga only
     this.addCommand({
       id: 'sync-mal-manga',
-      name: 'Sync manga from Myanimelist',
+      name: 'Sync manga from myanimelist',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncManga();
@@ -124,7 +125,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync active statuses (watching anime + reading manga)
     this.addCommand({
       id: 'sync-mal-active',
-      name: 'Sync currently Watching anime and  Reading manga',
+      name: 'Sync currently watching anime and  reading manga',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncActiveStatuses();
