@@ -173,8 +173,7 @@ function renderExpandableTemplate(
         });
       
       textarea.inputEl.rows = 8;
-      textarea.inputEl.style.width = '100%';
-      textarea.inputEl.style.fontFamily = 'monospace';
+      textarea.inputEl.addClass('myanimenotes-template-textarea');
     });
 }
 }
