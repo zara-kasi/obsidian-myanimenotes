@@ -162,19 +162,20 @@ function renderExpandableTemplate(
   
   // Use Setting wrapper with custom class to hide separator line
   new Setting(contentContainer)
-  .setClass('myanimenotes-textarea-setting')
-  .addTextArea(textarea => {
-    textarea
-      .setPlaceholder('# {{title}}\n\n{{synopsis}}\n')
-      .setValue(config.noteContent || '')
-      .onChange(async (value) => {
-        config.noteContent = value;
-        await saveTemplateConfig(plugin, type, config);
-      });
-    
-    textarea.inputEl.rows = 8;
-    textarea.inputEl.addClass('myanimenotes-textarea-input');
-  });
+    .setClass('myanimenotes-textarea-setting')
+    .addTextArea(textarea => {
+      textarea
+        .setPlaceholder('# {{title}}\n\n{{synopsis}}\n')
+        .setValue(config.noteContent || '')
+        .onChange(async (value) => {
+          config.noteContent = value;
+          await saveTemplateConfig(plugin, type, config);
+        });
+      
+      textarea.inputEl.rows = 8;
+      textarea.inputEl.style.width = '100%';
+      textarea.inputEl.style.fontFamily = 'monospace';
+    });
 }
 }
 
@@ -348,7 +349,7 @@ function addEmptyProperty(
   };
   
   config.properties.push(newProp);
-  await saveTemplateConfig(plugin, type, config);
+  saveTemplateConfig(plugin, type, config);
   
   // Re-render just the property list
   const listEl = type === 'anime' ? state.animePropertyListEl : state.mangaPropertyListEl;
