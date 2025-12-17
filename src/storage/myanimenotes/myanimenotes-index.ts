@@ -13,11 +13,6 @@ import { TFile, MetadataCache, Vault } from 'obsidian';
 import type MyAnimeNotesPlugin from '../../main';
 import { createDebugLogger } from '../../utils';
 
-interface MyAnimeNotesIndexEntry {
-  file: TFile;
-  myanimenotes: string;
-  mtime: number; // Track modification time for staleness detection
-}
 
 /**
  * MyAnimeNotes Index Manager
