@@ -93,7 +93,7 @@ function yieldToUI(): Promise<void> {
  * @returns Synced timestamp or undefined if not found
  */
 function getSyncedTimestampFast(
-  cache: any | undefined
+  cache: { frontmatter?: { synced?: string } } | undefined
 ): string | undefined {
   // Fast path: if cache exists and has synced timestamp, return it immediately
   if (cache?.frontmatter?.synced) {
