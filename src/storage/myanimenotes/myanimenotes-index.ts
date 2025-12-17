@@ -9,7 +9,7 @@
  * UPDATED: Lazy initialization - index is built on first sync, not on plugin load
  */
 
-import { TFile, MetadataCache, Vault } from 'obsidian';
+import { TFile, MetadataCache } from 'obsidian';
 import type MyAnimeNotesPlugin from '../../main';
 import { createDebugLogger } from '../../utils';
 
