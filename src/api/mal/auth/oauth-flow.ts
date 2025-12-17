@@ -2,7 +2,7 @@
 
 import { requestUrl } from 'obsidian';
 import type MyAnimeNotesPlugin from '../../../main';
-import type { MALAuthState, MALTokenResponse, OAuthParams } from './types';
+import type { MALTokenResponse, OAuthParams } from './types';
 import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateVerifier, generateChallenge, generateState } from './pkce';
 import { isTokenValid } from './token-manager';
