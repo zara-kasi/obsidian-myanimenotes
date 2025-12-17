@@ -92,17 +92,18 @@ function yieldToUI(): Promise<void> {
  * 
  * @returns Synced timestamp or undefined if not found
  */
-function getSyncedTimestampFast(
-  cache: { frontmatter?: { synced?: string } } | undefined
+ function getSyncedTimestampFast(
+  cache: { frontmatter?: Record<string, unknown> } | undefined
 ): string | undefined {
   // Fast path: if cache exists and has synced timestamp, return it immediately
-  if (cache?.frontmatter?.synced) {
+  if (cache?.frontmatter?.synced && typeof cache.frontmatter.synced === 'string') {
     return cache.frontmatter.synced;
   }
   
   // No timestamp found - return undefined (will update to be safe)
   return undefined;
-}
+
+ 
 
 /**
  * Pure computation: determines if file should be skipped
@@ -494,7 +495,7 @@ export async function saveMediaItem(
       case 'none':
         return createNewFile(plugin, item, config, myanimenotesSync, folderPath);
       default:
-        throw new Error(`Unknown lookup type: ${(lookup as any).type}`);
+  throw new Error(`Unknown lookup type: ${lookup.type}`)
     }
   });
 }
@@ -608,7 +609,7 @@ export async function saveMediaItems(
           break;
         
         default:
-          throw new Error(`Unknown lookup type: ${(batch.lookup as any).type}`);
+  throw new Error(`Unknown lookup type: ${batch.lookup.type}`);
       }
       
       results.push(result);
