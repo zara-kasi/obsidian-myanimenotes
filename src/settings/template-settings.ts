@@ -66,7 +66,7 @@ function renderExpandableTemplate(
   
   // Main setting with toggle
   const setting = new Setting(container)
-    .setName(`${type === 'anime' ? 'Anime' : 'Manga'} template`)
+    .setName(`${type === 'anime' ? 'Anime' : 'Manga'} Template`)
     .setDesc(`Configure how ${type} notes are created and which properties to include.`)
     .setClass('myanimenotes-template-setting');
   
@@ -116,7 +116,7 @@ function renderExpandableTemplate(
   
   // Add description
   contentContainer.createEl('p', { 
-    text: 'Properties to add to the top of the media note. Use variables to populate data from the mal api.',
+    text: 'Properties to add to the top of the media note. Use variables to populate data from the MAL API.',
     cls: 'setting-item-description'
   });
   
@@ -145,7 +145,7 @@ function renderExpandableTemplate(
   // Add text after the icon
   addButton.createSpan({ 
     cls: 'myanimenotes-button-text',
-    text: 'Add property' 
+    text: 'Add Property' 
   });
   
   addButton.addEventListener('click', () => {
@@ -153,10 +153,10 @@ function renderExpandableTemplate(
   });
   
   // Note content template section
-  contentContainer.createEl('h4', { text: 'Note content', cls: 'myanimenotes-section-header' });
+  contentContainer.createEl('h4', { text: 'Note Content', cls: 'myanimenotes-section-header' });
   
   contentContainer.createEl('p', { 
-    text: 'Customize the content of the note. Use variables to populate data from the mal api.',
+    text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
     cls: 'setting-item-description'
   });
   
@@ -173,7 +173,8 @@ function renderExpandableTemplate(
         });
       
       textarea.inputEl.rows = 8;
-      textarea.inputEl.addClass('myanimenotes-template-textarea');
+      textarea.inputEl.style.width = '100%';
+      textarea.inputEl.style.fontFamily = 'monospace';
     });
 }
 }
@@ -265,7 +266,7 @@ function renderPropertyRow(
   if (!isPermanent) {
     const deleteButton = rowEl.createDiv({ cls: 'myanimenotes-delete-button' });
     setIcon(deleteButton, 'trash-2');
-    ', async () => {
+    deleteButton.addEventListener('click', async () => {
       await removeProperty(plugin, state, prop.id, config, type);
     });
   } else {
@@ -348,7 +349,7 @@ function addEmptyProperty(
   };
   
   config.properties.push(newProp);
-  await saveTemplateConfig(plugin, type, config);
+  saveTemplateConfig(plugin, type, config);
   
   // Re-render just the property list
   const listEl = type === 'anime' ? state.animePropertyListEl : state.mangaPropertyListEl;
