@@ -214,8 +214,6 @@ function parseErrorMessage(response: any): string {
     if (data.error) {
       return data.message || data.error;
     }
-  } catch (e) {
-    // Ignore parse errors
   }
   return response.text || 'Unknown error';
 }
