@@ -280,7 +280,7 @@ export class MyAnimeNotesIndex {
         if (file instanceof TFile && file.extension === 'md') {
           // Wait a bit for metadata to be available
           setTimeout(() => {
-            this.indexFile(file, metadataCache);
+            void this.indexFile(file, metadataCache);
           }, 100);
         }
       })
