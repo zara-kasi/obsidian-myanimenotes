@@ -15,7 +15,7 @@ import {
   generateInitialFileContent
 } from './markdown';
 import { createDebugLogger } from '../utils';
-import type { TFile, MetadataCache } from 'obsidian';
+import type { TFile } from 'obsidian';
 import { normalizePath } from 'obsidian';
 
 // ============================================================================
