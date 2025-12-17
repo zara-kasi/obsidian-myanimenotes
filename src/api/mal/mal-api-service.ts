@@ -214,6 +214,8 @@ function parseErrorMessage(response: any): string {
     if (data.error) {
       return data.message || data.error;
     }
+  } catch {
+      console.warn('[MAL Auth] Failed to parse URL from params');
   }
   return response.text || 'Unknown error';
 }
