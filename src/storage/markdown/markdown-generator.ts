@@ -19,12 +19,14 @@ import { createDebugLogger } from '../../utils';
  * @param myanimenotesSync MyAnimeNotes identifier
  * @returns Frontmatter properties object
  */
-export function generateFrontmatterProperties(
+ 
+ export function generateFrontmatterProperties(
   plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   template: TemplateConfig,
   myanimenotesSync: string
-): Record<string, any> {
+): Record<string, unknown> {
+
   return buildFrontmatterFromTemplate(item, template, myanimenotesSync);
 }
 
@@ -32,24 +34,24 @@ export function generateFrontmatterProperties(
  * Updates an existing markdown file's frontmatter
  * Preserves existing body content automatically via processFrontMatter
  */
-export async function updateMarkdownFileFrontmatter(
+ 
+ export async function updateMarkdownFileFrontmatter(
   plugin: MyAnimeNotesPlugin,
   file: TFile,
-  frontmatterProps: Record<string, any>
+  frontmatterProps: Record<string, unknown>
 ): Promise<void> {
+
   const debug = createDebugLogger(plugin, 'Markdown');
   const { fileManager } = plugin.app;
 
   try {
-    await fileManager.processFrontMatter(file, (frontmatter) => {
-      // Merge synced properties into existing frontmatter
-      // This preserves any user-added properties
-      Object.entries(frontmatterProps).forEach(([key, value]) => {
-        frontmatter[key] = value;
-      });
-      
-      
-    });
+    await fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
+  // Merge synced properties into existing frontmatter
+  // This preserves any user-added properties
+  Object.entries(frontmatterProps).forEach(([key, value]) => {
+    frontmatter[key] = value;
+  });
+});
   } catch (error) {
     debug.log('[Markdown] Error updating frontmatter:', error);
     throw error;
