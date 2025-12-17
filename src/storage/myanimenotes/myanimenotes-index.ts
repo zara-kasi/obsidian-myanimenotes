@@ -119,7 +119,7 @@ export class MyAnimeNotesIndex {
       
       // Build index from all files
       for (const file of allFiles) {
-        await this.indexFile(file, metadataCache);
+        this.indexFile(file, metadataCache);
         indexedCount++;
       }
       
@@ -140,7 +140,7 @@ export class MyAnimeNotesIndex {
    * Indexes a single file
    * Extracts myanimenotes from frontmatter and updates indexes
    */
-  private async indexFile(file: TFile, metadataCache: MetadataCache): Promise<void> {
+  private indexFile(file: TFile, metadataCache: MetadataCache): void {
     try {
       const cache = metadataCache.getFileCache(file);
       const myanimenotes = cache?.frontmatter?.myanimenotes;
@@ -249,7 +249,7 @@ export class MyAnimeNotesIndex {
           this.removeFileFromIndex(file);
           
           // Re-index file
-          await this.indexFile(file, metadataCache);
+          this.indexFile(file, metadataCache);
         }
       })
     );
@@ -285,7 +285,7 @@ export class MyAnimeNotesIndex {
         if (file instanceof TFile && file.extension === 'md') {
           // Wait a bit for metadata to be available
           setTimeout(async () => {
-            await this.indexFile(file, metadataCache);
+            this.indexFile(file, metadataCache);
           }, 100);
         }
       })
