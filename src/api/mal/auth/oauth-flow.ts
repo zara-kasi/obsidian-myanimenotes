@@ -245,7 +245,7 @@ function formatTokenError(res: any): string {
     } else if (errorData.error === 'invalid_grant') {
       errorMsg += '\n\nTip: The authorization code may have expired. Please try again.';
     }
-  } catch (parseError) {
+  } catch {
     errorMsg += `: ${errorText}`;
   }
   
