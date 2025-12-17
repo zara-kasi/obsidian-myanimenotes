@@ -281,10 +281,10 @@ export class MyAnimeNotesIndex {
     
     // Handle file creation
     this.plugin.registerEvent(
-      vault.on('create', async (file) => {
+      vault.on('create', (file) => {
         if (file instanceof TFile && file.extension === 'md') {
           // Wait a bit for metadata to be available
-          setTimeout(async () => {
+          setTimeout( () => {
             this.indexFile(file, metadataCache);
           }, 100);
         }
