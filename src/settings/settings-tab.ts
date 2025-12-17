@@ -186,9 +186,11 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
         text: 'Log out'
       });
       
-      logoutButton.addEventListener('click', async () => {
-        await malLogout(this.plugin);
-        this.display();
+      logoutButton.addEventListener('click', () => {
+        void (async () => {
+          await malLogout(this.plugin);
+          this.display();
+        })();
       });
     }
     
