@@ -173,8 +173,7 @@ function renderExpandableTemplate(
         });
       
       textarea.inputEl.rows = 8;
-      textarea.inputEl.style.width = '100%';
-      textarea.inputEl.style.fontFamily = 'monospace';
+      textarea.inputEl.addClass('myanimenotes-template-textarea');
     });
 }
 }
@@ -349,7 +348,7 @@ function addEmptyProperty(
   };
   
   config.properties.push(newProp);
-  saveTemplateConfig(plugin, type, config);
+  void saveTemplateConfig(plugin, type, config);
   
   // Re-render just the property list
   const listEl = type === 'anime' ? state.animePropertyListEl : state.mangaPropertyListEl;
