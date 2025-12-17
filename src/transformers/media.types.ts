@@ -16,11 +16,11 @@ export enum MediaStatus {
 export enum UserListStatus {
   // For Anime
   WATCHING = 'Watching',
-  PLAN_TO_WATCH = 'Planning',
+  PLAN_TO_WATCH = 'Plan to Watch',
   
   // For Manga
   READING = 'Reading',
-  PLAN_TO_READ = 'Planning',
+  PLAN_TO_READ = 'Plan to Read',
   
   // Common
   COMPLETED = 'Completed',
