@@ -107,11 +107,11 @@ async function findFilesByMyAnimeNotesSyncLegacy(
  * OPTIMIZATION: Limited to folderPath scope to avoid full vault scan
  * Only called when no myanimenotes match exists (fallback path)
  */
-export async function findLegacyFiles(
+export function findLegacyFiles(
   plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   folderPath: string
-): Promise<TFile[]> {
+): TFile[] {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   const { vault, metadataCache } = plugin.app;
   const candidates: TFile[] = [];
