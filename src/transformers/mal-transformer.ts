@@ -353,7 +353,7 @@ export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: MALI
 /**
  * Transforms an array of MAL manga items
  */
-export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: MALItem[]): UniversalMediaItem[] {
+export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: MALItem[]: UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
@@ -361,3 +361,5 @@ export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: MALI
   
   return malItems.map(item => transformMALManga(plugin, item));
 }
+
+export type { MALItem };
