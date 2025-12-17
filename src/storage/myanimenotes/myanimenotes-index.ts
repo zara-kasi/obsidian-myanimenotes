@@ -48,7 +48,7 @@ export class MyAnimeNotesIndex {
    * Initializes the index by registering metadata listeners
    * Does NOT build the index - that happens lazily on first sync
    */
-  async initialize(): Promise<void> {
+  initialize(): void {
     this.debug.log('[Index] Registering metadata listeners (index will build on first sync)');
     
     // Register metadata cache listeners for automatic updates
@@ -135,7 +135,7 @@ export class MyAnimeNotesIndex {
    * Indexes a single file
    * Extracts myanimenotes from frontmatter and updates indexes
    */
-  private async indexFile(file: TFile, metadataCache: MetadataCache): Promise<void> {
+  private indexFile(file: TFile, metadataCache: MetadataCache): void {
     try {
       const cache = metadataCache.getFileCache(file);
       const myanimenotes = cache?.frontmatter?.myanimenotes;
@@ -276,11 +276,11 @@ export class MyAnimeNotesIndex {
     
     // Handle file creation
     this.plugin.registerEvent(
-      vault.on('create', async (file) => {
+      vault.on('create', (file) => {
         if (file instanceof TFile && file.extension === 'md') {
           // Wait a bit for metadata to be available
-          setTimeout(async () => {
-            await this.indexFile(file, metadataCache);
+          setTimeout(() => {
+            this.indexFile(file, metadataCache);
           }, 100);
         }
       })
