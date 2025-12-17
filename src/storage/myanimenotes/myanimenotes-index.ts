@@ -53,7 +53,7 @@ export class MyAnimeNotesIndex {
    * Initializes the index by registering metadata listeners
    * Does NOT build the index - that happens lazily on first sync
    */
-  initialize(): void {
+  async initialize(): Promise<void> {
     this.debug.log('[Index] Registering metadata listeners (index will build on first sync)');
     
     // Register metadata cache listeners for automatic updates
@@ -119,7 +119,7 @@ export class MyAnimeNotesIndex {
       
       // Build index from all files
       for (const file of allFiles) {
-        this.indexFile(file, metadataCache);
+        await this.indexFile(file, metadataCache);
         indexedCount++;
       }
       
@@ -140,7 +140,7 @@ export class MyAnimeNotesIndex {
    * Indexes a single file
    * Extracts myanimenotes from frontmatter and updates indexes
    */
-  private indexFile(file: TFile, metadataCache: MetadataCache): void {
+  private async indexFile(file: TFile, metadataCache: MetadataCache): Promise<void> {
     try {
       const cache = metadataCache.getFileCache(file);
       const myanimenotes = cache?.frontmatter?.myanimenotes;
@@ -249,7 +249,7 @@ export class MyAnimeNotesIndex {
           this.removeFileFromIndex(file);
           
           // Re-index file
-          this.indexFile(file, metadataCache);
+          await this.indexFile(file, metadataCache);
         }
       })
     );
@@ -281,11 +281,11 @@ export class MyAnimeNotesIndex {
     
     // Handle file creation
     this.plugin.registerEvent(
-      vault.on('create', (file) => {
+      vault.on('create', async (file) => {
         if (file instanceof TFile && file.extension === 'md') {
           // Wait a bit for metadata to be available
-          setTimeout( () => {
-            this.indexFile(file, metadataCache);
+          setTimeout(async () => {
+            await this.indexFile(file, metadataCache);
           }, 100);
         }
       })

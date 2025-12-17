@@ -2,7 +2,7 @@
 
 import { requestUrl } from 'obsidian';
 import type MyAnimeNotesPlugin from '../../../main';
-import type { MALTokenResponse, OAuthParams } from './types';
+import type { MALAuthState, MALTokenResponse, OAuthParams } from './types';
 import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateVerifier, generateChallenge, generateState } from './pkce';
 import { isTokenValid } from './token-manager';
@@ -225,28 +225,25 @@ function extractOAuthParams(params: OAuthParams): { code: string | null; state: 
 /**
  * Formats token exchange error with helpful messages
  */
- 
-function formatTokenError(res: { status: number; text?: string; json?: Record<string, unknown> }): string {
+function formatTokenError(res: any): string {
   const errorText = res.text || JSON.stringify(res.json) || 'Unknown error';
   let errorMsg = `Token exchange failed (HTTP ${res.status})`;
   
   try {
     const errorData = res.json || (res.text ? JSON.parse(res.text) : {});
     
-    if (errorData && typeof errorData === 'object' && 'error' in errorData) {
+    if (errorData.error) {
       errorMsg += `: ${errorData.error}`;
-      if ('error_description' in errorData) {
+      if (errorData.error_description) {
         errorMsg += ` - ${errorData.error_description}`;
       }
     }
     
     // Add helpful tips
-    if (errorData && typeof errorData === 'object' && 'error' in errorData) {
-      if (errorData.error === 'invalid_client') {
-        errorMsg += '\n\nTip: Check your Client ID and Secret in settings.';
-      } else if (errorData.error === 'invalid_grant') {
-        errorMsg += '\n\nTip: The authorization code may have expired. Please try again.';
-      }
+    if (errorData.error === 'invalid_client') {
+      errorMsg += '\n\nTip: Check your Client ID and Secret in settings.';
+    } else if (errorData.error === 'invalid_grant') {
+      errorMsg += '\n\nTip: The authorization code may have expired. Please try again.';
     }
   } catch (parseError) {
     errorMsg += `: ${errorText}`;

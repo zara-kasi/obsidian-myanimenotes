@@ -24,12 +24,12 @@ export class AutoSyncManager {
    * Each timer checks authentication independently
    */
   start(): void {
-    // Start Sync on load if enabled
+    // Start sync on load if enabled
     if (this.plugin.settings.syncOnLoad) {
       this.startSyncOnLoad();
     }
 
-    // Start Scheduled sync if enabled
+    // Start scheduled sync if enabled
     if (this.plugin.settings.scheduledSync) {
       this.startScheduledSync();
     }
@@ -45,14 +45,14 @@ export class AutoSyncManager {
 
   /**
    * Checks if enough time has passed since last sync
-   * Uses the same minimum interval as Scheduled sync (60 minutes)
+   * Uses the same minimum interval as scheduled sync (60 minutes)
    */
   private hasMinimumIntervalPassed(): boolean {
     const lastSync = this.plugin.settings.lastSuccessfulSync;
     
     // If no previous sync, allow sync
     if (!lastSync) {
-      this.debug.log('[Sync on load] No previous sync found - allowing sync');
+      this.debug.log('[Sync on Load] No previous sync found - allowing sync');
       return true;
     }
     
@@ -66,7 +66,7 @@ export class AutoSyncManager {
       const minutesSinceLastSync = Math.floor(timeSinceLastSync / 60000);
       const minutesRemaining = MIN_SCHEDULED_INTERVAL - minutesSinceLastSync;
       this.debug.log(
-        `[Sync on load] Minimum interval not met: ` +
+        `[Sync on Load] Minimum interval not met: ` +
         `${minutesSinceLastSync} minutes since last sync, ` +
         `${minutesRemaining} minutes remaining`
       );
@@ -85,24 +85,24 @@ export class AutoSyncManager {
 
     // Check authentication before starting timer
     if (!this.isAuthenticated()) {
-      this.debug.log('[Sync on load] Skipped: Not authenticated with MAL');
+      this.debug.log('[Sync on Load] Skipped: Not authenticated with MAL');
       return;
     }
 
-    this.debug.log('[Sync on load] Timer started: Will sync in 1 minute');
+    this.debug.log('[Sync on Load] Timer started: Will sync in 1 minute');
 
     this.syncOnLoadTimer = setTimeout(async () => {
-      this.debug.log('[Sync on load] Timer triggered after 1 minute');
+      this.debug.log('[Sync on Load] Timer triggered after 1 minute');
       
       // Double-check authentication at execution time
       if (!this.isAuthenticated()) {
-        this.debug.log('[Sync on load] Aborted: Not authenticated with MAL');
+        this.debug.log('[Sync on Load] Aborted: Not authenticated with MAL');
         return;
       }
 
       // Check if minimum interval has passed since last sync
       if (!this.hasMinimumIntervalPassed()) {
-        this.debug.log('[Sync on load] Aborted: Minimum interval not met');
+        this.debug.log('[Sync on Load] Aborted: Minimum interval not met');
         return;
       }
 
@@ -113,23 +113,23 @@ export class AutoSyncManager {
           } else {
             await this.plugin.syncManager.syncFromMAL();
           }
-          this.debug.log('[Sync on load] Completed successfully');
+          this.debug.log('[Sync on Load] Completed successfully');
         }
       } catch (error) {
-        console.error('[Sync on load] Failed:', error);
+        console.error('[Sync on Load] Failed:', error);
       }
     }, SYNC_ON_LOAD_DELAY);
   }
 
   /**
-   * Starts the Scheduled sync timer (repeating at configured interval)
+   * Starts the scheduled sync timer (repeating at configured interval)
    */
   private startScheduledSync(): void {
     this.clearScheduledSyncTimer();
 
     // Check authentication before starting timer
     if (!this.isAuthenticated()) {
-      this.debug.log('[Scheduled sync] Skipped: Not authenticated with MAL');
+      this.debug.log('[Scheduled Sync] Skipped: Not authenticated with MAL');
       return;
     }
 
@@ -140,14 +140,14 @@ export class AutoSyncManager {
     );
     const intervalMs = intervalMinutes * 60 * 1000;
 
-    this.debug.log(`[Scheduled sync] Timer started: Will sync every ${intervalMinutes} minutes`);
+    this.debug.log(`[Scheduled Sync] Timer started: Will sync every ${intervalMinutes} minutes`);
 
     const runSync = async () => {
-      this.debug.log('[Scheduled sync] Triggered');
+      this.debug.log('[Scheduled Sync] Triggered');
       
       // Check authentication at execution time
       if (!this.isAuthenticated()) {
-        this.debug.log('[Scheduled sync] Aborted: Not authenticated with MAL');
+        this.debug.log('[Scheduled Sync] Aborted: Not authenticated with MAL');
         return;
       }
 
@@ -158,17 +158,17 @@ export class AutoSyncManager {
           } else {
             await this.plugin.syncManager.syncFromMAL();
           }
-          this.debug.log('[Scheduled sync] Completed successfully');
+          this.debug.log('[Scheduled Sync] Completed successfully');
         }
       } catch (error) {
-        console.error('[Scheduled sync] Failed:', error);
+        console.error('[Scheduled Sync] Failed:', error);
       }
 
       // Schedule next sync if still enabled and authenticated
       if (this.plugin.settings.scheduledSync && this.isAuthenticated()) {
         this.scheduledSyncTimer = setTimeout(runSync, intervalMs);
       } else {
-        this.debug.log('[Scheduled sync] Stopped: Either disabled or not authenticated');
+        this.debug.log('[Scheduled Sync] Stopped: Either disabled or not authenticated');
       }
     };
 
@@ -197,7 +197,7 @@ export class AutoSyncManager {
   }
 
   /**
-   * Clears the Scheduled sync timer
+   * Clears the scheduled sync timer
    */
   private clearScheduledSyncTimer(): void {
     if (this.scheduledSyncTimer) {

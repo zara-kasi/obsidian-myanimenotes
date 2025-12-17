@@ -84,7 +84,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
     // Sync on load toggle
     new Setting(containerEl)
       .setName('Sync after startup')
-      .setDesc('Automatically sync shortly after obsidian starts.')
+      .setDesc('Automatically sync shortly after Obsidian starts.')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.syncOnLoad)
         .onChange(async (value) => {
@@ -101,7 +101,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
     // Optimize auto sync toggle
     new Setting(containerEl)
       .setName('Optimize auto-sync')
-      .setDesc('When enabled, auto-sync only syncs watching anime and reading manga (recommended).')
+      .setDesc('When enabled, auto-sync only syncs Watching anime and Reading manga (Recommended).')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.optimizeAutoSync)
         .onChange(async (value) => {
@@ -196,10 +196,10 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
     if (!isAuth) {
       // Client ID
       new Setting(container)
-        .setName('Client id')
-        .setDesc('Your myanimelist client id.')
+        .setName('Client ID')
+        .setDesc('Your MyAnimeList Client ID.')
         .addText(text => text
-          .setPlaceholder('Enter client id')
+          .setPlaceholder('Enter Client ID')
           .setValue(this.plugin.settings.malClientId)
           .onChange(async (value) => {
             this.plugin.settings.malClientId = value.trim();
@@ -208,11 +208,11 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
 
       // Client Secret
       new Setting(container)
-        .setName('Client secret')
-        .setDesc('Your myanimelist client secret.')
+        .setName('Client Secret')
+        .setDesc('Your MyAnimeList Client Secret.')
         .addText(text => {
           text
-            .setPlaceholder('Enter client secret')
+            .setPlaceholder('Enter Client Secret')
             .setValue(this.plugin.settings.malClientSecret || '')
             .onChange(async (value) => {
               this.plugin.settings.malClientSecret = value.trim();
@@ -240,7 +240,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
       // Add description with "Learn more" link
       const descEl = authSetting.descEl;
       descEl.createSpan({ 
-        text: 'Link your myanimelist account. ' 
+        text: 'Link your MyAnimeList account. ' 
       });
       descEl.createEl('a', {
         text: 'Learn more',

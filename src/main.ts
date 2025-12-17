@@ -37,7 +37,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     this.autoSyncManager = createAutoSyncManager(this);
     
     // Add ribbon icon for sync
-    this.addRibbonIcon('cloud-download', 'Myanimenotes sync all', async (evt: MouseEvent) => {
+    this.addRibbonIcon('cloud-download', 'MyAnimeNotes sync all', async (evt: MouseEvent) => {
       if (!this.syncManager) return;
       await this.syncManager.syncFromMAL();
     });
@@ -95,7 +95,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync all from MAL
     this.addCommand({
       id: 'sync-mal-all',
-      name: 'Sync all from myanimelist',
+      name: 'Sync all from MyAnimeList',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncFromMAL();
@@ -105,7 +105,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync anime only
     this.addCommand({
       id: 'sync-mal-anime',
-      name: 'Sync anime from myanimelist',
+      name: 'Sync anime from MyAnimeList',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncAnime();
@@ -115,7 +115,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync manga only
     this.addCommand({
       id: 'sync-mal-manga',
-      name: 'Sync manga from myanimelist',
+      name: 'Sync manga from MyAnimeList',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncManga();
@@ -125,7 +125,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     // Sync active statuses (watching anime + reading manga)
     this.addCommand({
       id: 'sync-mal-active',
-      name: 'Sync currently watching anime and  reading manga',
+      name: 'Sync currently Watching anime and  Reading manga',
       callback: async () => {
         if (!this.syncManager) return;
         await this.syncManager.syncActiveStatuses();

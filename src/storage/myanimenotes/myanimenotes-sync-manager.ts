@@ -70,17 +70,17 @@ export async function findFilesByMyAnimeNotesSync(
   
   // Fallback to old method if index not available (shouldn't happen)
   debug.log('[MyAnimeNotesSync] WARNING: Index not available, falling back to vault scan');
-  return findFilesByMyAnimeNotesSyncLegacy(plugin, myanimenotesSync);
+  return await findFilesByMyAnimeNotesSyncLegacy(plugin, myanimenotesSync);
 }
 
 /**
  * Legacy fallback method for finding files (only used if index unavailable)
  * Kept for safety but should rarely be called
  */
- function findFilesByMyAnimeNotesSyncLegacy(
+async function findFilesByMyAnimeNotesSyncLegacy(
   plugin: MyAnimeNotesPlugin,
   myanimenotesSync: string
-): TFile[] {
+): Promise<TFile[]> {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   const { vault, metadataCache } = plugin.app;
   const matchingFiles: TFile[] = [];

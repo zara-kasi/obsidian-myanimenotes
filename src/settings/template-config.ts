@@ -180,5 +180,5 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
  * Generates a unique property ID
  */
 export function generatePropertyId(): string {
-  return `prop-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  return `prop-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
