@@ -3,7 +3,6 @@ import { MyAnimeNotesSettingTab } from './settings';
 import { MyAnimeNotesSettings, DEFAULT_SETTINGS } from './settings';
 import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
-import { MediaCategory } from './transformers';
 import type { MyAnimeNotesIndex } from './storage/myanimenotes';
 import { createMyAnimeNotesIndex } from './storage/myanimenotes';
 import { MyAnimeNotesLockManager, createMyAnimeNotesLockManager } from './storage/myanimenotes';
