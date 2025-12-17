@@ -302,7 +302,8 @@ async function handleExactMatch(
   myanimenotesSync: string
 ): Promise<SyncActionResult> {
   // Get template based on category
-  const template = item.category === 'anime'
+  const template = item.category === MediaCategory.ANIME
+  
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
@@ -328,7 +329,8 @@ async function handleDuplicates(
   const selectedFile = selectDeterministicFile(plugin, files);
   
   // Get template based on category
-  const template = item.category === 'anime'
+  const template = item.category === MediaCategory.ANIME
+
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
@@ -357,7 +359,7 @@ async function handleLegacyMigration(
   
   const selectedFile = selectDeterministicFile(plugin, files);
   // Get template based on category
-  const template = item.category === 'anime'
+  const template = item.category === MediaCategory.ANIME
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
@@ -389,7 +391,8 @@ async function handleLegacyMigration(
     .trim();
   
   // Get template based on category
-  const template = item.category === 'anime'
+  const template = item.category === MediaCategory.ANIME
+
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
@@ -468,7 +471,8 @@ export async function saveMediaItem(
   
   // Single-item operations use lock for safety
   return await plugin.lockManager.withLock(myanimenotesSync, async () => {
-    let folderPath = item.category === 'anime' 
+    let folderPath = item.category === MediaCategory.ANIME
+
       ? config.animeFolder 
       : config.mangaFolder;
     
@@ -524,7 +528,8 @@ export async function saveMediaItems(
   debug.log(`[Storage] Batch save starting: ${items.length} items`);
   
   // PREPARE PHASE: Batch preparation (all cache reads + decisions upfront)
-  let folderPath = items[0].category === 'anime'
+  let folderPath = items[0].category === MediaCategory.ANIME
+
     ? config.animeFolder
     : config.mangaFolder;
   
@@ -647,8 +652,8 @@ export async function saveMediaItemsByCategory(
   const animePaths: string[] = [];
   const mangaPaths: string[] = [];
   
-  const animeItems = items.filter(item => item.category === 'anime');
-  const mangaItems = items.filter(item => item.category === 'manga');
+  const animeItems = items.filter(item => item.category === MediaCategory.ANIME);
+  const mangaItems = items.filter(item => item.category === MediaCategory.MANGA);
   
   debug.log(`[Storage] Category split: ${animeItems.length} anime, ${mangaItems.length} manga`);
   
