@@ -50,11 +50,11 @@ export function generateMyAnimeNotesSync(item: UniversalMediaItem): string {
  * @param folderPath Folder path (kept for API compatibility but not used)
  * @returns Array of files with matching myanimenotes
  */
-export function findFilesByMyAnimeNotesSync(
+export async function findFilesByMyAnimeNotesSync(
   plugin: MyAnimeNotesPlugin,
   myanimenotesSync: string,
   folderPath: string
-): TFile[] {
+): Promise<TFile[]> {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   
   // Use indexed lookup if available
@@ -68,7 +68,7 @@ export function findFilesByMyAnimeNotesSync(
     return files;
   }
   
-  // Fallback to old method if index not available
+  // Fallback to old method if index not available (shouldn't happen)
   debug.log('[MyAnimeNotesSync] WARNING: Index not available, falling back to vault scan');
   return findFilesByMyAnimeNotesSyncLegacy(plugin, myanimenotesSync);
 }
@@ -77,7 +77,7 @@ export function findFilesByMyAnimeNotesSync(
  * Legacy fallback method for finding files (only used if index unavailable)
  * Kept for safety but should rarely be called
  */
-function findFilesByMyAnimeNotesSyncLegacy(
+ function findFilesByMyAnimeNotesSyncLegacy(
   plugin: MyAnimeNotesPlugin,
   myanimenotesSync: string
 ): TFile[] {
@@ -107,11 +107,11 @@ function findFilesByMyAnimeNotesSyncLegacy(
  * OPTIMIZATION: Limited to folderPath scope to avoid full vault scan
  * Only called when no myanimenotes match exists (fallback path)
  */
-export function findLegacyFiles(
+export async function findLegacyFiles(
   plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   folderPath: string
-): TFile[] {
+): Promise<TFile[]> {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   const { vault, metadataCache } = plugin.app;
   const candidates: TFile[] = [];
