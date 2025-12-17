@@ -195,7 +195,6 @@ export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: any): Uni
  * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
  */
 export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: any): UniversalMediaItem {
-  const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
