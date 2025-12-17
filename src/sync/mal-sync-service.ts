@@ -16,6 +16,7 @@ import {
   transformMALMangaList,
 	MediaCategory,
 } from '../transformers';
+import type { MALItem } from '../transformers';
 import { createDebugLogger, showNotice } from '../utils';
 /**
  * Sync options
