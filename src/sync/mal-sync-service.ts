@@ -200,8 +200,7 @@ export async function syncMAL(
       endTime,
     };
 
-    if (syncResult.success) {
-    } else {
+    if (!syncResult.success) {
       showNotice(plugin, `⚠️ MAL sync completed with ${errors.length} errors`, 4000);
     }
 
