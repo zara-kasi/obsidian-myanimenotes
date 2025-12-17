@@ -87,13 +87,13 @@ export function extractVariables(template: string): Array<{ varName: string; fil
  * @param item - Media item with data
  * @param variableName - Variable name to resolve
  * @returns Resolved value or undefined if not found
- */
-function resolvePropertyValue(
+ */function resolvePropertyValue(
   item: UniversalMediaItem,
   variableName: string
-): any {
+): string | number | string[] | undefined {
+
   // Map of variable names to item properties
-  const valueMap: Record<string, any> = {
+  const valueMap: Record<string, string | number | string[] | undefined> = {
     // Basic fields
     'id': item.id,
     'title': item.title,
@@ -163,10 +163,12 @@ function resolvePropertyValue(
  * resolveTemplate("{{alternativeTitles}}", item)
  * // Returns: ["進撃の巨人", "Shingeki no Kyojin"] (array preserved)
  */
-export function resolveTemplate(
+ 
+ export function resolveTemplate(
   template: string,
   item: UniversalMediaItem
-): any {
+): string | string[] | undefined {
+
   if (!template || template.trim() === '') {
     return undefined;
   }
@@ -250,7 +252,7 @@ export function resolveTemplate(
 /**
  * Extracts alternative titles into array format for Obsidian aliases
  */
-function extractAliases(alternativeTitles: any): string[] | undefined {
+function extractAliases(alternativeTitles: UniversalAlternativeTitles | undefined): string[] | undefined {
   if (!alternativeTitles) return undefined;
   
   const aliases: string[] = [];
