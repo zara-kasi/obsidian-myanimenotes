@@ -61,9 +61,9 @@ if (statuses && statuses.length > 0) {
   );
   
   const animeResults = await throttlePromises(animePromises, 2, 300);
-  rawItems = animeResults.flat();
+  rawItems = animeResults.flat() as MALItem[];
 } else {
-  rawItems = await fetchCompleteMALAnimeList(plugin);
+  rawItems = await fetchCompleteMALAnimeList(plugin) as MALItem[];
 }
 
   debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
@@ -100,9 +100,9 @@ if (statuses && statuses.length > 0) {
   );
   
   const mangaResults = await throttlePromises(mangaPromises, 2, 300);
-  rawItems = mangaResults.flat();
+  rawItems = mangaResults.flat() as MALItem[];
 } else {
-  rawItems = await fetchCompleteMALMangaList(plugin);
+  rawItems = await fetchCompleteMALMangaList(plugin) as MALItem[];
 }
 
   debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
