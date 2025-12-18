@@ -6,6 +6,7 @@ import { syncMAL, type MALSyncOptions } from './mal-sync-service';
 import { saveMediaItemsByCategory, type StorageConfig } from '../storage';
 import { createDebugLogger, type DebugLogger } from '../utils';
 import { showNotice } from '../utils';
+import { DEFAULT_ANIME_TEMPLATE, DEFAULT_MANGA_TEMPLATE } from '../settings/template-config';
 /**
  * Complete sync options
  */
@@ -29,16 +30,24 @@ export class SyncManager {
     this.lastSyncTime = plugin.settings.lastSuccessfulSync || 0;
  }
 
-  /**
-   * Gets storage configuration from plugin settings
-   */
-  private getStorageConfig(): StorageConfig {
-    return {
-      animeFolder: this.plugin.settings.animeFolder,
-      mangaFolder: this.plugin.settings.mangaFolder,
-      createFolders: true,
-    };
-  }
+   /**
+ * Gets storage configuration from plugin settings
+ * NOW READS FROM TEMPLATE SETTINGS
+ */
+   private getStorageConfig(): StorageConfig {
+  // Get folder paths from templates (with fallback to defaults)
+  const animeFolder = this.plugin.settings.animeTemplate?.folderPath 
+    || DEFAULT_ANIME_TEMPLATE.folderPath;
+  
+  const mangaFolder = this.plugin.settings.mangaTemplate?.folderPath 
+    || DEFAULT_MANGA_TEMPLATE.folderPath;
+  
+  return {
+    animeFolder,
+    mangaFolder,
+    createFolders: true,
+  };
+}
 
   /**
    * Saves the last successful sync timestamp
