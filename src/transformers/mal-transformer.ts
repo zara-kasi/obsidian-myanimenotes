@@ -217,7 +217,7 @@ export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: MALItem):
     
     // Visual
     mainPicture: transformPicture(node.main_picture),
-    pictures: node.pictures?.map(transformPicture).filter(Boolean) || [],
+    pictures: node.pictures?.map(transformPicture).filter(Boolean) as UniversalPicture[] || [],
     
     // Alternative titles
     alternativeTitles: transformAlternativeTitles(node.alternative_titles),
@@ -277,7 +277,7 @@ export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: MALItem):
     
     // Visual
     mainPicture: transformPicture(node.main_picture),
-    pictures: node.pictures?.map(transformPicture).filter(Boolean) || [],
+    pictures: node.pictures?.map(transformPicture).filter(Boolean) as UniversalPicture[] || [],
     
     // Alternative titles
     alternativeTitles: transformAlternativeTitles(node.alternative_titles),
