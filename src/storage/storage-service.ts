@@ -102,7 +102,7 @@ function yieldToUI(): Promise<void> {
   
   // No timestamp found - return undefined (will update to be safe)
   return undefined;
-
+}
  
 
 /**
