@@ -1,6 +1,6 @@
 {
   "name": "MyAnimeNotes",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Make your media a part of your knowledge. Sync your media items from MyAnimeList directly into your vault.",
   "main": "main.js",
   "scripts": {
@@ -12,8 +12,7 @@
   },
   "author": "Zarakasi",
   "license": "MIT",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^16.11.6",
     "@typescript-eslint/eslint-plugin": "5.29.0",
