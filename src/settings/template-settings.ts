@@ -425,15 +425,19 @@ function reorderPropertiesSequentially(config: TemplateConfig): void {
 /**
  * Gets the template configuration for anime or manga
  */
+
 function getTemplateConfig(plugin: MyAnimeNotesPlugin, type: 'anime' | 'manga'): TemplateConfig {
   if (type === 'anime') {
-    return plugin.settings.animeTemplate 
-      ? JSON.parse(JSON.stringify(plugin.settings.animeTemplate))
-      : JSON.parse(JSON.stringify(DEFAULT_ANIME_TEMPLATE));
+    // Initialize with default if not exists, then return direct reference
+    if (!plugin.settings.animeTemplate) {
+      plugin.settings.animeTemplate = JSON.parse(JSON.stringify(DEFAULT_ANIME_TEMPLATE));
+    }
+    return plugin.settings.animeTemplate; // Direct reference
   } else {
-    return plugin.settings.mangaTemplate
-      ? JSON.parse(JSON.stringify(plugin.settings.mangaTemplate))
-      : JSON.parse(JSON.stringify(DEFAULT_MANGA_TEMPLATE));
+    if (!plugin.settings.mangaTemplate) {
+      plugin.settings.mangaTemplate = JSON.parse(JSON.stringify(DEFAULT_MANGA_TEMPLATE));
+    }
+    return plugin.settings.mangaTemplate; // Direct reference
   }
 }
 
