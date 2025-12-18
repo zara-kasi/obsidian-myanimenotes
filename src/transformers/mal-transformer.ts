@@ -95,6 +95,7 @@ function generateMALMangaUrl(id: number): string {
 /**
  * Maps MAL status to universal status
  */
+
 function mapMALStatus(malStatus: string): MediaStatus {
   switch (malStatus) {
     case 'finished_airing':
@@ -163,7 +164,7 @@ function transformAlternativeTitles(malTitles: MALAlternativeTitles | undefined)
 /**
  * Transforms MAL genres - with strict null filtering
  */
-function transformGenres(malGenres: MALGenre[] | undefined: UniversalGenre[] {
+function transformGenres(malGenres: MALGenre[] | undefined): UniversalGenre[] {
   if (!malGenres || !Array.isArray(malGenres)) return [];
   
   return malGenres
@@ -353,7 +354,7 @@ export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: MALI
 /**
  * Transforms an array of MAL manga items
  */
-export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: MALItem[]: UniversalMediaItem[] {
+export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: MALItem[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
