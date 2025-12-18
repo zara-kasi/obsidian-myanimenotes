@@ -12,10 +12,10 @@ export class DebugLogger {
    * @param message Main message to log
    * @param args Additional arguments to log
    */
-  log(message: string, ...args: any[]): void {
+  log(message: string, ...args: unknown[]): void {
     if (this.plugin.settings.debugMode) {
       const fullMessage = this.prefix ? `[${this.prefix}] ${message}` : message;
-      console.log(fullMessage, ...args);
+      console.debug(fullMessage, ...args);
     }
   }
 

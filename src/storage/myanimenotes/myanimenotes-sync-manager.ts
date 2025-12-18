@@ -77,10 +77,10 @@ export async function findFilesByMyAnimeNotesSync(
  * Legacy fallback method for finding files (only used if index unavailable)
  * Kept for safety but should rarely be called
  */
-async function findFilesByMyAnimeNotesSyncLegacy(
+ function findFilesByMyAnimeNotesSyncLegacy(
   plugin: MyAnimeNotesPlugin,
   myanimenotesSync: string
-): Promise<TFile[]> {
+): TFile[] {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   const { vault, metadataCache } = plugin.app;
   const matchingFiles: TFile[] = [];
@@ -107,11 +107,11 @@ async function findFilesByMyAnimeNotesSyncLegacy(
  * OPTIMIZATION: Limited to folderPath scope to avoid full vault scan
  * Only called when no myanimenotes match exists (fallback path)
  */
-export async function findLegacyFiles(
+export function findLegacyFiles(
   plugin: MyAnimeNotesPlugin,
   item: UniversalMediaItem,
   folderPath: string
-): Promise<TFile[]> {
+): TFile[] {
   const debug = createDebugLogger(plugin, 'MyAnimeNotesSync');
   const { vault, metadataCache } = plugin.app;
   const candidates: TFile[] = [];

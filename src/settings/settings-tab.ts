@@ -101,7 +101,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
     // Optimize auto sync toggle
     new Setting(containerEl)
       .setName('Optimize auto-sync')
-      .setDesc('When enabled, auto-sync only syncs Watching anime and Reading manga (Recommended).')
+      .setDesc('When enabled, auto-sync only syncs watching anime and reading manga (recommended).')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.optimizeAutoSync)
         .onChange(async (value) => {
@@ -186,9 +186,11 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
         text: 'Log out'
       });
       
-      logoutButton.addEventListener('click', async () => {
-        await malLogout(this.plugin);
-        this.display();
+      logoutButton.addEventListener('click', () => {
+        void (async () => {
+          await malLogout(this.plugin);
+          this.display();
+        })();
       });
     }
     
@@ -196,10 +198,10 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
     if (!isAuth) {
       // Client ID
       new Setting(container)
-        .setName('Client ID')
-        .setDesc('Your MyAnimeList Client ID.')
+        .setName('Client id')
+        .setDesc('Your myanimelist client id.')
         .addText(text => text
-          .setPlaceholder('Enter Client ID')
+          .setPlaceholder('Enter client id')
           .setValue(this.plugin.settings.malClientId)
           .onChange(async (value) => {
             this.plugin.settings.malClientId = value.trim();
@@ -208,11 +210,11 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
 
       // Client Secret
       new Setting(container)
-        .setName('Client Secret')
-        .setDesc('Your MyAnimeList Client Secret.')
+        .setName('Client secret')
+        .setDesc('Your myanimelist client secret.')
         .addText(text => {
           text
-            .setPlaceholder('Enter Client Secret')
+            .setPlaceholder('Enter client secret')
             .setValue(this.plugin.settings.malClientSecret || '')
             .onChange(async (value) => {
               this.plugin.settings.malClientSecret = value.trim();

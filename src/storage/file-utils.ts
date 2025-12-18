@@ -7,6 +7,7 @@
 import type MyAnimeNotesPlugin from '../main';
 import { createDebugLogger } from '../utils';
 import { normalizePath } from 'obsidian';
+import type { Vault } from 'obsidian';
 
 
 /**
@@ -46,9 +47,10 @@ export function sanitizeFilename(filename: string): string {
  * Appends -1, -2, etc. until a unique name is found
  * Normalizes paths before checking
  */
+
 export function generateUniqueFilename(
   plugin: MyAnimeNotesPlugin,
-  vault: any,
+  vault: Vault,
   folderPath: string,
   baseFilename: string
 ): string {

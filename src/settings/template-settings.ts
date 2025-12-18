@@ -116,7 +116,7 @@ function renderExpandableTemplate(
   
   // Add description
   contentContainer.createEl('p', { 
-    text: 'Properties to add to the top of the media note. Use variables to populate data from the MAL API.',
+    text: 'Properties to add to the top of the media note. Use variables to populate data from the mal api.',
     cls: 'setting-item-description'
   });
   
@@ -153,10 +153,10 @@ function renderExpandableTemplate(
   });
   
   // Note content template section
-  contentContainer.createEl('h4', { text: 'Note Content', cls: 'myanimenotes-section-header' });
+  contentContainer.createEl('h4', { text: 'Note content', cls: 'myanimenotes-section-header' });
   
   contentContainer.createEl('p', { 
-    text: 'Customize the content of the note. Use variables to populate data from the MAL API.',
+    text: 'Customize the content of the note. Use variables to populate data from the mal api.',
     cls: 'setting-item-description'
   });
   
@@ -173,8 +173,7 @@ function renderExpandableTemplate(
         });
       
       textarea.inputEl.rows = 8;
-      textarea.inputEl.style.width = '100%';
-      textarea.inputEl.style.fontFamily = 'monospace';
+      textarea.inputEl.addClass('myanimenotes-template-textarea');
     });
 }
 }
@@ -233,11 +232,12 @@ function renderPropertyRow(
   });
   
   if (!isPermanent) {
-    nameInput.addEventListener('input', async (e) => {
+    nameInput.addEventListener('input', (e) => {
       prop.customName = (e.target as HTMLInputElement).value;
-      await saveTemplateConfig(plugin, type, config);
+      void saveTemplateConfig(plugin, type, config);
     });
   }
+
   
   // Template variable input (read-only for permanent properties)
   const templateInput = rowEl.createEl('input', {
@@ -252,9 +252,9 @@ function renderPropertyRow(
   
   if (!isPermanent) {
     // Store template string directly
-    templateInput.addEventListener('blur', async (e) => {
+    templateInput.addEventListener('blur', (e) => {
       prop.template = (e.target as HTMLInputElement).value.trim();
-      await saveTemplateConfig(plugin, type, config);
+      void saveTemplateConfig(plugin, type, config);
     });
     
     templateInput.addEventListener('input', (e) => {
@@ -266,8 +266,8 @@ function renderPropertyRow(
   if (!isPermanent) {
     const deleteButton = rowEl.createDiv({ cls: 'myanimenotes-delete-button' });
     setIcon(deleteButton, 'trash-2');
-    deleteButton.addEventListener('click', async () => {
-      await removeProperty(plugin, state, prop.id, config, type);
+    deleteButton.addEventListener('click', () => {
+      void removeProperty(plugin, state, prop.id, config, type);
     });
   } else {
     // Add a spacer to maintain alignment for permanent properties
@@ -313,13 +313,13 @@ new VariableSuggest(plugin.app, templateInput, variables);
     rowEl.removeClass('drag-over-bottom');
   });
   
-  rowEl.addEventListener('drop', async (e) => {
+  rowEl.addEventListener('drop', (e) => {
     e.preventDefault();
     rowEl.removeClass('drag-over-top');
     rowEl.removeClass('drag-over-bottom');
     
     if (state.draggedElement && state.draggedElement !== rowEl) {
-      await reorderProperties(
+      void reorderProperties(
         plugin,
         state,
         state.draggedElement.getAttribute('data-id') || '',
@@ -349,7 +349,7 @@ function addEmptyProperty(
   };
   
   config.properties.push(newProp);
-  saveTemplateConfig(plugin, type, config);
+  void saveTemplateConfig(plugin, type, config);
   
   // Re-render just the property list
   const listEl = type === 'anime' ? state.animePropertyListEl : state.mangaPropertyListEl;

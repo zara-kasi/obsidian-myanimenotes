@@ -1,0 +1,22 @@
+/**
+ * Join Filter
+ * 
+ * Joins array elements with a separator
+ */
+
+export function join(value: any, separator: string = ', '): string {
+  if (value === undefined || value === null) {
+    return '';
+  }
+
+  // If not an array, return as string
+  if (!Array.isArray(value)) {
+    return String(value);
+  }
+
+  // Filter out empty values and join
+  return value
+    .filter(item => item !== undefined && item !== null && item !== '')
+    .map(item => String(item))
+    .join(separator);
+}

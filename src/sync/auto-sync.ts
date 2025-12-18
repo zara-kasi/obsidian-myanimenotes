@@ -91,33 +91,35 @@ export class AutoSyncManager {
 
     this.debug.log('[Sync on Load] Timer started: Will sync in 1 minute');
 
-    this.syncOnLoadTimer = setTimeout(async () => {
-      this.debug.log('[Sync on Load] Timer triggered after 1 minute');
-      
-      // Double-check authentication at execution time
-      if (!this.isAuthenticated()) {
-        this.debug.log('[Sync on Load] Aborted: Not authenticated with MAL');
-        return;
-      }
-
-      // Check if minimum interval has passed since last sync
-      if (!this.hasMinimumIntervalPassed()) {
-        this.debug.log('[Sync on Load] Aborted: Minimum interval not met');
-        return;
-      }
-
-      try {
-        if (this.plugin.syncManager) {
-          if (this.plugin.settings.optimizeAutoSync) {
-            await this.plugin.syncManager.syncActiveStatuses();
-          } else {
-            await this.plugin.syncManager.syncFromMAL();
-          }
-          this.debug.log('[Sync on Load] Completed successfully');
+    this.syncOnLoadTimer = setTimeout(() => {
+      void (async () => {
+        this.debug.log('[Sync on Load] Timer triggered after 1 minute');
+        
+        // Double-check authentication at execution time
+        if (!this.isAuthenticated()) {
+          this.debug.log('[Sync on Load] Aborted: Not authenticated with MAL');
+          return;
         }
-      } catch (error) {
-        console.error('[Sync on Load] Failed:', error);
-      }
+
+        // Check if minimum interval has passed since last sync
+        if (!this.hasMinimumIntervalPassed()) {
+          this.debug.log('[Sync on Load] Aborted: Minimum interval not met');
+          return;
+        }
+
+        try {
+          if (this.plugin.syncManager) {
+            if (this.plugin.settings.optimizeAutoSync) {
+              await this.plugin.syncManager.syncActiveStatuses();
+            } else {
+              await this.plugin.syncManager.syncFromMAL();
+            }
+            this.debug.log('[Sync on Load] Completed successfully');
+          }
+        } catch (error) {
+          console.error('[Sync on Load] Failed:', error);
+        }
+      })();
     }, SYNC_ON_LOAD_DELAY);
   }
 
@@ -166,7 +168,7 @@ export class AutoSyncManager {
 
       // Schedule next sync if still enabled and authenticated
       if (this.plugin.settings.scheduledSync && this.isAuthenticated()) {
-        this.scheduledSyncTimer = setTimeout(runSync, intervalMs);
+         this.scheduledSyncTimer = setTimeout(() => void runSync(), intervalMs);
       } else {
         this.debug.log('[Scheduled Sync] Stopped: Either disabled or not authenticated');
       }

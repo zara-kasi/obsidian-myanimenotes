@@ -1,6 +1,6 @@
 import type MyAnimeNotesPlugin from '../main';
 import type { UniversalMediaItem } from '../transformers';
-import type { TemplateConfig } from '../settings/template-config';
+import { MediaCategory } from '../transformers';
 import { DEFAULT_ANIME_TEMPLATE, DEFAULT_MANGA_TEMPLATE } from '../settings/template-config'
 import { 
   generateMyAnimeNotesSync, 
@@ -15,7 +15,7 @@ import {
   generateInitialFileContent
 } from './markdown';
 import { createDebugLogger } from '../utils';
-import type { TFile, MetadataCache } from 'obsidian';
+import type { TFile } from 'obsidian';
 import { normalizePath } from 'obsidian';
 
 // ============================================================================
@@ -93,17 +93,18 @@ function yieldToUI(): Promise<void> {
  * 
  * @returns Synced timestamp or undefined if not found
  */
-function getSyncedTimestampFast(
-  cache: any | undefined
+ function getSyncedTimestampFast(
+  cache: { frontmatter?: Record<string, unknown> } | undefined
 ): string | undefined {
   // Fast path: if cache exists and has synced timestamp, return it immediately
-  if (cache?.frontmatter?.synced) {
+  if (cache?.frontmatter?.synced && typeof cache.frontmatter.synced === 'string') {
     return cache.frontmatter.synced;
   }
   
   // No timestamp found - return undefined (will update to be safe)
   return undefined;
 }
+ 
 
 /**
  * Pure computation: determines if file should be skipped
@@ -193,7 +194,7 @@ async function prepareBatchItems(
     if (lookup.files.length > 0) {
       const file = lookup.files[0];
       const cache = metadataCache.getFileCache(file);
-      cachedTimestamp = getSyncedTimestampFast(cache);
+      cachedTimestamp = cache ? getSyncedTimestampFast(cache) : undefined;
       cacheMap.set(myanimenotes, cachedTimestamp);
     }
     
@@ -303,7 +304,8 @@ async function handleExactMatch(
   myanimenotesSync: string
 ): Promise<SyncActionResult> {
   // Get template based on category
-  const template = item.category === 'anime'
+  const template = item.category === MediaCategory.ANIME
+  
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
@@ -329,7 +331,8 @@ async function handleDuplicates(
   const selectedFile = selectDeterministicFile(plugin, files);
   
   // Get template based on category
-  const template = item.category === 'anime'
+  const template = item.category === MediaCategory.ANIME
+
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
@@ -358,7 +361,7 @@ async function handleLegacyMigration(
   
   const selectedFile = selectDeterministicFile(plugin, files);
   // Get template based on category
-  const template = item.category === 'anime'
+  const template = item.category === MediaCategory.ANIME
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
@@ -390,7 +393,8 @@ async function handleLegacyMigration(
     .trim();
   
   // Get template based on category
-  const template = item.category === 'anime'
+  const template = item.category === MediaCategory.ANIME
+
     ? (plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE)
     : (plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE);
   
@@ -469,7 +473,8 @@ export async function saveMediaItem(
   
   // Single-item operations use lock for safety
   return await plugin.lockManager.withLock(myanimenotesSync, async () => {
-    let folderPath = item.category === 'anime' 
+    let folderPath = item.category === MediaCategory.ANIME
+
       ? config.animeFolder 
       : config.mangaFolder;
     
@@ -491,7 +496,7 @@ export async function saveMediaItem(
       case 'none':
         return createNewFile(plugin, item, config, myanimenotesSync, folderPath);
       default:
-        throw new Error(`Unknown lookup type: ${(lookup as any).type}`);
+  throw new Error(`Unknown lookup type: ${lookup.type}`)
     }
   });
 }
@@ -525,7 +530,8 @@ export async function saveMediaItems(
   debug.log(`[Storage] Batch save starting: ${items.length} items`);
   
   // PREPARE PHASE: Batch preparation (all cache reads + decisions upfront)
-  let folderPath = items[0].category === 'anime'
+  let folderPath = items[0].category === MediaCategory.ANIME
+
     ? config.animeFolder
     : config.mangaFolder;
   
@@ -604,7 +610,7 @@ export async function saveMediaItems(
           break;
         
         default:
-          throw new Error(`Unknown lookup type: ${(batch.lookup as any).type}`);
+  throw new Error(`Unknown lookup type: ${batch.lookup.type}`);
       }
       
       results.push(result);
@@ -648,8 +654,8 @@ export async function saveMediaItemsByCategory(
   const animePaths: string[] = [];
   const mangaPaths: string[] = [];
   
-  const animeItems = items.filter(item => item.category === 'anime');
-  const mangaItems = items.filter(item => item.category === 'manga');
+  const animeItems = items.filter(item => item.category === MediaCategory.ANIME);
+  const mangaItems = items.filter(item => item.category === MediaCategory.MANGA);
   
   debug.log(`[Storage] Category split: ${animeItems.length} anime, ${mangaItems.length} manga`);
   

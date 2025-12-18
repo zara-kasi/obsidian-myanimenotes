@@ -9,6 +9,74 @@ import type {
 } from './media.types';
 import { MediaStatus, UserListStatus, MediaCategory } from './media.types';
 
+interface MALPicture {
+  medium?: string;
+  large?: string;
+}
+
+interface MALAlternativeTitles {
+  en?: string;
+  ja?: string;
+  synonyms?: string[];
+}
+
+interface MALGenre {
+  id: number;
+  name: string;
+}
+
+interface MALAuthorNode {
+  first_name?: string;
+  last_name?: string;
+}
+
+interface MALAuthor {
+  node: MALAuthorNode;
+  role?: string;
+}
+
+interface MALStudio {
+  name: string;
+}
+
+interface MALListStatus {
+  status: string;
+  score?: number;
+  num_episodes_watched?: number;
+  num_volumes_read?: number;
+  num_chapters_read?: number;
+  start_date?: string;
+  finish_date?: string;
+  updated_at?: string;
+}
+
+interface MALNode {
+  id: number;
+  title: string;
+  main_picture?: MALPicture;
+  pictures?: MALPicture[];
+  alternative_titles?: MALAlternativeTitles;
+  synopsis?: string;
+  media_type?: string;
+  status: string;
+  mean?: number;
+  genres?: MALGenre[];
+  start_date?: string;
+  end_date?: string;
+  num_episodes?: number;
+  source?: string;
+  studios?: MALStudio[];
+  average_episode_duration?: number;
+  num_volumes?: number;
+  num_chapters?: number;
+  authors?: MALAuthor[];
+}
+
+interface MALItem {
+  node: MALNode;
+  list_status?: MALListStatus;
+}
+
 
 /**
  * Generates MyAnimeList URL for anime
@@ -27,6 +95,7 @@ function generateMALMangaUrl(id: number): string {
 /**
  * Maps MAL status to universal status
  */
+
 function mapMALStatus(malStatus: string): MediaStatus {
   switch (malStatus) {
     case 'finished_airing':
@@ -70,7 +139,7 @@ function mapMALUserStatus(malStatus: string): UserListStatus {
 /**
  * Transforms MAL picture object
  */
-function transformPicture(malPicture: any): UniversalPicture | undefined {
+function transformPicture(malPicture: MALPicture | undefined): UniversalPicture | undefined {
   if (!malPicture) return undefined;
   
   return {
@@ -82,7 +151,7 @@ function transformPicture(malPicture: any): UniversalPicture | undefined {
 /**
  * Transforms MAL alternative titles
  */
-function transformAlternativeTitles(malTitles: any): UniversalAlternativeTitles | undefined {
+function transformAlternativeTitles(malTitles: MALAlternativeTitles | undefined): UniversalAlternativeTitles | undefined {
   if (!malTitles) return undefined;
   
   return {
@@ -95,7 +164,7 @@ function transformAlternativeTitles(malTitles: any): UniversalAlternativeTitles 
 /**
  * Transforms MAL genres - with strict null filtering
  */
-function transformGenres(malGenres: any[]): UniversalGenre[] {
+function transformGenres(malGenres: MALGenre[] | undefined): UniversalGenre[] {
   if (!malGenres || !Array.isArray(malGenres)) return [];
   
   return malGenres
@@ -109,7 +178,7 @@ function transformGenres(malGenres: any[]): UniversalGenre[] {
 /**
  * Transforms MAL authors (for manga) - with strict null filtering
  */
-function transformAuthors(malAuthors: any[]): UniversalAuthor[] {
+function transformAuthors(malAuthors: MALAuthor[] | undefined): UniversalAuthor[] {
   if (!malAuthors || !Array.isArray(malAuthors)) return [];
   
   return malAuthors
@@ -128,7 +197,7 @@ function transformAuthors(malAuthors: any[]): UniversalAuthor[] {
  * Transforms a single MAL anime item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/animelist response
  */
-export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: any): UniversalMediaItem {
+export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: MALItem): UniversalMediaItem {
   const debug = createDebugLogger(plugin, 'MAL Transformer');
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
@@ -148,7 +217,7 @@ export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: any): Uni
     
     // Visual
     mainPicture: transformPicture(node.main_picture),
-    pictures: node.pictures?.map(transformPicture).filter(Boolean) || [],
+    pictures: node.pictures?.map(transformPicture).filter(Boolean) as UniversalPicture[] || [],
     
     // Alternative titles
     alternativeTitles: transformAlternativeTitles(node.alternative_titles),
@@ -194,8 +263,7 @@ export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: any): Uni
  * Transforms a single MAL manga item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
  */
-export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: any): UniversalMediaItem {
-  const debug = createDebugLogger(plugin, 'MAL Transformer');
+export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: MALItem): UniversalMediaItem {
   const node = malItem.node || malItem;
   const listStatus = malItem.list_status; // User-specific data
 
@@ -209,7 +277,7 @@ export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: any): Uni
     
     // Visual
     mainPicture: transformPicture(node.main_picture),
-    pictures: node.pictures?.map(transformPicture).filter(Boolean) || [],
+    pictures: node.pictures?.map(transformPicture).filter(Boolean) as UniversalPicture[] || [],
     
     // Alternative titles
     alternativeTitles: transformAlternativeTitles(node.alternative_titles),
@@ -254,7 +322,7 @@ export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: any): Uni
  * Transforms MAL studios array - keeps objects for wiki link formatting
  * Filters out null, undefined, and invalid entries
  */
-function transformStudios(malStudios: any[]): Array<{name: string}> {
+function transformStudios(malStudios: MALStudio[] | undefined): Array<{name: string}> {
   if (!malStudios || !Array.isArray(malStudios)) return [];
   
   return malStudios
@@ -274,7 +342,7 @@ function convertDurationToMinutes(seconds: number | undefined): number | undefin
 /**
  * Transforms an array of MAL anime items
  */
-export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: any[]): UniversalMediaItem[] {
+export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: MALItem[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
@@ -286,7 +354,7 @@ export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: any[
 /**
  * Transforms an array of MAL manga items
  */
-export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: any[]): UniversalMediaItem[] {
+export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: MALItem[]): UniversalMediaItem[] {
   if (!Array.isArray(malItems)) {
     console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
     return [];
@@ -294,3 +362,5 @@ export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: any[
   
   return malItems.map(item => transformMALManga(plugin, item));
 }
+
+export type { MALItem };

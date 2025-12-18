@@ -16,6 +16,7 @@ import {
   transformMALMangaList,
 	MediaCategory,
 } from '../transformers';
+import type { MALItem } from '../transformers';
 import { createDebugLogger, showNotice } from '../utils';
 /**
  * Sync options
@@ -49,7 +50,7 @@ async function syncAnimeList(
   
   debug.log('[MAL Sync] Starting anime sync...');
   
-  let rawItems: any[] = [];
+  let rawItems: MALItem[] = [];
 
 if (statuses && statuses.length > 0) {
   const animePromises = statuses.map(status => 
@@ -60,9 +61,9 @@ if (statuses && statuses.length > 0) {
   );
   
   const animeResults = await throttlePromises(animePromises, 2, 300);
-  rawItems = animeResults.flat();
+  rawItems = animeResults.flat() as MALItem[];
 } else {
-  rawItems = await fetchCompleteMALAnimeList(plugin);
+  rawItems = await fetchCompleteMALAnimeList(plugin) as MALItem[];
 }
 
   debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
@@ -87,7 +88,7 @@ async function syncMangaList(
   
   debug.log('[MAL Sync] Starting manga sync...');
   
-  let rawItems: any[] = [];
+  let rawItems: MALItem[] = [];
 
 // Update mal-sync-service.ts - syncMangaList()
 if (statuses && statuses.length > 0) {
@@ -99,9 +100,9 @@ if (statuses && statuses.length > 0) {
   );
   
   const mangaResults = await throttlePromises(mangaPromises, 2, 300);
-  rawItems = mangaResults.flat();
+  rawItems = mangaResults.flat() as MALItem[];
 } else {
-  rawItems = await fetchCompleteMALMangaList(plugin);
+  rawItems = await fetchCompleteMALMangaList(plugin) as MALItem[];
 }
 
   debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
@@ -200,8 +201,7 @@ export async function syncMAL(
       endTime,
     };
 
-    if (syncResult.success) {
-    } else {
+    if (!syncResult.success) {
       showNotice(plugin, `⚠️ MAL sync completed with ${errors.length} errors`, 4000);
     }
 

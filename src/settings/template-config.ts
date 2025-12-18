@@ -96,94 +96,81 @@ export function getAvailableProperties(category: 'anime' | 'manga'): PropertyMet
   return category === 'anime' ? ANIME_PROPERTIES : MANGA_PROPERTIES;
 }
 
-/**
- * Default anime template
- * NOTE: 'myanimenotesSync' and 'updatedAt' are permanent properties that cannot be removed
- * Contains only common + anime-specific properties
- */
-
+// Update the DEFAULT_ANIME_TEMPLATE to showcase filters
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
   folderPath: 'MyAnimeNotes/Anime',
-  noteContent: '',  
+  noteContent: '# {{title}}\n\n{{synopsis}}',  
   properties: [
-    // Core properties (order: 1-9)
+    // Core properties with filters
     { id: 'prop-1', template: '{{title}}', customName: 'title', order: 1 },
-    { id: 'prop-2', template: '{{alternativeTitles}}', customName: 'aliases', order: 2 },
+    { id: 'prop-2', template: '{{alternativeTitles}}', customName: 'aliases', order: 2 }, // Preserves array
     { id: 'prop-20', template: '{{userStatus}}', customName: 'status', order: 3 },
     { id: 'prop-17', template: '{{numEpisodesWatched}}', customName: 'eps_seen', order: 4 },
     { id: 'prop-21', template: '{{userScore}}', customName: 'rating', order: 5 },
-    { id: 'prop-22', template: '{{userStartDate}}', customName: 'started', order: 6 },
-    { id: 'prop-23', template: '{{userFinishDate}}', customName: 'finished', order: 7 },
+    { id: 'prop-22', template: '{{userStartDate|date:"YYYY-MM-DD"}}', customName: 'started', order: 6 },
+    { id: 'prop-23', template: '{{userFinishDate|date:"YYYY-MM-DD"}}', customName: 'finished', order: 7 },
     
-    // Media details (order: 8-17)
+    // Media details with wikilinks
     { id: 'prop-9', template: '{{mediaType}}', customName: 'media', order: 8 },
     { id: 'prop-16', template: '{{numEpisodes}}', customName: 'episodes', order: 9 },
     { id: 'prop-10', template: '{{status}}', customName: 'state', order: 10 },
-    { id: 'prop-14', template: '{{releasedStart}}', customName: 'released', order: 11 },
-    { id: 'prop-15', template: '{{releasedEnd}}', customName: 'ended', order: 12 },
-    { id: 'prop-18', template: '{{studios}}', customName: 'studios', order: 13 },
+    { id: 'prop-14', template: '{{releasedStart|date:"YYYY-MM-DD"}}', customName: 'released', order: 11 },
+    { id: 'prop-15', template: '{{releasedEnd|date:"YYYY-MM-DD"}}', customName: 'ended', order: 12 },
+    { id: 'prop-18', template: '{{studios|wikilink}}', customName: 'studios', order: 13 }, // Array of wikilinks
     { id: 'prop-13', template: '{{source}}', customName: 'origin', order: 14 },
-    { id: 'prop-12', template: '{{genres}}', customName: 'genres', order: 15 },
+    { id: 'prop-12', template: '{{genres|wikilink}}', customName: 'genres', order: 15 }, // Array of wikilinks
     { id: 'prop-19', template: '{{duration}}', customName: 'duration', order: 16 },
-    { id: 'prop-11', template: '{{mean}}', customName: 'score', order: 17 },
+    { id: 'prop-11', template: '{{mean|default:"Not Rated"}}', customName: 'score', order: 17 },
     
-    // Additional details (order: 18-23)
-    { id: 'prop-8', template: '{{synopsis}}', customName: 'description', order: 18 },
-    { id: 'prop-7', template: '{{mainPicture}}', customName: 'image', order: 19 },
-    { id: 'prop-6', template: '{{url}}', customName: 'source', order: 20 },
-    { id: 'prop-5', template: '{{platform}}', customName: 'platform', order: 21 },
-    { id: 'prop-4', template: '{{category}}', customName: 'category', order: 22 },
-    { id: 'prop-3', template: '{{id}}', customName: 'id', order: 23 },
+    // Additional details
+    { id: 'prop-7', template: '{{mainPicture}}', customName: 'image', order: 18 },
+    { id: 'prop-6', template: '{{url}}', customName: 'source', order: 19 },
+    { id: 'prop-5', template: '{{platform}}', customName: 'platform', order: 20 },
+    { id: 'prop-4', template: '{{category}}', customName: 'category', order: 21 },
+    { id: 'prop-3', template: '{{id}}', customName: 'id', order: 22 },
     
-    // Permanent properties (order: 24-25) - use special keywords
-    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 24 },
-    { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 25 },
+    // Permanent properties
+    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 23 },
+    { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 24 },
   ]
 };
 
-/**
- * Default manga template
- * NOTE: 'myanimenotesSync' and 'updatedAt' are permanent properties that cannot be removed
- * Contains only common + manga-specific properties
- */
-
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
   folderPath: 'MyAnimeNotes/Manga',
-  noteContent: '',
+  noteContent: '# {{title}}\n\n{{synopsis}}',
   properties: [
-    // Core properties (order: 1-8)
+    // Core properties with filters
     { id: 'prop-1', template: '{{title}}', customName: 'title', order: 1 },
     { id: 'prop-2', template: '{{alternativeTitles}}', customName: 'aliases', order: 2 },
     { id: 'prop-21', template: '{{userStatus}}', customName: 'status', order: 3 },
     { id: 'prop-19', template: '{{numChaptersRead}}', customName: 'chap_read', order: 4 },
     { id: 'prop-17', template: '{{numVolumesRead}}', customName: 'vol_read', order: 5 },
     { id: 'prop-22', template: '{{userScore}}', customName: 'rating', order: 6 },
-    { id: 'prop-23', template: '{{userStartDate}}', customName: 'started', order: 7 },
-    { id: 'prop-24', template: '{{userFinishDate}}', customName: 'finished', order: 8 },
+    { id: 'prop-23', template: '{{userStartDate|date:"YYYY-MM-DD"}}', customName: 'started', order: 7 },
+    { id: 'prop-24', template: '{{userFinishDate|date:"YYYY-MM-DD"}}', customName: 'finished', order: 8 },
     
-    // Media details (order: 9-18)
+    // Media details
     { id: 'prop-9', template: '{{mediaType}}', customName: 'media', order: 9 },
     { id: 'prop-18', template: '{{numChapters}}', customName: 'chapters', order: 10 },
     { id: 'prop-16', template: '{{numVolumes}}', customName: 'volumes', order: 11 },
     { id: 'prop-10', template: '{{status}}', customName: 'state', order: 12 },
-    { id: 'prop-14', template: '{{releasedStart}}', customName: 'released', order: 13 },
-    { id: 'prop-15', template: '{{releasedEnd}}', customName: 'ended', order: 14 },
+    { id: 'prop-14', template: '{{releasedStart|date:"YYYY-MM-DD"}}', customName: 'released', order: 13 },
+    { id: 'prop-15', template: '{{releasedEnd|date:"YYYY-MM-DD"}}', customName: 'ended', order: 14 },
     { id: 'prop-13', template: '{{source}}', customName: 'origin', order: 15 },
-    { id: 'prop-12', template: '{{genres}}', customName: 'genres', order: 16 },
+    { id: 'prop-12', template: '{{genres|wikilink}}', customName: 'genres', order: 16 },
     { id: 'prop-20', template: '{{authors}}', customName: 'authors', order: 17 },
-    { id: 'prop-11', template: '{{mean}}', customName: 'score', order: 18 },
+    { id: 'prop-11', template: '{{mean|default:"Not Rated"}}', customName: 'score', order: 17 },
     
-    // Additional details (order: 19-24)
-    { id: 'prop-8', template: '{{synopsis}}', customName: 'description', order: 19 },
-    { id: 'prop-7', template: '{{mainPicture}}', customName: 'image', order: 20 },
-    { id: 'prop-6', template: '{{url}}', customName: 'source', order: 21 },
-    { id: 'prop-5', template: '{{platform}}', customName: 'platform', order: 22 },
-    { id: 'prop-4', template: '{{category}}', customName: 'category', order: 23 },
-    { id: 'prop-3', template: '{{id}}', customName: 'id', order: 24 },
+    // Additional details
+    { id: 'prop-7', template: '{{mainPicture}}', customName: 'image', order: 18 },
+    { id: 'prop-6', template: '{{url}}', customName: 'source', order: 19 },
+    { id: 'prop-5', template: '{{platform}}', customName: 'platform', order: 20 },
+    { id: 'prop-4', template: '{{category}}', customName: 'category', order: 21 },
+    { id: 'prop-3', template: '{{id}}', customName: 'id', order: 22 },
     
-    // Permanent properties (order: 25-26) - use special keywords
-    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 25 },
-    { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 26 },
+    // Permanent properties
+    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 23 },
+    { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 24 },
   ]
 };
 
@@ -191,5 +178,5 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
  * Generates a unique property ID
  */
 export function generatePropertyId(): string {
-  return `prop-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `prop-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }

@@ -2,7 +2,7 @@
 
 import { requestUrl } from 'obsidian';
 import type MyAnimeNotesPlugin from '../../../main';
-import type { MALAuthState, MALTokenResponse, OAuthParams } from './types';
+import type { MALTokenResponse, OAuthParams } from './types';
 import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateVerifier, generateChallenge, generateState } from './pkce';
 import { isTokenValid } from './token-manager';
@@ -225,7 +225,7 @@ function extractOAuthParams(params: OAuthParams): { code: string | null; state: 
 /**
  * Formats token exchange error with helpful messages
  */
-function formatTokenError(res: any): string {
+function formatTokenError(res: { status: number; text?: string; json?: unknown }): string {
   const errorText = res.text || JSON.stringify(res.json) || 'Unknown error';
   let errorMsg = `Token exchange failed (HTTP ${res.status})`;
   
@@ -245,7 +245,7 @@ function formatTokenError(res: any): string {
     } else if (errorData.error === 'invalid_grant') {
       errorMsg += '\n\nTip: The authorization code may have expired. Please try again.';
     }
-  } catch (parseError) {
+  } catch {
     errorMsg += `: ${errorText}`;
   }
   

@@ -24,5 +24,5 @@ export interface OAuthParams {
   error?: string;
   error_description?: string;
   url?: string;
-  [key: string]: any;
+  [key: string]: string | undefined;
 }

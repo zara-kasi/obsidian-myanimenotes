@@ -29,8 +29,8 @@ export function buildFrontmatterFromTemplate(
   item: UniversalMediaItem,
   template: TemplateConfig,
   myanimenotesSync: string
-): Record<string, any> {
-  const properties: Record<string, any> = {};
+): Record<string, unknown> {
+  const properties: Record<string, unknown> = {};
   
   // Process each template property in order
   for (const prop of template.properties) {

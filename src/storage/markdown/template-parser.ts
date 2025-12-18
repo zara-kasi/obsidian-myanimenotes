@@ -6,28 +6,75 @@
  * - Multiple variables: "{{numEpisodes}} episodes / {{numEpisodesWatched}} watched"
  * - Mixed content: "Score: {{userScore}}/10"
  * - Pure static text: "My custom value"
- * - User-controlled formatting: "[[{{studio}}]]" (user adds wiki links)
+ * - Filters: "{{studios|wikilink|join:', '}}"
  */
 
-import type { UniversalMediaItem } from '../../transformers';
+import type { UniversalMediaItem, UniversalAlternativeTitles } from '../../transformers';
+import { applyFilters } from '../../utils/filters';
 
 /**
- * Extracts all variable names from a template string
+ * Extracts variable name and filters from a template variable
  * 
- * @param template - Template string with {{variables}}
- * @returns Array of variable names found in template
+ * @param template - Template variable string (e.g., "{{title|lower}}")
+ * @returns Object with variable name and filter string
  * 
  * @example
- * extractVariables("{{title}} - {{numEpisodes}} ep")
- * // Returns: ["title", "numEpisodes"]
+ * parseTemplateVariable("{{title|lower|default:'Untitled'}}")
+ * // Returns: { varName: "title", filters: "lower|default:'Untitled'" }
  */
-export function extractVariables(template: string): string[] {
-  const regex = /\{\{(\w+)\}\}/g;
-  const variables: string[] = [];
+function parseTemplateVariable(varString: string): { varName: string; filters: string } {
+  // Remove outer {{ }}
+  const content = varString.replace(/^\{\{|\}\}$/g, '').trim();
+  
+  // Split on first pipe that's not inside quotes
+  let pipeIndex = -1;
+  let inQuotes = false;
+  let quoteChar = '';
+  
+  for (let i = 0; i < content.length; i++) {
+    const char = content[i];
+    
+    if ((char === '"' || char === "'") && (i === 0 || content[i - 1] !== '\\')) {
+      if (!inQuotes) {
+        inQuotes = true;
+        quoteChar = char;
+      } else if (char === quoteChar) {
+        inQuotes = false;
+        quoteChar = '';
+      }
+    }
+    
+    if (char === '|' && !inQuotes) {
+      pipeIndex = i;
+      break;
+    }
+  }
+  
+  if (pipeIndex === -1) {
+    return { varName: content, filters: '' };
+  }
+  
+  return {
+    varName: content.substring(0, pipeIndex).trim(),
+    filters: content.substring(pipeIndex + 1).trim()
+  };
+}
+
+/**
+ * Extracts all variables from a template string
+ * 
+ * @param template - Template string with {{variables}}
+ * @returns Array of variable info objects
+ */
+export function extractVariables(template: string): Array<{ varName: string; filters: string; fullMatch: string }> {
+  const regex = /\{\{[^}]+\}\}/g;
+  const variables: Array<{ varName: string; filters: string; fullMatch: string }> = [];
   let match;
   
   while ((match = regex.exec(template)) !== null) {
-    variables.push(match[1]);
+    const fullMatch = match[0];
+    const { varName, filters } = parseTemplateVariable(fullMatch);
+    variables.push({ varName, filters, fullMatch });
   }
   
   return variables;
@@ -40,13 +87,13 @@ export function extractVariables(template: string): string[] {
  * @param item - Media item with data
  * @param variableName - Variable name to resolve
  * @returns Resolved value or undefined if not found
- */
-function resolvePropertyValue(
+ */function resolvePropertyValue(
   item: UniversalMediaItem,
   variableName: string
-): any {
+): string | number | string[] | undefined {
+
   // Map of variable names to item properties
-  const valueMap: Record<string, any> = {
+  const valueMap: Record<string, string | number | string[] | undefined> = {
     // Basic fields
     'id': item.id,
     'title': item.title,
@@ -79,7 +126,7 @@ function resolvePropertyValue(
     // Anime-specific
     'numEpisodes': item.numEpisodes,
     'numEpisodesWatched': item.numEpisodesWatched,
-    'studios': item.studios?.map(s => s.name), // Extract studio names
+    'studios': item.studios?.map(s => s.name), // Extract studio names as array
     'duration': formatDuration(item.duration),
     
     // Manga-specific
@@ -102,7 +149,7 @@ function resolvePropertyValue(
 /**
  * Resolves a template string by replacing {{variables}} with actual values
  * 
- * @param template - Template string with {{variables}} and custom text
+ * @param template - Template string with {{variables}}, filters, and custom text
  * @param item - Media item with data
  * @returns Resolved string, array (for special cases), or undefined if empty
  * 
@@ -110,16 +157,18 @@ function resolvePropertyValue(
  * resolveTemplate("{{numEpisodes}} episodes", item)
  * // Returns: "24 episodes"
  * 
- * resolveTemplate("{{numEpisodesWatched}}/{{numEpisodes}}", item)
- * // Returns: "12/24"
+ * resolveTemplate("{{studios|wikilink|join:', '}}", item)
+ * // Returns: "[[Studio Bones]], [[MAPPA]]"
  * 
- * resolveTemplate("My custom note", item)
- * // Returns: "My custom note"
+ * resolveTemplate("{{alternativeTitles}}", item)
+ * // Returns: ["進撃の巨人", "Shingeki no Kyojin"] (array preserved)
  */
-export function resolveTemplate(
+ 
+ export function resolveTemplate(
   template: string,
   item: UniversalMediaItem
-): any {
+): string | string[] | undefined {
+
   if (!template || template.trim() === '') {
     return undefined;
   }
@@ -127,14 +176,29 @@ export function resolveTemplate(
   // Extract all variables from template
   const variables = extractVariables(template);
   
-  // Special case: if template is ONLY {{alternativeTitles}} or {{genres}}, return array directly
-  // This preserves Obsidian's array property behavior for aliases and list properties
-  if (template.trim() === '{{alternativeTitles}}') {
-    return extractAliases(item.alternativeTitles);
-  }
-  
-  if (template.trim() === '{{genres}}') {
-    return item.genres?.map(g => g.name);
+  // Special case: if template is ONLY a single variable with no other text,
+  // we might want to preserve its type (array vs string)
+  if (variables.length === 1 && template.trim() === variables[0].fullMatch) {
+    const { varName, filters } = variables[0];
+    let value = resolvePropertyValue(item, varName);
+    
+    // If no value, return undefined
+    if (value === undefined || value === null) {
+  return undefined;
+}
+
+    // Apply filters if present
+   if (filters) {
+  value = applyFilters(value, filters, item);
+}
+
+    // Convert number to string if needed
+   if (typeof value === 'number') {
+  return String(value);
+}
+
+   // Return the value (might be array, string, etc.)
+   return value;
   }
   
   // If no variables found, return template as-is (static text)
@@ -146,32 +210,32 @@ export function resolveTemplate(
   let result = template;
   let hasAnyValue = false;
   
-  for (const varName of variables) {
-    const value = resolvePropertyValue(item, varName);
+  for (const varInfo of variables) {
+    const { varName, filters, fullMatch } = varInfo;
+    let value = resolvePropertyValue(item, varName);
     
     if (value !== undefined && value !== null && value !== '') {
       hasAnyValue = true;
       
-      // Handle array values - join with comma for string templates
-      // (Arrays are only returned directly for pure {{alternativeTitles}} or {{genres}})
+      // Apply filters if present
+      if (filters) {
+        value = applyFilters(value, filters, item);
+      }
+      
+      // Convert to string for template substitution
       let stringValue: string;
       if (Array.isArray(value)) {
+        // If result is array after filters, join it
         stringValue = value.join(', ');
       } else {
         stringValue = String(value);
       }
       
-      // Replace all occurrences of this variable
-      result = result.replace(
-        new RegExp(`\\{\\{${varName}\\}\\}`, 'g'),
-        stringValue
-      );
+      // Replace this specific occurrence
+      result = result.replace(fullMatch, stringValue);
     } else {
       // Remove the {{variable}} placeholder if no value exists
-      result = result.replace(
-        new RegExp(`\\{\\{${varName}\\}\\}`, 'g'),
-        ''
-      );
+      result = result.replace(fullMatch, '');
     }
   }
   
@@ -193,7 +257,7 @@ export function resolveTemplate(
 /**
  * Extracts alternative titles into array format for Obsidian aliases
  */
-function extractAliases(alternativeTitles: any): string[] | undefined {
+function extractAliases(alternativeTitles: UniversalAlternativeTitles | undefined): string[] | undefined {
   if (!alternativeTitles) return undefined;
   
   const aliases: string[] = [];
