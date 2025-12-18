@@ -123,16 +123,15 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
     { id: 'prop-11', template: '{{mean|default:"Not Rated"}}', customName: 'score', order: 17 },
     
     // Additional details
-    { id: 'prop-8', template: '{{synopsis}}', customName: 'description', order: 18 },
-    { id: 'prop-7', template: '{{mainPicture}}', customName: 'image', order: 19 },
-    { id: 'prop-6', template: '{{url}}', customName: 'source', order: 20 },
-    { id: 'prop-5', template: '{{platform}}', customName: 'platform', order: 21 },
-    { id: 'prop-4', template: '{{category}}', customName: 'category', order: 22 },
-    { id: 'prop-3', template: '{{id}}', customName: 'id', order: 23 },
+    { id: 'prop-7', template: '{{mainPicture}}', customName: 'image', order: 18 },
+    { id: 'prop-6', template: '{{url}}', customName: 'source', order: 19 },
+    { id: 'prop-5', template: '{{platform}}', customName: 'platform', order: 20 },
+    { id: 'prop-4', template: '{{category}}', customName: 'category', order: 21 },
+    { id: 'prop-3', template: '{{id}}', customName: 'id', order: 22 },
     
     // Permanent properties
-    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 24 },
-    { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 25 },
+    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 23 },
+    { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 24 },
   ]
 };
 
@@ -160,19 +159,18 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
     { id: 'prop-13', template: '{{source}}', customName: 'origin', order: 15 },
     { id: 'prop-12', template: '{{genres|wikilink}}', customName: 'genres', order: 16 },
     { id: 'prop-20', template: '{{authors}}', customName: 'authors', order: 17 },
-    { id: 'prop-11', template: '{{mean|default:"Not Rated"}}', customName: 'score', order: 18 },
+    { id: 'prop-11', template: '{{mean|default:"Not Rated"}}', customName: 'score', order: 17 },
     
     // Additional details
-    { id: 'prop-8', template: '{{synopsis}}', customName: 'description', order: 19 },
-    { id: 'prop-7', template: '{{mainPicture}}', customName: 'image', order: 20 },
-    { id: 'prop-6', template: '{{url}}', customName: 'source', order: 21 },
-    { id: 'prop-5', template: '{{platform}}', customName: 'platform', order: 22 },
-    { id: 'prop-4', template: '{{category}}', customName: 'category', order: 23 },
-    { id: 'prop-3', template: '{{id}}', customName: 'id', order: 24 },
+    { id: 'prop-7', template: '{{mainPicture}}', customName: 'image', order: 18 },
+    { id: 'prop-6', template: '{{url}}', customName: 'source', order: 19 },
+    { id: 'prop-5', template: '{{platform}}', customName: 'platform', order: 20 },
+    { id: 'prop-4', template: '{{category}}', customName: 'category', order: 21 },
+    { id: 'prop-3', template: '{{id}}', customName: 'id', order: 22 },
     
     // Permanent properties
-    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 25 },
-    { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 26 },
+    { id: 'prop-permanent-1', template: 'myanimenotes', customName: 'myanimenotes', order: 23 },
+    { id: 'prop-permanent-2', template: 'synced', customName: 'synced', order: 24 },
   ]
 };
 
