@@ -45,6 +45,7 @@
 ![Steps](../assets/Imagepipe_22.webp)
 
 6.  Fill Client ID & Secret and click on Authenticate
+
 ![Steps](../assets/Imagepipe_23.webp)
 
 7.  Click Allow and it will redirect you to Obsidian
