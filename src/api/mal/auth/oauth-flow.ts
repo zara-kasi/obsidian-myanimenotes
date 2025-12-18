@@ -225,7 +225,7 @@ function extractOAuthParams(params: OAuthParams): { code: string | null; state: 
 /**
  * Formats token exchange error with helpful messages
  */
-function formatTokenError(res: any): string {
+function formatTokenError(res: { status: number; text?: string; json?: unknown }): string {
   const errorText = res.text || JSON.stringify(res.json) || 'Unknown error';
   let errorMsg = `Token exchange failed (HTTP ${res.status})`;
   
