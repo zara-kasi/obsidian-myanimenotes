@@ -9,7 +9,7 @@
  * - Filters: "{{studios|wikilink|join:', '}}"
  */
 
-import type { UniversalMediaItem } from '../../transformers';
+import type { UniversalMediaItem, UniversalAlternativeTitles } from '../../transformers';
 import { applyFilters } from '../../utils/filters';
 
 /**
@@ -184,16 +184,21 @@ export function extractVariables(template: string): Array<{ varName: string; fil
     
     // If no value, return undefined
     if (value === undefined || value === null) {
-      return undefined;
-    }
-    
+  return undefined;
+}
+
     // Apply filters if present
-    if (filters) {
-      value = applyFilters(value, filters, item);
-    }
-    
-    // Return the value (might be array, string, etc.)
-    return value;
+   if (filters) {
+  value = applyFilters(value, filters, item);
+}
+
+    // Convert number to string if needed
+   if (typeof value === 'number') {
+  return String(value);
+}
+
+   // Return the value (might be array, string, etc.)
+   return value;
   }
   
   // If no variables found, return template as-is (static text)
