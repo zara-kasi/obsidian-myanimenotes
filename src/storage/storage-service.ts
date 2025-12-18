@@ -1,5 +1,6 @@
 import type MyAnimeNotesPlugin from '../main';
 import type { UniversalMediaItem } from '../transformers';
+import { MediaCategory } from '../transformers';
 import { DEFAULT_ANIME_TEMPLATE, DEFAULT_MANGA_TEMPLATE } from '../settings/template-config'
 import { 
   generateMyAnimeNotesSync, 
@@ -193,7 +194,7 @@ async function prepareBatchItems(
     if (lookup.files.length > 0) {
       const file = lookup.files[0];
       const cache = metadataCache.getFileCache(file);
-      cachedTimestamp = getSyncedTimestampFast(cache);
+      cachedTimestamp = cache ? getSyncedTimestampFast(cache) : undefined;
       cacheMap.set(myanimenotes, cachedTimestamp);
     }
     
