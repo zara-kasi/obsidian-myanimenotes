@@ -22,10 +22,6 @@ export interface MyAnimeNotesSettings {
   apiMaxRetries?: number;
   apiRetryDelay?: number;
   
-  // Storage Settings
-  animeFolder: string;
-  mangaFolder: string;
-  
   // Template System
   animeTemplate?: TemplateConfig;
   mangaTemplate?: TemplateConfig;
@@ -56,10 +52,6 @@ export const DEFAULT_SETTINGS: MyAnimeNotesSettings = {
   malUserInfo: null,
   malAuthenticated: false,
   malAuthState: null, 
-  
-  // Storage defaults
-  animeFolder: 'MyAnimeNotes/Anime',
-  mangaFolder: 'MyAnimeNotes/Manga',
   
   // Template system defaults
   animeTemplate: undefined,
