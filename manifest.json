@@ -1,7 +1,7 @@
 {
   "id": "myanimenotes",
   "name": "MyAnimeNotes",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "minAppVersion": "0.15.0",
   "description": "Sync your anime and manga lists with MyAnimeList (MAL).",
   "author": "Zarakasi",
