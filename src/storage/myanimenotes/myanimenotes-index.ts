@@ -7,9 +7,10 @@
  * Performance: O(1) lookup instead of O(n) vault scan
  *
  * UPDATED: Lazy initialization - index is built on first sync, not on plugin load
+ * FIXED: Replaced setTimeout with proper metadata listener for file creation
  */
 
-import { TFile, MetadataCache } from "obsidian";
+import { TFile, MetadataCache, EventRef } from "obsidian";
 import type MyAnimeNotesPlugin from "../../main";
 import { createDebugLogger } from "../../utils";
 
@@ -37,6 +38,7 @@ export class MyAnimeNotesIndex {
 
     // Configuration
     private readonly REBUILD_COOLDOWN_MS = 5000; // Minimum 5s between rebuilds
+    private readonly METADATA_TIMEOUT_MS = 5000; // 5s timeout for metadata availability
 
     constructor(plugin: MyAnimeNotesPlugin) {
         this.plugin = plugin;
@@ -118,7 +120,7 @@ export class MyAnimeNotesIndex {
 
             // Build index from all files
             for (const file of allFiles) {
-                await this.indexFile(file, metadataCache);
+                this.indexFile(file, metadataCache);
                 indexedCount++;
             }
 
@@ -149,9 +151,9 @@ export class MyAnimeNotesIndex {
                     this.myanimenotesToFiles.set(myanimenotes, new Set());
                 }
                 const filesSet = this.myanimenotesToFiles.get(myanimenotes);
-if (filesSet) {
-  filesSet.add(file);
-}
+                if (filesSet) {
+                    filesSet.add(file);
+                }
 
                 // Add to file -> myanimenotes mapping
                 this.fileToMyAnimeNotes.set(file.path, myanimenotes);
@@ -160,6 +162,62 @@ if (filesSet) {
             // Silently skip files that can't be indexed
             this.debug.log(`[Index] Failed to index file ${file.path}:`, error);
         }
+    }
+
+    /**
+     * Waits for a file's metadata to become available
+     * Uses proper metadata cache listener instead of unreliable setTimeout
+     * 
+     * @param file The file to wait for
+     * @param metadataCache The metadata cache to listen to
+     * @returns Promise that resolves when metadata is available or times out
+     */
+    private async waitForMetadata(
+        file: TFile,
+        metadataCache: MetadataCache
+    ): Promise<void> {
+        // Check if metadata is already available
+        const cache = metadataCache.getFileCache(file);
+        if (cache) {
+            return Promise.resolve();
+        }
+
+        // Wait for metadata to become available
+        return new Promise<void>((resolve) => {
+            let listener: EventRef | null = null;
+            let timeoutId: number | null = null;
+
+            const cleanup = () => {
+                if (listener) {
+                    metadataCache.offref(listener);
+                    listener = null;
+                }
+                if (timeoutId !== null) {
+                    window.clearTimeout(timeoutId);
+                    timeoutId = null;
+                }
+            };
+
+            // Set up timeout
+            timeoutId = window.setTimeout(() => {
+                cleanup();
+                this.debug.log(
+                    `[Index] Metadata timeout for ${file.path} after ${this.METADATA_TIMEOUT_MS}ms`
+                );
+                resolve(); // Resolve anyway to prevent hanging
+            }, this.METADATA_TIMEOUT_MS);
+
+            // Set up metadata listener
+            listener = metadataCache.on("changed", (changedFile) => {
+                if (changedFile.path === file.path) {
+                    cleanup();
+                    this.debug.log(
+                        `[Index] Metadata available for ${file.path}`
+                    );
+                    resolve();
+                }
+            });
+        });
     }
 
     /**
@@ -238,26 +296,27 @@ if (filesSet) {
 
     /**
      * Registers metadata cache listeners for automatic index updates
+     * FIXED: File creation now uses proper metadata waiting instead of setTimeout
      */
     private registerMetadataListeners(): void {
         const { metadataCache, vault } = this.plugin.app;
 
         // Update index when file metadata changes
         this.plugin.registerEvent(
-            metadataCache.on("changed", async file => {
+            metadataCache.on("changed", (file) => {
                 if (file instanceof TFile && file.extension === "md") {
                     // Remove old entry
                     this.removeFileFromIndex(file);
 
                     // Re-index file
-                    await this.indexFile(file, metadataCache);
+                    this.indexFile(file, metadataCache);
                 }
             })
         );
 
         // Handle file deletion
         this.plugin.registerEvent(
-            vault.on("delete", file => {
+            vault.on("delete", (file) => {
                 if (file instanceof TFile) {
                     this.removeFileFromIndex(file);
                 }
@@ -280,14 +339,14 @@ if (filesSet) {
             })
         );
 
-        // Handle file creation
+        // Handle file creation - FIXED: Use proper metadata waiting
         this.plugin.registerEvent(
-            vault.on("create", file => {
+            vault.on("create", (file) => {
                 if (file instanceof TFile && file.extension === "md") {
-                    // Wait a bit for metadata to be available
-                    setTimeout(() => {
-                        void this.indexFile(file, metadataCache);
-                    }, 100);
+                    // Wait for metadata to become available, then index
+                    void this.waitForMetadata(file, metadataCache).then(() => {
+                        this.indexFile(file, metadataCache);
+                    });
                 }
             })
         );
@@ -315,6 +374,6 @@ export async function createMyAnimeNotesIndex(
     plugin: MyAnimeNotesPlugin
 ): Promise<MyAnimeNotesIndex> {
     const index = new MyAnimeNotesIndex(plugin);
-    await index.initialize(); // Just registers listeners, doesn't build index
+    index.initialize(); // Just registers listeners, doesn't build index
     return index;
 }
