@@ -22,8 +22,8 @@ const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
  */
 export class SyncManager {
   private debug: DebugLogger;
-  private isSyncing: boolean = false;
-  private lastSyncTime: number = 0;
+  private isSyncing = false;
+  private lastSyncTime = 0;
   constructor(private plugin: MyAnimeNotesPlugin) {
     this.debug = createDebugLogger(plugin, 'Sync Manager');
         // Load persisted last sync time from settings
@@ -173,7 +173,7 @@ export class SyncManager {
    */
   async quickSync(
     category: MediaCategory,
-    saveToVault: boolean = true
+    saveToVault = true
   ): Promise<UniversalMediaItem[]> {
     this.debug.log(`[Sync Manager] Quick sync for ${category}...`);
     
@@ -196,7 +196,7 @@ export class SyncManager {
    * @param saveToVault Whether to save to vault
    * @returns Synced anime items
    */
-  async syncAnime(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
+  async syncAnime(saveToVault = true): Promise<UniversalMediaItem[]> {
     return this.quickSync(MediaCategory.ANIME, saveToVault);
   }
 
@@ -205,7 +205,7 @@ export class SyncManager {
    * @param saveToVault Whether to save to vault
    * @returns Synced manga items
    */
-  async syncManga(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
+  async syncManga(saveToVault = true): Promise<UniversalMediaItem[]> {
     return this.quickSync(MediaCategory.MANGA, saveToVault);
   }
 
@@ -213,7 +213,7 @@ export class SyncManager {
    * Syncs active statuses: Watching anime + Reading manga
    * Used by both the "Sync active" command and optimized auto-sync
    */
-  async syncActiveStatuses(saveToVault: boolean = true): Promise<UniversalMediaItem[]> {
+  async syncActiveStatuses(saveToVault = true): Promise<UniversalMediaItem[]> {
     this.debug.log('[Sync Manager] Syncing active statuses (watching anime + reading manga)...');
     
     const options: CompleteSyncOptions = {

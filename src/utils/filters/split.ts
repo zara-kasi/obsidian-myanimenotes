@@ -4,7 +4,7 @@
  * Splits a string into an array
  */
 
-export function split(value: any, separator: string = ','): string[] {
+export function split(value: unknown, separator = ','): string[] {
   if (value === undefined || value === null || value === '') {
     return [];
   }

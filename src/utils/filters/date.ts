@@ -6,7 +6,7 @@
 
 import { moment } from 'obsidian';
 
-export function date(value: any, format: string = 'YYYY-MM-DD'): string {
+export function date(value: unknown, format = 'YYYY-MM-DD'): string {
   if (!value || value === '') {
     return '';
   }

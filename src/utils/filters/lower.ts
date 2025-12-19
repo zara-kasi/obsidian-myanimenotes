@@ -4,7 +4,7 @@
  * Converts text to lowercase
  */
 
-export function lower(value: any): any {
+export function lower(value: unknown): string | string[] | null | undefined | '' {
   if (value === undefined || value === null || value === '') {
     return value;
   }

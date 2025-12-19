@@ -4,7 +4,7 @@
  * Converts text to uppercase
  */
 
-export function upper(value: any): any {
+export function upper(value: unknown): string | string[] | null | undefined | '' {
   if (value === undefined || value === null || value === '') {
     return value;
   }

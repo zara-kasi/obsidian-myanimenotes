@@ -4,7 +4,7 @@
  * Joins array elements with a separator
  */
 
-export function join(value: any, separator: string = ', '): string {
+export function join(value: unknown, separator = ', '): string {
   if (value === undefined || value === null) {
     return '';
   }
