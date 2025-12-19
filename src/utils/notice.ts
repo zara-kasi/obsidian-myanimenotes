@@ -34,7 +34,7 @@ export function showNotice(
 export function showSuccessNotice(
   plugin: MyAnimeNotesPlugin,
   message: string,
-  duration: number = 3000
+  duration = 3000
 ): void {
   showNotice(plugin, message, duration);
 }
@@ -48,7 +48,7 @@ export function showSuccessNotice(
 export function showErrorNotice(
   plugin: MyAnimeNotesPlugin,
   message: string,
-  duration: number = 5000
+  duration = 5000
 ): void {
   showNotice(plugin, message, duration);
 }
@@ -62,7 +62,7 @@ export function showErrorNotice(
 export function showInfoNotice(
   plugin: MyAnimeNotesPlugin,
   message: string,
-  duration: number = 3000
+  duration = 3000
 ): void {
   showNotice(plugin, message, duration);
 }

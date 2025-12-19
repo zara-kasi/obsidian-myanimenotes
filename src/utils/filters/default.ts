@@ -4,7 +4,7 @@
  * Provides a fallback value if the input is empty/undefined
  */
 
-export function defaultFilter(value: any, fallback: string = ''): any {
+export function defaultFilter(value: unknown, fallback = ''): unknown {
   if (value === undefined || value === null || value === '') {
     return fallback;
   }

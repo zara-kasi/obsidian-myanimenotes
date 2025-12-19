@@ -4,7 +4,7 @@
  * Converts values into Obsidian wikilinks [[value]]
  */
 
-export function wikilink(value: any): any {
+export function wikilink(value: unknown): string | string[] | null | undefined | '' {
   if (value === undefined || value === null || value === '') {
     return value;
   }

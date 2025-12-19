@@ -7,7 +7,7 @@
 
 import type { UniversalMediaItem } from '../../transformers';
 
-export type FilterFunction = (value: any, param?: string, item?: UniversalMediaItem) => any;
+export type FilterFunction = (value: unknown, param?: string, item?: UniversalMediaItem) => unknown;
 
 // Import individual filters
 import { wikilink } from './wikilink';
@@ -37,11 +37,12 @@ const filterRegistry: Record<string, FilterFunction> = {
  * @param item - Media item for context-aware filters
  * @returns Transformed value
  */
-export function applyFilters(
-  value: any,
+ 
+ export function applyFilters(
+  value: unknown,
   filterString: string,
   item?: UniversalMediaItem
-): any {
+): unknown {
   if (!filterString || filterString.trim() === '') {
     return value;
   }
