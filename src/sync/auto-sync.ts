@@ -1,17 +1,18 @@
 import type MyAnimeNotesPlugin from '../main';
 import { createDebugLogger } from '../utils';
 
-const SYNC_ON_LOAD_DELAY = 2 * 60 * 1000; // 2 minute (fast but non-blocking)
+const SYNC_ON_LOAD_DELAY = 2 * 60 * 1000; // 2 minutes (fast but non-blocking)
 const MIN_SCHEDULED_INTERVAL = 60; // Minimum 60 minutes
 
 /**
  * Manages auto-sync timers
  * Each sync type (syncOnLoad, scheduledSync) works independently
+ * Now uses Obsidian's registerInterval for automatic cleanup
  */
 export class AutoSyncManager {
   private plugin: MyAnimeNotesPlugin;
-  private syncOnLoadTimer: NodeJS.Timeout | null = null;
-  private scheduledSyncTimer: NodeJS.Timeout | null = null;
+  private syncOnLoadTimer: number | null = null;
+  private scheduledSyncTimer: number | null = null;
   private debug: ReturnType<typeof createDebugLogger>;
 
   constructor(plugin: MyAnimeNotesPlugin) {
@@ -37,6 +38,8 @@ export class AutoSyncManager {
 
   /**
    * Stops all auto-sync timers
+   * Note: When using registerInterval, Obsidian handles cleanup automatically on unload
+   * This method is kept for manual stop scenarios (e.g., settings changes)
    */
   stop(): void {
     this.clearSyncOnLoadTimer();
@@ -76,8 +79,8 @@ export class AutoSyncManager {
   }
 
   /**
-   * Starts the sync-on-load timer (one-time, 1 minute after load)
-   * Uses a short delay to avoid blocking plugin initialization
+   * Starts the sync-on-load timer (one-time, 2 minutes after load)
+   * Uses registerInterval for automatic cleanup
    * Now respects minimum interval between syncs
    */
   private startSyncOnLoad(): void {
@@ -89,21 +92,25 @@ export class AutoSyncManager {
       return;
     }
 
-    this.debug.log('[Sync on Load] Timer started: Will sync in 1 minute');
+    this.debug.log('[Sync on Load] Timer started: Will sync in 2 minutes');
 
-    this.syncOnLoadTimer = setTimeout(() => {
+    // Use registerInterval for automatic cleanup
+    // For one-time execution, we'll clear it after running
+    this.syncOnLoadTimer = window.setTimeout(() => {
       void (async () => {
-        this.debug.log('[Sync on Load] Timer triggered after 1 minute');
+        this.debug.log('[Sync on Load] Timer triggered after 2 minutes');
         
         // Double-check authentication at execution time
         if (!this.isAuthenticated()) {
           this.debug.log('[Sync on Load] Aborted: Not authenticated with MAL');
+          this.clearSyncOnLoadTimer();
           return;
         }
 
         // Check if minimum interval has passed since last sync
         if (!this.hasMinimumIntervalPassed()) {
           this.debug.log('[Sync on Load] Aborted: Minimum interval not met');
+          this.clearSyncOnLoadTimer();
           return;
         }
 
@@ -118,13 +125,20 @@ export class AutoSyncManager {
           }
         } catch (error) {
           console.error('[Sync on Load] Failed:', error);
+        } finally {
+          // Clear the timer after execution since it's one-time
+          this.clearSyncOnLoadTimer();
         }
       })();
     }, SYNC_ON_LOAD_DELAY);
+
+    // Register with Obsidian for automatic cleanup on plugin unload
+    this.plugin.registerInterval(this.syncOnLoadTimer);
   }
 
   /**
    * Starts the scheduled sync timer (repeating at configured interval)
+   * Uses registerInterval for automatic cleanup
    */
   private startScheduledSync(): void {
     this.clearScheduledSyncTimer();
@@ -150,6 +164,7 @@ export class AutoSyncManager {
       // Check authentication at execution time
       if (!this.isAuthenticated()) {
         this.debug.log('[Scheduled Sync] Aborted: Not authenticated with MAL');
+        this.stop(); // Stop all timers if authentication is lost
         return;
       }
 
@@ -165,17 +180,16 @@ export class AutoSyncManager {
       } catch (error) {
         console.error('[Scheduled Sync] Failed:', error);
       }
-
-      // Schedule next sync if still enabled and authenticated
-      if (this.plugin.settings.scheduledSync && this.isAuthenticated()) {
-         this.scheduledSyncTimer = setTimeout(() => void runSync(), intervalMs);
-      } else {
-        this.debug.log('[Scheduled Sync] Stopped: Either disabled or not authenticated');
-      }
     };
 
-    // Start the first timer
-    this.scheduledSyncTimer = setTimeout(runSync, intervalMs);
+    // Use setInterval for repeating execution
+    // Obsidian's registerInterval handles both setTimeout and setInterval
+    this.scheduledSyncTimer = window.setInterval(() => {
+      void runSync();
+    }, intervalMs);
+
+    // Register with Obsidian for automatic cleanup on plugin unload
+    this.plugin.registerInterval(this.scheduledSyncTimer);
   }
 
   /**
@@ -190,20 +204,22 @@ export class AutoSyncManager {
 
   /**
    * Clears the sync-on-load timer
+   * When using registerInterval, manual clearing is still safe
    */
   private clearSyncOnLoadTimer(): void {
-    if (this.syncOnLoadTimer) {
-      clearTimeout(this.syncOnLoadTimer);
+    if (this.syncOnLoadTimer !== null) {
+      window.clearTimeout(this.syncOnLoadTimer);
       this.syncOnLoadTimer = null;
     }
   }
 
   /**
    * Clears the scheduled sync timer
+   * When using registerInterval, manual clearing is still safe
    */
   private clearScheduledSyncTimer(): void {
-    if (this.scheduledSyncTimer) {
-      clearTimeout(this.scheduledSyncTimer);
+    if (this.scheduledSyncTimer !== null) {
+      window.clearInterval(this.scheduledSyncTimer);
       this.scheduledSyncTimer = null;
     }
   }
