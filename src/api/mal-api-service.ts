@@ -1,7 +1,7 @@
 import { requestUrl } from "obsidian";
-import type MyAnimeNotesPlugin from "../../main";
-import { ensureValidToken, getAuthHeaders } from "./auth";
-import { createDebugLogger } from "../../utils";
+import type MyAnimeNotesPlugin from "../main";
+import { ensureValidToken, getAuthHeaders } from "../auth";
+import { createDebugLogger } from "../utils";
 
 interface MALApiResponse {
     data?: unknown[];

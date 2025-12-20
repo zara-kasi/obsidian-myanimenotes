@@ -9,9 +9,9 @@
  */
 
 import type { UniversalMediaItem } from "../../transformers";
-import type { TemplateConfig } from "../../settings/template-config";
+import type { TemplateConfig } from "../../settings/template";
 import { resolveTemplate } from "./template-parser";
-import { formatPropertyValue } from "../../settings/PropertiesType";
+import { formatPropertyValue } from "../../settings/template";
 
 /**
  * Builds frontmatter properties from template configuration

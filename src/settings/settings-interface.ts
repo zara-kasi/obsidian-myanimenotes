@@ -1,5 +1,5 @@
-import type { MALUserInfo } from '../api/mal'
-import type { TemplateConfig } from './template-config';
+import type { MALUserInfo } from '../auth'
+import type { TemplateConfig } from './template';
 
 
 export interface MyAnimeNotesSettings {

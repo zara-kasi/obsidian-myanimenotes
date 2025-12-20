@@ -1,13 +1,13 @@
 // OAuth 2.0 authorization flow
 
 import { requestUrl } from 'obsidian';
-import type MyAnimeNotesPlugin from '../../../main';
+import type MyAnimeNotesPlugin from '../main';
 import type { MALTokenResponse, OAuthParams } from './types';
 import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from './constants';
 import { generateVerifier, generateChallenge, generateState } from './pkce';
 import { isTokenValid } from './token-manager';
 import { fetchUserInfo } from './user-service';
-import { createDebugLogger, showNotice } from '../../../utils';
+import { createDebugLogger, showNotice } from '../utils';
 
 // Auth state timeout: 10 minutes
 const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;

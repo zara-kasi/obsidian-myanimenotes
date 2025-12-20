@@ -5,7 +5,7 @@
  * Filters transform variable values (e.g., formatting, wikilinks, joins)
  */
 
-import type { UniversalMediaItem } from '../../transformers';
+import type { UniversalMediaItem } from '../../../transformers';
 
 export type FilterFunction = (value: unknown, param?: string, item?: UniversalMediaItem) => unknown;
 

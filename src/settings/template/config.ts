@@ -4,7 +4,7 @@
  * Contains only common + anime-specific properties
  */
 
-import type { PropertyType } from "./PropertiesType";
+import type { PropertyType } from "./type";
 
 /**
  * Single property in a template

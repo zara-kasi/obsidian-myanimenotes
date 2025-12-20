@@ -1,6 +1,6 @@
 // Logout and session cleanup
-import { showNotice } from '../../../utils';
-import type MyAnimeNotesPlugin from '../../../main';
+import { showNotice } from '../utils';
+import type MyAnimeNotesPlugin from '../main';
 
 /**
  * Clears all authentication data and credentials

@@ -1,39 +1,39 @@
 // Main service for syncing MAL data
 
-import type MyAnimeNotesPlugin from '../main';
-import type { UniversalMediaItem } from '../transformers';
-import type { SyncResult, SyncItemResult } from './sync.types';
+import type MyAnimeNotesPlugin from "../main";
+import type { UniversalMediaItem } from "../transformers";
+import type { SyncResult, SyncItemResult } from "./sync.types";
 import {
-  fetchCompleteMALAnimeList,
-  fetchCompleteMALMangaList,
-  fetchMALAnimeByStatus,
-  fetchMALMangaByStatus,
-  isAuthenticated,
-  throttlePromises,
-} from '../api/mal';
+    fetchCompleteMALAnimeList,
+    fetchCompleteMALMangaList,
+    fetchMALAnimeByStatus,
+    fetchMALMangaByStatus,
+    throttlePromises
+} from "../api";
+import { isAuthenticated } from "../auth";
 import {
-  transformMALAnimeList,
-  transformMALMangaList,
-	MediaCategory,
-} from '../transformers';
-import type { MALItem } from '../transformers';
-import { createDebugLogger, showNotice } from '../utils';
+    transformMALAnimeList,
+    transformMALMangaList,
+    MediaCategory
+} from "../transformers";
+import type { MALItem } from "../transformers";
+import { createDebugLogger, showNotice } from "../utils";
 /**
  * Sync options
  */
 export interface MALSyncOptions {
-  syncAnime?: boolean;
-  syncManga?: boolean;
-  animeStatuses?: string[];
-  mangaStatuses?: string[];
+    syncAnime?: boolean;
+    syncManga?: boolean;
+    animeStatuses?: string[];
+    mangaStatuses?: string[];
 }
 
 /**
  * Default sync options
  */
 const DEFAULT_SYNC_OPTIONS: MALSyncOptions = {
-  syncAnime: true,
-  syncManga: true,
+    syncAnime: true,
+    syncManga: true
 };
 
 /**
@@ -43,35 +43,40 @@ const DEFAULT_SYNC_OPTIONS: MALSyncOptions = {
  * @returns Array of transformed anime items
  */
 async function syncAnimeList(
-  plugin: MyAnimeNotesPlugin,
-  statuses?: string[]
+    plugin: MyAnimeNotesPlugin,
+    statuses?: string[]
 ): Promise<UniversalMediaItem[]> {
-  const debug = createDebugLogger(plugin, 'MAL Sync');
-  
-  debug.log('[MAL Sync] Starting anime sync...');
-  
-  let rawItems: MALItem[] = [];
+    const debug = createDebugLogger(plugin, "MAL Sync");
 
-if (statuses && statuses.length > 0) {
-  const animePromises = statuses.map(status => 
-    fetchMALAnimeByStatus(
-      plugin,
-      status as 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch'
-    )
-  );
-  
-  const animeResults = await throttlePromises(animePromises, 2, 300);
-  rawItems = animeResults.flat() as MALItem[];
-} else {
-  rawItems = await fetchCompleteMALAnimeList(plugin) as MALItem[];
-}
+    debug.log("[MAL Sync] Starting anime sync...");
 
-  debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
-  
-  // Transform to universal format
-  const transformedItems = transformMALAnimeList(plugin, rawItems);
-  
-  return transformedItems;
+    let rawItems: MALItem[] = [];
+
+    if (statuses && statuses.length > 0) {
+        const animePromises = statuses.map(status =>
+            fetchMALAnimeByStatus(
+                plugin,
+                status as
+                    | "watching"
+                    | "completed"
+                    | "on_hold"
+                    | "dropped"
+                    | "plan_to_watch"
+            )
+        );
+
+        const animeResults = await throttlePromises(animePromises, 2, 300);
+        rawItems = animeResults.flat() as MALItem[];
+    } else {
+        rawItems = (await fetchCompleteMALAnimeList(plugin)) as MALItem[];
+    }
+
+    debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
+
+    // Transform to universal format
+    const transformedItems = transformMALAnimeList(plugin, rawItems);
+
+    return transformedItems;
 }
 
 /**
@@ -81,36 +86,41 @@ if (statuses && statuses.length > 0) {
  * @returns Array of transformed manga items
  */
 async function syncMangaList(
-  plugin: MyAnimeNotesPlugin,
-  statuses?: string[]
+    plugin: MyAnimeNotesPlugin,
+    statuses?: string[]
 ): Promise<UniversalMediaItem[]> {
-  const debug = createDebugLogger(plugin, 'MAL Sync');
-  
-  debug.log('[MAL Sync] Starting manga sync...');
-  
-  let rawItems: MALItem[] = [];
+    const debug = createDebugLogger(plugin, "MAL Sync");
 
-// Update mal-sync-service.ts - syncMangaList()
-if (statuses && statuses.length > 0) {
-  const mangaPromises = statuses.map(status => 
-    fetchMALMangaByStatus(
-      plugin,
-      status as 'reading' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_read'
-    )
-  );
-  
-  const mangaResults = await throttlePromises(mangaPromises, 2, 300);
-  rawItems = mangaResults.flat() as MALItem[];
-} else {
-  rawItems = await fetchCompleteMALMangaList(plugin) as MALItem[];
-}
+    debug.log("[MAL Sync] Starting manga sync...");
 
-  debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
-  
-  // Transform to universal format
-  const transformedItems = transformMALMangaList(plugin, rawItems);
-  
-  return transformedItems;
+    let rawItems: MALItem[] = [];
+
+    // Update mal-sync-service.ts - syncMangaList()
+    if (statuses && statuses.length > 0) {
+        const mangaPromises = statuses.map(status =>
+            fetchMALMangaByStatus(
+                plugin,
+                status as
+                    | "reading"
+                    | "completed"
+                    | "on_hold"
+                    | "dropped"
+                    | "plan_to_read"
+            )
+        );
+
+        const mangaResults = await throttlePromises(mangaPromises, 2, 300);
+        rawItems = mangaResults.flat() as MALItem[];
+    } else {
+        rawItems = (await fetchCompleteMALMangaList(plugin)) as MALItem[];
+    }
+
+    debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
+
+    // Transform to universal format
+    const transformedItems = transformMALMangaList(plugin, rawItems);
+
+    return transformedItems;
 }
 
 /**
@@ -120,117 +130,125 @@ if (statuses && statuses.length > 0) {
  * @returns Sync result with all synced items
  */
 export async function syncMAL(
-  plugin: MyAnimeNotesPlugin,
-  options: MALSyncOptions = DEFAULT_SYNC_OPTIONS
+    plugin: MyAnimeNotesPlugin,
+    options: MALSyncOptions = DEFAULT_SYNC_OPTIONS
 ): Promise<{ items: UniversalMediaItem[]; result: SyncResult }> {
-  const debug = createDebugLogger(plugin, 'MAL Sync');
-  const startTime = Date.now();
-  const allItems: UniversalMediaItem[] = [];
-  const results: SyncItemResult[] = [];
-  const errors: string[] = [];
-  
-  try {
-    // Check authentication
-    if (!isAuthenticated(plugin)) {
-      throw new Error('Not authenticated with MyAnimeList');
-    }
+    const debug = createDebugLogger(plugin, "MAL Sync");
+    const startTime = Date.now();
+    const allItems: UniversalMediaItem[] = [];
+    const results: SyncItemResult[] = [];
+    const errors: string[] = [];
 
-    showNotice(plugin, 'Starting MAL sync...', 1000);
+    try {
+        // Check authentication
+        if (!isAuthenticated(plugin)) {
+            throw new Error("Not authenticated with MyAnimeList");
+        }
 
-    // Sync anime if enabled
-    if (options.syncAnime !== false) {
-      try {
-        const animeItems = await syncAnimeList(plugin, options.animeStatuses);
-        allItems.push(...animeItems);
-        
-        // Create success results for each item
-        animeItems.forEach(item => {
-          results.push({
-            id: item.id,
-            title: item.title,
-            success: true,
-            action: 'updated',
-          });
-        });
-        
-        
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorMsg = `Failed to sync anime: ${errorMessage}`;
-        console.error('[MAL Sync]', errorMsg);
+        showNotice(plugin, "Starting MAL sync...", 1000);
+
+        // Sync anime if enabled
+        if (options.syncAnime !== false) {
+            try {
+                const animeItems = await syncAnimeList(
+                    plugin,
+                    options.animeStatuses
+                );
+                allItems.push(...animeItems);
+
+                // Create success results for each item
+                animeItems.forEach(item => {
+                    results.push({
+                        id: item.id,
+                        title: item.title,
+                        success: true,
+                        action: "updated"
+                    });
+                });
+            } catch (error) {
+                const errorMessage =
+                    error instanceof Error ? error.message : String(error);
+                const errorMsg = `Failed to sync anime: ${errorMessage}`;
+                console.error("[MAL Sync]", errorMsg);
+                errors.push(errorMsg);
+                showNotice(plugin, `❌ ${errorMsg}`, 5000);
+            }
+        }
+
+        // Sync manga if enabled
+        if (options.syncManga !== false) {
+            try {
+                const mangaItems = await syncMangaList(
+                    plugin,
+                    options.mangaStatuses
+                );
+                allItems.push(...mangaItems);
+
+                // Create success results for each item
+                mangaItems.forEach(item => {
+                    results.push({
+                        id: item.id,
+                        title: item.title,
+                        success: true,
+                        action: "updated"
+                    });
+                });
+            } catch (error) {
+                const errorMessage =
+                    error instanceof Error ? error.message : String(error);
+                const errorMsg = `Failed to sync manga: ${errorMessage}`;
+                console.error("[MAL Sync]", errorMsg);
+                errors.push(errorMsg);
+                showNotice(plugin, `❌ ${errorMsg}`, 5000);
+            }
+        }
+
+        const endTime = Date.now();
+        const syncResult: SyncResult = {
+            success: errors.length === 0,
+            itemsProcessed: results.length,
+            itemsSucceeded: results.filter(r => r.success).length,
+            itemsFailed: results.filter(r => !r.success).length,
+            results,
+            errors,
+            startTime,
+            endTime
+        };
+
+        if (!syncResult.success) {
+            showNotice(
+                plugin,
+                `⚠️ MAL sync completed with ${errors.length} errors`,
+                4000
+            );
+        }
+
+        debug.log("[MAL Sync] Sync completed:", syncResult);
+
+        return { items: allItems, result: syncResult };
+    } catch (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : String(error);
+        const errorMsg = `MAL sync failed: ${errorMessage}`;
+        console.error("[MAL Sync]", errorMsg);
         errors.push(errorMsg);
+
         showNotice(plugin, `❌ ${errorMsg}`, 5000);
-      }
+
+        const endTime = Date.now();
+        const syncResult: SyncResult = {
+            success: false,
+            itemsProcessed: results.length,
+            itemsSucceeded: results.filter(r => r.success).length,
+            itemsFailed: results.filter(r => !r.success).length,
+            results,
+            errors,
+            startTime,
+            endTime
+        };
+
+        return { items: allItems, result: syncResult };
     }
-
-    // Sync manga if enabled
-    if (options.syncManga !== false) {
-      try {
-        const mangaItems = await syncMangaList(plugin, options.mangaStatuses);
-        allItems.push(...mangaItems);
-        
-        // Create success results for each item
-        mangaItems.forEach(item => {
-          results.push({
-            id: item.id,
-            title: item.title,
-            success: true,
-            action: 'updated',
-          });
-        });
-        
-        
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorMsg = `Failed to sync manga: ${errorMessage}`;
-        console.error('[MAL Sync]', errorMsg);
-        errors.push(errorMsg);
-        showNotice(plugin, `❌ ${errorMsg}`, 5000);
-      }
-    }
-
-    const endTime = Date.now();
-    const syncResult: SyncResult = {
-      success: errors.length === 0,
-      itemsProcessed: results.length,
-      itemsSucceeded: results.filter(r => r.success).length,
-      itemsFailed: results.filter(r => !r.success).length,
-      results,
-      errors,
-      startTime,
-      endTime,
-    };
-
-    if (!syncResult.success) {
-      showNotice(plugin, `⚠️ MAL sync completed with ${errors.length} errors`, 4000);
-    }
-
-    debug.log('[MAL Sync] Sync completed:', syncResult);
-    
-    return { items: allItems, result: syncResult };
-
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorMsg = `MAL sync failed: ${errorMessage}`;
-    console.error('[MAL Sync]', errorMsg);
-    errors.push(errorMsg);
-    
-    showNotice(plugin, `❌ ${errorMsg}`, 5000);
-
-    const endTime = Date.now();
-    const syncResult: SyncResult = {
-      success: false,
-      itemsProcessed: results.length,
-      itemsSucceeded: results.filter(r => r.success).length,
-      itemsFailed: results.filter(r => !r.success).length,
-      results,
-      errors,
-      startTime,
-      endTime,
-    };
-
-    return { items: allItems, result: syncResult };
-  }
 }
 
 /**
@@ -240,14 +258,14 @@ export async function syncMAL(
  * @returns Synced items
  */
 export async function quickSyncMAL(
-  plugin: MyAnimeNotesPlugin,
-  category: MediaCategory
+    plugin: MyAnimeNotesPlugin,
+    category: MediaCategory
 ): Promise<UniversalMediaItem[]> {
-  const options: MALSyncOptions = {
-    syncAnime: category === MediaCategory.ANIME,
-    syncManga: category === MediaCategory.MANGA,
-  };
+    const options: MALSyncOptions = {
+        syncAnime: category === MediaCategory.ANIME,
+        syncManga: category === MediaCategory.MANGA
+    };
 
-  const { items } = await syncMAL(plugin, options);
-  return items;
+    const { items } = await syncMAL(plugin, options);
+    return items;
 }

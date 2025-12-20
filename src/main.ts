@@ -1,7 +1,7 @@
 import { Plugin } from 'obsidian';
 import { MyAnimeNotesSettingTab } from './settings';
 import { MyAnimeNotesSettings, DEFAULT_SETTINGS } from './settings';
-import { handleOAuthRedirect as handleMALRedirect } from './api/mal';
+import { handleOAuthRedirect as handleMALRedirect } from './auth';
 import { SyncManager, createSyncManager, AutoSyncManager, createAutoSyncManager } from './sync';
 import type { MyAnimeNotesIndex } from './storage/myanimenotes';
 import { createMyAnimeNotesIndex } from './storage/myanimenotes';

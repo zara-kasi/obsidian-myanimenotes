@@ -1,2 +1,2 @@
-export * from './debug';
-export * from './notice';
+export * from "./debug";
+export * from "./notice";

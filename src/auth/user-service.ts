@@ -1,7 +1,7 @@
 // User information management
 
 import { requestUrl } from 'obsidian';
-import type MyAnimeNotesPlugin from '../../../main';
+import type MyAnimeNotesPlugin from '../main';
 import type { MALUserInfo } from './types';
 import { MAL_USER_URL } from './constants';
 

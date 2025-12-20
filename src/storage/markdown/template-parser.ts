@@ -13,7 +13,7 @@ import type {
     UniversalMediaItem,
     UniversalAlternativeTitles
 } from "../../transformers";
-import { applyFilters } from "../../utils/filters";
+import { applyFilters } from "../../settings/template/filters";
 
 /**
  * Extracts variable name and filters from a template variable

@@ -1,10 +1,10 @@
 // Token validation, refresh, and management
 
 import { requestUrl } from 'obsidian';
-import type MyAnimeNotesPlugin from '../../../main';
+import type MyAnimeNotesPlugin from '../main';
 import type { MALTokenResponse } from './types';
 import { MAL_TOKEN_URL, TOKEN_EXPIRY_BUFFER } from './constants';
-import { createDebugLogger } from '../../../utils';
+import { createDebugLogger } from '../utils';
 
 
 /**
