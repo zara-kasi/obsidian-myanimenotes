@@ -1,15 +1,16 @@
 import { Setting, setIcon, normalizePath } from "obsidian";
 import type MyAnimeNotesPlugin from "../../main";
 import { FolderSuggest, VariableSuggest } from "./suggesters";
+import { TemplateConfig, PropertyItem } from "./types";
 import {
-    TemplateConfig,
-    PropertyItem,
-    generatePropertyId,
-    getAvailableProperties,
     DEFAULT_ANIME_TEMPLATE,
-    DEFAULT_MANGA_TEMPLATE
-} from "./config";
-import { promptForPropertyType, getPropertyTypeIcon } from "./type";
+    DEFAULT_MANGA_TEMPLATE,
+    generatePropertyId
+} from "./defaults";
+
+import { getAvailableProperties } from "./metadata";
+
+import { promptForPropertyType, getPropertyTypeIcon } from "./properties";
 
 /**
  * Renders the template configuration section

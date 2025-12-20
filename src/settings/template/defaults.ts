@@ -1,123 +1,18 @@
+import type { TemplateConfig } from "./types";
+
+/**
+ * Generates a unique property ID
+ */
+export function generatePropertyId(): string {
+    return `prop-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+}
+
 /**
  * Default anime template
  * NOTE: Properties with template='myanimenotes' and template='synced' are permanent and cannot be removed
  * Contains only common + anime-specific properties
  */
 
-import type { PropertyType } from "./type";
-
-/**
- * Single property in a template
- */
-
-export interface PropertyItem {
-    id: string; // Unique ID for drag-drop (e.g., 'prop-1', 'prop-2')
-    template: string; // Template string with {{variables}} and custom text
-    customName: string; // User's custom property name (e.g., 'episodes')
-    order: number; // Sort order for display
-    type?: PropertyType; // Format type for this property
-}
-
-/**
- * Template configuration for anime or manga
- */
-export interface TemplateConfig {
-    folderPath: string;
-    properties: PropertyItem[];
-    noteContent: string;
-}
-
-/**
- * Property metadata for available properties
- */
-export interface PropertyMetadata {
-    key: string; // Template variable (e.g., 'title')
-    label: string; // Display name in dropdown (e.g., 'Title')
-    defaultName: string; // Default property name (e.g., 'title')
-}
-
-/**
- * Common properties (shared by both anime and manga)
- */
-const COMMON_PROPERTIES: PropertyMetadata[] = [
-    { key: "title", label: "Title", defaultName: "title" },
-    {
-        key: "alternativeTitles",
-        label: "Alternative Titles",
-        defaultName: "aliases"
-    },
-    { key: "id", label: "Media ID", defaultName: "id" },
-    { key: "category", label: "Category", defaultName: "category" },
-    { key: "platform", label: "Platform", defaultName: "platform" },
-    { key: "url", label: "Source URL", defaultName: "source" },
-    { key: "mainPicture", label: "Cover Image", defaultName: "image" },
-    { key: "synopsis", label: "Synopsis", defaultName: "description" },
-    { key: "mediaType", label: "Media Type", defaultName: "media" },
-    { key: "status", label: "Status", defaultName: "state" },
-    { key: "mean", label: "Average Score", defaultName: "score" },
-    { key: "genres", label: "Genres", defaultName: "genres" },
-    { key: "releasedStart", label: "Released Start", defaultName: "released" },
-    { key: "releasedEnd", label: "Released End", defaultName: "ended" },
-    { key: "source", label: "Source Material", defaultName: "origin" },
-    { key: "userStatus", label: "User Status", defaultName: "status" },
-    { key: "userScore", label: "User Rating", defaultName: "rating" },
-    { key: "userStartDate", label: "Started Date", defaultName: "started" },
-    { key: "userFinishDate", label: "Finished Date", defaultName: "finished" }
-];
-
-/**
- * Anime-specific properties (including common)
- */
-export const ANIME_PROPERTIES: PropertyMetadata[] = [
-    ...COMMON_PROPERTIES,
-    { key: "numEpisodes", label: "Total Episodes", defaultName: "episodes" },
-    {
-        key: "numEpisodesWatched",
-        label: "Episodes Watched",
-        defaultName: "eps_seen"
-    },
-    { key: "studios", label: "Studios", defaultName: "studios" },
-    { key: "duration", label: "Duration", defaultName: "duration" }
-];
-
-/**
- * Manga-specific properties (including common)
- */
-export const MANGA_PROPERTIES: PropertyMetadata[] = [
-    ...COMMON_PROPERTIES,
-    { key: "numVolumes", label: "Total Volumes", defaultName: "volumes" },
-    { key: "numVolumesRead", label: "Volumes Read", defaultName: "vol_read" },
-    { key: "numChapters", label: "Total Chapters", defaultName: "chapters" },
-    {
-        key: "numChaptersRead",
-        label: "Chapters Read",
-        defaultName: "chap_read"
-    },
-    { key: "authors", label: "Authors", defaultName: "authors" }
-];
-
-/**
- * Gets property metadata by key
- */
-export function getPropertyMetadata(
-    key: string,
-    category: "anime" | "manga"
-): PropertyMetadata | undefined {
-    const properties =
-        category === "anime" ? ANIME_PROPERTIES : MANGA_PROPERTIES;
-    return properties.find(p => p.key === key);
-}
-
-/**
- * Gets available properties for a category
- */
-export function getAvailableProperties(
-    category: "anime" | "manga"
-): PropertyMetadata[] {
-    return category === "anime" ? ANIME_PROPERTIES : MANGA_PROPERTIES;
-}
-
-// Update the DEFAULT_ANIME_TEMPLATE to showcase filters
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
     folderPath: "MyAnimeNotes/Anime",
     noteContent: "# {{title}}\n\n{{synopsis}}",
@@ -484,10 +379,3 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         }
     ]
 };
-
-/**
- * Generates a unique property ID
- */
-export function generatePropertyId(): string {
-    return `prop-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-}

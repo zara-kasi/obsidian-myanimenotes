@@ -1,5 +1,5 @@
 import { App, AbstractInputSuggest } from "obsidian";
-import type { PropertyMetadata } from "../config";
+import type { PropertyMetadata } from "../types";
 
 /**
  * Variable Suggester for Template System

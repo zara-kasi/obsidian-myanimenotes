@@ -1,3 +1,3 @@
-export { MyAnimeNotesSettingTab } from './settings-tab';
-export type { MyAnimeNotesSettings } from './settings-interface';
-export { DEFAULT_SETTINGS } from './settings-interface';
+export { MyAnimeNotesSettingTab } from "./tab";
+export type { MyAnimeNotesSettings } from "./types";
+export { DEFAULT_SETTINGS } from "./defaults";
