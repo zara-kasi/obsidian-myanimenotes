@@ -12,15 +12,6 @@ export {
     saveMediaItemsByCategory
 } from "./storage-service";
 
-// MyAnimeNotes sync utilities (internal, but exported for testing/advanced use)
-export {
-    generateMyAnimeNotesSync,
-    validateMyAnimeNotesSyncFormat,
-    findFilesByMyAnimeNotesSync,
-    selectDeterministicFile,
-    buildMyAnimeNotesIndex
-} from "./myanimenotes";
-
 // File utilities (internal, but exported for testing/advanced use)
 export { ensureFolderExists, generateUniqueFilename } from "./file-utils";
 

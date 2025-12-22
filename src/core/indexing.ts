@@ -16,8 +16,8 @@
  */
 
 import { TFile } from "obsidian";
-import type MyAnimeNotesPlugin from "../../main";
-import { createDebugLogger } from "../../utils";
+import type MyAnimeNotesPlugin from "../main";
+import { createDebugLogger } from "../utils";
 
 /**
  * Index result: simple Map from myanimenotes -> files

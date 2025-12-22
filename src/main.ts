@@ -7,7 +7,7 @@ import { AutoSyncManager, createAutoSyncManager } from "./sync/auto";
 import {
     MyAnimeNotesLockManager,
     createMyAnimeNotesLockManager
-} from "./storage/myanimenotes";
+} from "./core";
 
 export default class MyAnimeNotesPlugin extends Plugin {
     settings: MyAnimeNotesSettings = DEFAULT_SETTINGS;

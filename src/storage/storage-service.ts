@@ -9,8 +9,11 @@ import {
     generateMyAnimeNotesSync,
     findFilesByMyAnimeNotesSync,
     selectDeterministicFile
-} from "./myanimenotes";
-import { buildMyAnimeNotesIndex, type MyAnimeNotesIndex } from "./myanimenotes";
+} from "../core";
+import {
+    buildMyAnimeNotesIndex,
+    type MyAnimeNotesIndex
+} from "../core";
 import { ensureFolderExists, generateUniqueFilename } from "./file-utils";
 import {
     generateFrontmatterProperties,
@@ -189,7 +192,6 @@ async function prepareBatchItems(
     const debug = createDebugLogger(plugin, "Storage");
     const { metadataCache } = plugin.app;
     const startTime = Date.now();
-
 
     const batchItems: BatchItem[] = [];
 
