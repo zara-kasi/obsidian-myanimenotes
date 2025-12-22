@@ -11,6 +11,7 @@ import {
     findLegacyFiles,
     selectDeterministicFile
 } from "./myanimenotes";
+import { buildMyAnimeNotesIndex, type MyAnimeNotesIndex } from "./myanimenotes";
 import { ensureFolderExists, generateUniqueFilename } from "./file-utils";
 import {
     generateFrontmatterProperties,
@@ -45,7 +46,7 @@ export interface SyncActionResult {
 }
 
 interface FileLookupResult {
-    type: "exact" | "duplicates" | "legacy" | "none";
+    type: "exact" | "duplicates" | "none";  // Remove "legacy"
     files: TFile[];
 }
 
@@ -292,18 +293,12 @@ function createSkipResults(skippedItems: BatchItem[]): SyncActionResult[] {
 /**
  * Performs file lookup using myanimenotes and legacy strategies
  */
-async function lookupExistingFiles(
-    plugin: MyAnimeNotesPlugin,
-    myanimenotesSync: string,
-    item: UniversalMediaItem,
-    folderPath: string
-): Promise<FileLookupResult> {
-    // Strategy 1: MyAnimeNotes-based lookup (primary)
-    const matchingFiles = await findFilesByMyAnimeNotesSync(
-        plugin,
-        myanimenotesSync,
-        folderPath
-    );
+function lookupExistingFiles(
+    index: MyAnimeNotesIndex,
+    myanimenotesSync: string
+): FileLookupResult {
+    // Simple Map lookup - no async, no complexity
+    const matchingFiles = findFilesByMyAnimeNotesSync(index, myanimenotesSync);
 
     if (matchingFiles.length > 1) {
         return { type: "duplicates", files: matchingFiles };
@@ -313,16 +308,8 @@ async function lookupExistingFiles(
         return { type: "exact", files: matchingFiles };
     }
 
-    // Strategy 2: Legacy file detection (fallback)
-    const legacyCandidates = await findLegacyFiles(plugin, item, folderPath);
-
-    if (legacyCandidates.length > 0) {
-        return { type: "legacy", files: legacyCandidates };
-    }
-
     return { type: "none", files: [] };
 }
-
 // ============================================================================
 // FILE HANDLERS (unchanged core logic)
 // ============================================================================

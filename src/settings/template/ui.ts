@@ -73,9 +73,7 @@ function renderExpandableTemplate(
     // Main setting with toggle
     const setting = new Setting(container)
         .setName(`${type === "anime" ? "Anime" : "Manga"} Template`)
-        .setDesc(
-            `Configure how ${type} notes are created and which properties to include.`
-        )
+        .setDesc(`Configure the template used for ${type} notes.`)
         .setClass("myanimenotes-template-setting");
 
     // Add collapse/expand icon to the setting element (not nameEl)

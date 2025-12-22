@@ -15,7 +15,7 @@ export class DebugLogger {
   log(message: string, ...args: unknown[]): void {
     if (this.plugin.settings.debugMode) {
       const fullMessage = this.prefix ? `[${this.prefix}] ${message}` : message;
-      console.debug(fullMessage, ...args);
+      console.log(fullMessage, ...args);
     }
   }
 

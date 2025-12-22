@@ -17,7 +17,6 @@ export {
   generateMyAnimeNotesSync,
   validateMyAnimeNotesSyncFormat,
   findFilesByMyAnimeNotesSync,
-  findLegacyFiles,
   selectDeterministicFile
 } from './myanimenotes';
 

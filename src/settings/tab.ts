@@ -34,7 +34,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
         // Notifications
         new Setting(containerEl)
             .setName("Notifications")
-            .setDesc("Enable or disable notifications from the plugin.")
+            .setDesc("Notifications from the plugin.")
             .addToggle(toggle =>
                 toggle
                     .setValue(this.plugin.settings.notificationsEnabled)
@@ -117,9 +117,9 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
 
         // Optimize auto sync toggle
         new Setting(containerEl)
-            .setName("Optimize auto-sync")
+            .setName("Efficient auto-sync")
             .setDesc(
-                "When enabled, auto-sync only syncs watching anime and reading manga (recommended)."
+                "Reduce API requests by only auto-syncing 'Watching' and 'Reading' items."
             )
             .addToggle(toggle =>
                 toggle
@@ -132,8 +132,8 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
 
         // Force full sync toggle
         new Setting(containerEl)
-            .setName("Overwrite all")
-            .setDesc("Update all notes on every sync, even if nothing changed.")
+            .setName("Ignore Timestamps")
+            .setDesc("Skip the timestamp check and update every file.")
             .addToggle(toggle =>
                 toggle
                     .setValue(this.plugin.settings.forceFullSync)
