@@ -4,8 +4,6 @@ import { MyAnimeNotesSettings, DEFAULT_SETTINGS } from "./settings";
 import { handleOAuthRedirect as handleMALRedirect } from "./auth";
 import { SyncManager, createSyncManager } from "./sync";
 import { AutoSyncManager, createAutoSyncManager } from "./sync/auto";
-import type { MyAnimeNotesIndex } from "./storage/myanimenotes";
-import { createMyAnimeNotesIndex } from "./storage/myanimenotes";
 import {
     MyAnimeNotesLockManager,
     createMyAnimeNotesLockManager
@@ -16,7 +14,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
     settingsTab: MyAnimeNotesSettingTab | null = null;
     syncManager: SyncManager | null = null;
     autoSyncManager: AutoSyncManager | null = null;
-    myanimenotesIndex: MyAnimeNotesIndex | null = null;
+
     lockManager: MyAnimeNotesLockManager | null = null;
 
     async onload() {
@@ -27,14 +25,6 @@ export default class MyAnimeNotesPlugin extends Plugin {
 
         // Initialize sync manager
         this.syncManager = createSyncManager(this);
-
-        // Initialize myanimenotes index (lazy - just registers listeners, doesn't build index)
-        try {
-            this.myanimenotesIndex = await createMyAnimeNotesIndex(this);
-        } catch (error) {
-            console.error("[MyAnimeNotes] Failed to initialize index:", error);
-            // Plugin can still work without index (uses fallback)
-        }
 
         // Initialize auto-sync manager
         this.autoSyncManager = createAutoSyncManager(this);
@@ -70,11 +60,6 @@ export default class MyAnimeNotesPlugin extends Plugin {
         if (this.lockManager) {
             this.lockManager.clear();
             this.lockManager = null;
-        }
-
-        // Clear index on unload
-        if (this.myanimenotesIndex) {
-            this.myanimenotesIndex.clear();
         }
 
         // Stop all auto-sync timers

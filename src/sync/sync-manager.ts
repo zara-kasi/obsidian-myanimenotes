@@ -132,15 +132,6 @@ export class SyncManager {
         try {
             this.debug.log("[Sync Manager] Starting MAL sync...", options);
 
-            // Ensure myanimenotes index is initialized before sync
-            if (this.plugin.myanimenotesIndex) {
-                this.debug.log(
-                    "[Sync Manager] Ensuring myanimenotes index is initialized..."
-                );
-                await this.plugin.myanimenotesIndex.ensureInitialized();
-                this.debug.log("[Sync Manager] MyAnimeNotes index ready");
-            }
-
             // Perform sync
             const { items, result } = await syncMAL(this.plugin, options);
 

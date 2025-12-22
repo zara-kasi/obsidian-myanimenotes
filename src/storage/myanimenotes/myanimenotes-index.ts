@@ -27,13 +27,13 @@ export type MyAnimeNotesIndex = Map<string, TFile[]>;
 
 /**
  * Builds a fresh index of all myanimenotes in the vault RIGHT NOW
- * 
+ *
  * Scans every markdown file and extracts myanimenotes frontmatter.
  * Returns a simple Map for O(1) lookups.
- * 
+ *
  * @param plugin Plugin instance for vault access
  * @returns Map of myanimenotes identifier -> array of files
- * 
+ *
  * @example
  * const index = await buildMyAnimeNotesIndex(plugin);
  * const files = index.get("mal:anime:1245") || [];
@@ -62,11 +62,12 @@ export async function buildMyAnimeNotesIndex(
             const myanimenotes = cache?.frontmatter?.myanimenotes;
 
             // Validate and add to index
+
             if (myanimenotes && typeof myanimenotes === "string") {
-                if (!index.has(myanimenotes)) {
-                    index.set(myanimenotes, []);
-                }
-                index.get(myanimenotes)!.push(file);
+                // Get existing array or create new one
+                const files = index.get(myanimenotes) ?? [];
+                files.push(file);
+                index.set(myanimenotes, files);
                 filesWithMyAnimeNotes++;
             }
         } catch (error) {
@@ -100,7 +101,7 @@ export async function buildMyAnimeNotesIndex(
 /**
  * Helper: Get files for a myanimenotes identifier
  * Just a convenience wrapper around Map.get()
- * 
+ *
  * @param index The index Map
  * @param myanimenotes The identifier to look up
  * @returns Array of files (empty if not found)
@@ -114,7 +115,7 @@ export function getFilesFromIndex(
 
 /**
  * Helper: Check if myanimenotes exists in index
- * 
+ *
  * @param index The index Map
  * @param myanimenotes The identifier to check
  * @returns true if identifier exists
@@ -128,7 +129,7 @@ export function hasMyAnimeNotes(
 
 /**
  * Helper: Get index statistics
- * 
+ *
  * @param index The index Map
  * @returns Statistics object
  */

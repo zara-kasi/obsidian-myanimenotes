@@ -8,7 +8,6 @@ import {
 import {
     generateMyAnimeNotesSync,
     findFilesByMyAnimeNotesSync,
-    findLegacyFiles,
     selectDeterministicFile
 } from "./myanimenotes";
 import { buildMyAnimeNotesIndex, type MyAnimeNotesIndex } from "./myanimenotes";
@@ -46,7 +45,7 @@ export interface SyncActionResult {
 }
 
 interface FileLookupResult {
-    type: "exact" | "duplicates" | "none";  // Remove "legacy"
+    type: "exact" | "duplicates" | "none";
     files: TFile[];
 }
 
@@ -137,7 +136,7 @@ function shouldSkipByTimestamp(
         return { skip: false, reason: "force sync enabled" };
     }
 
-    // No local timestamp means new/legacy file - always update
+    // No local timestamp means new/ file - always update
     if (!localSynced) {
         return { skip: false, reason: "no local timestamp" };
     }
@@ -184,16 +183,17 @@ async function prepareBatchItems(
     plugin: MyAnimeNotesPlugin,
     items: UniversalMediaItem[],
     config: StorageConfig,
-    folderPath: string
+    folderPath: string,
+    index: MyAnimeNotesIndex
 ): Promise<BatchItem[]> {
     const debug = createDebugLogger(plugin, "Storage");
     const { metadataCache } = plugin.app;
     const startTime = Date.now();
 
+
     const batchItems: BatchItem[] = [];
 
     // Phase 1: Generate myanimenotes and read cache for all items upfront
-    // This is a single pass through metadata cache - NO delays
     debug.log(
         `[Storage] Batch prep phase 1: Reading cache for ${items.length} items...`
     );
@@ -203,15 +203,9 @@ async function prepareBatchItems(
     for (const item of items) {
         const myanimenotes = generateMyAnimeNotesSync(item);
 
-        // Lookup file (index O(1) if available, or vault scan)
-        const lookup = await lookupExistingFiles(
-            plugin,
-            myanimenotes,
-            item,
-            folderPath
-        );
+        const lookup = lookupExistingFiles(index, myanimenotes);
 
-        // For exact/duplicates/legacy matches, get cache immediately
+        // For exact/duplicates/ matches, get cache immediately
         let cachedTimestamp: string | undefined;
         if (lookup.files.length > 0) {
             const file = lookup.files[0];
@@ -291,8 +285,9 @@ function createSkipResults(skippedItems: BatchItem[]): SyncActionResult[] {
 // ============================================================================
 
 /**
- * Performs file lookup using myanimenotes and legacy strategies
+ * Performs file lookup using myanimenotes  strategies
  */
+
 function lookupExistingFiles(
     index: MyAnimeNotesIndex,
     myanimenotesSync: string
@@ -310,6 +305,7 @@ function lookupExistingFiles(
 
     return { type: "none", files: [] };
 }
+
 // ============================================================================
 // FILE HANDLERS (unchanged core logic)
 // ============================================================================
@@ -375,43 +371,6 @@ async function handleDuplicates(
         myanimenotesSync,
         duplicatePaths: files.map(f => f.path),
         message: `Updated ${selectedFile.path} but found ${files.length} duplicates`
-    };
-}
-
-async function handleLegacyMigration(
-    plugin: MyAnimeNotesPlugin,
-    files: TFile[],
-    item: UniversalMediaItem,
-    config: StorageConfig,
-    myanimenotesSync: string
-): Promise<SyncActionResult> {
-    if (files.length > 1) {
-        console.warn(
-            `[Storage] Found ${files.length} legacy candidates for ${myanimenotesSync}`
-        );
-    }
-
-    const selectedFile = selectDeterministicFile(plugin, files);
-    // Get template based on category
-    const template =
-        item.category === MediaCategory.ANIME
-            ? plugin.settings.animeTemplate || DEFAULT_ANIME_TEMPLATE
-            : plugin.settings.mangaTemplate || DEFAULT_MANGA_TEMPLATE;
-
-    const frontmatterProps = generateFrontmatterProperties(
-        plugin,
-        item,
-        template,
-        myanimenotesSync
-    );
-    await updateMarkdownFileFrontmatter(plugin, selectedFile, frontmatterProps);
-
-    return {
-        action: "linked-legacy",
-        filePath: selectedFile.path,
-        myanimenotesSync,
-        duplicatePaths: files.length > 1 ? files.map(f => f.path) : undefined,
-        message: `Migrated legacy file ${selectedFile.path}`
     };
 }
 
@@ -533,12 +492,10 @@ export async function saveMediaItem(
             await ensureFolderExists(plugin, folderPath);
         }
 
-        const lookup = await lookupExistingFiles(
-            plugin,
-            myanimenotesSync,
-            item,
-            folderPath
-        );
+        // Build fresh index for single-item operation
+        const index = await buildMyAnimeNotesIndex(plugin);
+
+        const lookup = lookupExistingFiles(index, myanimenotesSync);
 
         switch (lookup.type) {
             case "exact":
@@ -557,14 +514,7 @@ export async function saveMediaItem(
                     config,
                     myanimenotesSync
                 );
-            case "legacy":
-                return handleLegacyMigration(
-                    plugin,
-                    lookup.files,
-                    item,
-                    config,
-                    myanimenotesSync
-                );
+
             case "none":
                 return createNewFile(
                     plugin,
@@ -591,6 +541,7 @@ export async function saveMediaItem(
  * - Progress callback for real-time feedback
  * - No per-item locks (sequential processing already safe)
  */
+
 export async function saveMediaItems(
     plugin: MyAnimeNotesPlugin,
     items: UniversalMediaItem[],
@@ -618,14 +569,27 @@ export async function saveMediaItems(
         await ensureFolderExists(plugin, folderPath);
     }
 
+    // Build index before calling prepareBatchItems
+    debug.log(`[Storage] Building fresh myanimenotes index for batch...`);
+    const indexStartTime = Date.now();
+    const index = await buildMyAnimeNotesIndex(plugin);
+    const indexDuration = Date.now() - indexStartTime;
+    debug.log(
+        `[Storage] Index built: ${index.size} identifiers (${indexDuration}ms)`
+    );
+
     debug.log(`[Storage] Starting batch preparation phase...`);
     const prepStartTime = Date.now();
+
+    // INDEX to prepareBatchItems
     const batchItems = await prepareBatchItems(
         plugin,
         items,
         config,
-        folderPath
+        folderPath,
+        index
     );
+
     const prepDuration = Date.now() - prepStartTime;
     debug.log(`[Storage] Batch preparation complete: ${prepDuration}ms`);
 
@@ -665,16 +629,6 @@ export async function saveMediaItems(
 
                 case "duplicates":
                     result = await handleDuplicates(
-                        plugin,
-                        batch.lookup.files,
-                        batch.item,
-                        config,
-                        batch.myanimenotesSync
-                    );
-                    break;
-
-                case "legacy":
-                    result = await handleLegacyMigration(
                         plugin,
                         batch.lookup.files,
                         batch.item,
