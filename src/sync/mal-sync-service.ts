@@ -17,7 +17,7 @@ import {
     MediaCategory
 } from "../transformers";
 import type { MALItem } from "../transformers";
-import { createDebugLogger, showNotice } from "../utils";
+import { log, showNotice } from "../utils";
 /**
  * Sync options
  */
@@ -46,9 +46,9 @@ async function syncAnimeList(
     plugin: MyAnimeNotesPlugin,
     statuses?: string[]
 ): Promise<UniversalMediaItem[]> {
-    const debug = createDebugLogger(plugin, "MAL Sync");
+    const debug = log.createSub("MALSync");
 
-    debug.log("[MAL Sync] Starting anime sync...");
+    debug.info("Starting anime sync...");
 
     let rawItems: MALItem[] = [];
 
@@ -71,7 +71,7 @@ async function syncAnimeList(
         rawItems = (await fetchCompleteMALAnimeList(plugin)) as MALItem[];
     }
 
-    debug.log(`[MAL Sync] Fetched ${rawItems.length} anime items`);
+    debug.info(`Fetched ${rawItems.length} anime items`);
 
     // Transform to universal format
     const transformedItems = transformMALAnimeList(plugin, rawItems);
@@ -89,9 +89,9 @@ async function syncMangaList(
     plugin: MyAnimeNotesPlugin,
     statuses?: string[]
 ): Promise<UniversalMediaItem[]> {
-    const debug = createDebugLogger(plugin, "MAL Sync");
+    const debug = log.createSub("MALSync");
 
-    debug.log("[MAL Sync] Starting manga sync...");
+    debug.info("Starting manga sync...");
 
     let rawItems: MALItem[] = [];
 
@@ -115,7 +115,7 @@ async function syncMangaList(
         rawItems = (await fetchCompleteMALMangaList(plugin)) as MALItem[];
     }
 
-    debug.log(`[MAL Sync] Fetched ${rawItems.length} manga items`);
+    debug.info(`[MAL Sync] Fetched ${rawItems.length} manga items`);
 
     // Transform to universal format
     const transformedItems = transformMALMangaList(plugin, rawItems);
@@ -133,8 +133,9 @@ export async function syncMAL(
     plugin: MyAnimeNotesPlugin,
     options: MALSyncOptions = DEFAULT_SYNC_OPTIONS
 ): Promise<{ items: UniversalMediaItem[]; result: SyncResult }> {
-    const debug = createDebugLogger(plugin, "MAL Sync");
+    const debug = log.createSub("MALSync");
     const startTime = Date.now();
+
     const allItems: UniversalMediaItem[] = [];
     const results: SyncItemResult[] = [];
     const errors: string[] = [];
@@ -169,8 +170,9 @@ export async function syncMAL(
                 const errorMessage =
                     error instanceof Error ? error.message : String(error);
                 const errorMsg = `Failed to sync anime: ${errorMessage}`;
-                console.error("[MAL Sync]", errorMsg);
+                debug.error(errorMsg);
                 errors.push(errorMsg);
+
                 showNotice(plugin, `❌ ${errorMsg}`, 5000);
             }
         }
@@ -197,8 +199,9 @@ export async function syncMAL(
                 const errorMessage =
                     error instanceof Error ? error.message : String(error);
                 const errorMsg = `Failed to sync manga: ${errorMessage}`;
-                console.error("[MAL Sync]", errorMsg);
+                debug.error(errorMsg);
                 errors.push(errorMsg);
+
                 showNotice(plugin, `❌ ${errorMsg}`, 5000);
             }
         }
@@ -223,14 +226,14 @@ export async function syncMAL(
             );
         }
 
-        debug.log("[MAL Sync] Sync completed:", syncResult);
+        debug.info("Sync completed:", syncResult);
 
         return { items: allItems, result: syncResult };
     } catch (error) {
         const errorMessage =
             error instanceof Error ? error.message : String(error);
         const errorMsg = `MAL sync failed: ${errorMessage}`;
-        console.error("[MAL Sync]", errorMsg);
+        debug.error(errorMsg);
         errors.push(errorMsg);
 
         showNotice(plugin, `❌ ${errorMsg}`, 5000);

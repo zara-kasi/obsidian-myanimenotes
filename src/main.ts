@@ -4,10 +4,8 @@ import { MyAnimeNotesSettings, DEFAULT_SETTINGS } from "./settings";
 import { handleOAuthRedirect as handleMALRedirect } from "./auth";
 import { SyncManager, createSyncManager } from "./sync";
 import { AutoSyncManager, createAutoSyncManager } from "./sync/auto";
-import {
-    MyAnimeNotesLockManager,
-    createMyAnimeNotesLockManager
-} from "./core";
+import { MyAnimeNotesLockManager, createMyAnimeNotesLockManager } from "./core";
+import { configureLogger, log } from "./utils";
 
 export default class MyAnimeNotesPlugin extends Plugin {
     settings: MyAnimeNotesSettings = DEFAULT_SETTINGS;
@@ -28,6 +26,10 @@ export default class MyAnimeNotesPlugin extends Plugin {
 
         // Initialize auto-sync manager
         this.autoSyncManager = createAutoSyncManager(this);
+
+        //  Initialize logger
+        configureLogger(this.settings);
+        log.info("Plugin loaded");
 
         // Add ribbon icon for sync
         this.addRibbonIcon(
@@ -73,12 +75,13 @@ export default class MyAnimeNotesPlugin extends Plugin {
         this.settings = Object.assign(
             {},
             DEFAULT_SETTINGS,
-            await this.loadData()
+            (await this.loadData()) as Partial<MyAnimeNotesSettings>
         );
     }
 
     async saveSettings() {
         await this.saveData(this.settings);
+        configureLogger(this.settings);
     }
 
     refreshSettingsUI(): void {

@@ -9,7 +9,7 @@ import type MyAnimeNotesPlugin from "../../main";
 import type { UniversalMediaItem } from "../../transformers";
 import type { TemplateConfig } from "../../settings/template";
 import { buildFrontmatterFromTemplate } from "./frontmatter";
-import { createDebugLogger } from "../../utils";
+import { log } from "../../utils";
 
 /**
  * Generates frontmatter properties for a media item using template configuration
@@ -39,7 +39,7 @@ export async function updateMarkdownFileFrontmatter(
     file: TFile,
     frontmatterProps: Record<string, unknown>
 ): Promise<void> {
-    const debug = createDebugLogger(plugin, "Markdown");
+    const debug = log.createSub("Markdown");
     const { fileManager } = plugin.app;
 
     try {
@@ -54,7 +54,7 @@ export async function updateMarkdownFileFrontmatter(
             }
         );
     } catch (error) {
-        debug.log("[Markdown] Error updating frontmatter:", error);
+        debug.error("Error updating frontmatter:", error);
         throw error;
     }
 }

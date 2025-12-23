@@ -134,7 +134,7 @@ function renderExpandableTemplate(
 
         // Add description
         contentContainer.createEl("p", {
-            text: "Properties to add to the top of the media note. Use variables to populate data from the mal api.",
+            text: "Properties to add to the top of the media note. Use variables to populate data from the mal API.",
             cls: "setting-item-description"
         });
 
@@ -183,7 +183,7 @@ function renderExpandableTemplate(
         });
 
         contentContainer.createEl("p", {
-            text: "Customize the content of the note. Use variables to populate data from the mal api.",
+            text: "Customize the content of the note. Use variables to populate data from the mal API.",
             cls: "setting-item-description"
         });
 
@@ -268,29 +268,32 @@ function renderPropertyRow(
     if (!isPermanent) {
         typeIconButton.addClass("myanimenotes-type-icon-clickable");
 
-        typeIconButton.addEventListener("click", async e => {
-            e.stopPropagation(); // Don't trigger drag
+        typeIconButton.addEventListener("click", e => {
+            // Wrap async logic in a void function
+            void (async () => {
+                e.stopPropagation(); // Don't trigger drag
 
-            // Open modal to select type
-            const selectedType = await promptForPropertyType(
-                plugin.app,
-                prop.customName
-            );
-
-            if (selectedType) {
-                // Save the type to config
-                prop.type = selectedType;
-                await saveTemplateConfig(plugin, type, config);
-
-                // Update icon immediately
-                typeIconButton.empty();
-                const newIconName = getPropertyTypeIcon(selectedType);
-                setIcon(typeIconButton, newIconName);
-                typeIconButton.setAttribute(
-                    "aria-label",
-                    `Format: ${selectedType}`
+                // Open modal to select type
+                const selectedType = await promptForPropertyType(
+                    plugin.app,
+                    prop.customName
                 );
-            }
+
+                if (selectedType) {
+                    // Save the type to config
+                    prop.type = selectedType;
+                    await saveTemplateConfig(plugin, type, config);
+
+                    // Update icon immediately
+                    typeIconButton.empty();
+                    const newIconName = getPropertyTypeIcon(selectedType);
+                    setIcon(typeIconButton, newIconName);
+                    typeIconButton.setAttribute(
+                        "aria-label",
+                        `Format: ${selectedType}`
+                    );
+                }
+            })();
         });
     } else {
         typeIconButton.addClass("myanimenotes-type-icon-readonly");
@@ -515,18 +518,27 @@ function reorderPropertiesSequentially(config: TemplateConfig): void {
 /**
  * Gets the template configuration for anime or manga
  */
+
 function getTemplateConfig(
     plugin: MyAnimeNotesPlugin,
     type: "anime" | "manga"
 ): TemplateConfig {
     if (type === "anime") {
         return plugin.settings.animeTemplate
-            ? JSON.parse(JSON.stringify(plugin.settings.animeTemplate))
-            : JSON.parse(JSON.stringify(DEFAULT_ANIME_TEMPLATE));
+            ? (JSON.parse(
+                  JSON.stringify(plugin.settings.animeTemplate)
+              ) as TemplateConfig)
+            : (JSON.parse(
+                  JSON.stringify(DEFAULT_ANIME_TEMPLATE)
+              ) as TemplateConfig);
     } else {
         return plugin.settings.mangaTemplate
-            ? JSON.parse(JSON.stringify(plugin.settings.mangaTemplate))
-            : JSON.parse(JSON.stringify(DEFAULT_MANGA_TEMPLATE));
+            ? (JSON.parse(
+                  JSON.stringify(plugin.settings.mangaTemplate)
+              ) as TemplateConfig)
+            : (JSON.parse(
+                  JSON.stringify(DEFAULT_MANGA_TEMPLATE)
+              ) as TemplateConfig);
     }
 }
 

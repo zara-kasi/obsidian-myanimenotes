@@ -5,7 +5,7 @@
  */
 
 import type MyAnimeNotesPlugin from "../../main";
-import { createDebugLogger } from "../../utils";
+import { log } from "../../utils";
 import { normalizePath } from "obsidian";
 import type { Vault } from "obsidian";
 
@@ -13,13 +13,13 @@ import type { Vault } from "obsidian";
  * Ensures a folder exists, creating it if necessary
  * Normalizes the path before checking/creating
  */
+
 export async function ensureFolderExists(
     plugin: MyAnimeNotesPlugin,
     folderPath: string
 ): Promise<void> {
-    const debug = createDebugLogger(plugin, "FileUtils");
+    const debug = log.createSub("FileUtils");
     const { vault } = plugin.app;
-
     // Normalize the folder path to handle cross-platform paths
     const normalizedPath = normalizePath(folderPath);
 
@@ -27,7 +27,7 @@ export async function ensureFolderExists(
 
     if (!folder) {
         await vault.createFolder(normalizedPath);
-        debug.log(`[FileUtils] Created folder: ${normalizedPath}`);
+        debug.info(`Created folder: ${normalizedPath}`);
     }
 }
 
@@ -67,8 +67,7 @@ export function generateUniqueFilename(
     folderPath: string,
     baseFilename: string
 ): string {
-    const debug = createDebugLogger(plugin, "FileUtils");
-
+    const debug = log.createSub("FileUtils");
     // Normalize the folder path
     const normalizedFolderPath = normalizePath(folderPath);
 
@@ -87,7 +86,7 @@ export function generateUniqueFilename(
     }
 
     if (counter > 1) {
-        debug.log(`[FileUtils] Generated unique filename: ${filename}`);
+        debug.info(`Generated unique filename: ${filename}`);
     }
 
     return filename;

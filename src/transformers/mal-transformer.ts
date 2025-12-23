@@ -1,95 +1,94 @@
-import type MyAnimeNotesPlugin from '../main';
-import { createDebugLogger } from '../utils';
+import type MyAnimeNotesPlugin from "../main";
+import { log } from "../utils";
 import type {
-  UniversalMediaItem,
-  UniversalPicture,
-  UniversalAlternativeTitles,
-  UniversalGenre,
-  UniversalAuthor,
-} from './media.types';
-import { MediaStatus, UserListStatus, MediaCategory } from './media.types';
+    UniversalMediaItem,
+    UniversalPicture,
+    UniversalAlternativeTitles,
+    UniversalGenre,
+    UniversalAuthor
+} from "./media.types";
+import { MediaStatus, UserListStatus, MediaCategory } from "./media.types";
 
 interface MALPicture {
-  medium?: string;
-  large?: string;
+    medium?: string;
+    large?: string;
 }
 
 interface MALAlternativeTitles {
-  en?: string;
-  ja?: string;
-  synonyms?: string[];
+    en?: string;
+    ja?: string;
+    synonyms?: string[];
 }
 
 interface MALGenre {
-  id: number;
-  name: string;
+    id: number;
+    name: string;
 }
 
 interface MALAuthorNode {
-  first_name?: string;
-  last_name?: string;
+    first_name?: string;
+    last_name?: string;
 }
 
 interface MALAuthor {
-  node: MALAuthorNode;
-  role?: string;
+    node: MALAuthorNode;
+    role?: string;
 }
 
 interface MALStudio {
-  name: string;
+    name: string;
 }
 
 interface MALListStatus {
-  status: string;
-  score?: number;
-  num_episodes_watched?: number;
-  num_volumes_read?: number;
-  num_chapters_read?: number;
-  start_date?: string;
-  finish_date?: string;
-  updated_at?: string;
+    status: string;
+    score?: number;
+    num_episodes_watched?: number;
+    num_volumes_read?: number;
+    num_chapters_read?: number;
+    start_date?: string;
+    finish_date?: string;
+    updated_at?: string;
 }
 
 interface MALNode {
-  id: number;
-  title: string;
-  main_picture?: MALPicture;
-  pictures?: MALPicture[];
-  alternative_titles?: MALAlternativeTitles;
-  synopsis?: string;
-  media_type?: string;
-  status: string;
-  mean?: number;
-  genres?: MALGenre[];
-  start_date?: string;
-  end_date?: string;
-  num_episodes?: number;
-  source?: string;
-  studios?: MALStudio[];
-  average_episode_duration?: number;
-  num_volumes?: number;
-  num_chapters?: number;
-  authors?: MALAuthor[];
+    id: number;
+    title: string;
+    main_picture?: MALPicture;
+    pictures?: MALPicture[];
+    alternative_titles?: MALAlternativeTitles;
+    synopsis?: string;
+    media_type?: string;
+    status: string;
+    mean?: number;
+    genres?: MALGenre[];
+    start_date?: string;
+    end_date?: string;
+    num_episodes?: number;
+    source?: string;
+    studios?: MALStudio[];
+    average_episode_duration?: number;
+    num_volumes?: number;
+    num_chapters?: number;
+    authors?: MALAuthor[];
 }
 
 interface MALItem {
-  node: MALNode;
-  list_status?: MALListStatus;
+    node: MALNode;
+    list_status?: MALListStatus;
 }
-
 
 /**
  * Generates MyAnimeList URL for anime
  */
 function generateMALAnimeUrl(id: number): string {
-  return `https://myanimelist.net/anime/${id}`;
+    return `https://myanimelist.net/anime/${id}`;
 }
 
 /**
  * Generates MyAnimeList URL for manga
  */
 function generateMALMangaUrl(id: number): string {
-  return `https://myanimelist.net/manga/${id}`;
+    return `https://myanimelist.net/manga/${id}`;
 }
 
 /**
@@ -97,270 +96,305 @@ function generateMALMangaUrl(id: number): string {
  */
 
 function mapMALStatus(malStatus: string): MediaStatus {
-  switch (malStatus) {
-    case 'finished_airing':
-    case 'finished':
-      return MediaStatus.FINISHED;
-    case 'currently_airing':
-    case 'currently_publishing':
-      return MediaStatus.CURRENTLY_RELEASING;
-    case 'not_yet_aired':
-    case 'not_yet_published':
-      return MediaStatus.NOT_YET_RELEASED;
-    default:
-      return MediaStatus.FINISHED;
-  }
+    switch (malStatus) {
+        case "finished_airing":
+        case "finished":
+            return MediaStatus.FINISHED;
+        case "currently_airing":
+        case "currently_publishing":
+            return MediaStatus.CURRENTLY_RELEASING;
+        case "not_yet_aired":
+        case "not_yet_published":
+            return MediaStatus.NOT_YET_RELEASED;
+        default:
+            return MediaStatus.FINISHED;
+    }
 }
 
 /**
  * Maps MAL user status to universal user status
  */
 function mapMALUserStatus(malStatus: string): UserListStatus {
-  switch (malStatus) {
-    case 'watching':
-      return UserListStatus.WATCHING;
-    case 'reading':
-      return UserListStatus.READING;
-    case 'completed':
-      return UserListStatus.COMPLETED;
-    case 'on_hold':
-      return UserListStatus.ON_HOLD;
-    case 'dropped':
-      return UserListStatus.DROPPED;
-    case 'plan_to_watch':
-      return UserListStatus.PLAN_TO_WATCH;
-    case 'plan_to_read':
-      return UserListStatus.PLAN_TO_READ;
-    default:
-      return UserListStatus.PLAN_TO_WATCH;
-  }
+    switch (malStatus) {
+        case "watching":
+            return UserListStatus.WATCHING;
+        case "reading":
+            return UserListStatus.READING;
+        case "completed":
+            return UserListStatus.COMPLETED;
+        case "on_hold":
+            return UserListStatus.ON_HOLD;
+        case "dropped":
+            return UserListStatus.DROPPED;
+        case "plan_to_watch":
+            return UserListStatus.PLAN_TO_WATCH;
+        case "plan_to_read":
+            return UserListStatus.PLAN_TO_READ;
+        default:
+            return UserListStatus.PLAN_TO_WATCH;
+    }
 }
 
 /**
  * Transforms MAL picture object
  */
-function transformPicture(malPicture: MALPicture | undefined): UniversalPicture | undefined {
-  if (!malPicture) return undefined;
-  
-  return {
-    medium: malPicture.medium,
-    large: malPicture.large
-  };
+function transformPicture(
+    malPicture: MALPicture | undefined
+): UniversalPicture | undefined {
+    if (!malPicture) return undefined;
+
+    return {
+        medium: malPicture.medium,
+        large: malPicture.large
+    };
 }
 
 /**
  * Transforms MAL alternative titles
  */
-function transformAlternativeTitles(malTitles: MALAlternativeTitles | undefined): UniversalAlternativeTitles | undefined {
-  if (!malTitles) return undefined;
-  
-  return {
-    en: malTitles.en,
-    ja: malTitles.ja,
-    synonyms: malTitles.synonyms || []
-  };
+function transformAlternativeTitles(
+    malTitles: MALAlternativeTitles | undefined
+): UniversalAlternativeTitles | undefined {
+    if (!malTitles) return undefined;
+
+    return {
+        en: malTitles.en,
+        ja: malTitles.ja,
+        synonyms: malTitles.synonyms || []
+    };
 }
 
 /**
  * Transforms MAL genres - with strict null filtering
  */
 function transformGenres(malGenres: MALGenre[] | undefined): UniversalGenre[] {
-  if (!malGenres || !Array.isArray(malGenres)) return [];
-  
-  return malGenres
-    .filter(genre => genre != null && genre.id != null && genre.name != null)
-    .map(genre => ({
-      id: genre.id,
-      name: genre.name
-    }));
+    if (!malGenres || !Array.isArray(malGenres)) return [];
+
+    return malGenres
+        .filter(
+            genre => genre != null && genre.id != null && genre.name != null
+        )
+        .map(genre => ({
+            id: genre.id,
+            name: genre.name
+        }));
 }
 
 /**
  * Transforms MAL authors (for manga) - with strict null filtering
  */
-function transformAuthors(malAuthors: MALAuthor[] | undefined): UniversalAuthor[] {
-  if (!malAuthors || !Array.isArray(malAuthors)) return [];
-  
-  return malAuthors
-    .filter(author => author != null && author.node != null)
-    .map(author => ({
-      firstName: author.node?.first_name || '',
-      lastName: author.node?.last_name || '',
-      role: author.role
-    }))
-    .filter(author => author.firstName || author.lastName); // Filter out empty authors
+function transformAuthors(
+    malAuthors: MALAuthor[] | undefined
+): UniversalAuthor[] {
+    if (!malAuthors || !Array.isArray(malAuthors)) return [];
+
+    return malAuthors
+        .filter(author => author != null && author.node != null)
+        .map(author => ({
+            firstName: author.node?.first_name || "",
+            lastName: author.node?.last_name || "",
+            role: author.role
+        }))
+        .filter(author => author.firstName || author.lastName); // Filter out empty authors
 }
-
-
 
 /**
  * Transforms a single MAL anime item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/animelist response
  */
-export function transformMALAnime(plugin: MyAnimeNotesPlugin, malItem: MALItem): UniversalMediaItem {
-  const debug = createDebugLogger(plugin, 'MAL Transformer');
-  const node = malItem.node || malItem;
-  const listStatus = malItem.list_status; // User-specific data
+export function transformMALAnime(
+    plugin: MyAnimeNotesPlugin,
+    malItem: MALItem
+): UniversalMediaItem {
+    const debug = log.createSub("MAL-Transformer");
+    const node = malItem.node || malItem;
+    const listStatus = malItem.list_status; // User-specific data
 
-  debug.log('[MAL Transformer] Processing anime:', {
-    title: node.title,
-    hasListStatus: !!listStatus,
-    listStatus: listStatus
-  });
+    debug.info("Processing anime:", {
+        title: node.title,
+        hasListStatus: !!listStatus,
+        listStatus: listStatus
+    });
 
-  return {
-    // Basic info
-    id: node.id,
-    title: node.title,
-    category: MediaCategory.ANIME,
-    url: generateMALAnimeUrl(node.id),
-    
-    // Visual
-    mainPicture: transformPicture(node.main_picture),
-    pictures: node.pictures?.map(transformPicture).filter(Boolean) as UniversalPicture[] || [],
-    
-    // Alternative titles
-    alternativeTitles: transformAlternativeTitles(node.alternative_titles),
-    
-    // Description
-    synopsis: node.synopsis,
-    
-    // Metadata
-    mediaType: node.media_type || 'unknown',
-    status: mapMALStatus(node.status),
-    mean: node.mean,
-    
-    // Genres
-    genres: transformGenres(node.genres),
-    // Airing dates 
-    releasedStart: node.start_date,
-    releasedEnd: node.end_date,
-    
-   // Anime-specific
-    numEpisodes: node.num_episodes,
-    source: node.source, 
-    studios: transformStudios(node.studios),    
-    duration: convertDurationToMinutes(node.average_episode_duration), 
-    
+    return {
+        // Basic info
+        id: node.id,
+        title: node.title,
+        category: MediaCategory.ANIME,
+        url: generateMALAnimeUrl(node.id),
 
-    
-    // User list data - THIS IS THE KEY PART
-    // list_status is returned by /users/@me/animelist endpoint
-    userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
-    userScore: listStatus?.score || 0,
-    numEpisodesWatched: listStatus?.num_episodes_watched || 0,
-    userStartDate: listStatus?.start_date,      
-    userFinishDate: listStatus?.finish_date,    
-    
-    // Sync metadata - MAL's updated_at timestamp
-    updatedAt: listStatus?.updated_at,
-    // Platform metadata
-    platform: 'mal',
-  };
+        // Visual
+        mainPicture: transformPicture(node.main_picture),
+        pictures:
+            (node.pictures
+                ?.map(transformPicture)
+                .filter(Boolean) as UniversalPicture[]) || [],
+
+        // Alternative titles
+        alternativeTitles: transformAlternativeTitles(node.alternative_titles),
+
+        // Description
+        synopsis: node.synopsis,
+
+        // Metadata
+        mediaType: node.media_type || "unknown",
+        status: mapMALStatus(node.status),
+        mean: node.mean,
+
+        // Genres
+        genres: transformGenres(node.genres),
+        // Airing dates
+        releasedStart: node.start_date,
+        releasedEnd: node.end_date,
+
+        // Anime-specific
+        numEpisodes: node.num_episodes,
+        source: node.source,
+        studios: transformStudios(node.studios),
+        duration: convertDurationToMinutes(node.average_episode_duration),
+
+        // User list data - THIS IS THE KEY PART
+        // list_status is returned by /users/@me/animelist endpoint
+        userStatus: listStatus
+            ? mapMALUserStatus(listStatus.status)
+            : undefined,
+        userScore: listStatus?.score || 0,
+        numEpisodesWatched: listStatus?.num_episodes_watched || 0,
+        userStartDate: listStatus?.start_date,
+        userFinishDate: listStatus?.finish_date,
+
+        // Sync metadata - MAL's updated_at timestamp
+        updatedAt: listStatus?.updated_at,
+        // Platform metadata
+        platform: "mal"
+    };
 }
 
 /**
  * Transforms a single MAL manga item to universal format
  * IMPORTANT: User list data comes from list_status object in /users/@me/mangalist response
  */
-export function transformMALManga(plugin: MyAnimeNotesPlugin, malItem: MALItem): UniversalMediaItem {
-  const node = malItem.node || malItem;
-  const listStatus = malItem.list_status; // User-specific data
+export function transformMALManga(
+    plugin: MyAnimeNotesPlugin,
+    malItem: MALItem
+): UniversalMediaItem {
+    const node = malItem.node || malItem;
+    const listStatus = malItem.list_status; // User-specific data
 
+    return {
+        // Basic info
+        id: node.id,
+        title: node.title,
+        category: MediaCategory.MANGA,
+        url: generateMALMangaUrl(node.id),
 
-  return {
-    // Basic info
-    id: node.id,
-    title: node.title,
-    category: MediaCategory.MANGA,
-    url: generateMALMangaUrl(node.id),
-    
-    // Visual
-    mainPicture: transformPicture(node.main_picture),
-    pictures: node.pictures?.map(transformPicture).filter(Boolean) as UniversalPicture[] || [],
-    
-    // Alternative titles
-    alternativeTitles: transformAlternativeTitles(node.alternative_titles),
-    
-    // Description
-    synopsis: node.synopsis,
-    
-    // Metadata
-    mediaType: node.media_type || 'unknown',
-    status: mapMALStatus(node.status),
-    mean: node.mean,
-    
-    // Genres
-    genres: transformGenres(node.genres),
-   // Publication dates 
-    releasedStart: node.start_date,
-    releasedEnd: node.end_date,
-    
-    // Manga-specific
-    numVolumes: node.num_volumes,
-    numChapters: node.num_chapters,
-    authors: transformAuthors(node.authors),     
-    
+        // Visual
+        mainPicture: transformPicture(node.main_picture),
+        pictures:
+            (node.pictures
+                ?.map(transformPicture)
+                .filter(Boolean) as UniversalPicture[]) || [],
 
-    // User list data - THIS IS THE KEY PART
-    // list_status is returned by /users/@me/mangalist endpoint
-    userStatus: listStatus ? mapMALUserStatus(listStatus.status) : undefined,
-    userScore: listStatus?.score || 0,
-    numVolumesRead: listStatus?.num_volumes_read || 0,
-    numChaptersRead: listStatus?.num_chapters_read || 0,
-    userStartDate: listStatus?.start_date,  
-    userFinishDate: listStatus?.finish_date,  
-    
-    // Sync metadata - MAL's updated_at timestamp
-    updatedAt: listStatus?.updated_at,
-    // Platform metadata
-    platform: 'mal',
-  };
+        // Alternative titles
+        alternativeTitles: transformAlternativeTitles(node.alternative_titles),
+
+        // Description
+        synopsis: node.synopsis,
+
+        // Metadata
+        mediaType: node.media_type || "unknown",
+        status: mapMALStatus(node.status),
+        mean: node.mean,
+
+        // Genres
+        genres: transformGenres(node.genres),
+        // Publication dates
+        releasedStart: node.start_date,
+        releasedEnd: node.end_date,
+
+        // Manga-specific
+        numVolumes: node.num_volumes,
+        numChapters: node.num_chapters,
+        authors: transformAuthors(node.authors),
+
+        // User list data - THIS IS THE KEY PART
+        // list_status is returned by /users/@me/mangalist endpoint
+        userStatus: listStatus
+            ? mapMALUserStatus(listStatus.status)
+            : undefined,
+        userScore: listStatus?.score || 0,
+        numVolumesRead: listStatus?.num_volumes_read || 0,
+        numChaptersRead: listStatus?.num_chapters_read || 0,
+        userStartDate: listStatus?.start_date,
+        userFinishDate: listStatus?.finish_date,
+
+        // Sync metadata - MAL's updated_at timestamp
+        updatedAt: listStatus?.updated_at,
+        // Platform metadata
+        platform: "mal"
+    };
 }
 
 /**
  * Transforms MAL studios array - keeps objects for wiki link formatting
  * Filters out null, undefined, and invalid entries
  */
-function transformStudios(malStudios: MALStudio[] | undefined): Array<{name: string}> {
-  if (!malStudios || !Array.isArray(malStudios)) return [];
-  
-  return malStudios
-    .filter(studio => studio != null && studio.name != null && studio.name !== '')
-    .map(studio => ({ name: studio.name }));
+function transformStudios(
+    malStudios: MALStudio[] | undefined
+): Array<{ name: string }> {
+    if (!malStudios || !Array.isArray(malStudios)) return [];
+
+    return malStudios
+        .filter(
+            studio =>
+                studio != null && studio.name != null && studio.name !== ""
+        )
+        .map(studio => ({ name: studio.name }));
 }
 
 /**
  * Converts duration from seconds to minutes (rounded)
  */
-function convertDurationToMinutes(seconds: number | undefined): number | undefined {
-  if (!seconds) return undefined;
-  return Math.round(seconds / 60);
+function convertDurationToMinutes(
+    seconds: number | undefined
+): number | undefined {
+    if (!seconds) return undefined;
+    return Math.round(seconds / 60);
 }
-
 
 /**
  * Transforms an array of MAL anime items
  */
-export function transformMALAnimeList(plugin: MyAnimeNotesPlugin, malItems: MALItem[]): UniversalMediaItem[] {
-  if (!Array.isArray(malItems)) {
-    console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
-    return [];
-  }
-  
-  return malItems.map(item => transformMALAnime(plugin, item));
+export function transformMALAnimeList(
+    plugin: MyAnimeNotesPlugin,
+    malItems: MALItem[]
+): UniversalMediaItem[] {
+    const debug = log.createSub("MAL-Transformer");
+
+    if (!Array.isArray(malItems)) {
+        debug.warn("Expected array but got:", typeof malItems);
+        return [];
+    }
+
+    return malItems.map(item => transformMALAnime(plugin, item));
 }
 
 /**
  * Transforms an array of MAL manga items
  */
-export function transformMALMangaList(plugin: MyAnimeNotesPlugin, malItems: MALItem[]): UniversalMediaItem[] {
-  if (!Array.isArray(malItems)) {
-    console.warn('[MAL Transformer] Expected array but got:', typeof malItems);
-    return [];
-  }
-  
-  return malItems.map(item => transformMALManga(plugin, item));
+
+export function transformMALMangaList(
+    plugin: MyAnimeNotesPlugin,
+    malItems: MALItem[]
+): UniversalMediaItem[] {
+    const debug = log.createSub("MAL-Transformer");
+
+    if (!Array.isArray(malItems)) {
+        debug.warn("Expected array but got:", typeof malItems);
+        return [];
+    }
+
+    return malItems.map(item => transformMALManga(plugin, item));
 }
 
 export type { MALItem };

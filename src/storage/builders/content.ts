@@ -33,8 +33,11 @@ export function generateInitialFileContent(
   
   // Combine: frontmatter + blank line + content
   if (resolvedContent) {
-    return `---\n${frontmatterYaml}---\n\n${resolvedContent}`;
-  } else {
-    return `---\n${frontmatterYaml}---\n`;
-  }
+  const contentStr = Array.isArray(resolvedContent) 
+    ? resolvedContent.join('\n') 
+    : String(resolvedContent);
+  return `---\n${frontmatterYaml}---\n\n${contentStr}`;
+} else {
+  return `---\n${frontmatterYaml}---\n`;
+}
 }

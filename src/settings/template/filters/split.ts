@@ -9,7 +9,8 @@ export function split(value: unknown, separator = ','): string[] {
     return [];
   }
 
-  const str = String(value);
+  const str = typeof value === 'string' ? value : JSON.stringify(value);
+
   return str
     .split(separator)
     .map(item => item.trim())

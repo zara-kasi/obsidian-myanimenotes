@@ -1,5 +1,5 @@
 import type MyAnimeNotesPlugin from "../main";
-import { createDebugLogger } from "../utils";
+import { log } from "../utils";
 import { ANIME_FIELDS, MANGA_FIELDS } from "./constants";
 import { makeMALRequest } from "./client";
 import type { MALApiResponse, MALNode } from "./types";
@@ -7,13 +7,15 @@ import type { MALApiResponse, MALNode } from "./types";
 /**
  * Internal helper for pagination
  */
+
 async function fetchAllPages(
     plugin: MyAnimeNotesPlugin,
     endpoint: string,
     params: Record<string, string> = {}
 ): Promise<MALNode[]> {
-    const debug = createDebugLogger(plugin, "MAL API");
+    const debug = log.createSub("API");
     const allItems: MALNode[] = [];
+
     let nextUrl: string | null = null;
     let offset = 0;
     const limit = 100;
@@ -24,7 +26,7 @@ async function fetchAllPages(
             limit: limit.toString(),
             offset: offset.toString()
         };
-        debug.log(`[MAL API] Fetching ${endpoint} (offset: ${offset})...`);
+        debug.info(`Fetching ${endpoint} (offset: ${offset})...`);
 
         const data = await makeMALRequest(plugin, endpoint, requestParams);
 
@@ -35,10 +37,11 @@ async function fetchAllPages(
         nextUrl = data.paging?.next || null;
         offset += limit;
 
-        if (offset > 10000) {
-            debug.log("[MAL API] Safety limit reached (10000 items)");
+                if (offset > 10000) {
+            debug.warn("Safety limit reached (10000 items)");
             break;
         }
+
     } while (nextUrl);
 
     return allItems;

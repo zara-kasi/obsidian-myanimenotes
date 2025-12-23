@@ -18,7 +18,7 @@ import {
     ensureFolderExists,
     generateUniqueFilename
 } from "./builders";
-import { createDebugLogger } from "../utils";
+import { log } from "../utils";
 import type { TFile } from "obsidian";
 import { normalizePath } from "obsidian";
 
@@ -187,15 +187,15 @@ async function prepareBatchItems(
     folderPath: string,
     index: MyAnimeNotesIndex
 ): Promise<BatchItem[]> {
-    const debug = createDebugLogger(plugin, "Storage");
+    const debug = log.createSub("Storage");
     const { metadataCache } = plugin.app;
     const startTime = Date.now();
 
     const batchItems: BatchItem[] = [];
 
     // Phase 1: Generate myanimenotes and read cache for all items upfront
-    debug.log(
-        `[Storage] Batch prep phase 1: Reading cache for ${items.length} items...`
+    debug.info(
+        `Batch prep phase 1: Reading cache for ${items.length} items...`
     );
 
     const cacheMap = new Map<string, string | undefined>();
@@ -224,12 +224,12 @@ async function prepareBatchItems(
         });
     }
 
-    debug.log(
+    debug.info(
         `[Storage] Batch prep phase 1 complete: ${Date.now() - startTime}ms`
     );
 
     // Phase 2: Compute skip decisions (pure memory computation)
-    debug.log(`[Storage] Batch prep phase 2: Computing skip decisions...`);
+    debug.info(`[Storage] Batch prep phase 2: Computing skip decisions...`);
     const phase2Start = Date.now();
 
     for (const batch of batchItems) {
@@ -243,7 +243,7 @@ async function prepareBatchItems(
         batch.skipReason = skipResult.reason;
     }
 
-    debug.log(
+    debug.info(
         `[Storage] Batch prep phase 2 complete: ${Date.now() - phase2Start}ms`
     );
 
@@ -251,7 +251,7 @@ async function prepareBatchItems(
     const skipCount = batchItems.filter(b => b.shouldSkip).length;
     const processCount = batchItems.length - skipCount;
 
-    debug.log(
+    debug.info(
         `[Storage] Batch prep complete: ${items.length} items analyzed, ` +
             `${skipCount} to skip, ${processCount} to process (${
                 Date.now() - startTime
@@ -346,7 +346,8 @@ async function handleDuplicates(
     config: StorageConfig,
     myanimenotesSync: string
 ): Promise<SyncActionResult> {
-    console.warn(
+    const debug = log.createSub("Storage");
+    debug.warn(
         `[Storage] Found ${files.length} files with myanimenotes: ${myanimenotesSync}`
     );
     const selectedFile = selectDeterministicFile(plugin, files);
@@ -381,7 +382,8 @@ async function createNewFile(
     myanimenotesSync: string,
     folderPath: string
 ): Promise<SyncActionResult> {
-    const debug = createDebugLogger(plugin, "Storage");
+    const debug = log.createSub("Storage");
+
     const { vault } = plugin.app;
 
     const sanitizedTitle = item.title
@@ -429,7 +431,7 @@ async function createNewFile(
             // CHANGED: Use generated content instead of '---\n---\n'
             const createdFile = await vault.create(filePath, initialContent);
 
-            debug.log(`[Storage] Created: ${filePath}`);
+            debug.info(`Created: ${filePath}`);
 
             return {
                 action: "created",
@@ -450,7 +452,7 @@ async function createNewFile(
                 );
             }
 
-            debug.log(`[Storage] Collision on attempt ${attempt}, retrying...`);
+            debug.warn(`Collision on attempt ${attempt}, retrying...`);
         }
     }
 
@@ -470,10 +472,10 @@ export async function saveMediaItem(
     item: UniversalMediaItem,
     config: StorageConfig
 ): Promise<SyncActionResult> {
-    const debug = createDebugLogger(plugin, "Storage");
+    const debug = log.createSub("Storage");
     const myanimenotesSync = generateMyAnimeNotesSync(item);
 
-    debug.log(`[Storage] Saving item: ${myanimenotesSync}`);
+    debug.info(`Saving item: ${myanimenotesSync}`);
 
     if (!plugin.lockManager) {
         throw new Error("Lock manager not initialized");
@@ -523,8 +525,12 @@ export async function saveMediaItem(
                     myanimenotesSync,
                     folderPath
                 );
-            default:
-                throw new Error(`Unknown lookup type: ${lookup.type}`);
+            default: {
+                const exhaustiveCheck: never = lookup.type;
+                throw new Error(
+                    `Unknown lookup type: ${String(exhaustiveCheck)}`
+                );
+            }
         }
     });
 }
@@ -548,14 +554,14 @@ export async function saveMediaItems(
     config: StorageConfig,
     progressCallback?: ProgressCallback
 ): Promise<SyncActionResult[]> {
-    const debug = createDebugLogger(plugin, "Storage");
+    const debug = log.createSub("Storage");
     const startTime = Date.now();
 
     if (items.length === 0) {
         return [];
     }
 
-    debug.log(`[Storage] Batch save starting: ${items.length} items`);
+    debug.info(`Batch save starting: ${items.length} items`);
 
     // PREPARE PHASE: Batch preparation (all cache reads + decisions upfront)
     let folderPath =
@@ -570,15 +576,13 @@ export async function saveMediaItems(
     }
 
     // Build index before calling prepareBatchItems
-    debug.log(`[Storage] Building fresh myanimenotes index for batch...`);
+    debug.info(`Building fresh myanimenotes index for batch...`);
     const indexStartTime = Date.now();
     const index = await buildMyAnimeNotesIndex(plugin);
     const indexDuration = Date.now() - indexStartTime;
-    debug.log(
-        `[Storage] Index built: ${index.size} identifiers (${indexDuration}ms)`
-    );
+    debug.info(`Index built: ${index.size} identifiers (${indexDuration}ms)`);
 
-    debug.log(`[Storage] Starting batch preparation phase...`);
+    debug.info(`Starting batch preparation phase...`);
     const prepStartTime = Date.now();
 
     // INDEX to prepareBatchItems
@@ -591,7 +595,7 @@ export async function saveMediaItems(
     );
 
     const prepDuration = Date.now() - prepStartTime;
-    debug.log(`[Storage] Batch preparation complete: ${prepDuration}ms`);
+    debug.info(`Batch preparation complete: ${prepDuration}ms`);
 
     // FAST-PATH: Record all skips instantly (no I/O)
     const results: SyncActionResult[] = [];
@@ -601,13 +605,11 @@ export async function saveMediaItems(
     if (skippedItems.length > 0) {
         const skipResults = createSkipResults(skippedItems);
         results.push(...skipResults);
-        debug.log(
-            `[Storage] Recorded ${skippedItems.length} skips (fast-path, < 1ms)`
-        );
+        debug.info(`Recorded ${skippedItems.length} skips (fast-path, < 1ms)`);
     }
 
     // PROCESS PHASE: Update items with UI yielding
-    debug.log(`[Storage] Processing ${itemsToProcess.length} items...`);
+    debug.info(`Processing ${itemsToProcess.length} items...`);
     const processStartTime = Date.now();
 
     for (let i = 0; i < itemsToProcess.length; i++) {
@@ -647,10 +649,12 @@ export async function saveMediaItems(
                     );
                     break;
 
-                default:
+                default: {
+                    const exhaustiveCheck: never = batch.lookup.type;
                     throw new Error(
-                        `Unknown lookup type: ${batch.lookup.type}`
+                        `Unknown lookup type: ${String(exhaustiveCheck)}`
                     );
+                }
             }
 
             results.push(result);
@@ -669,18 +673,15 @@ export async function saveMediaItems(
                 await yieldToUI();
             }
         } catch (error) {
-            console.error(
-                `[Storage] Failed to save ${batch.item.title}:`,
-                error
-            );
+            debug.error(`Failed to save ${batch.item.title}:`, error);
         }
     }
 
     const processDuration = Date.now() - processStartTime;
     const totalDuration = Date.now() - startTime;
 
-    debug.log(
-        `[Storage] Batch save complete: ${results.length} results ` +
+    debug.info(
+        `Batch save complete: ${results.length} results ` +
             `(prep: ${prepDuration}ms, process: ${processDuration}ms, total: ${totalDuration}ms)`
     );
 
@@ -696,7 +697,7 @@ export async function saveMediaItemsByCategory(
     config: StorageConfig,
     progressCallback?: ProgressCallback
 ): Promise<{ anime: string[]; manga: string[] }> {
-    const debug = createDebugLogger(plugin, "Storage");
+    const debug = log.createSub("Storage");
     const animePaths: string[] = [];
     const mangaPaths: string[] = [];
 
@@ -707,8 +708,8 @@ export async function saveMediaItemsByCategory(
         item => item.category === MediaCategory.MANGA
     );
 
-    debug.log(
-        `[Storage] Category split: ${animeItems.length} anime, ${mangaItems.length} manga`
+    debug.info(
+        `Category split: ${animeItems.length} anime, ${mangaItems.length} manga`
     );
 
     if (animeItems.length > 0) {

@@ -12,7 +12,7 @@ import type MyAnimeNotesPlugin from "../main";
 import type { UniversalMediaItem } from "../transformers";
 import type { MyAnimeNotesIndex } from "./indexing";
 import { getFilesFromIndex } from "./indexing";
-import { createDebugLogger } from "../utils";
+import { log } from "../utils";
 
 /**
  * Validates myanimenotes format: provider:category:id
@@ -76,7 +76,7 @@ export function selectDeterministicFile(
     plugin: MyAnimeNotesPlugin,
     files: TFile[]
 ): TFile {
-    const debug = createDebugLogger(plugin, "MyAnimeNotesSync");
+    const debug = log.createSub("MyAnimeNotesSync");
 
     if (files.length === 0) {
         throw new Error("No files provided for selection");
@@ -85,8 +85,8 @@ export function selectDeterministicFile(
     // Sort by mtime descending (most recent first)
     const sorted = [...files].sort((a, b) => b.stat.mtime - a.stat.mtime);
 
-    debug.log(
-        `[MyAnimeNotesSync] Selected file from ${files.length} candidates: ${sorted[0].path} (most recent)`
+    debug.info(
+        `Selected file from ${files.length} candidates: ${sorted[0].path} (most recent)`
     );
     return sorted[0];
 }

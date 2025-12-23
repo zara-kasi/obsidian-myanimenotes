@@ -17,7 +17,7 @@
 
 import { TFile } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
-import { createDebugLogger } from "../utils";
+import { log } from "../utils";
 
 /**
  * Index result: simple Map from myanimenotes -> files
@@ -39,19 +39,19 @@ export type MyAnimeNotesIndex = Map<string, TFile[]>;
  * const files = index.get("mal:anime:1245") || [];
  * console.log(`Found ${files.length} files`);
  */
+
 export async function buildMyAnimeNotesIndex(
     plugin: MyAnimeNotesPlugin
 ): Promise<MyAnimeNotesIndex> {
-    const debug = createDebugLogger(plugin, "JITIndex");
+    const debug = log.createSub("JITIndex");
     const startTime = Date.now();
-
     const { vault, metadataCache } = plugin.app;
     const allFiles = vault.getMarkdownFiles();
 
     // Simple Map: myanimenotes -> files
     const index: MyAnimeNotesIndex = new Map();
 
-    debug.log(`[JITIndex] Building index from ${allFiles.length} files...`);
+    debug.info(`Building index from ${allFiles.length} files...`);
 
     let filesWithMyAnimeNotes = 0;
 
@@ -59,8 +59,10 @@ export async function buildMyAnimeNotesIndex(
     for (const file of allFiles) {
         try {
             const cache = metadataCache.getFileCache(file);
-            const myanimenotes = cache?.frontmatter?.myanimenotes;
 
+            const myanimenotes = cache?.frontmatter?.myanimenotes as
+                | string
+                | undefined;
             // Validate and add to index
 
             if (myanimenotes && typeof myanimenotes === "string") {
@@ -72,7 +74,7 @@ export async function buildMyAnimeNotesIndex(
             }
         } catch (error) {
             // Skip files that can't be read
-            debug.log(`[JITIndex] Failed to read ${file.path}:`, error);
+            debug.warn(`Failed to read ${file.path}:`, error);
         }
     }
 
@@ -87,8 +89,8 @@ export async function buildMyAnimeNotesIndex(
         }
     }
 
-    debug.log(
-        `[JITIndex] Index built: ${allFiles.length} files scanned, ` +
+    debug.info(
+        `Index built: ${allFiles.length} files scanned, ` +
             `${filesWithMyAnimeNotes} with myanimenotes, ` +
             `${uniqueIdentifiers} unique identifiers, ` +
             `${duplicateCount} duplicates, ` +

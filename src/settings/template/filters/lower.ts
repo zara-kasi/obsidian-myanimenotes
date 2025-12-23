@@ -4,14 +4,21 @@
  * Converts text to lowercase
  */
 
-export function lower(value: unknown): string | string[] | null | undefined | '' {
+export function lower(value: unknown): string | string[] | null | undefined {
   if (value === undefined || value === null || value === '') {
     return value;
   }
 
   if (Array.isArray(value)) {
-    return value.map(item => String(item).toLowerCase());
+    return value.map(item => {
+      if (typeof item === 'string') return item.toLowerCase();
+      return JSON.stringify(item).toLowerCase();
+    });
   }
 
-  return String(value).toLowerCase();
+  if (typeof value === 'string') {
+    return value.toLowerCase();
+  }
+  
+  return JSON.stringify(value).toLowerCase();
 }

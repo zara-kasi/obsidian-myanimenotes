@@ -10,6 +10,7 @@ import {
     createTemplateSettingsState,
     TemplateSettingsState
 } from "./template";
+import { configureLogger } from "../utils";
 
 export class MyAnimeNotesSettingTab extends PluginSettingTab {
     plugin: MyAnimeNotesPlugin;
@@ -119,7 +120,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName("Efficient auto-sync")
             .setDesc(
-                "Reduce API requests by only auto-syncing 'Watching' and 'Reading' items."
+                "Reduce API requests by only auto-syncing watching and reading items."
             )
             .addToggle(toggle =>
                 toggle
@@ -132,7 +133,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
 
         // Force full sync toggle
         new Setting(containerEl)
-            .setName("Ignore Timestamps")
+            .setName("Ignore timestamps")
             .setDesc("Skip the timestamp check and update every file.")
             .addToggle(toggle =>
                 toggle
@@ -143,7 +144,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     })
             );
 
-        // Debug mode
+        // Debug mode setting
         new Setting(containerEl)
             .setName("Debug mode")
             .setDesc("Enable detailed console logging.")
@@ -153,6 +154,9 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     .onChange(async value => {
                         this.plugin.settings.debugMode = value;
                         await this.plugin.saveSettings();
+
+                        // UPDATE LOGGER CONFIGURATION INSTANTLY
+                        configureLogger(this.plugin.settings);
                     })
             );
     }
@@ -200,7 +204,9 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
 
                 if (window.require) {
-                    const { shell } = window.require("electron");
+                    const { shell } = window.require("electron") as {
+                        shell: { openExternal: (url: string) => void };
+                    };
                     shell.openExternal(profileUrl);
                 } else {
                     window.open(profileUrl, "_blank");
@@ -229,11 +235,11 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
         if (!isAuth) {
             // Client ID
             new Setting(container)
-                .setName("Client id")
-                .setDesc("Your myanimelist client id.")
+                .setName("Client ID")
+                .setDesc("Your myanimelist client ID.")
                 .addText(text =>
                     text
-                        .setPlaceholder("Enter client id")
+                        .setPlaceholder("Enter client ID")
                         .setValue(this.plugin.settings.malClientId)
                         .onChange(async value => {
                             this.plugin.settings.malClientId = value.trim();
@@ -274,7 +280,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
             // Add description with "Learn more" link
             const descEl = authSetting.descEl;
             descEl.createSpan({
-                text: "Link your MyAnimeList account. "
+                text: "Link your myanimelist account. "
             });
             descEl
                 .createEl("a", {
