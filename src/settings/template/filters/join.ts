@@ -11,8 +11,8 @@ export function join(value: unknown, separator = ', '): string {
 
   // If not an array, return as string
   if (!Array.isArray(value)) {
-    return String(value);
-  }
+  return typeof value === 'string' ? value : JSON.stringify(value);
+}
 
   // Filter out empty values and join
   return value

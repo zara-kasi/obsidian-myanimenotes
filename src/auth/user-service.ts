@@ -1,7 +1,7 @@
 // User information management
 
 import { requestUrl } from 'obsidian';
-import type MyAnimeNotesPlugin from '../../../main';
+import type MyAnimeNotesPlugin from '../main';
 import type { MALUserInfo } from './types';
 import { MAL_USER_URL } from './constants';
 
@@ -24,14 +24,18 @@ export async function fetchUserInfo(plugin: MyAnimeNotesPlugin): Promise<void> {
     throw new Error(`Could not fetch user info (HTTP ${res.status})`);
   }
   
-  const fullResponse = res.json || JSON.parse(res.text);
-  
-  // Only save necessary fields
-  plugin.settings.malUserInfo = {
-    id: fullResponse.id,
-    name: fullResponse.name,
-    picture: fullResponse.picture
-  };
+  const fullResponse = (res.json || JSON.parse(res.text)) as {
+  id: number;
+  name: string;
+  picture?: string;
+};
+
+// Only save necessary fields
+plugin.settings.malUserInfo = {
+  id: fullResponse.id,
+  name: fullResponse.name,
+  picture: fullResponse.picture
+};
   
   await plugin.saveSettings();
 }

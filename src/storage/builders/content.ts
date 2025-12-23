@@ -7,7 +7,7 @@
 
 import { stringifyYaml } from 'obsidian';
 import type { UniversalMediaItem } from '../../transformers';
-import { resolveTemplate } from './template-parser';
+import { resolveTemplate } from '../../settings/template';
 
 /**
  * Generates complete initial file content
@@ -33,8 +33,11 @@ export function generateInitialFileContent(
   
   // Combine: frontmatter + blank line + content
   if (resolvedContent) {
-    return `---\n${frontmatterYaml}---\n\n${resolvedContent}`;
-  } else {
-    return `---\n${frontmatterYaml}---\n`;
-  }
+  const contentStr = Array.isArray(resolvedContent) 
+    ? resolvedContent.join('\n') 
+    : String(resolvedContent);
+  return `---\n${frontmatterYaml}---\n\n${contentStr}`;
+} else {
+  return `---\n${frontmatterYaml}---\n`;
+}
 }

@@ -2,73 +2,73 @@
 
 /* MAL User Info Wrapper Container */
 .myanimenotes-user-info-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 16px;
 }
 
 /* User Details (avatar and name) on the left */
 .myanimenotes-user-details {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
 }
 
 /* Setting with user info remove default flex behavior */
 .setting-item:has(.myanimenotes-user-info-wrapper) {
-  display: block;
+    display: block;
 }
 
 .setting-item:has(.myanimenotes-user-info-wrapper) .setting-item-control {
-  justify-content: flex-start;
-  width: 100%;
+    justify-content: flex-start;
+    width: 100%;
 }
 
 /* MAL User Avatar */
 .myanimenotes-user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  object-fit: cover;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
 }
 
 /* MAL User Name */
 .myanimenotes-user-name {
-  font-size: 1.1em;
-  font-weight: 500;
-  color: var(--text-normal);
-  text-decoration: none;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--text-normal);
+    text-decoration: none;
 }
 
 .myanimenotes-user-name:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 /* Button Container on the right */
 .myanimenotes-button-container {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 /* Logout Button */
 .myanimenotes-logout-button {
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 2px !important;
-  font-size: 1.1em;
-  font-weight: 500;
-  text-decoration: none;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 2px !important;
+    font-size: 1.1em;
+    font-weight: 500;
+    text-decoration: none;
 }
 
 .myanimenotes-logout-button:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 /* ========================================================================
@@ -77,202 +77,234 @@
 
 /* Clickable setting for expand/collapse */
 .myanimenotes-clickable-setting {
-  cursor: pointer;
-  position: relative;
+    cursor: pointer;
+    position: relative;
 }
 
 .myanimenotes-clickable-setting:hover {
-  background-color: var(--background-modifier-hover);
+    background-color: var(--background-modifier-hover);
 }
 
 /* Collapse/Expand icon - absolutely positioned to align with setting name */
 .myanimenotes-collapse-icon {
-  position: absolute;
-  right: 16px;
-  top: 20px; /* Aligns with the setting name line */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  pointer-events: none; /* Allow clicks to pass through to parent */
+    position: absolute;
+    right: 16px;
+    top: 20px; /* Aligns with the setting name line */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    pointer-events: none; /* Allow clicks to pass through to parent */
 }
 
 .myanimenotes-collapse-icon svg {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 /* Template content container */
 .myanimenotes-template-content {
-  padding-left: 16px;
-  margin-top: 8px;
+    padding-left: 16px;
+    margin-top: 8px;
 }
 
 /* Property List */
 .myanimenotes-property-list {
-  margin: 8px 0;
+    margin: 8px 0;
 }
 
 /* Property Row */
 .myanimenotes-property-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  margin-bottom: 4px;
-  cursor: move;
-  border-radius: 4px;
-  transition: background-color 0.1s ease;
-  position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 4px;
+    cursor: move;
+    border-radius: 4px;
+    transition: background-color 0.1s ease;
+    position: relative;
 }
 
 .myanimenotes-property-row.dragging {
-  opacity: 0.5;
+    opacity: 0.5;
 }
 
 .myanimenotes-property-row.drag-over-top::before,
 .myanimenotes-property-row.drag-over-bottom::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background-color: var(--interactive-accent);
-  opacity: 0.15;
-  border-radius: 4px;
-  pointer-events: none;
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background-color: var(--interactive-accent);
+    opacity: 0.15;
+    border-radius: 4px;
+    pointer-events: none;
 }
 
 .myanimenotes-property-row.drag-over-top::before {
-  top: -2px;
+    top: -2px;
 }
 
 .myanimenotes-property-row.drag-over-bottom::after {
-  bottom: -2px;
+    bottom: -2px;
 }
 
 /* Drag Handle */
 .myanimenotes-drag-handle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-faint);
-  cursor: grab;
-  flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-faint);
+    cursor: grab;
+    flex-shrink: 0;
 }
 
 .myanimenotes-drag-handle svg {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 .myanimenotes-drag-handle:active {
-  cursor: grabbing;
+    cursor: grabbing;
 }
 
 /* Property Inputs */
 .myanimenotes-property-name,
 .myanimenotes-template-var {
-  padding: 4px 8px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: var(--input-radius);
-  background-color: var(--background-primary);
-  color: var(--text-normal);
-  font-size: var(--font-ui-small);
+    padding: 4px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--input-radius);
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: var(--font-ui-small);
 }
 
 .myanimenotes-property-name {
-  flex: 0 0 150px;
+    flex: 0 0 150px;
 }
 
 .myanimenotes-template-var {
-  flex: 1;
-  font-family: var(--font-monospace);
+    flex: 1;
+    font-family: var(--font-monospace);
 }
 
 .myanimenotes-property-name:focus,
 .myanimenotes-template-var:focus {
-  border-color: var(--interactive-accent);
+    border-color: var(--interactive-accent);
 }
 
 /* Delete Button */
 .myanimenotes-delete-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-faint);
-  cursor: pointer;
-  padding: 4px;
-  flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-faint);
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
 }
 
 .myanimenotes-delete-button svg {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 .myanimenotes-delete-button:hover {
-  color: var(--text-muted);
+    color: var(--text-muted);
 }
 
 /* Delete button spacer for permanent properties */
 .myanimenotes-delete-button-spacer {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
 }
 
 /* Add Property Button */
 
 .myanimenotes-add-property-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: transparent !important;
-  line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: transparent !important;
+    line-height: 1;
 }
 
 .myanimenotes-button-icon svg {
-  display: block;
+    display: block;
 }
 
 /* Variable Suggestion Styles */
 .myanimenotes-variable-suggestion {
-  padding: 4px 8px;
+    padding: 4px 8px;
 }
 
 .myanimenotes-variable-key {
-  font-family: var(--font-monospace);
-  font-weight: 500;
-  color: var(--text-normal);
-  font-size: var(--font-ui-small);
+    font-family: var(--font-monospace);
+    font-weight: 500;
+    color: var(--text-normal);
+    font-size: var(--font-ui-small);
 }
 
 .myanimenotes-variable-label {
-  font-size: var(--font-ui-smaller);
-  color: var(--text-muted);
-  margin-top: 2px;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    margin-top: 2px;
 }
 
 /* Note Content TextArea Setting - remove separator line for cleaner appearance */
 .myanimenotes-textarea-setting {
-  border-top: none !important;
-  padding-top: 0 !important;
+    border-top: none !important;
+    padding-top: 0 !important;
 }
 
 .myanimenotes-textarea-setting .setting-item-info {
-  display: none; /* Hide the info column since we don't need it */
+    display: none; /* Hide the info column since we don't need it */
 }
 
 .myanimenotes-textarea-setting .setting-item-control {
-  width: 100%;
+    width: 100%;
 }
 
 .myanimenotes-textarea-setting textarea {
-  resize: vertical; /* Allow users to resize vertically if needed */
+    resize: vertical; /* Allow users to resize vertically if needed */
 }
 
 .myanimenotes-template-textarea {
-  width: 100%;
-  font-family: var(--font-monospace);
+    width: 100%;
+    font-family: var(--font-monospace);
+}
+
+/* Type icon styles */
+
+.myanimenotes-type-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    border-radius: 4px;
+    transition: all 0.1s ease;
+}
+
+.myanimenotes-type-icon-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.myanimenotes-type-icon-clickable {
+    cursor: pointer;
+}
+
+.myanimenotes-type-icon-clickable:hover {
+    color: var(--text-normal);
+    background-color: var(--background-modifier-hover);
+}
+
+.myanimenotes-type-icon-readonly {
+    opacity: 0.5;
 }

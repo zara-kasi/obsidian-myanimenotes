@@ -53,4 +53,3 @@ All trademarks and content belong to their respective owners.
 
 - [MyAnimeList API License & Developer Agreement](https://myanimelist.net/static/apiagreement.html)  
 - [Official MAL API Club Page](https://myanimelist.net/clubs.php?cid=13727)
-

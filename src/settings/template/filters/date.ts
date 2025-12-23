@@ -11,7 +11,8 @@ export function date(value: unknown, format = 'YYYY-MM-DD'): string {
     return '';
   }
 
-  const dateStr = String(value);
+  const dateStr = typeof value === 'string' ? value : JSON.stringify(value);
+
   const parsed = moment(dateStr);
 
   if (!parsed.isValid()) {

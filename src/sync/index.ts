@@ -8,7 +8,4 @@ export type { CompleteSyncOptions } from './sync-manager';
 export { syncMAL, quickSyncMAL } from './mal-sync-service';
 export type { MALSyncOptions } from './mal-sync-service';
 
-// Auto-sync functionality
-export { AutoSyncManager, createAutoSyncManager } from './auto-sync';
-
 export * from './sync.types';

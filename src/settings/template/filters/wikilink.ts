@@ -1,10 +1,14 @@
 /**
  * Wikilink Filter
- * 
+ *
  * Converts values into Obsidian wikilinks [[value]]
  */
 
+<<<<<<< HEAD:src/utils/filters/wikilink.ts
 export function wikilink(value: unknown): string | string[] | null | undefined | '' {
+=======
+export function wikilink(value: unknown): string | string[] | null | undefined {
+>>>>>>> dev:src/settings/template/filters/wikilink.ts
   if (value === undefined || value === null || value === '') {
     return value;
   }
@@ -12,12 +16,12 @@ export function wikilink(value: unknown): string | string[] | null | undefined |
   // Handle arrays
   if (Array.isArray(value)) {
     return value.map(item => {
-      const str = String(item).trim();
+      const str = (typeof item === 'string' ? item : JSON.stringify(item)).trim();
       return str ? `[[${str}]]` : str;
     });
   }
 
   // Handle single values
-  const str = String(value).trim();
+  const str = (typeof value === 'string' ? value : JSON.stringify(value)).trim();
   return str ? `[[${str}]]` : str;
 }
