@@ -10,8 +10,8 @@
 
 import type { UniversalMediaItem } from "../../transformers";
 import type { TemplateConfig } from "../../settings/template";
-import { resolveTemplate } from "./template-parser";
-import { formatPropertyValue } from "../../settings/template";
+import { formatPropertyValue, 
+resolveTemplate } from "../../settings/template";
 
 /**
  * Builds frontmatter properties from template configuration

@@ -8,7 +8,7 @@ import { TFile } from "obsidian";
 import type MyAnimeNotesPlugin from "../../main";
 import type { UniversalMediaItem } from "../../transformers";
 import type { TemplateConfig } from "../../settings/template";
-import { buildFrontmatterFromTemplate } from "./frontmatter-builder";
+import { buildFrontmatterFromTemplate } from "./frontmatter";
 import { createDebugLogger } from "../../utils";
 
 /**

@@ -16,3 +16,4 @@ export {
 export { renderTemplateSection, createTemplateSettingsState } from "./ui";
 export type { TemplateSettingsState } from "./ui";
 export { formatPropertyValue } from "./properties";
+export { resolveTemplate } from "./parser";

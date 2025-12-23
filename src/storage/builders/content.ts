@@ -7,7 +7,7 @@
 
 import { stringifyYaml } from 'obsidian';
 import type { UniversalMediaItem } from '../../transformers';
-import { resolveTemplate } from './template-parser';
+import { resolveTemplate } from '../../settings/template';
 
 /**
  * Generates complete initial file content

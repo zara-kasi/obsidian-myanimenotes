@@ -10,16 +10,14 @@ import {
     findFilesByMyAnimeNotesSync,
     selectDeterministicFile
 } from "../core";
-import {
-    buildMyAnimeNotesIndex,
-    type MyAnimeNotesIndex
-} from "../core";
-import { ensureFolderExists, generateUniqueFilename } from "./file-utils";
+import { buildMyAnimeNotesIndex, type MyAnimeNotesIndex } from "../core";
 import {
     generateFrontmatterProperties,
     updateMarkdownFileFrontmatter,
-    generateInitialFileContent
-} from "./markdown";
+    generateInitialFileContent,
+    ensureFolderExists,
+    generateUniqueFilename
+} from "./builders";
 import { createDebugLogger } from "../utils";
 import type { TFile } from "obsidian";
 import { normalizePath } from "obsidian";

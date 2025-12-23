@@ -11,15 +11,3 @@ export {
     saveMediaItems,
     saveMediaItemsByCategory
 } from "./storage-service";
-
-// File utilities (internal, but exported for testing/advanced use)
-export { ensureFolderExists, generateUniqueFilename } from "./file-utils";
-
-// Markdown generation (internal, but exported for testing/advanced use)
-export {
-    generateFrontmatterProperties,
-    updateMarkdownFileFrontmatter
-} from "./markdown";
-
-// Frontmatter builder
-export { buildFrontmatterFromTemplate } from "./markdown";

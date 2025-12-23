@@ -4,8 +4,8 @@
  * Helper functions for file operations, path handling
  */
 
-import type MyAnimeNotesPlugin from "../main";
-import { createDebugLogger } from "../utils";
+import type MyAnimeNotesPlugin from "../../main";
+import { createDebugLogger } from "../../utils";
 import { normalizePath } from "obsidian";
 import type { Vault } from "obsidian";
 
