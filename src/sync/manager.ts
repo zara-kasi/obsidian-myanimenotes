@@ -1,33 +1,26 @@
 import type MyAnimeNotesPlugin from "../main";
 import type { UniversalMediaItem } from "../transformers";
-import type { SyncResult } from "./sync.types";
 import { MediaCategory } from "../transformers";
-import { syncMAL, type MALSyncOptions } from "./mal-sync-service";
+import { syncMAL } from "./service";
 import { saveMediaItemsByCategory, type StorageConfig } from "../storage";
-import { log, type Logger } from "../utils";
-import { showNotice } from "../utils";
+import { log, type Logger, showNotice } from "../utils";
 import {
     DEFAULT_ANIME_TEMPLATE,
     DEFAULT_MANGA_TEMPLATE
 } from "../settings/template";
-/**
- * Complete sync options
- */
-export interface CompleteSyncOptions extends MALSyncOptions {
-    saveToVault?: boolean;
-    storageConfig?: StorageConfig;
-}
 
-const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+// Local imports
+import { SYNC_COOLDOWN_MS } from "./constants";
+import type { CompleteSyncOptions, SyncResult, MALSyncOptions } from "./types";
 
 /**
  * Sync manager class
  */
-
 export class SyncManager {
     private debug: Logger;
     private isSyncing = false;
     private lastSyncTime = 0;
+
     constructor(private plugin: MyAnimeNotesPlugin) {
         this.debug = log.createSub("SyncManager");
         // Load persisted last sync time from settings
@@ -57,6 +50,7 @@ export class SyncManager {
 
     /**
      * Saves the last successful sync timestamp
+     * (Note: Logic preserved, though internal usage is currently implicit in syncFromMAL)
      */
     private async saveLastSyncTimestamp(): Promise<void> {
         this.plugin.settings.lastSuccessfulSync = Date.now();

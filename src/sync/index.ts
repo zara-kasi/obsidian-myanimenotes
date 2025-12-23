@@ -1,11 +1,12 @@
 // Central export point for sync functionality
 
 // Core sync manager
-export { SyncManager, createSyncManager } from './sync-manager';
-export type { CompleteSyncOptions } from './sync-manager';
+export { SyncManager, createSyncManager } from "./manager";
 
-// MAL sync service
-export { syncMAL, quickSyncMAL } from './mal-sync-service';
-export type { MALSyncOptions } from './mal-sync-service';
+// Export types
+export * from "./types";
 
-export * from './sync.types';
+// Export constants if needed externally
+export * from "./constants";
+
+export { syncMAL, quickSyncMAL } from "./service";
