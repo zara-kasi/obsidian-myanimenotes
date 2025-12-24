@@ -1,7 +1,7 @@
 import { normalizePath, type TFile } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
-import type { UniversalMediaItem } from "../transformers";
-import { MediaCategory } from "../transformers";
+import type { MediaItem } from "../models";
+import { MediaCategory } from "../models";
 import {
     DEFAULT_ANIME_TEMPLATE,
     DEFAULT_MANGA_TEMPLATE
@@ -23,7 +23,7 @@ import { selectDeterministicFile } from "../core";
 export async function handleExactMatch(
     plugin: MyAnimeNotesPlugin,
     file: TFile,
-    item: UniversalMediaItem,
+    item: MediaItem,
     config: StorageConfig,
     myanimenotesSync: string
 ): Promise<SyncActionResult> {
@@ -52,7 +52,7 @@ export async function handleExactMatch(
 export async function handleDuplicates(
     plugin: MyAnimeNotesPlugin,
     files: TFile[],
-    item: UniversalMediaItem,
+    item: MediaItem,
     config: StorageConfig,
     myanimenotesSync: string
 ): Promise<SyncActionResult> {
@@ -87,7 +87,7 @@ export async function handleDuplicates(
 
 export async function createNewFile(
     plugin: MyAnimeNotesPlugin,
-    item: UniversalMediaItem,
+    item: MediaItem,
     config: StorageConfig,
     myanimenotesSync: string,
     folderPath: string

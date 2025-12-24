@@ -8,7 +8,7 @@
  * Now returns plain objects - Obsidian's FileManager.processFrontMatter handles YAML
  */
 
-import type { UniversalMediaItem } from "../../transformers";
+import type { MediaItem } from "../../models";
 import type { TemplateConfig } from "../../settings/template";
 import { formatPropertyValue, 
 resolveTemplate } from "../../settings/template";
@@ -24,7 +24,7 @@ resolveTemplate } from "../../settings/template";
  */
 
 export function buildFrontmatterFromTemplate(
-    item: UniversalMediaItem,
+    item: MediaItem,
     template: TemplateConfig,
     myanimenotesSync: string
 ): Record<string, unknown> {

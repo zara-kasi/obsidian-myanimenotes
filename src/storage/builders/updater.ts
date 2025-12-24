@@ -6,7 +6,7 @@
  */
 import { TFile } from "obsidian";
 import type MyAnimeNotesPlugin from "../../main";
-import type { UniversalMediaItem } from "../../transformers";
+import type { MediaItem } from "../../models";
 import type { TemplateConfig } from "../../settings/template";
 import { buildFrontmatterFromTemplate } from "./frontmatter";
 import { log } from "../../utils";
@@ -22,7 +22,7 @@ import { log } from "../../utils";
 
 export function generateFrontmatterProperties(
     plugin: MyAnimeNotesPlugin,
-    item: UniversalMediaItem,
+    item: MediaItem,
     template: TemplateConfig,
     myanimenotesSync: string
 ): Record<string, unknown> {

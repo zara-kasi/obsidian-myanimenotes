@@ -1,7 +1,7 @@
 import { normalizePath } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
-import type { UniversalMediaItem } from "../transformers";
-import { MediaCategory } from "../transformers";
+import type { MediaItem } from "../models";
+import { MediaCategory } from "../models";
 import { buildMyAnimeNotesIndex, generateMyAnimeNotesSync } from "../core";
 import { ensureFolderExists } from "./builders";
 import { log } from "../utils";
@@ -28,7 +28,7 @@ import { prepareBatchItems, createSkipResults } from "./batching";
  */
 export async function saveMediaItem(
     plugin: MyAnimeNotesPlugin,
-    item: UniversalMediaItem,
+    item: MediaItem,
     config: StorageConfig
 ): Promise<SyncActionResult> {
     const debug = log.createSub("Storage");
@@ -109,7 +109,7 @@ export async function saveMediaItem(
 
 export async function saveMediaItems(
     plugin: MyAnimeNotesPlugin,
-    items: UniversalMediaItem[],
+    items: MediaItem[],
     config: StorageConfig,
     progressCallback?: ProgressCallback
 ): Promise<SyncActionResult[]> {
@@ -252,7 +252,7 @@ export async function saveMediaItems(
  */
 export async function saveMediaItemsByCategory(
     plugin: MyAnimeNotesPlugin,
-    items: UniversalMediaItem[],
+    items: MediaItem[],
     config: StorageConfig,
     progressCallback?: ProgressCallback
 ): Promise<{ anime: string[]; manga: string[] }> {

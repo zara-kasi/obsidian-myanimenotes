@@ -9,7 +9,7 @@
 
 import { TFile } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
-import type { UniversalMediaItem } from "../transformers";
+import type { MediaItem } from "../models";
 import type { MyAnimeNotesIndex } from "./indexing";
 import { getFilesFromIndex } from "./indexing";
 import { log } from "../utils";
@@ -37,7 +37,7 @@ export function validateMyAnimeNotesSyncFormat(
  * Generates myanimenotes identifier from media item
  * Format: provider:category:id (e.g., mal:anime:1245)
  */
-export function generateMyAnimeNotesSync(item: UniversalMediaItem): string {
+export function generateMyAnimeNotesSync(item: MediaItem): string {
     const provider = item.platform.toLowerCase();
     const category = item.category.toLowerCase();
     const id = String(item.id);

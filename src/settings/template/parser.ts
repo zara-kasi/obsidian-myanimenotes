@@ -1,7 +1,7 @@
 /**
  * Template Parser
  *
- * Resolves template strings by replacing {{variables}} with actual values from UniversalMediaItem.
+ * Resolves template strings by replacing {{variables}} with actual values from MediaItem.
  * Supports:
  * - Multiple variables: "{{numEpisodes}} episodes / {{numEpisodesWatched}} watched"
  * - Mixed content: "Score: {{userScore}}/10"
@@ -9,10 +9,7 @@
  * - Filters: "{{studios|wiklink|join:', '}}"
  */
 
-import type {
-    UniversalMediaItem,
-    UniversalAlternativeTitles
-} from "../../transformers";
+import type { MediaItem, AlternativeTitles } from "../../models";
 import { applyFilters } from "../../settings/template/filters";
 
 /**
@@ -96,14 +93,14 @@ export function extractVariables(
 }
 
 /**
- * Resolves a property value from UniversalMediaItem
+ * Resolves a property value from MediaItem
  * Maps template variable names to actual item properties
  *
  * @param item - Media item with data
  * @param variableName - Variable name to resolve
  * @returns Resolved value or undefined if not found
  */ function resolvePropertyValue(
-    item: UniversalMediaItem,
+    item: MediaItem,
     variableName: string
 ): string | number | string[] | undefined {
     // Map of variable names to item properties
@@ -180,7 +177,7 @@ export function extractVariables(
 
 export function resolveTemplate(
     template: string,
-    item: UniversalMediaItem
+    item: MediaItem
 ): string | string[] | undefined {
     if (!template || template.trim() === "") {
         return undefined;
@@ -236,7 +233,11 @@ export function resolveTemplate(
 
             // Apply filters if present
             if (filters) {
-                value = applyFilters(value, filters, item) as string | number | string[] | undefined;
+                value = applyFilters(value, filters, item) as
+                    | string
+                    | number
+                    | string[]
+                    | undefined;
             }
 
             // Convert to string for template substitution
@@ -275,7 +276,7 @@ export function resolveTemplate(
  * Extracts alternative titles into array format for Obsidian aliases
  */
 function extractAliases(
-    alternativeTitles: UniversalAlternativeTitles | undefined
+    alternativeTitles: AlternativeTitles | undefined
 ): string[] | undefined {
     if (!alternativeTitles) return undefined;
 

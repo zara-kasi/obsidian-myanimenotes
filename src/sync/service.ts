@@ -1,6 +1,6 @@
 import type MyAnimeNotesPlugin from "../main";
-import type { UniversalMediaItem } from "../transformers";
-import { MediaCategory } from "../transformers";
+import type { MediaItem } from "../models";
+import { MediaCategory } from "../models";
 import type { SyncResult, SyncItemResult, MALSyncOptions } from "./types";
 import { isAuthenticated } from "../auth";
 import { log, showNotice } from "../utils";
@@ -16,11 +16,11 @@ import { syncAnimeList, syncMangaList } from "./fetchers";
 export async function syncMAL(
     plugin: MyAnimeNotesPlugin,
     options: MALSyncOptions = DEFAULT_SYNC_OPTIONS
-): Promise<{ items: UniversalMediaItem[]; result: SyncResult }> {
+): Promise<{ items: MediaItem[]; result: SyncResult }> {
     const debug = log.createSub("MALSync");
     const startTime = Date.now();
 
-    const allItems: UniversalMediaItem[] = [];
+    const allItems: MediaItem[] = [];
     const results: SyncItemResult[] = [];
     const errors: string[] = [];
 
@@ -147,7 +147,7 @@ export async function syncMAL(
 export async function quickSyncMAL(
     plugin: MyAnimeNotesPlugin,
     category: MediaCategory
-): Promise<UniversalMediaItem[]> {
+): Promise<MediaItem[]> {
     const options: MALSyncOptions = {
         syncAnime: category === MediaCategory.ANIME,
         syncManga: category === MediaCategory.MANGA

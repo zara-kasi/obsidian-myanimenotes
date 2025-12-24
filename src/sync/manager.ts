@@ -1,6 +1,6 @@
 import type MyAnimeNotesPlugin from "../main";
-import type { UniversalMediaItem } from "../transformers";
-import { MediaCategory } from "../transformers";
+import type { MediaItem } from "../models";
+import { MediaCategory } from "../models";
 import { syncMAL } from "./service";
 import { saveMediaItemsByCategory, type StorageConfig } from "../storage";
 import { log, type Logger, showNotice } from "../utils";
@@ -103,7 +103,7 @@ export class SyncManager {
      * @returns Synced items and result
      */
     async syncFromMAL(options: CompleteSyncOptions = {}): Promise<{
-        items: UniversalMediaItem[];
+        items: MediaItem[];
         result: SyncResult;
         savedPaths?: { anime: string[]; manga: string[] };
     }> {
@@ -187,7 +187,7 @@ export class SyncManager {
     async quickSync(
         category: MediaCategory,
         saveToVault = true
-    ): Promise<UniversalMediaItem[]> {
+    ): Promise<MediaItem[]> {
         this.debug.info(`Quick sync for ${category}...`);
 
         const options: MALSyncOptions = {
@@ -209,7 +209,7 @@ export class SyncManager {
      * @param saveToVault Whether to save to vault
      * @returns Synced anime items
      */
-    async syncAnime(saveToVault = true): Promise<UniversalMediaItem[]> {
+    async syncAnime(saveToVault = true): Promise<MediaItem[]> {
         return this.quickSync(MediaCategory.ANIME, saveToVault);
     }
 
@@ -218,7 +218,7 @@ export class SyncManager {
      * @param saveToVault Whether to save to vault
      * @returns Synced manga items
      */
-    async syncManga(saveToVault = true): Promise<UniversalMediaItem[]> {
+    async syncManga(saveToVault = true): Promise<MediaItem[]> {
         return this.quickSync(MediaCategory.MANGA, saveToVault);
     }
 
@@ -226,9 +226,7 @@ export class SyncManager {
      * Syncs active statuses: Watching anime + Reading manga
      * Used by both the "Sync active" command and optimized auto-sync
      */
-    async syncActiveStatuses(
-        saveToVault = true
-    ): Promise<UniversalMediaItem[]> {
+    async syncActiveStatuses(saveToVault = true): Promise<MediaItem[]> {
         this.debug.info(
             "Syncing active statuses (watching anime + reading manga)..."
         );

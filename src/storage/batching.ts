@@ -1,5 +1,5 @@
 import type MyAnimeNotesPlugin from "../main";
-import type { UniversalMediaItem } from "../transformers";
+import type { MediaItem } from "../models";
 import { generateMyAnimeNotesSync, type MyAnimeNotesIndex } from "../core";
 import { log } from "../utils";
 import type { BatchItem, StorageConfig, SyncActionResult } from "./types";
@@ -26,7 +26,7 @@ import {
  */
 export async function prepareBatchItems(
     plugin: MyAnimeNotesPlugin,
-    items: UniversalMediaItem[],
+    items: MediaItem[],
     config: StorageConfig,
     folderPath: string,
     index: MyAnimeNotesIndex
@@ -115,7 +115,9 @@ export async function prepareBatchItems(
  *
  * @returns Array of skipped results
  */
-export function createSkipResults(skippedItems: BatchItem[]): SyncActionResult[] {
+export function createSkipResults(
+    skippedItems: BatchItem[]
+): SyncActionResult[] {
     return skippedItems.map(batch => ({
         action: "skipped",
         filePath: batch.lookup.files[0]?.path || "",

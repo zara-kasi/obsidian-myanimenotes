@@ -1,5 +1,5 @@
 import type { TFile } from "obsidian";
-import type { UniversalMediaItem } from "../transformers";
+import type { MediaItem } from "../models";
 
 // ============================================================================
 // TYPES
@@ -39,7 +39,7 @@ export interface SkipCheckResult {
  * Computed upfront during batch preparation phase
  */
 export interface BatchItem {
-    item: UniversalMediaItem;
+    item: MediaItem;
     myanimenotesSync: string;
     cachedTimestamp: string | undefined;
     lookup: FileLookupResult;

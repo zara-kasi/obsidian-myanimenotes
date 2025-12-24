@@ -1,5 +1,5 @@
 import type MyAnimeNotesPlugin from "../main";
-import type { UniversalMediaItem, MALItem } from "../transformers";
+import type { MediaItem, MALItem } from "../models";
 import {
     fetchCompleteMALAnimeList,
     fetchCompleteMALMangaList,
@@ -7,7 +7,7 @@ import {
     fetchMALMangaByStatus,
     throttlePromises
 } from "../api";
-import { transformMALAnimeList, transformMALMangaList } from "../transformers";
+import { parseAnimeList, parseMangaList } from "../models";
 import { log } from "../utils";
 
 /**
@@ -19,7 +19,7 @@ import { log } from "../utils";
 export async function syncAnimeList(
     plugin: MyAnimeNotesPlugin,
     statuses?: string[]
-): Promise<UniversalMediaItem[]> {
+): Promise<MediaItem[]> {
     const debug = log.createSub("MALSync");
 
     debug.info("Starting anime sync...");
@@ -40,15 +40,15 @@ export async function syncAnimeList(
         );
 
         const animeResults = await throttlePromises(animePromises, 2, 300);
-        rawItems = animeResults.flat() as MALItem[];
+        rawItems = animeResults.flat();
     } else {
-        rawItems = (await fetchCompleteMALAnimeList(plugin)) as MALItem[];
+        rawItems = await fetchCompleteMALAnimeList(plugin);
     }
 
     debug.info(`Fetched ${rawItems.length} anime items`);
 
-    // Transform to universal format
-    const transformedItems = transformMALAnimeList(plugin, rawItems);
+    // Parse item
+    const transformedItems = parseAnimeList(plugin, rawItems);
 
     return transformedItems;
 }
@@ -62,7 +62,7 @@ export async function syncAnimeList(
 export async function syncMangaList(
     plugin: MyAnimeNotesPlugin,
     statuses?: string[]
-): Promise<UniversalMediaItem[]> {
+): Promise<MediaItem[]> {
     const debug = log.createSub("MALSync");
 
     debug.info("Starting manga sync...");
@@ -83,15 +83,15 @@ export async function syncMangaList(
         );
 
         const mangaResults = await throttlePromises(mangaPromises, 2, 300);
-        rawItems = mangaResults.flat() as MALItem[];
+        rawItems = mangaResults.flat();
     } else {
-        rawItems = (await fetchCompleteMALMangaList(plugin)) as MALItem[];
+        rawItems = await fetchCompleteMALMangaList(plugin);
     }
 
     debug.info(`[MAL Sync] Fetched ${rawItems.length} manga items`);
 
-    // Transform to universal format
-    const transformedItems = transformMALMangaList(plugin, rawItems);
+    // Parse item
+    const transformedItems = parseMangaList(plugin, rawItems);
 
     return transformedItems;
 }

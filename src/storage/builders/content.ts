@@ -6,7 +6,7 @@
  */
 
 import { stringifyYaml } from 'obsidian';
-import type { UniversalMediaItem } from '../../transformers';
+import type { MediaItem } from '../../models';
 import { resolveTemplate } from '../../settings/template';
 
 /**
@@ -21,7 +21,7 @@ import { resolveTemplate } from '../../settings/template';
 export function generateInitialFileContent(
   frontmatterProps: Record<string, unknown>,
   noteContentTemplate: string,
-  item: UniversalMediaItem
+  item: MediaItem
 ): string {
   // Use Obsidian's built-in YAML serializer
   const frontmatterYaml = stringifyYaml(frontmatterProps);

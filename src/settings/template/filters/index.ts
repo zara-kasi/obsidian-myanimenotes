@@ -5,9 +5,9 @@
  * Filters transform variable values (e.g., formatting, wikilinks, joins)
  */
 
-import type { UniversalMediaItem } from '../../../transformers';
+import type { MediaItem } from '../../../models';
 
-export type FilterFunction = (value: unknown, param?: string, item?: UniversalMediaItem) => unknown;
+export type FilterFunction = (value: unknown, param?: string, item?: MediaItem) => unknown;
 
 // Import individual filters
 import { wikilink } from './wikilink';
@@ -41,7 +41,7 @@ const filterRegistry: Record<string, FilterFunction> = {
  export function applyFilters(
   value: unknown,
   filterString: string,
-  item?: UniversalMediaItem
+  item?: MediaItem
 ): unknown {
   if (!filterString || filterString.trim() === '') {
     return value;
