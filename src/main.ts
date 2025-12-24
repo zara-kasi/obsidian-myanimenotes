@@ -35,7 +35,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
         this.addRibbonIcon(
             "cloud-download",
             "Myanimenotes sync all",
-            async (evt: MouseEvent) => {
+            async () => {
                 if (!this.syncManager) return;
                 await this.syncManager.syncFromMAL();
             }

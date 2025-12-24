@@ -83,7 +83,11 @@ export class AutoSyncManager extends Component {
         }
 
         const { SYNC_ON_LOAD_DELAY } = AUTO_SYNC_CONSTANTS;
-        this.debug.info("Timer started: Will sync in 2 minutes");
+        this.debug.info(
+            `Timer started: Will sync in ${
+                AUTO_SYNC_CONSTANTS.SYNC_ON_LOAD_DELAY / 60000
+            } minutes`
+        );
 
         this.syncOnLoadTimer = window.setTimeout(() => {
             void this.executeSync("Sync on Load", true); // true = check minimum interval
@@ -152,7 +156,6 @@ export class AutoSyncManager extends Component {
                     await this.plugin.syncManager.syncFromMAL();
                 }
                 this.debug.info(`[${source}] Completed successfully`);
-
             }
         } catch (error) {
             this.debug.error(`[${source}] Failed:`, error);

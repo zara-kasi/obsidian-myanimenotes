@@ -17,9 +17,6 @@ export interface MyAnimeNotesSettings {
         state: string;
         timestamp: number; // For expiry checking
     } | null;
-    // Advanced API settings
-    apiMaxRetries?: number;
-    apiRetryDelay?: number;
 
     // Template System
     animeTemplate?: TemplateConfig;

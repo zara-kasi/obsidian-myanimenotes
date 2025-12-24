@@ -1,6 +1,5 @@
 import type MyAnimeNotesPlugin from "../main";
-import type { MediaItem } from "../models";
-import { MediaCategory } from "../models";
+import { MediaCategory, type MediaItem } from "../models";
 import { syncMAL } from "./service";
 import { saveMediaItemsByCategory, type StorageConfig } from "../storage";
 import { log, type Logger, showNotice } from "../utils";
