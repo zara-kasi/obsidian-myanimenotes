@@ -4,7 +4,9 @@ import { requestUrl } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
 import type { MALTokenResponse } from "./types";
 import { MAL_TOKEN_URL, TOKEN_EXPIRY_BUFFER } from "./constants";
-import { log } from "../utils";
+import { logger } from "../utils/logger";
+
+const log = new logger("AuthTokenManager");
 
 /**
  * Checks if the current access token is valid
@@ -84,7 +86,6 @@ export async function refreshAccessToken(
 export async function ensureValidToken(
     plugin: MyAnimeNotesPlugin
 ): Promise<void> {
-    const debug = log.createSub("MAL-Auth");
     if (!isTokenValid(plugin)) {
         if (!plugin.settings.malRefreshToken) {
             throw new Error(
@@ -94,9 +95,9 @@ export async function ensureValidToken(
 
         try {
             await refreshAccessToken(plugin);
-            debug.info("Token automatically refreshed");
+            log.debug("Token automatically refreshed");
         } catch (e) {
-            debug.error("Automatic token refresh failed", e);
+            log.error("Automatic token refresh failed", e);
             plugin.settings.malAuthenticated = false;
             await plugin.saveSettings();
             throw new Error(

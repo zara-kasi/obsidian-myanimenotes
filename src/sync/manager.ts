@@ -2,26 +2,25 @@ import type MyAnimeNotesPlugin from "../main";
 import { MediaCategory, type MediaItem } from "../models";
 import { syncMAL } from "./service";
 import { saveMediaItemsByCategory, type StorageConfig } from "../storage";
-import { log, type Logger, showNotice } from "../utils";
+import { showNotice } from "../utils/notice";
+import { logger } from "../utils/logger";
 import {
     DEFAULT_ANIME_TEMPLATE,
     DEFAULT_MANGA_TEMPLATE
 } from "../settings/template";
-
-// Local imports
 import { SYNC_COOLDOWN_MS } from "./constants";
 import type { CompleteSyncOptions, SyncResult, MALSyncOptions } from "./types";
+
+const log = new logger("SyncManager");
 
 /**
  * Sync manager class
  */
 export class SyncManager {
-    private debug: Logger;
     private isSyncing = false;
     private lastSyncTime = 0;
 
     constructor(private plugin: MyAnimeNotesPlugin) {
-        this.debug = log.createSub("SyncManager");
         // Load persisted last sync time from settings
         this.lastSyncTime = plugin.settings.lastSuccessfulSync || 0;
     }
@@ -54,7 +53,7 @@ export class SyncManager {
     private async saveLastSyncTimestamp(): Promise<void> {
         this.plugin.settings.lastSuccessfulSync = Date.now();
         await this.plugin.saveSettings();
-        this.debug.info("Saved last sync timestamp");
+        log.debug("Saved last sync timestamp");
     }
 
     /**
@@ -63,11 +62,9 @@ export class SyncManager {
     private checkSyncGuard(): boolean {
         // Prevent overlapping syncs
         if (this.isSyncing) {
-            this.debug.warn(
-                "Sync already in progress - blocking new sync request"
-            );
+            log.debug("Sync already in progress - blocking new sync request");
 
-            showNotice(this.plugin, "Sync already in progress.", 4000);
+            showNotice("Sync already in progress.", "warning", 4000);
             return false;
         }
 
@@ -77,19 +74,20 @@ export class SyncManager {
             const minutesRemaining = Math.ceil(
                 (SYNC_COOLDOWN_MS - timeSinceLastSync) / 60000
             );
-            this.debug.warn(
+            log.debug(
                 `Sync cooldown active - ${minutesRemaining} minute${
                     minutesRemaining > 1 ? "s" : ""
                 } remaining`
             );
 
             showNotice(
-                this.plugin,
                 `Please wait ${minutesRemaining} minute${
                     minutesRemaining > 1 ? "s" : ""
                 } before syncing again.`,
+                "warning",
                 4000
             );
+
             return false;
         }
 
@@ -126,7 +124,7 @@ export class SyncManager {
         this.isSyncing = true;
 
         try {
-            this.debug.info("Starting MAL sync...", options);
+            log.debug("Starting MAL sync...", options);
 
             // Perform sync
             const { items, result } = await syncMAL(this.plugin, options);
@@ -145,17 +143,17 @@ export class SyncManager {
                         storageConfig
                     );
 
-                    this.debug.info("Saved to vault:", savedPaths);
+                    log.debug("Saved to vault:", savedPaths);
                 } catch (saveError) {
-                    this.debug.error("Failed to save to vault:", saveError);
+                    log.error("Failed to save to vault:", saveError);
 
                     const errorMessage =
                         saveError instanceof Error
                             ? saveError.message
                             : String(saveError);
                     showNotice(
-                        this.plugin,
-                        `⚠️ Synced but failed to save: ${errorMessage}`,
+                        `Synced but failed to save: ${errorMessage}`,
+                        "warning",
                         5000
                     );
                 }
@@ -168,7 +166,7 @@ export class SyncManager {
 
             return { items, result, savedPaths };
         } catch (error) {
-            this.debug.error("Sync failed:", error);
+            log.error("Sync failed:", error);
 
             throw error;
         } finally {
@@ -187,7 +185,8 @@ export class SyncManager {
         category: MediaCategory,
         saveToVault = true
     ): Promise<MediaItem[]> {
-        this.debug.info(`Quick sync for ${category}...`);
+
+        log.debug(`Quick sync for ${category}...`);
 
         const options: MALSyncOptions = {
             syncAnime: category === MediaCategory.ANIME,
@@ -226,7 +225,7 @@ export class SyncManager {
      * Used by both the "Sync active" command and optimized auto-sync
      */
     async syncActiveStatuses(saveToVault = true): Promise<MediaItem[]> {
-        this.debug.info(
+        log.debug(
             "Syncing active statuses (watching anime + reading manga)..."
         );
 

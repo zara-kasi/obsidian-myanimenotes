@@ -3,9 +3,12 @@ import type { MediaItem } from "../models";
 import { MediaCategory } from "../models";
 import type { SyncResult, SyncItemResult, MALSyncOptions } from "./types";
 import { isAuthenticated } from "../auth";
-import { log, showNotice } from "../utils";
+import { showNotice } from "../utils/notice";
+import { logger } from "../utils/logger";
 import { DEFAULT_SYNC_OPTIONS } from "./constants";
 import { syncAnimeList, syncMangaList } from "./fetchers";
+
+const log = new logger("SyncService");
 
 /**
  * Main sync function for MAL
@@ -17,7 +20,6 @@ export async function syncMAL(
     plugin: MyAnimeNotesPlugin,
     options: MALSyncOptions = DEFAULT_SYNC_OPTIONS
 ): Promise<{ items: MediaItem[]; result: SyncResult }> {
-    const debug = log.createSub("MALSync");
     const startTime = Date.now();
 
     const allItems: MediaItem[] = [];
@@ -30,7 +32,7 @@ export async function syncMAL(
             throw new Error("Not authenticated with MyAnimeList");
         }
 
-        showNotice(plugin, "Starting MAL sync...", 1000);
+        showNotice("Starting MAL sync...", 2000);
 
         // Sync anime if enabled
         if (options.syncAnime !== false) {
@@ -54,10 +56,10 @@ export async function syncMAL(
                 const errorMessage =
                     error instanceof Error ? error.message : String(error);
                 const errorMsg = `Failed to sync anime: ${errorMessage}`;
-                debug.error(errorMsg);
+                log.error(errorMsg);
                 errors.push(errorMsg);
 
-                showNotice(plugin, `❌ ${errorMsg}`, 5000);
+                showNotice(` ${errorMsg}`, "warning", 5000);
             }
         }
 
@@ -83,10 +85,10 @@ export async function syncMAL(
                 const errorMessage =
                     error instanceof Error ? error.message : String(error);
                 const errorMsg = `Failed to sync manga: ${errorMessage}`;
-                debug.error(errorMsg);
+                log.error(errorMsg);
                 errors.push(errorMsg);
 
-                showNotice(plugin, `❌ ${errorMsg}`, 5000);
+                showNotice(` ${errorMsg}`, "warning", 5000);
             }
         }
 
@@ -104,23 +106,23 @@ export async function syncMAL(
 
         if (!syncResult.success) {
             showNotice(
-                plugin,
-                `⚠️ MAL sync completed with ${errors.length} errors`,
+                `MAL sync completed with ${errors.length} errors`,
+                "warning",
                 4000
             );
         }
 
-        debug.info("Sync completed:", syncResult);
+        log.debug("Sync completed:", syncResult);
 
         return { items: allItems, result: syncResult };
     } catch (error) {
         const errorMessage =
             error instanceof Error ? error.message : String(error);
         const errorMsg = `MAL sync failed: ${errorMessage}`;
-        debug.error(errorMsg);
+        log.error(errorMsg);
         errors.push(errorMsg);
 
-        showNotice(plugin, `❌ ${errorMsg}`, 5000);
+        showNotice(`${errorMsg}`, "warning", 5000);
 
         const endTime = Date.now();
         const syncResult: SyncResult = {

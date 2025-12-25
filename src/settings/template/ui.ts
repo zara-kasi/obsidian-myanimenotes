@@ -132,11 +132,25 @@ function renderExpandableTemplate(
         // Properties section header
         contentContainer.createEl("h4", { text: "Properties" });
 
-        // Add description
-        contentContainer.createEl("p", {
-            text: "Properties to add to the top of the media note. Use variables to populate data from the mal API.",
+        // Add description with "Learn more" link
+        const propertiesDesc = contentContainer.createEl("p", {
             cls: "setting-item-description"
         });
+        propertiesDesc.createSpan({
+            text: "Properties to add to the top of the media note. Use variables to populate data from the mal API. "
+        });
+        propertiesDesc
+            .createEl("a", {
+                text: "Learn more",
+                href: "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md"
+            })
+            .addEventListener("click", e => {
+                e.preventDefault();
+                window.open(
+                    "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md",
+                    "_blank"
+                );
+            });
 
         // Properties list container
         const propertyListEl = contentContainer.createDiv({

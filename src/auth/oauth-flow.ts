@@ -7,7 +7,10 @@ import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from "./constants";
 import { generateVerifier, generateChallenge, generateState } from "./pkce";
 import { isTokenValid } from "./token-manager";
 import { fetchUserInfo } from "./user-service";
-import { log, showNotice } from "../utils";
+import { showNotice } from "../utils/notice";
+import { logger } from "../utils/logger";
+
+const log = new logger("OAuthFlow");
 
 // Auth state timeout: 10 minutes
 const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
@@ -18,12 +21,12 @@ const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
  */
 export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
     if (!plugin.settings.malClientId) {
-        showNotice(plugin, "Please enter your MAL Client ID first.", 5000);
+        showNotice("Please enter your MAL Client ID first.", "warning", 5000);
         return;
     }
 
     if (isTokenValid(plugin)) {
-        showNotice(plugin, "Already authenticated with MyAnimeList", 3000);
+        showNotice("Already authenticated with MyAnimeList", "success", 3000);
         return;
     }
 
@@ -52,7 +55,7 @@ export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
 
     const authUrl = `${MAL_AUTH_URL}?${params.toString()}`;
 
-    showNotice(plugin, "Opening MyAnimeList login page…", 2000);
+    showNotice("Opening MyAnimeList login page…", 2000);
 
     // Open in external browser
 
@@ -75,9 +78,8 @@ export async function handleOAuthRedirect(
     plugin: MyAnimeNotesPlugin,
     params: OAuthParams
 ): Promise<void> {
-    const debug = log.createSub("MAL-Auth");
     try {
-        debug.info("Received OAuth redirect:", params);
+        log.debug("Received OAuth redirect:", params);
         const { code, state } = extractOAuthParams(params);
 
         // Retrieve stored auth state
@@ -110,10 +112,10 @@ export async function handleOAuthRedirect(
             const error = params.error || "Unknown error";
             const errorDesc =
                 params.error_description || "No authorization code received";
-            debug.error("OAuth error:", { error, errorDesc });
+            log.error("OAuth error:", { error, errorDesc });
             showNotice(
-                plugin,
-                `❌ MAL Authentication failed: ${errorDesc}`,
+                `MAL Authentication failed: ${errorDesc}`,
+                "warning",
                 5000
             );
             return;
@@ -121,12 +123,12 @@ export async function handleOAuthRedirect(
 
         await exchangeCodeForToken(plugin, code, authState.verifier);
     } catch (error) {
-        debug.error("Failed to handle OAuth redirect:", error);
+        log.error("Failed to handle OAuth redirect:", error);
         const errorMessage =
             error instanceof Error ? error.message : String(error);
         showNotice(
-            plugin,
-            `❌ MAL Authentication failed: ${errorMessage}`,
+            `MAL Authentication failed: ${errorMessage}`,
+            "warning",
             5000
         );
     }
@@ -141,12 +143,11 @@ async function exchangeCodeForToken(
     code: string,
     verifier: string
 ): Promise<void> {
-    const debug = log.createSub("MAL-Auth");
     if (!code || code.length < 10) {
         throw new Error("Invalid authorization code");
     }
 
-    showNotice(plugin, "Exchanging authorization code for tokens…", 1500);
+    showNotice("Exchanging authorization code for tokens…", 1500);
 
     const body = new URLSearchParams({
         client_id: plugin.settings.malClientId,
@@ -192,13 +193,13 @@ async function exchangeCodeForToken(
 
         await plugin.saveSettings();
 
-        showNotice(plugin, "✅ Authenticated successfully!", 3000);
+        showNotice("✅ Authenticated successfully!", "success", 3000);
 
         // Fetch user info
         try {
             await fetchUserInfo(plugin);
         } catch (userError) {
-            debug.warn(
+            log.error(
                 "Failed to fetch user info but auth succeeded",
                 userError
             );
@@ -208,7 +209,7 @@ async function exchangeCodeForToken(
         plugin.refreshSettingsUI();
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
-        showNotice(plugin, `❌ MAL Auth failed: ${errorMessage}`, 5000);
+        showNotice(`MAL Auth failed: ${errorMessage}`, "warning", 5000);
         throw err;
     }
 }
@@ -223,9 +224,6 @@ function extractOAuthParams(params: OAuthParams): {
     code: string | null;
     state: string | null;
 } {
-    // Standard initialization
-    const debug = log.createSub("MAL-Auth");
-
     let code: string | null = null;
     let state: string | null = null;
 
@@ -245,7 +243,7 @@ function extractOAuthParams(params: OAuthParams): {
             code = url.searchParams.get("code");
             state = url.searchParams.get("state");
         } catch (e) {
-            debug.warn("Failed to parse URL from params:", e);
+            log.error("Failed to parse URL from params:", e);
         }
     }
 

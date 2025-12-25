@@ -1,7 +1,7 @@
 // It focuses solely on orchestrating the parsing logic by consuming the types and mappers
 
 import type MyAnimeNotesPlugin from "../main";
-import { log } from "../utils";
+import { logger } from "../utils/logger";
 import { MediaItem, Picture, MediaCategory } from "./types";
 import type { MALItem } from "./types";
 import {
@@ -17,6 +17,8 @@ import {
     convertDurationToMinutes
 } from "./mappers";
 
+const log = new logger("ModelsMedia");
+
 /**
  * parses a single MAL anime item to format
  */
@@ -24,11 +26,10 @@ export function parseAnime(
     plugin: MyAnimeNotesPlugin,
     malItem: MALItem
 ): MediaItem {
-    const debug = log.createSub("MAL-Parser");
     const node = malItem.node || malItem;
     const listStatus = malItem.list_status;
 
-    debug.info("Processing anime:", {
+    log.debug("Processing anime:", {
         title: node.title,
         hasListStatus: !!listStatus,
         listStatus: listStatus
@@ -151,10 +152,9 @@ export function parseAnimeList(
     plugin: MyAnimeNotesPlugin,
     malItems: MALItem[]
 ): MediaItem[] {
-    const debug = log.createSub("MAL-Parser");
 
     if (!Array.isArray(malItems)) {
-        debug.warn("Expected array but got:", typeof malItems);
+        log.error("Expected array but got:", typeof malItems);
         return [];
     }
 
@@ -168,10 +168,8 @@ export function parseMangaList(
     plugin: MyAnimeNotesPlugin,
     malItems: MALItem[]
 ): MediaItem[] {
-    const debug = log.createSub("MAL-Parser");
-
     if (!Array.isArray(malItems)) {
-        debug.warn("Expected array but got:", typeof malItems);
+        log.error("Expected array but got:", typeof malItems);
         return [];
     }
 

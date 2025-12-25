@@ -1,68 +1,51 @@
+import { Notice } from "obsidian";
+
+// Internal switch to control notifications
+let isEnabled = true;
+
 /**
- * Notification Wrapper Utility
- * 
- * Provides a centralized way to show notifications that respects user settings
- * All notifications in the plugin should use this function instead of direct Notice() calls
+ * Update this from main.ts and tab.ts to sync with settings.
  */
-
-import { Notice } from 'obsidian';
-import type MyAnimeNotesPlugin from '../main';
+export function setNotificationsEnabled(enabled: boolean): void {
+    isEnabled = enabled;
+}
 
 /**
- * Shows a notification if notifications are enabled in settings
- * @param plugin Plugin instance
- * @param message Notification message
- * @param duration Duration in milliseconds (0 = persistent)
+ * Shows a notice if enabled.
+ * Supports:
+ * - showNotice("Message")
+ * - showNotice("Message", 2000)
+ * - showNotice("Message", "success")
+ * - showNotice("Message", "warning", 5000)
  */
 export function showNotice(
-  plugin: MyAnimeNotesPlugin,
-  message: string,
-  duration?: number
+    message: string,
+    typeOrDuration?: "success" | "warning" | number,
+    duration?: number
 ): void {
-  // Check if notifications are enabled
-  if (plugin.settings.notificationsEnabled) {
-    new Notice(message, duration);
-  }
-}
+    if (!isEnabled) return;
 
-/**
- * Shows a success notification
- * @param plugin Plugin instance
- * @param message Notification message
- * @param duration Duration in milliseconds (default: 3000)
- */
-export function showSuccessNotice(
-  plugin: MyAnimeNotesPlugin,
-  message: string,
-  duration = 3000
-): void {
-  showNotice(plugin, message, duration);
-}
+    let finalType: "success" | "warning" | undefined;
+    let finalDuration: number | undefined;
 
-/**
- * Shows an error notification
- * @param plugin Plugin instance
- * @param message Notification message
- * @param duration Duration in milliseconds (default: 5000)
- */
-export function showErrorNotice(
-  plugin: MyAnimeNotesPlugin,
-  message: string,
-  duration = 5000
-): void {
-  showNotice(plugin, message, duration);
-}
+    // MAGIC: Check if the 2nd argument is actually a number (duration)
+    if (typeof typeOrDuration === "number") {
+        finalDuration = typeOrDuration;
+        finalType = undefined;
+    } else {
+        finalType = typeOrDuration;
+        finalDuration = duration;
+    }
 
-/**
- * Shows an info notification
- * @param plugin Plugin instance
- * @param message Notification message
- * @param duration Duration in milliseconds (default: 3000)
- */
-export function showInfoNotice(
-  plugin: MyAnimeNotesPlugin,
-  message: string,
-  duration = 3000
-): void {
-  showNotice(plugin, message, duration);
+    // Set defaults if duration is still missing
+    if (finalDuration === undefined) {
+        if (finalType === "success") finalDuration = 3000;
+        else if (finalType === "warning") finalDuration = 5000;
+    }
+
+    const notice = new Notice(message, finalDuration);
+
+    if (finalType) {
+        notice.messageEl.addClass(`mod-${finalType}`);
+    }
 }

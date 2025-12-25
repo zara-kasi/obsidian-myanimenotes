@@ -8,7 +8,9 @@ import {
     throttlePromises
 } from "../api";
 import { parseAnimeList, parseMangaList } from "../models";
-import { log } from "../utils";
+import { logger } from "../utils/logger";
+
+const log = new logger("Fetchers");
 
 /**
  * Syncs anime list from MAL
@@ -20,9 +22,7 @@ export async function syncAnimeList(
     plugin: MyAnimeNotesPlugin,
     statuses?: string[]
 ): Promise<MediaItem[]> {
-    const debug = log.createSub("MALSync");
-
-    debug.info("Starting anime sync...");
+    log.debug("Starting anime sync...");
 
     let rawItems: MALItem[] = [];
 
@@ -45,7 +45,7 @@ export async function syncAnimeList(
         rawItems = await fetchCompleteMALAnimeList(plugin);
     }
 
-    debug.info(`Fetched ${rawItems.length} anime items`);
+    log.debug(`Fetched ${rawItems.length} anime items`);
 
     // Parse item
     const transformedItems = parseAnimeList(plugin, rawItems);
@@ -63,9 +63,7 @@ export async function syncMangaList(
     plugin: MyAnimeNotesPlugin,
     statuses?: string[]
 ): Promise<MediaItem[]> {
-    const debug = log.createSub("MALSync");
-
-    debug.info("Starting manga sync...");
+    log.debug("Starting manga sync...");
 
     let rawItems: MALItem[] = [];
 
@@ -88,7 +86,7 @@ export async function syncMangaList(
         rawItems = await fetchCompleteMALMangaList(plugin);
     }
 
-    debug.info(`[MAL Sync] Fetched ${rawItems.length} manga items`);
+    log.debug(`[MAL Sync] Fetched ${rawItems.length} manga items`);
 
     // Parse item
     const transformedItems = parseMangaList(plugin, rawItems);

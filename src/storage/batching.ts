@@ -1,7 +1,18 @@
+/**
+ * Batching Strategy: Pre-Computation & Optimization
+ *
+ * Implements a "Split-Phase" processing strategy for batch operations:
+ * 1. Analysis Phase (Synchronous): Reads all necessary state from memory and makes decisions.
+ * 2. Execution Phase (Asynchronous): Performs the actual I/O based on Phase 1 results.
+ *
+ * This separation allows for "Fast-Path" optimizations (skipping IO entirely) and
+ * prevents long-running loops from blocking the UI during decision making.
+ */
+
 import type MyAnimeNotesPlugin from "../main";
 import type { MediaItem } from "../models";
 import { generateMyAnimeNotesSync, type MyAnimeNotesIndex } from "../core";
-import { log } from "../utils";
+import { logger } from "../utils/logger";
 import type { BatchItem, StorageConfig, SyncActionResult } from "./types";
 import {
     getSyncedTimestampFast,
@@ -9,53 +20,55 @@ import {
     shouldSkipByTimestamp
 } from "./utils";
 
+const log = new logger("StorageBatching");
+
 // ============================================================================
-// BATCH PREPARATION PHASE
+// ANALYSIS PHASE
 // ============================================================================
 
 /**
- * Prepares batch items by:
- * 1. Reading ALL metadata caches upfront (no delays)
- * 2. Performing ALL skip decisions in memory (pure computation)
- * 3. Creating enriched batch items with pre-computed decisions
+ * Synchronously analyzes a batch of items to determine processing actions.
  *
- * This phase runs quickly (< 100ms for 500 items) and determines
- * exactly which items to process before any file I/O begins.
+ * Performs pure in-memory computations:
+ * 1. Resolves 'myanimenotes' identifiers.
+ * 2. Queries the JIT Index for existing files.
+ * 3. Reads MetadataCache to retrieve timestamps.
+ * 4. Computes "Skip" vs "Update" decisions based on data freshness.
  *
- * @returns Array of batch items with computed decisions
+ * @param plugin - Plugin instance (access to MetadataCache).
+ * @param items - Raw media items from source.
+ * @param config - Storage configuration.
+ * @param folderPath - Target directory path.
+ * @param index - JIT Index snapshot.
+ * @returns Array of enriched BatchItems with pre-calculated decisions.
  */
-export async function prepareBatchItems(
+export function prepareBatchItems(
     plugin: MyAnimeNotesPlugin,
     items: MediaItem[],
     config: StorageConfig,
     folderPath: string,
     index: MyAnimeNotesIndex
-): Promise<BatchItem[]> {
-    const debug = log.createSub("Storage");
+): BatchItem[] {
     const { metadataCache } = plugin.app;
     const startTime = Date.now();
 
     const batchItems: BatchItem[] = [];
 
-    // Phase 1: Generate myanimenotes and read cache for all items upfront
-    debug.info(
-        `Batch prep phase 1: Reading cache for ${items.length} items...`
-    );
+    log.debug(`Batch Analysis: Processing ${items.length} items...`);
 
-    const cacheMap = new Map<string, string | undefined>();
+    // --- Sub-Phase 1: State Resolution ---
+    // Resolve all identifiers and retrieve current file state from cache.
 
     for (const item of items) {
         const myanimenotes = generateMyAnimeNotesSync(item);
-
         const lookup = lookupExistingFiles(index, myanimenotes);
 
-        // For exact/duplicates/ matches, get cache immediately
+        // Optimistically retrieve timestamp if file exists (No disk I/O)
         let cachedTimestamp: string | undefined;
         if (lookup.files.length > 0) {
             const file = lookup.files[0];
             const cache = metadataCache.getFileCache(file);
             cachedTimestamp = cache ? getSyncedTimestampFast(cache) : undefined;
-            cacheMap.set(myanimenotes, cachedTimestamp);
         }
 
         batchItems.push({
@@ -63,57 +76,50 @@ export async function prepareBatchItems(
             myanimenotesSync: myanimenotes,
             cachedTimestamp,
             lookup,
-            shouldSkip: false, // Will compute in phase 2
+            shouldSkip: false, // Placeholder, computed below
             skipReason: undefined
         });
     }
 
-    debug.info(
-        `[Storage] Batch prep phase 1 complete: ${Date.now() - startTime}ms`
-    );
-
-    // Phase 2: Compute skip decisions (pure memory computation)
-    debug.info(`[Storage] Batch prep phase 2: Computing skip decisions...`);
-    const phase2Start = Date.now();
+    // --- Sub-Phase 2: Decision Logic ---
+    // Apply business logic to determine if an update is required.
 
     for (const batch of batchItems) {
-        const skipResult = shouldSkipByTimestamp(
+        const decision = shouldSkipByTimestamp(
             batch.cachedTimestamp,
             batch.item.updatedAt,
             plugin.settings.forceFullSync
         );
 
-        batch.shouldSkip = skipResult.skip;
-        batch.skipReason = skipResult.reason;
+        batch.shouldSkip = decision.skip;
+        batch.skipReason = decision.reason;
     }
 
-    debug.info(
-        `[Storage] Batch prep phase 2 complete: ${Date.now() - phase2Start}ms`
-    );
+    // --- Metrics ---
 
-    // Summary stats
+    const duration = Date.now() - startTime;
     const skipCount = batchItems.filter(b => b.shouldSkip).length;
-    const processCount = batchItems.length - skipCount;
 
-    debug.info(
-        `[Storage] Batch prep complete: ${items.length} items analyzed, ` +
-            `${skipCount} to skip, ${processCount} to process (${
-                Date.now() - startTime
-            }ms total)`
+    log.debug(
+        `Batch Analysis Complete (${duration}ms): ` +
+            `${items.length} total, ${skipCount} skipped, ${
+                items.length - skipCount
+            } to process.`
     );
 
     return batchItems;
 }
 
 // ============================================================================
-// SKIP FAST-PATH
+// RESULT GENERATION
 // ============================================================================
 
 /**
- * Records all skipped items as results without any file I/O
- * This completes instantly (< 1ms for 500 items) since there's no disk access
+ * Generates result objects for skipped items without performing I/O.
+ * Used to immediately resolve "Fast-Path" items in the batch processor.
  *
- * @returns Array of skipped results
+ * @param skippedItems - Subset of BatchItems marked for skipping.
+ * @returns Array of SyncActionResults (Status: 'skipped').
  */
 export function createSkipResults(
     skippedItems: BatchItem[]

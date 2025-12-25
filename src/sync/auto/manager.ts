@@ -1,7 +1,9 @@
 import { Component } from "obsidian";
 import type MyAnimeNotesPlugin from "../../main";
-import { log, type Logger } from "../../utils";
+import { logger } from "../../utils/logger";
 import { AUTO_SYNC_CONSTANTS } from "./constants";
+
+const log = new logger("AutoSyncManager");
 
 /**
  * Manages auto-sync timers (Sync on Load & Scheduled Sync)
@@ -11,12 +13,10 @@ export class AutoSyncManager extends Component {
     private plugin: MyAnimeNotesPlugin;
     private syncOnLoadTimer: number | null = null;
     private scheduledSyncTimer: number | null = null;
-    private debug: Logger;
 
     constructor(plugin: MyAnimeNotesPlugin) {
         super();
         this.plugin = plugin;
-        this.debug = log.createSub("AutoSync");
     }
     /**
      * Starts all enabled auto-sync timers
@@ -48,7 +48,7 @@ export class AutoSyncManager extends Component {
 
         // If never synced, allow it
         if (!lastSuccessfulSync) {
-            this.debug.info("No previous sync found - allowing sync");
+            log.debug("No previous sync found - allowing sync");
 
             return true;
         }
@@ -62,7 +62,7 @@ export class AutoSyncManager extends Component {
         if (!hasPassed) {
             const minutesSince = Math.floor(timeSinceLastSync / MS_PER_MINUTE);
             const remaining = MIN_SCHEDULED_INTERVAL - minutesSince;
-            this.debug.info(
+            log.debug(
                 `Minimum interval not met: ${minutesSince}m since last sync. Wait ${remaining}m.`
             );
         }
@@ -77,13 +77,13 @@ export class AutoSyncManager extends Component {
         this.clearSyncOnLoadTimer();
 
         if (!this.isAuthenticated()) {
-            this.debug.warn("Skipped: Not authenticated");
+            log.error("Skipped: Not authenticated");
 
             return;
         }
 
         const { SYNC_ON_LOAD_DELAY } = AUTO_SYNC_CONSTANTS;
-        this.debug.info(
+        log.debug(
             `Timer started: Will sync in ${
                 AUTO_SYNC_CONSTANTS.SYNC_ON_LOAD_DELAY / 60000
             } minutes`
@@ -103,7 +103,7 @@ export class AutoSyncManager extends Component {
         this.clearScheduledSyncTimer();
 
         if (!this.isAuthenticated()) {
-            this.debug.warn("Skipped: Not authenticated");
+            log.debug("Skipped: Not authenticated");
             return;
         }
 
@@ -116,7 +116,7 @@ export class AutoSyncManager extends Component {
         );
         const intervalMs = intervalMinutes * MS_PER_MINUTE;
 
-        this.debug.info(`Timer started: Every ${intervalMinutes} minutes`);
+        log.debug(`Timer started: Every ${intervalMinutes} minutes`);
 
         this.scheduledSyncTimer = window.setInterval(() => {
             void this.executeSync("Scheduled Sync", false); // false = ignore minimum interval (schedule is explicit)
@@ -132,17 +132,17 @@ export class AutoSyncManager extends Component {
         source: string,
         checkMinInterval: boolean
     ): Promise<void> {
-        this.debug.info(`[${source}] Triggered`);
+        log.debug(`[${source}] Triggered`);
 
         if (!this.isAuthenticated()) {
-            this.debug.warn(`[${source}] Aborted: Auth lost`);
+            log.error(`[${source}] Aborted: Auth lost`);
 
             if (source === "Scheduled Sync") this.stop();
             return;
         }
 
         if (checkMinInterval && !this.hasMinimumIntervalPassed()) {
-            this.debug.info(`[${source}] Aborted: Too soon`);
+            log.debug(`[${source}] Aborted: Too soon`);
 
             if (source === "Sync on Load") this.clearSyncOnLoadTimer();
             return;
@@ -155,10 +155,10 @@ export class AutoSyncManager extends Component {
                 } else {
                     await this.plugin.syncManager.syncFromMAL();
                 }
-                this.debug.info(`[${source}] Completed successfully`);
+                log.debug(`[${source}] Completed successfully`);
             }
         } catch (error) {
-            this.debug.error(`[${source}] Failed:`, error);
+            log.error(`[${source}] Failed:`, error);
         } finally {
             // Cleanup one-time timers
             if (source === "Sync on Load") {

@@ -12,9 +12,11 @@ import {
     generateInitialFileContent,
     generateUniqueFilename
 } from "./builders";
-import { log } from "../utils";
+import { logger } from "../utils/logger";
 import type { StorageConfig, SyncActionResult } from "./types";
 import { selectDeterministicFile } from "../core";
+
+const log = new logger("StorageOperations");
 
 // ============================================================================
 // FILE HANDLERS
@@ -56,8 +58,7 @@ export async function handleDuplicates(
     config: StorageConfig,
     myanimenotesSync: string
 ): Promise<SyncActionResult> {
-    const debug = log.createSub("Storage");
-    debug.warn(
+    log.debug(
         `[Storage] Found ${files.length} files with myanimenotes: ${myanimenotesSync}`
     );
     const selectedFile = selectDeterministicFile(plugin, files);
@@ -92,8 +93,6 @@ export async function createNewFile(
     myanimenotesSync: string,
     folderPath: string
 ): Promise<SyncActionResult> {
-    const debug = log.createSub("Storage");
-
     const { vault } = plugin.app;
 
     const sanitizedTitle = item.title
@@ -141,7 +140,7 @@ export async function createNewFile(
             // CHANGED: Use generated content instead of '---\n---\n'
             const createdFile = await vault.create(filePath, initialContent);
 
-            debug.info(`Created: ${filePath}`);
+            log.debug(`Created: ${filePath}`);
 
             return {
                 action: "created",
@@ -162,7 +161,7 @@ export async function createNewFile(
                 );
             }
 
-            debug.warn(`Collision on attempt ${attempt}, retrying...`);
+            log.debug(`Collision on attempt ${attempt}, retrying...`);
         }
     }
 

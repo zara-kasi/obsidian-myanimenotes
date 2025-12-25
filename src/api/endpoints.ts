@@ -1,9 +1,11 @@
 import type MyAnimeNotesPlugin from "../main";
-import { log } from "../utils";
+import { logger } from "../utils/logger";
 import { ANIME_FIELDS, MANGA_FIELDS } from "./constants";
 import { makeMALRequest } from "./client";
 import type { MALApiResponse } from "./types";
 import type { MALItem } from "../models";
+
+const log = new logger("ApiEndpoints");
 
 /**
  * Internal helper for pagination
@@ -14,7 +16,6 @@ async function fetchAllPages(
     endpoint: string,
     params: Record<string, string> = {}
 ): Promise<MALItem[]> {
-    const debug = log.createSub("API");
     const allItems: MALItem[] = [];
 
     let nextUrl: string | null = null;
@@ -27,7 +28,7 @@ async function fetchAllPages(
             limit: limit.toString(),
             offset: offset.toString()
         };
-        debug.info(`Fetching ${endpoint} (offset: ${offset})...`);
+        log.debug(`Fetching ${endpoint} (offset: ${offset})...`);
 
         const data = await makeMALRequest(plugin, endpoint, requestParams);
 
@@ -39,10 +40,9 @@ async function fetchAllPages(
         offset += limit;
 
         if (offset > 10000) {
-            debug.warn("Safety limit reached (10000 items)");
+            log.error("Safety limit reached (10000 items)");
             break;
         }
-
     } while (nextUrl);
 
     return allItems;

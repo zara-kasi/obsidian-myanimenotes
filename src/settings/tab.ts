@@ -10,7 +10,8 @@ import {
     createTemplateSettingsState,
     TemplateSettingsState
 } from "./template";
-import { configureLogger } from "../utils";
+import { setNotificationsEnabled } from "../utils/notice";
+import { logger } from "../utils/logger";
 
 export class MyAnimeNotesSettingTab extends PluginSettingTab {
     plugin: MyAnimeNotesPlugin;
@@ -42,6 +43,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     .onChange(async value => {
                         this.plugin.settings.notificationsEnabled = value;
                         await this.plugin.saveSettings();
+                        setNotificationsEnabled(value);
                     })
             );
 
@@ -154,9 +156,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     .onChange(async value => {
                         this.plugin.settings.debugMode = value;
                         await this.plugin.saveSettings();
-
-                        // UPDATE LOGGER CONFIGURATION INSTANTLY
-                        configureLogger(this.plugin.settings);
+                        logger.setDebugMode(value);
                     })
             );
     }

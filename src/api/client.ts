@@ -1,9 +1,12 @@
 import { requestUrl } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
 import { ensureValidToken, getAuthHeaders } from "../auth";
-import { log } from "../utils";
+import { showNotice } from "../utils/notice";
+import { logger } from "../utils/logger";
 import { MAL_API_BASE, RATE_LIMIT_CONFIG } from "./constants";
 import type { MALApiResponse, RequestResponse } from "./types";
+
+const log = new logger("MalApiClient");
 
 /**
  * Calculates exponential backoff delay with jitter
@@ -29,7 +32,7 @@ function parseErrorMessage(response: RequestResponse): string {
         };
         if (data.error) return data.message || data.error;
     } catch {
-        console.warn("[MAL Auth] Failed to parse error response");
+        log.error("[MAL Auth] Failed to parse error response");
     }
     return response.text || "Unknown error";
 }
@@ -42,8 +45,6 @@ export async function makeMALRequest(
     endpoint: string,
     params: Record<string, string> = {}
 ): Promise<MALApiResponse> {
-    // Logger instance for this function scope
-    const logger = log.createSub("API");
     await ensureValidToken(plugin);
 
     const headers = getAuthHeaders(plugin);
@@ -83,9 +84,15 @@ export async function makeMALRequest(
                     const type =
                         response.status === 429 ? "Rate limit" : "Server error";
 
-                    logger.warn(
-                        `${type} (${response.status}). Retrying in ${delay}ms...`
-                    );
+                    // Create a readable message
+                    const msg = `${type} (${
+                        response.status
+                    }). Retrying in ${Math.ceil(delay / 1000)}s...`;
+
+                    log.error(msg);
+
+                    // Notify the user so they know the plugin is waiting
+                    showNotice(msg, "warning");
 
                     await new Promise(r => setTimeout(r, delay));
                     continue;
@@ -116,11 +123,19 @@ export async function makeMALRequest(
             if (attempt < MAX_RETRIES) {
                 const delay = calculateBackoffDelay(attempt);
 
-                logger.warn(`Network error. Retrying in ${delay}ms...`);
+                const msg = `Network error. Retrying in ${Math.ceil(
+                    delay / 1000
+                )}s...`;
+
+                log.error(msg);
+
+                // Notify the user
+                showNotice(msg, "warning");
 
                 await new Promise(r => setTimeout(r, delay));
                 continue;
             }
+
             break;
         }
     }

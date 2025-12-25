@@ -1,112 +1,90 @@
 /**
- * MyAnimeNotes JIT (Just-In-Time) Index
+ * MyAnimeNotes JIT Indexing
  *
- * DESIGN PHILOSOPHY:
- * - Single function that captures vault state right now
- * - No classes, no methods, no state management
- * - Returns simple Map data structures
- * - Build -> Use -> Garbage collect
+ * Provides a synchronous, stateless indexer for tracking 'myanimenotes' identifiers
+ * across the Obsidian vault. Leverages Obsidian's internal MetadataCache for
+ * high-performance O(1) lookups without persistent storage overhead.
  *
- * USAGE:
- * ```typescript
- * const index = await buildMyAnimeNotesIndex(plugin);
- * const files = index.get(myanimenotes) || [];
- * // Done - let it garbage collect
- * ```
+ * Usage:
+ * const index = buildMyAnimeNotesIndex(plugin);
+ * const files = index.get("mal:anime:1234");
  */
 
 import { TFile } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
-import { log } from "../utils";
+import { logger } from "../utils/logger";
+
+const log = new logger("FileIndex");
 
 /**
- * Index result: simple Map from myanimenotes -> files
- * No class, no methods, just data
+ * Maps a unique 'myanimenotes' identifier to an array of Obsidian files.
+ * Storing an array (TFile[]) enables implicit duplicate detection.
  */
 export type MyAnimeNotesIndex = Map<string, TFile[]>;
 
 /**
- * Builds a fresh index of all myanimenotes in the vault RIGHT NOW
+ * Synchronously builds a snapshot index of all tracked items in the vault.
  *
- * Scans every markdown file and extracts myanimenotes frontmatter.
- * Returns a simple Map for O(1) lookups.
+ * Utilizes the in-memory MetadataCache to scan files instantly without disk I/O.
+ * Designed to be instantiated, used for a specific operation (e.g., Sync), and
+ * immediately garbage collected.
  *
- * @param plugin Plugin instance for vault access
- * @returns Map of myanimenotes identifier -> array of files
- *
- * @example
- * const index = await buildMyAnimeNotesIndex(plugin);
- * const files = index.get("mal:anime:1245") || [];
- * console.log(`Found ${files.length} files`);
+ * @param plugin - Plugin instance for accessing Vault and MetadataCache.
+ * @returns A Map linking identifiers to corresponding file objects.
  */
-
-export async function buildMyAnimeNotesIndex(
+export function buildMyAnimeNotesIndex(
     plugin: MyAnimeNotesPlugin
-): Promise<MyAnimeNotesIndex> {
-    const debug = log.createSub("JITIndex");
+): MyAnimeNotesIndex {
     const startTime = Date.now();
     const { vault, metadataCache } = plugin.app;
-    const allFiles = vault.getMarkdownFiles();
 
-    // Simple Map: myanimenotes -> files
+    const allFiles = vault.getMarkdownFiles();
     const index: MyAnimeNotesIndex = new Map();
 
-    debug.info(`Building index from ${allFiles.length} files...`);
+    log.debug(`Building index from ${allFiles.length} files...`);
 
     let filesWithMyAnimeNotes = 0;
 
-    // Scan every markdown file
     for (const file of allFiles) {
         try {
             const cache = metadataCache.getFileCache(file);
+            const id = cache?.frontmatter?.myanimenotes as string | undefined;
 
-            const myanimenotes = cache?.frontmatter?.myanimenotes as
-                | string
-                | undefined;
-            // Validate and add to index
-
-            if (myanimenotes && typeof myanimenotes === "string") {
-                // Get existing array or create new one
-                const files = index.get(myanimenotes) ?? [];
+            if (id && typeof id === "string") {
+                const files = index.get(id) ?? [];
                 files.push(file);
-                index.set(myanimenotes, files);
+                index.set(id, files);
                 filesWithMyAnimeNotes++;
             }
         } catch (error) {
-            // Skip files that can't be read
-            debug.warn(`Failed to read ${file.path}:`, error);
+            log.error(`Failed to index file ${file.path}:`, error);
         }
     }
 
+    // Performance and integrity logging
     const duration = Date.now() - startTime;
-
-    // Calculate stats
     const uniqueIdentifiers = index.size;
     let duplicateCount = 0;
+
     for (const files of index.values()) {
-        if (files.length > 1) {
-            duplicateCount += files.length - 1;
-        }
+        if (files.length > 1) duplicateCount += files.length - 1;
     }
 
-    debug.info(
-        `Index built: ${allFiles.length} files scanned, ` +
-            `${filesWithMyAnimeNotes} with myanimenotes, ` +
-            `${uniqueIdentifiers} unique identifiers, ` +
-            `${duplicateCount} duplicates, ` +
-            `${duration}ms`
+    log.debug(
+        `Index built: ${allFiles.length} scanned, ` +
+            `${filesWithMyAnimeNotes} tracked, ` +
+            `${uniqueIdentifiers} unique IDs, ` +
+            `${duplicateCount} duplicates ` +
+            `(${duration}ms)`
     );
 
     return index;
 }
 
 /**
- * Helper: Get files for a myanimenotes identifier
- * Just a convenience wrapper around Map.get()
+ * Retrieves all files associated with a specific identifier.
  *
- * @param index The index Map
- * @param myanimenotes The identifier to look up
- * @returns Array of files (empty if not found)
+ * @returns Array of TFiles (empty if identifier is not found).
  */
 export function getFilesFromIndex(
     index: MyAnimeNotesIndex,
@@ -116,11 +94,8 @@ export function getFilesFromIndex(
 }
 
 /**
- * Helper: Check if myanimenotes exists in index
- *
- * @param index The index Map
- * @param myanimenotes The identifier to check
- * @returns true if identifier exists
+ * Checks for the existence of an identifier in the index.
+ * * @returns boolean indicating if the item exists in the vault.
  */
 export function hasMyAnimeNotes(
     index: MyAnimeNotesIndex,
@@ -130,10 +105,8 @@ export function hasMyAnimeNotes(
 }
 
 /**
- * Helper: Get index statistics
- *
- * @param index The index Map
- * @returns Statistics object
+ * Generates statistical data for the current index snapshot.
+ * Useful for vault health checks and duplicate reporting.
  */
 export function getIndexStats(index: MyAnimeNotesIndex): {
     totalIdentifiers: number;

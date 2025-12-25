@@ -1,5 +1,5 @@
 // Logout and session cleanup
-import { showNotice } from '../utils';
+import { showNotice } from '../utils/notice';
 import type MyAnimeNotesPlugin from '../main';
 
 /**
@@ -20,5 +20,5 @@ export async function logout(plugin: MyAnimeNotesPlugin): Promise<void> {
   
   await plugin.saveSettings();
   
-  showNotice(plugin, '✅ Cleared all MyAnimeList credentials', 3000);
+  showNotice('✅ Cleared all MyAnimeList credentials', 'success', 3000);
 }
