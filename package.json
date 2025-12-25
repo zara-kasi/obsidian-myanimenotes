@@ -1,6 +1,6 @@
 {
   "name": "MyAnimeNotes",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Make your media a part of your knowledge. Sync your media items from MyAnimeList directly into your vault.",
   "main": "main.js",
   "type": "module",
