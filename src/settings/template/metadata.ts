@@ -1,7 +1,12 @@
 import type { PropertyMetadata } from "./types";
 
 /**
- * Common properties (shared by both anime and manga)
+ * A list of metadata properties that are common to both Anime and Manga media types.
+ *
+ * These definitions act as the source of truth for:
+ * 1. The variable names used in templates (e.g., `{{title}}`).
+ * 2. The default frontmatter keys (e.g., `title: ...`).
+ * 3. The user-friendly labels shown in the settings UI.
  */
 export const COMMON_PROPERTIES: PropertyMetadata[] = [
     { key: "title", label: "Title", defaultName: "title" },
@@ -30,7 +35,8 @@ export const COMMON_PROPERTIES: PropertyMetadata[] = [
 ];
 
 /**
- * Anime-specific properties (including common)
+ * The complete list of available properties for **Anime** templates.
+ * Includes all common properties plus anime-specific fields like episodes and studios.
  */
 export const ANIME_PROPERTIES: PropertyMetadata[] = [
     ...COMMON_PROPERTIES,
@@ -45,7 +51,8 @@ export const ANIME_PROPERTIES: PropertyMetadata[] = [
 ];
 
 /**
- * Manga-specific properties (including common)
+ * The complete list of available properties for **Manga** templates.
+ * Includes all common properties plus manga-specific fields like volumes, chapters, and authors.
  */
 export const MANGA_PROPERTIES: PropertyMetadata[] = [
     ...COMMON_PROPERTIES,
@@ -61,7 +68,11 @@ export const MANGA_PROPERTIES: PropertyMetadata[] = [
 ];
 
 /**
- * Gets property metadata by key
+ * Retrieves the metadata definition for a specific property key.
+ *
+ * @param key - The template variable name (e.g., "numEpisodes").
+ * @param category - The media category ("anime" or "manga").
+ * @returns The metadata object if found, or undefined.
  */
 export function getPropertyMetadata(
     key: string,
@@ -73,7 +84,11 @@ export function getPropertyMetadata(
 }
 
 /**
- * Gets available properties for a category
+ * Returns the full list of available properties for a given category.
+ * Used primarily by the suggestion UI to populate the autocomplete list.
+ *
+ * @param category - "anime" or "manga".
+ * @returns An array of PropertyMetadata objects.
  */
 export function getAvailableProperties(
     category: "anime" | "manga"

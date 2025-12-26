@@ -13,27 +13,57 @@ import {
 import { setNotificationsEnabled } from "../utils/notice";
 import { logger } from "../utils/logger";
 
+/**
+ * The Settings Tab for the MyAnimeNotes plugin.
+ *
+ * This class constructs the UI for the plugin's settings page in Obsidian,
+ * allowing users to configure authentication, synchronization behavior,
+ * notification preferences, and template options.
+ */
 export class MyAnimeNotesSettingTab extends PluginSettingTab {
+    /** The reference to the main plugin instance. */
     plugin: MyAnimeNotesPlugin;
+
+    /**
+     * Manages the internal state of the template settings section.
+     * This handles the complexity of dynamic template variable rendering.
+     */
     private templateState: TemplateSettingsState;
 
+    /**
+     * Creates a new instance of the settings tab.
+     *
+     * @param app - The Obsidian App instance.
+     * @param plugin - The MyAnimeNotes plugin instance.
+     */
     constructor(app: App, plugin: MyAnimeNotesPlugin) {
         super(app, plugin);
         this.plugin = plugin;
+        // Initialize template state with a callback to refresh the display
         this.templateState = createTemplateSettingsState(() => this.display());
     }
 
+    /**
+     * Renders the settings view.
+     *
+     * This method is called by Obsidian when the user opens the settings tab.
+     * It clears the existing container and rebuilds all setting components
+     * (Authentication, Templates, Sync options, etc.).
+     */
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
 
-        // MAL Authentication Settings
+        // 1. Render MyAnimeList Authentication Settings (Client ID, Secret, Login/Logout)
         this.renderMALSettings(containerEl);
 
-        // Template Section (rendered separately due to complexity)
+        // 2. Render Template Section
+        // Handled by a separate helper function due to the complexity of the template UI
         renderTemplateSection(containerEl, this.plugin, this.templateState);
 
-        // Notifications
+        // 3. General Settings
+
+        // Notifications Toggle
         new Setting(containerEl)
             .setName("Notifications")
             .setDesc("Notifications from the plugin.")
@@ -43,11 +73,12 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     .onChange(async value => {
                         this.plugin.settings.notificationsEnabled = value;
                         await this.plugin.saveSettings();
+                        // Update the global notification utility state
                         setNotificationsEnabled(value);
                     })
             );
 
-        // Scheduled sync toggle
+        // Scheduled Sync Toggle
         new Setting(containerEl)
             .setName("Scheduled sync")
             .setDesc("Automatically sync at regular intervals.")
@@ -58,18 +89,19 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                         this.plugin.settings.scheduledSync = value;
                         await this.plugin.saveSettings();
 
-                        // Restart auto-sync manager to apply changes
+                        // Side Effect: Restart auto-sync manager to apply changes immediately
                         if (this.plugin.autoSyncManager) {
                             this.plugin.autoSyncManager.stop();
                             this.plugin.autoSyncManager.start();
                         }
 
-                        // Refresh UI to show/hide interval input
+                        // Refresh UI to show/hide the "Sync interval" input below
                         this.display();
                     })
             );
 
-        // Scheduled sync interval (only show if scheduled sync is enabled)
+        // Scheduled Sync Interval (Conditional Render)
+        // Only visible if scheduled sync is enabled
         if (this.plugin.settings.scheduledSync) {
             new Setting(containerEl)
                 .setName("Sync interval")
@@ -84,12 +116,13 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                         )
                         .onChange(async value => {
                             const numValue = parseInt(value);
+                            // Enforce minimum interval of 60 minutes to respect API rate limits
                             if (!isNaN(numValue) && numValue >= 60) {
                                 this.plugin.settings.scheduledSyncInterval =
                                     numValue;
                                 await this.plugin.saveSettings();
 
-                                // Restart auto-sync manager to apply new interval
+                                // Restart manager to apply new interval
                                 if (this.plugin.autoSyncManager) {
                                     this.plugin.autoSyncManager.stop();
                                     this.plugin.autoSyncManager.start();
@@ -99,7 +132,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 );
         }
 
-        // Sync on load toggle
+        // Sync on Startup Toggle
         new Setting(containerEl)
             .setName("Sync after startup")
             .setDesc("Automatically sync shortly after Obsidian starts.")
@@ -110,7 +143,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                         this.plugin.settings.syncOnLoad = value;
                         await this.plugin.saveSettings();
 
-                        // Restart auto-sync manager to apply changes
+                        // Restart manager to update config
                         if (this.plugin.autoSyncManager) {
                             this.plugin.autoSyncManager.stop();
                             this.plugin.autoSyncManager.start();
@@ -118,7 +151,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     })
             );
 
-        // Optimize auto sync toggle
+        // Optimization Toggle
         new Setting(containerEl)
             .setName("Efficient auto-sync")
             .setDesc(
@@ -133,7 +166,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     })
             );
 
-        // Force full sync toggle
+        // Force Full Sync Toggle
         new Setting(containerEl)
             .setName("Ignore timestamps")
             .setDesc("Skip the timestamp check and update every file.")
@@ -146,7 +179,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     })
             );
 
-        // Debug mode setting
+        // Debug Mode Toggle
         new Setting(containerEl)
             .setName("Debug mode")
             .setDesc("Enable detailed console logging.")
@@ -156,31 +189,41 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     .onChange(async value => {
                         this.plugin.settings.debugMode = value;
                         await this.plugin.saveSettings();
+                        // Update logger state immediately
                         logger.setDebugMode(value);
                     })
             );
     }
 
+    /**
+     * Renders the MyAnimeList specific authentication settings.
+     *
+     * This method dynamically switches between two views:
+     * 1. Authenticated: Displays user avatar, name, and logout button.
+     * 2. Unauthenticated: Displays Client ID/Secret inputs and Authenticate button.
+     *
+     * @param container - The HTML element to append the settings to.
+     */
     private renderMALSettings(container: HTMLElement): void {
         const isAuth = isMALAuthenticated(this.plugin);
 
-        // Show user info if authenticated
+        // === View 1: Authenticated State ===
         if (isAuth && this.plugin.settings.malUserInfo) {
             const userInfo = this.plugin.settings.malUserInfo;
 
             const userSetting = new Setting(container);
 
-            // Create a container for avatar, name, and Logout button
+            // Create a custom flex container for avatar, name, and Logout button
             const userInfoContainer = userSetting.controlEl.createDiv({
                 cls: "myanimenotes-user-info-wrapper"
             });
 
-            // Left side: avatar and name
+            // Left side container: avatar and name
             const userDetailsContainer = userInfoContainer.createDiv({
                 cls: "myanimenotes-user-details"
             });
 
-            // Add avatar if available
+            // Add avatar image if URL is present
             if (userInfo.picture) {
                 userDetailsContainer.createEl("img", {
                     cls: "myanimenotes-user-avatar",
@@ -191,14 +234,14 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 });
             }
 
-            // Add username (clickable link to MAL profile)
+            // Add username as a clickable link to their MAL profile
             const usernameLink = userDetailsContainer.createEl("a", {
                 cls: "myanimenotes-user-name",
                 text: userInfo.name,
                 href: `https://myanimelist.net/profile/${userInfo.name}`
             });
 
-            // Open link in external browser
+            // Handle link click to open in default browser (supports Electron/Desktop)
             usernameLink.addEventListener("click", e => {
                 e.preventDefault();
                 const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
@@ -213,7 +256,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 }
             });
 
-            // Right side: Logout button
+            // Right side container: Logout button
             const buttonContainer = userInfoContainer.createDiv({
                 cls: "myanimenotes-button-container"
             });
@@ -226,14 +269,15 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
             logoutButton.addEventListener("click", () => {
                 void (async () => {
                     await malLogout(this.plugin);
+                    // Refresh view to show login inputs
                     this.display();
                 })();
             });
         }
 
-        // Only show Client ID and Secret when not authenticated
+        // === View 2: Unauthenticated State ===
         if (!isAuth) {
-            // Client ID
+            // Client ID Input
             new Setting(container)
                 .setName("Client ID")
                 .setDesc("Your myanimelist client ID.")
@@ -247,7 +291,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                         })
                 );
 
-            // Client Secret
+            // Client Secret Input (Masked)
             new Setting(container)
                 .setName("Client secret")
                 .setDesc("Your myanimelist client secret.")
@@ -258,26 +302,26 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                             this.plugin.settings.malClientSecret = value.trim();
                             await this.plugin.saveSettings();
                         });
-                    text.inputEl.type = "password";
+                    text.inputEl.type = "password"; // Hide secret visually
                     return text;
                 });
         }
 
-        // Authentication button (only shown when not authenticated)
+        // Authenticate Button (only shown when not authenticated)
         if (!isAuth) {
             const authSetting = new Setting(container)
                 .setName("Authenticate")
                 .addButton(button => {
                     button
                         .setButtonText("Authenticate")
-                        .setCta()
+                        .setCta() // Call To Action style (highlighted)
                         .onClick(async () => {
                             await startMALAuth(this.plugin);
                             this.display();
                         });
                 });
 
-            // Add description with "Learn more" link
+            // Add description with "Learn more" link for help
             const descEl = authSetting.descEl;
             descEl.createSpan({
                 text: "Link your myanimelist account. "

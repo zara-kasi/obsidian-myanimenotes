@@ -2,10 +2,15 @@ import { App, AbstractInputSuggest } from "obsidian";
 import type { PropertyMetadata } from "../types";
 
 /**
- * Variable Suggester for Template System
+ * Variable Suggester for the Template System.
  *
- * Provides autocomplete suggestions for template variables while typing.
- * Uses Obsidian's native AbstractInputSuggest API.
+ * This class provides autocomplete suggestions for template variables (e.g., `{{title}}`)
+ * as the user types into input fields. It leverages Obsidian's native `AbstractInputSuggest`
+ * API to render a pop-over menu.
+ *
+ * @remarks
+ * It is smart enough to handle multiple variables in a single string (e.g., "{{series}} - {{episode}}")
+ * by only looking at the text following the last open bracket `{{`.
  *
  * Usage:
  * ```typescript
@@ -17,10 +22,11 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
     private availableVariables: PropertyMetadata[];
 
     /**
-     * Creates a new variable suggester
-     * @param app Obsidian app instance
-     * @param inputEl Input element to attach suggestions to
-     * @param availableVariables List of variables to suggest (e.g., ANIME_PROPERTIES or MANGA_PROPERTIES)
+     * Creates a new variable suggester instance.
+     *
+     * @param app - The Obsidian App instance.
+     * @param inputEl - The HTML Input element to attach the suggester to.
+     * @param availableVariables - The list of metadata properties (Anime or Manga) to suggest.
      */
     constructor(
         app: App,
@@ -33,50 +39,51 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
     }
 
     /**
-     * Gets matching suggestions based on user input
-     * Filters variables by key or label (case-insensitive)
-     * Triggers on {{ brackets for multiple variable support
-     * Only shows suggestions when actively typing inside an incomplete variable
+     * Determines which suggestions to show based on the current user input.
      *
-     * @param inputStr Current input string
-     * @returns Array of matching variables
+     * Logic:
+     * 1. Detects if the user has typed `{{`.
+     * 2. Extracts the partial text after the last `{{`.
+     * 3. Filters the `availableVariables` list by matching keys or labels.
+     *
+     * @param inputStr - The current value of the input field.
+     * @returns An array of matching PropertyMetadata objects.
      */
     getSuggestions(inputStr: string): PropertyMetadata[] {
-        // Check if user just typed {{ to trigger suggestions
+        // TRIGGER 1: Immediate suggestion when user types "{{ "
         if (inputStr.endsWith("{{")) {
-            // Show all available variables when {{ is typed
             return this.availableVariables;
         }
 
-        // Find the last occurrence of {{
+        // Find the start of the current variable context
         const lastOpenBracketIndex = inputStr.lastIndexOf("{{");
 
-        // If no opening brackets found, don't show suggestions
+        // If no opening brackets are found, we are not in a variable context -> No suggestions
         if (lastOpenBracketIndex === -1) {
             return [];
         }
 
-        // Get text after the last {{
+        // Get the text specifically after the last `{{`
         const textAfterOpen = inputStr.substring(lastOpenBracketIndex + 2);
 
-        // Check if there's a closing }} after the last {{
+        // Check if this specific variable block is already closed with `}}`
         const closingBracketIndex = textAfterOpen.indexOf("}}");
 
-        // If there's already a closing }}, check cursor position
+        // If there is a closing bracket, the user is likely typing text *after* a variable,
+        // so we should not show suggestions for the closed variable.
         if (closingBracketIndex !== -1) {
-            // Variable is complete - don't show suggestions
             return [];
         }
 
-        // Extract text after the last {{ for filtering
+        // Prepare the search term
         const cleanInput = textAfterOpen.trim().toLowerCase();
 
-        // If input is empty (after extracting from brackets), show all available variables
+        // If the user hasn't typed a filter term yet (just `{{`), show everything
         if (!cleanInput) {
             return this.availableVariables;
         }
 
-        // Filter variables by matching key or label
+        // Filter variables: match against the ID key (e.g. "numEpisodes") or the UI label (e.g. "Total Episodes")
         return this.availableVariables.filter(
             variable =>
                 variable.key.toLowerCase().includes(cleanInput) ||
@@ -85,24 +92,24 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
     }
 
     /**
-     * Renders a suggestion item in the dropdown
-     * Shows both the variable key and a friendly label
+     * Renders a single suggestion item within the dropdown menu.
+     * Displays the raw variable key alongside its user-friendly label.
      *
-     * @param variable The variable metadata to render
-     * @param el The HTML element to render into
+     * @param variable - The variable metadata object to render.
+     * @param el - The parent container element for this suggestion.
      */
     renderSuggestion(variable: PropertyMetadata, el: HTMLElement): void {
         const container = el.createDiv({
             cls: "myanimenotes-variable-suggestion"
         });
 
-        // Variable key (main text)
+        // Main text: The actual variable key (e.g., "title")
         container.createDiv({
             cls: "myanimenotes-variable-key",
             text: variable.key
         });
 
-        // Variable label (description)
+        // Subtext: The description (e.g., "Media Title")
         container.createDiv({
             cls: "myanimenotes-variable-label",
             text: variable.label
@@ -110,53 +117,52 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
     }
 
     /**
-     * Called when user selects a suggestion
-     * Inserts the variable key with proper bracket handling
-     * Supports multiple variables in one property
+     * Handler called when the user selects a suggestion from the list.
+     * It correctly replaces the partial input (e.g., `{{ti`) with the full variable `{{title}}`.
      *
-     * @param variable The selected variable
+     * @param variable - The selected variable metadata.
      */
     selectSuggestion(variable: PropertyMetadata): void {
         const currentValue = this.inputEl.value;
 
-        // Find the last occurrence of {{ to support multiple variables
+        // Locate the active variable block
         const lastBracketIndex = currentValue.lastIndexOf("{{");
 
         if (lastBracketIndex !== -1) {
-            // Get the text before the {{
+            // Split string into "Before {{", "Active Block", "Rest"
             const beforeBrackets = currentValue.substring(0, lastBracketIndex);
             const afterBrackets = currentValue.substring(lastBracketIndex + 2);
 
-            // Check if there's already a closing bracket
+            // Check if a closing bracket already exists (though getSuggestions usually prevents this case)
             const closingIndex = afterBrackets.indexOf("}}");
 
             if (closingIndex !== -1) {
-                // Replace content between {{ and existing }}
+                // If closing brackets exist, preserve the text *after* them
                 const remaining = afterBrackets.substring(closingIndex + 2);
                 this.inputEl.value = `${beforeBrackets}{{${variable.key}}}${remaining}`;
             } else {
-                // No closing bracket yet - remove any partial text before adding the variable
-                // Find where the actual remaining text starts (after any partial variable name)
-                // We need to remove the partial text that matched the suggestion
+                // Normal case: User was typing `{{partial`, so we replace `partial` with `key}}`
                 this.inputEl.value = `${beforeBrackets}{{${variable.key}}}`;
             }
         } else {
-            // First variable, no brackets yet
+            // Fallback: If somehow triggered without brackets (unlikely via getSuggestions), just insert it.
             this.inputEl.value = `{{${variable.key}}}`;
         }
 
-        // Trigger input event so any listeners are notified
+        // Programmatically trigger the 'input' event so Obsidian detects the change
+        // and updates any listeners (like the autosave config logic).
         this.inputEl.trigger("input");
 
-        // Close the suggestion dropdown
+        // Close the dropdown
         this.close();
     }
 
     /**
-     * Updates the list of available variables
-     * Useful when switching between anime/manga templates
+     * Dynamically updates the list of available variables.
+     * Useful when the user switches between "Anime" and "Manga" tabs in settings,
+     * allowing reuse of the same suggester instance.
      *
-     * @param newVariables New list of variables to suggest
+     * @param newVariables - The new list of properties to suggest.
      */
     updateVariables(newVariables: PropertyMetadata[]): void {
         this.availableVariables = newVariables;
@@ -164,13 +170,12 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
 }
 
 /**
- * Creates a variable suggester for an input element
- * Helper function for easy instantiation
+ * Helper factory function to create and attach a VariableSuggest instance.
  *
- * @param app Obsidian app instance
- * @param inputEl Input element to attach suggestions to
- * @param variables List of variables to suggest
- * @returns VariableSuggest instance
+ * @param app - The Obsidian App instance.
+ * @param inputEl - The input element to enhance.
+ * @param variables - The list of variables to suggest.
+ * @returns The active VariableSuggest instance.
  */
 export function createVariableSuggest(
     app: App,

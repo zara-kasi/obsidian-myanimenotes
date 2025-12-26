@@ -13,34 +13,49 @@ import { getAvailableProperties } from "./metadata";
 import { promptForPropertyType, getPropertyTypeIcon } from "./properties";
 
 /**
- * Renders the template configuration section
+ * Renders the entire template configuration section within the settings tab.
+ * This acts as the main entry point for the template UI.
+ *
+ * @param container - The HTML element to append the template settings to.
+ * @param plugin - The main plugin instance.
+ * @param templateState - The state object managing UI expansion and drag references.
  */
 export function renderTemplateSection(
     container: HTMLElement,
     plugin: MyAnimeNotesPlugin,
     templateState: TemplateSettingsState
 ): void {
-    // Anime template expandable section
+    // Render Anime template expandable section
     renderExpandableTemplate(container, plugin, templateState, "anime");
 
-    // Manga template expandable section
+    // Render Manga template expandable section
     renderExpandableTemplate(container, plugin, templateState, "manga");
 }
 
 /**
- * State management for template settings
+ * Manages the internal state for the template settings UI.
+ * Tracks which sections are expanded and holds references for drag-and-drop operations.
  */
 export interface TemplateSettingsState {
+    /** Whether the Anime template section is currently expanded. */
     animeTemplateExpanded: boolean;
+    /** Whether the Manga template section is currently expanded. */
     mangaTemplateExpanded: boolean;
+    /** Reference to the container element holding the list of Anime properties. */
     animePropertyListEl: HTMLElement | null;
+    /** Reference to the container element holding the list of Manga properties. */
     mangaPropertyListEl: HTMLElement | null;
+    /** The HTML element currently being dragged by the user. */
     draggedElement: HTMLElement | null;
+    /** Callback function to trigger a UI refresh (usually calls `display()` on the setting tab). */
     refreshCallback: () => void;
 }
 
 /**
- * Creates initial template settings state
+ * Factory function to create the initial template settings state.
+ *
+ * @param refreshCallback - The function to call when the UI needs to update.
+ * @returns A new TemplateSettingsState object with default values.
  */
 export function createTemplateSettingsState(
     refreshCallback: () => void
@@ -56,7 +71,13 @@ export function createTemplateSettingsState(
 }
 
 /**
- * Renders an expandable template section for anime or manga
+ * Renders an individual expandable template section (either for Anime or Manga).
+ * Handles the accordion behavior, folder settings, property list, and content template.
+ *
+ * @param container - The parent container.
+ * @param plugin - The plugin instance.
+ * @param state - The shared UI state.
+ * @param type - The type of template to render ("anime" or "manga").
  */
 function renderExpandableTemplate(
     container: HTMLElement,
@@ -70,54 +91,57 @@ function renderExpandableTemplate(
             : state.mangaTemplateExpanded;
     const config = getTemplateConfig(plugin, type);
 
-    // Main setting with toggle
+    // Main setting header with toggle functionality
     const setting = new Setting(container)
         .setName(`${type === "anime" ? "Anime" : "Manga"} Template`)
         .setDesc(`Configure the template used for ${type} notes.`)
         .setClass("myanimenotes-template-setting");
 
-    // Add collapse/expand icon to the setting element (not nameEl)
+    // Add collapse/expand chevron icon
     const iconEl = setting.settingEl.createDiv({
         cls: "myanimenotes-collapse-icon"
     });
     setIcon(iconEl, isExpanded ? "chevron-down" : "chevron-right");
 
-    // Make the entire setting clickable to toggle
+    // Make the entire setting header clickable to toggle expansion
     setting.settingEl.addClass("myanimenotes-clickable-setting");
     setting.settingEl.addEventListener("click", e => {
-        // Don't toggle if clicking on input fields or buttons inside the expanded content
+        // Prevent toggling if the user clicks on interactive elements inside the setting content
         if (
             (e.target as HTMLElement).closest(".myanimenotes-template-content")
         ) {
             return;
         }
 
+        // Toggle state
         if (type === "anime") {
             state.animeTemplateExpanded = !state.animeTemplateExpanded;
         } else {
             state.mangaTemplateExpanded = !state.mangaTemplateExpanded;
         }
+        // Trigger UI refresh
         state.refreshCallback();
     });
 
-    // Expanded content container
+    // Render the expanded content if open
     if (isExpanded) {
         const contentContainer = container.createDiv({
             cls: "myanimenotes-template-content"
         });
 
-        // Folder path setting
+        // 1. Folder Path Setting
         new Setting(contentContainer)
             .setName("Note location")
             .setDesc("The folder or path of the note.")
             .addText(text => {
+                // Attach folder suggestion logic to the input
                 new FolderSuggest(plugin.app, text.inputEl);
                 text.setPlaceholder(
                     `MyAnimeNotes/${type === "anime" ? "Anime" : "Manga"}`
                 )
                     .setValue(config.folderPath)
                     .onChange(async value => {
-                        // Normalize the path to handle cross-platform paths and user input variations
+                        // Normalize path to handle OS-specific separators
                         const normalizedPath = normalizePath(
                             value.trim() ||
                                 `MyAnimeNotes/${
@@ -129,10 +153,10 @@ function renderExpandableTemplate(
                     });
             });
 
-        // Properties section header
+        // 2. Properties Section
         contentContainer.createEl("h4", { text: "Properties" });
 
-        // Add description with "Learn more" link
+        // Description with documentation link
         const propertiesDesc = contentContainer.createEl("p", {
             cls: "setting-item-description"
         });
@@ -152,21 +176,22 @@ function renderExpandableTemplate(
                 );
             });
 
-        // Properties list container
+        // Properties list container (target for re-rendering list items)
         const propertyListEl = contentContainer.createDiv({
             cls: "myanimenotes-property-list"
         });
 
-        // Store reference for drag operations
+        // Store reference to this list element in state for updates
         if (type === "anime") {
             state.animePropertyListEl = propertyListEl;
         } else {
             state.mangaPropertyListEl = propertyListEl;
         }
 
+        // Initial render of property rows
         renderPropertyList(propertyListEl, plugin, state, config, type);
 
-        // Add property button
+        // "Add Property" Button
         const addButtonContainer = contentContainer.createDiv({
             cls: "myanimenotes-add-property-container"
         });
@@ -174,13 +199,11 @@ function renderExpandableTemplate(
             cls: "myanimenotes-add-property-button"
         });
 
-        // Create icon element inside the button
-        const iconEl = addButton.createSpan({
+        const addButtonIcon = addButton.createSpan({
             cls: "myanimenotes-button-icon"
         });
-        setIcon(iconEl, "plus");
+        setIcon(addButtonIcon, "plus");
 
-        // Add text after the icon
         addButton.createSpan({
             cls: "myanimenotes-button-text",
             text: "Add Property"
@@ -190,7 +213,7 @@ function renderExpandableTemplate(
             addEmptyProperty(plugin, state, config, type);
         });
 
-        // Note content template section
+        // 3. Note Content Section
         contentContainer.createEl("h4", {
             text: "Note content",
             cls: "myanimenotes-section-header"
@@ -201,7 +224,7 @@ function renderExpandableTemplate(
             cls: "setting-item-description"
         });
 
-        // Use Setting wrapper with custom class to hide separator line
+        // Content Template TextArea
         new Setting(contentContainer)
             .setClass("myanimenotes-textarea-setting")
             .addTextArea(textarea => {
@@ -220,7 +243,14 @@ function renderExpandableTemplate(
 }
 
 /**
- * Renders the list of properties
+ * Renders the list of properties for a specific template.
+ * Clears the container and rebuilds the rows based on the current configuration.
+ *
+ * @param container - The DOM element to render properties into.
+ * @param plugin - Plugin instance.
+ * @param state - UI state.
+ * @param config - The template configuration containing the properties.
+ * @param type - "anime" or "manga".
  */
 function renderPropertyList(
     container: HTMLElement,
@@ -231,7 +261,7 @@ function renderPropertyList(
 ): void {
     container.empty();
 
-    // Sort properties by order
+    // Ensure properties are displayed in the correct order
     const sortedProps = [...config.properties].sort(
         (a, b) => a.order - b.order
     );
@@ -242,9 +272,16 @@ function renderPropertyList(
 }
 
 /**
- * Renders a single property row
+ * Renders a single property row with inputs for name, template value, and drag/delete controls.
+ * This function also attaches all necessary event listeners for drag-and-drop reordering.
+ *
+ * @param container - The parent property list container.
+ * @param plugin - Plugin instance.
+ * @param state - UI state.
+ * @param prop - The specific property item to render.
+ * @param config - The parent template config.
+ * @param type - "anime" or "manga".
  */
-
 function renderPropertyRow(
     container: HTMLElement,
     plugin: MyAnimeNotesPlugin,
@@ -257,48 +294,46 @@ function renderPropertyRow(
     rowEl.setAttribute("draggable", "true");
     rowEl.setAttribute("data-id", prop.id);
 
+    // Identify permanent system properties that cannot be deleted or renamed
     const isPermanent =
         prop.template === "myanimenotes" || prop.template === "synced";
 
-    // Drag handle
+    // Drag handle icon
     const dragHandle = rowEl.createDiv({ cls: "myanimenotes-drag-handle" });
     setIcon(dragHandle, "grip-vertical");
 
     // ========================================================================
-    // TYPE ICON BUTTON (NEW)
+    // Property Type Icon Button
     // ========================================================================
     const typeIconButton = rowEl.createDiv({
         cls: "myanimenotes-type-icon-button"
     });
 
-    // Show icon based on current type (defaults to 'text' if not set)
     const currentType = prop.type || "text";
     const iconName = getPropertyTypeIcon(currentType);
     setIcon(typeIconButton, iconName);
 
-    // Tooltip
     typeIconButton.setAttribute("aria-label", `Format: ${currentType}`);
 
+    // If not permanent, allow changing the property type via click
     if (!isPermanent) {
         typeIconButton.addClass("myanimenotes-type-icon-clickable");
 
         typeIconButton.addEventListener("click", e => {
-            // Wrap async logic in a void function
             void (async () => {
-                e.stopPropagation(); // Don't trigger drag
-
-                // Open modal to select type
+                e.stopPropagation(); // Prevent drag initiation
+                
+                // Show modal to select new property type
                 const selectedType = await promptForPropertyType(
                     plugin.app,
                     prop.customName
                 );
 
                 if (selectedType) {
-                    // Save the type to config
                     prop.type = selectedType;
                     await saveTemplateConfig(plugin, type, config);
 
-                    // Update icon immediately
+                    // Update UI immediately
                     typeIconButton.empty();
                     const newIconName = getPropertyTypeIcon(selectedType);
                     setIcon(typeIconButton, newIconName);
@@ -312,11 +347,12 @@ function renderPropertyRow(
     } else {
         typeIconButton.addClass("myanimenotes-type-icon-readonly");
     }
+
     // ========================================================================
-    // END TYPE ICON BUTTON
+    // Property Inputs
     // ========================================================================
 
-    // Property name input
+    // 1. Property Name Input (Key)
     const nameInput = rowEl.createEl("input", {
         cls: "myanimenotes-property-name",
         type: "text",
@@ -334,7 +370,7 @@ function renderPropertyRow(
         });
     }
 
-    // Template variable input
+    // 2. Template Variable Input (Value)
     const templateInput = rowEl.createEl("input", {
         cls: "myanimenotes-template-var",
         type: "text",
@@ -346,17 +382,19 @@ function renderPropertyRow(
     });
 
     if (!isPermanent) {
+        // Update on blur to avoid excessive saves while typing
         templateInput.addEventListener("blur", e => {
             prop.template = (e.target as HTMLInputElement).value.trim();
             void saveTemplateConfig(plugin, type, config);
         });
 
+        // Update local object immediately for responsiveness
         templateInput.addEventListener("input", e => {
             prop.template = (e.target as HTMLInputElement).value;
         });
     }
 
-    // Delete button
+    // Delete Button
     if (!isPermanent) {
         const deleteButton = rowEl.createDiv({
             cls: "myanimenotes-delete-button"
@@ -366,14 +404,19 @@ function renderPropertyRow(
             void removeProperty(plugin, state, prop.id, config, type);
         });
     } else {
+        // Spacer to align read-only rows
         rowEl.createDiv({ cls: "myanimenotes-delete-button-spacer" });
     }
 
-    // Variable suggester
+    // Attach Variable Suggester (auto-complete for {{variables}})
     const variables = getAvailableProperties(type);
     new VariableSuggest(plugin.app, templateInput, variables);
 
-    // Drag and drop events (unchanged)
+    // ========================================================================
+    // Drag and Drop Event Handlers
+    // ========================================================================
+    
+    // Start Dragging
     rowEl.addEventListener("dragstart", e => {
         state.draggedElement = rowEl;
         rowEl.addClass("dragging");
@@ -382,17 +425,20 @@ function renderPropertyRow(
         }
     });
 
+    // End Dragging
     rowEl.addEventListener("dragend", () => {
         rowEl.removeClass("dragging");
         state.draggedElement = null;
     });
 
+    // Drag Over (Calculate drop position)
     rowEl.addEventListener("dragover", e => {
-        e.preventDefault();
+        e.preventDefault(); // Essential to allow dropping
         if (state.draggedElement && state.draggedElement !== rowEl) {
             const rect = rowEl.getBoundingClientRect();
             const midpoint = rect.top + rect.height / 2;
 
+            // Visual feedback: Show line above or below row based on mouse position
             if (e.clientY < midpoint) {
                 rowEl.addClass("drag-over-top");
                 rowEl.removeClass("drag-over-bottom");
@@ -403,22 +449,27 @@ function renderPropertyRow(
         }
     });
 
+    // Drag Leave (Cleanup visual feedback)
     rowEl.addEventListener("dragleave", () => {
         rowEl.removeClass("drag-over-top");
         rowEl.removeClass("drag-over-bottom");
     });
 
+    // Drop Action
     rowEl.addEventListener("drop", e => {
         e.preventDefault();
+        // Cleanup styles
         rowEl.removeClass("drag-over-top");
         rowEl.removeClass("drag-over-bottom");
 
         if (state.draggedElement && state.draggedElement !== rowEl) {
+            // Calculate exact drop position logic
             void reorderProperties(
                 plugin,
                 state,
                 state.draggedElement.getAttribute("data-id") || "",
-                prop.id,
+                prop.id, // Target ID
+                // Determine if dropping before or after based on mouse Y position
                 e.clientY <
                     rowEl.getBoundingClientRect().top +
                         rowEl.getBoundingClientRect().height / 2,
@@ -430,9 +481,13 @@ function renderPropertyRow(
 }
 
 /**
- * Adds an empty property to the template
+ * Adds a new empty property to the configuration and refreshes the UI.
+ *
+ * @param plugin - Plugin instance.
+ * @param state - UI state.
+ * @param config - Template config.
+ * @param type - "anime" or "manga".
  */
-
 function addEmptyProperty(
     plugin: MyAnimeNotesPlugin,
     state: TemplateSettingsState,
@@ -449,7 +504,7 @@ function addEmptyProperty(
     config.properties.push(newProp);
     void saveTemplateConfig(plugin, type, config);
 
-    // Re-render just the property list
+    // Re-render just the property list part of the UI
     const listEl =
         type === "anime"
             ? state.animePropertyListEl
@@ -460,7 +515,13 @@ function addEmptyProperty(
 }
 
 /**
- * Removes a property from the template
+ * Removes a property by ID and re-indexes the order of remaining properties.
+ *
+ * @param plugin - Plugin instance.
+ * @param state - UI state.
+ * @param id - The unique ID of the property to remove.
+ * @param config - Template config.
+ * @param type - "anime" or "manga".
  */
 async function removeProperty(
     plugin: MyAnimeNotesPlugin,
@@ -473,7 +534,6 @@ async function removeProperty(
     reorderPropertiesSequentially(config);
     await saveTemplateConfig(plugin, type, config);
 
-    // Re-render just the property list
     const listEl =
         type === "anime"
             ? state.animePropertyListEl
@@ -484,7 +544,16 @@ async function removeProperty(
 }
 
 /**
- * Reorders properties via drag and drop
+ * Handles the logic for reordering properties after a drop event.
+ * Moves the dragged item to the new index and saves the new order.
+ *
+ * @param plugin - Plugin instance.
+ * @param state - UI state.
+ * @param draggedId - ID of item being moved.
+ * @param targetId - ID of item where it was dropped.
+ * @param insertBefore - True if dropped before target, false if after.
+ * @param config - Template config.
+ * @param type - "anime" or "manga".
  */
 async function reorderProperties(
     plugin: MyAnimeNotesPlugin,
@@ -500,17 +569,19 @@ async function reorderProperties(
 
     if (draggedIndex === -1 || targetIndex === -1) return;
 
+    // Remove dragged item from old position
     const [draggedProp] = config.properties.splice(draggedIndex, 1);
 
+    // Calculate new insertion index (adjusting for array mutation)
     const newTargetIndex = config.properties.findIndex(p => p.id === targetId);
     const insertIndex = insertBefore ? newTargetIndex : newTargetIndex + 1;
 
+    // Insert at new position
     config.properties.splice(insertIndex, 0, draggedProp);
 
     reorderPropertiesSequentially(config);
     await saveTemplateConfig(plugin, type, config);
 
-    // Re-render just the property list
     const listEl =
         type === "anime"
             ? state.animePropertyListEl
@@ -521,7 +592,8 @@ async function reorderProperties(
 }
 
 /**
- * Reorders properties sequentially
+ * Normalizes the `order` property of all items in the list to be sequential (1, 2, 3...).
+ * This ensures clean data before saving.
  */
 function reorderPropertiesSequentially(config: TemplateConfig): void {
     config.properties.forEach((prop, index) => {
@@ -530,13 +602,18 @@ function reorderPropertiesSequentially(config: TemplateConfig): void {
 }
 
 /**
- * Gets the template configuration for anime or manga
+ * Retrieves the current template configuration from plugin settings.
+ * Falls back to default templates if user settings are missing.
+ *
+ * @param plugin - Plugin instance.
+ * @param type - "anime" or "manga".
+ * @returns A deep copy of the template configuration.
  */
-
 function getTemplateConfig(
     plugin: MyAnimeNotesPlugin,
     type: "anime" | "manga"
 ): TemplateConfig {
+    // Deep copy JSON parse/stringify is used to avoid reference issues
     if (type === "anime") {
         return plugin.settings.animeTemplate
             ? (JSON.parse(
@@ -557,7 +634,11 @@ function getTemplateConfig(
 }
 
 /**
- * Saves the template configuration
+ * Persists the modified template configuration to the plugin settings file (`data.json`).
+ *
+ * @param plugin - Plugin instance.
+ * @param type - "anime" or "manga".
+ * @param config - The updated configuration to save.
  */
 async function saveTemplateConfig(
     plugin: MyAnimeNotesPlugin,

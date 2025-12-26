@@ -6,12 +6,17 @@ import type { FileLookupResult, SkipCheckResult } from "./types";
 // ============================================================================
 
 /**
- * Yields to UI thread to prevent freezing
- * Uses requestAnimationFrame for better performance than setTimeout
+ * Yields execution back to the browser's main UI thread to prevent the application
+ * from freezing during long-running batch operations.
  *
- * Calls requestAnimationFrame twice:
- * - First call: returns when browser is ready to paint
- * - Second call: ensures any pending paints are flushed
+ * Implementation Details:
+ * Uses a double `requestAnimationFrame` pattern instead of `setTimeout(..., 0)`.
+ * - First RAF: Queues the callback for the next paint frame.
+ * - Second RAF: Ensures that the browser has actually painted the previous frame
+ * before resuming execution. This guarantees visual updates (like progress bars)
+ * actually render to the screen.
+ *
+ * @returns A Promise that resolves after the UI has had a chance to update.
  */
 export function yieldToUI(): Promise<void> {
     return new Promise(resolve => {
@@ -22,13 +27,16 @@ export function yieldToUI(): Promise<void> {
 }
 
 /**
- * Gets synced timestamp using FAST cache-first approach
- * NO delays, NO fallbacks - trusts cache immediately
+ * Retrieves the 'synced' timestamp from a file's metadata cache.
  *
- * The cache is reliable in practice. The rare edge case of stale cache
- * is acceptable vs 25 seconds of wasted time per batch.
+ * Strategy: "Fast-Fail Cache-First"
+ * This function is designed for high-performance loops. It strictly trusts the
+ * in-memory metadata cache provided by Obsidian. It does NOT fall back to reading
+ * the file from disk (which would be 100x slower), accepting that in rare edge
+ * cases the cache might be slightly stale.
  *
- * @returns Synced timestamp or undefined if not found
+ * @param cache - The Obsidian file cache object (from `app.metadataCache`).
+ * @returns The timestamp string if found, otherwise undefined.
  */
 export function getSyncedTimestampFast(
     cache: { frontmatter?: Record<string, unknown> } | undefined
@@ -41,15 +49,25 @@ export function getSyncedTimestampFast(
         return cache.frontmatter.synced;
     }
 
-    // No timestamp found - return undefined (will update to be safe)
+    // No timestamp found - return undefined (will likely trigger an update to be safe)
     return undefined;
 }
 
 /**
- * Pure computation: determines if file should be skipped
- * No I/O, no delays - just timestamp comparison
+ * Pure business logic to determine if a file update is necessary.
+ * Compares local and remote timestamps to decide if an I/O operation can be skipped.
  *
- * @returns Skip decision with reason for logging
+ * Logic Priority:
+ * 1. Force Sync -> Never skip.
+ * 2. Missing Timestamps (Local or Remote) -> Never skip (safety first).
+ * 3. Invalid Date Strings -> Never skip.
+ * 4. Timestamps Match -> Skip.
+ * 5. Timestamps Differ -> Update.
+ *
+ * @param localSynced - The timestamp currently in the local file's frontmatter.
+ * @param remoteSynced - The 'updatedAt' timestamp from the MyAnimeList API.
+ * @param forceSync - User setting to override optimization.
+ * @returns A structured result containing the boolean decision and a reason string.
  */
 export function shouldSkipByTimestamp(
     localSynced: string | undefined,
@@ -61,7 +79,7 @@ export function shouldSkipByTimestamp(
         return { skip: false, reason: "force sync enabled" };
     }
 
-    // No local timestamp means new/ file - always update
+    // No local timestamp means new/legacy file - always update
     if (!localSynced) {
         return { skip: false, reason: "no local timestamp" };
     }
@@ -81,6 +99,7 @@ export function shouldSkipByTimestamp(
     }
 
     // Timestamps match - SKIP!
+    // This is the "Happy Path" for optimization where we save IO operations.
     if (localTime === remoteTime) {
         return { skip: true, reason: "timestamps match" };
     }
@@ -94,7 +113,12 @@ export function shouldSkipByTimestamp(
 // ============================================================================
 
 /**
- * Performs file lookup using myanimenotes strategies
+ * Locates existing files in the vault that match the given 'myanimenotes' Sync ID.
+ * Standardizes the lookup result into a typed union for easier handling by the service layer.
+ *
+ * @param index - The JIT index of the vault.
+ * @param myanimenotesSync - The unique identifier to search for.
+ * @returns A FileLookupResult categorizing the find as 'exact', 'duplicates', or 'none'.
  */
 export function lookupExistingFiles(
     index: MyAnimeNotesIndex,

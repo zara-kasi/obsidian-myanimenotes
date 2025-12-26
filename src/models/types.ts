@@ -1,7 +1,9 @@
 // Data types for media synchronization
+// This file separates the internal data model (MediaItem) from the external API shapes (MALItem).
 
 /**
- *  Media status
+ * Standardized status for the media itself (Production Status).
+ * Unifies terminology for Anime (Airing) and Manga (Publishing).
  */
 export enum MediaStatus {
     // Anime/Manga production status
@@ -11,7 +13,8 @@ export enum MediaStatus {
 }
 
 /**
- * User list status
+ * Standardized status for the user's personal list.
+ * Unifies "Watching" and "Reading" into equivalent states where possible.
  */
 export enum UserListStatus {
     // For Anime
@@ -29,7 +32,7 @@ export enum UserListStatus {
 }
 
 /**
- * Media type (anime or manga)
+ * The primary categorization of media items.
  */
 export enum MediaCategory {
     ANIME = "anime",
@@ -37,7 +40,7 @@ export enum MediaCategory {
 }
 
 /**
- * Picture structure
+ * Common image structure used for covers and posters.
  */
 export interface Picture {
     medium?: string;
@@ -45,7 +48,7 @@ export interface Picture {
 }
 
 /**
- *  Alternative titles
+ * Localized titles and aliases.
  */
 export interface AlternativeTitles {
     en?: string;
@@ -54,7 +57,7 @@ export interface AlternativeTitles {
 }
 
 /**
- *  Genre
+ * Media genre tag (e.g., "Action", "Romance").
  */
 export interface Genre {
     id: number;
@@ -62,7 +65,7 @@ export interface Genre {
 }
 
 /**
- *  Author (for manga)
+ * Author info (specifically for Manga).
  */
 export interface Author {
     firstName: string;
@@ -71,7 +74,10 @@ export interface Author {
 }
 
 /**
- *  Media item structure
+ * The core internal data model representing a synchronized item.
+ *
+ * This interface normalizes differences between Anime and Manga, providing a
+ * single consistent shape for templates and storage logic.
  */
 export interface MediaItem {
     // Basic info
@@ -97,6 +103,7 @@ export interface MediaItem {
 
     // Genres
     genres?: Genre[];
+
     // Publication/Airing dates (UNIFIED - common to both anime and manga)
     releasedStart?: string; // When media started (YYYY-MM-DD)
     releasedEnd?: string; // When media ended (YYYY-MM-DD)
@@ -121,14 +128,17 @@ export interface MediaItem {
     numVolumesRead?: number; // For manga
     numChaptersRead?: number; // For manga
 
-    // Sync metadata - timestamp from API
+    // Sync metadata - timestamp from API (used for change detection)
     updatedAt?: string;
 
     // Platform metadata
     platform: "mal";
 }
 
-// Contains strictly the API response interfaces from MyAnimeList
+// ============================================================================
+// RAW API TYPES
+// Contains strictly the API response interfaces from MyAnimeList (MAL)
+// ============================================================================
 
 export interface MALPicture {
     medium?: string;
@@ -160,6 +170,9 @@ export interface MALStudio {
     name: string;
 }
 
+/**
+ * Represents the user's interaction with the item (score, status, progress).
+ */
 export interface MALListStatus {
     status: string;
     score?: number;
@@ -171,6 +184,10 @@ export interface MALListStatus {
     updated_at?: string;
 }
 
+/**
+ * Represents the media item details (title, synopsis, metadata).
+ * MAL nests this under a `node` property in most list responses.
+ */
 export interface MALNode {
     id: number;
     title: string;
@@ -193,6 +210,10 @@ export interface MALNode {
     authors?: MALAuthor[];
 }
 
+/**
+ * The top-level object returned by MAL list endpoints.
+ * Combines the static node details with the user's dynamic list status.
+ */
 export interface MALItem {
     node: MALNode;
     list_status?: MALListStatus;

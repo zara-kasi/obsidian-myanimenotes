@@ -13,10 +13,11 @@ import type { MediaItem, AlternativeTitles } from "../../models";
 import { applyFilters } from "../../settings/template/filters";
 
 /**
- * Extracts variable name and filters from a template variable
+ * Extracts variable name and filters from a template variable string.
+ * This parses the inner content of a `{{...}}` block.
  *
- * @param template - Template variable string (e.g., "{{title|lower}}")
- * @returns Object with variable name and filter string
+ * @param varString - The raw content inside braces (e.g., "title|lower").
+ * @returns Object containing the clean variable name and the raw filter string.
  *
  * @example
  * parseTemplateVariable("{{title|lower|default:'Untitled'}}")
@@ -26,10 +27,11 @@ function parseTemplateVariable(varString: string): {
     varName: string;
     filters: string;
 } {
-    // Remove outer {{ }}
+    // Remove outer {{ }} characters
     const content = varString.replace(/^\{\{|\}\}$/g, "").trim();
 
-    // Split on first pipe that's not inside quotes
+    // Logic to split on the first pipe '|' that is NOT inside quotes
+    // This allows filters to accept arguments with pipes if they are quoted (e.g., default:'|')
     let pipeIndex = -1;
     let inQuotes = false;
     let quoteChar = "";
@@ -37,9 +39,10 @@ function parseTemplateVariable(varString: string): {
     for (let i = 0; i < content.length; i++) {
         const char = content[i];
 
+        // Toggle quote state
         if (
             (char === '"' || char === "'") &&
-            (i === 0 || content[i - 1] !== "\\")
+            (i === 0 || content[i - 1] !== "\\") // Ignore escaped quotes
         ) {
             if (!inQuotes) {
                 inQuotes = true;
@@ -50,6 +53,7 @@ function parseTemplateVariable(varString: string): {
             }
         }
 
+        // Found a pipe outside of quotes -> this splits variable from filters
         if (char === "|" && !inQuotes) {
             pipeIndex = i;
             break;
@@ -67,10 +71,10 @@ function parseTemplateVariable(varString: string): {
 }
 
 /**
- * Extracts all variables from a template string
+ * Extracts all unique variables from a template string.
  *
- * @param template - Template string with {{variables}}
- * @returns Array of variable info objects
+ * @param template - Template string containing zero or more {{variables}}.
+ * @returns Array of objects containing parsed variable info and the full match string.
  */
 export function extractVariables(
     template: string
@@ -83,6 +87,7 @@ export function extractVariables(
     }> = [];
     let match;
 
+    // Iterate through all matches of {{...}}
     while ((match = regex.exec(template)) !== null) {
         const fullMatch = match[0];
         const { varName, filters } = parseTemplateVariable(fullMatch);
@@ -93,13 +98,14 @@ export function extractVariables(
 }
 
 /**
- * Resolves a property value from MediaItem
- * Maps template variable names to actual item properties
+ * Resolves a property value from a MediaItem based on the variable name.
+ * Acts as a mapping layer between the template system and the internal data model.
  *
- * @param item - Media item with data
- * @param variableName - Variable name to resolve
- * @returns Resolved value or undefined if not found
- */ function resolvePropertyValue(
+ * @param item - Media item containing the source data.
+ * @param variableName - The key requested in the template (e.g., "numEpisodes").
+ * @returns The resolved value (string, number, array, or undefined).
+ */
+function resolvePropertyValue(
     item: MediaItem,
     variableName: string
 ): string | number | string[] | undefined {
@@ -126,7 +132,7 @@ export function extractVariables(
         status: item.status,
         mean: item.mean,
 
-        // Genres - return as array of genre names
+        // Genres - return as array of genre names (e.g., ["Action", "Adventure"])
         genres: item.genres?.map(g => g.name),
 
         // Dates
@@ -158,11 +164,12 @@ export function extractVariables(
 }
 
 /**
- * Resolves a template string by replacing {{variables}} with actual values
+ * Resolves a complete template string by replacing all `{{variables}}` with actual values.
+ * Handles mixed content (text + variables), single variable preservation (arrays), and filter application.
  *
- * @param template - Template string with {{variables}}, filters, and custom text
- * @param item - Media item with data
- * @returns Resolved string, array (for special cases), or undefined if empty
+ * @param template - Template string with {{variables}}, filters, and custom text.
+ * @param item - Media item containing the data.
+ * @returns The resolved string, an array (for single-variable list contexts), or undefined if result is empty.
  *
  * @example
  * resolveTemplate("{{numEpisodes}} episodes", item)
@@ -172,9 +179,8 @@ export function extractVariables(
  * // Returns: "[[Studio Bones]], [[MAPPA]]"
  *
  * resolveTemplate("{{alternativeTitles}}", item)
- * // Returns: ["進撃の巨人", "Shingeki no Kyojin"] (array preserved)
+ * // Returns: ["進撃の巨人", "Shingeki no Kyojin"] (preserves array type for YAML)
  */
-
 export function resolveTemplate(
     template: string,
     item: MediaItem
@@ -186,13 +192,14 @@ export function resolveTemplate(
     // Extract all variables from template
     const variables = extractVariables(template);
 
-    // Special case: if template is ONLY a single variable with no other text,
-    // we might want to preserve its type (array vs string)
+    // CASE 1: Single Variable (No extra text)
+    // If the template is ONLY "{{var}}", we preserve the original type (e.g., array).
+    // This is crucial for frontmatter properties like `aliases` or `tags`.
     if (variables.length === 1 && template.trim() === variables[0].fullMatch) {
         const { varName, filters } = variables[0];
         let value = resolvePropertyValue(item, varName);
 
-        // If no value, return undefined
+        // If no value, return undefined (field will be omitted)
         if (value === undefined || value === null) {
             return undefined;
         }
@@ -206,21 +213,22 @@ export function resolveTemplate(
                 | undefined;
         }
 
-        // Convert number to string if needed
+        // Convert number to string if needed (templates generally output strings)
         if (typeof value === "number") {
             return String(value);
         }
 
-        // Return the value (might be array, string, etc.)
+        // Return the raw value (might be array, string, etc.)
         return value;
     }
 
-    // If no variables found, return template as-is (static text)
+    // CASE 2: Static Text (No variables)
     if (variables.length === 0) {
         return template;
     }
 
-    // Replace each {{variable}} with its value
+    // CASE 3: Mixed Content (Text + Variables)
+    // We perform string replacement. Arrays must be joined into strings.
     let result = template;
     let hasAnyValue = false;
 
@@ -243,7 +251,7 @@ export function resolveTemplate(
             // Convert to string for template substitution
             let stringValue: string;
             if (Array.isArray(value)) {
-                // If result is array after filters, join it
+                // If result is array after filters, join it nicely
                 stringValue = value.join(", ");
             } else {
                 stringValue = String(value);
@@ -252,12 +260,12 @@ export function resolveTemplate(
             // Replace this specific occurrence
             result = result.replace(fullMatch, stringValue);
         } else {
-            // Remove the {{variable}} placeholder if no value exists
+            // If value is missing, remove the {{variable}} placeholder entirely
             result = result.replace(fullMatch, "");
         }
     }
 
-    // Clean up result - remove extra whitespace
+    // Clean up result - remove extra whitespace left by removed variables
     result = result.trim();
 
     // Return undefined if all variables were empty/undefined
@@ -273,7 +281,8 @@ export function resolveTemplate(
 // ============================================================================
 
 /**
- * Extracts alternative titles into array format for Obsidian aliases
+ * Extracts and flattens alternative titles into a single string array.
+ * Useful for populating the `aliases` property in Obsidian.
  */
 function extractAliases(
     alternativeTitles: AlternativeTitles | undefined
@@ -295,7 +304,7 @@ function extractAliases(
 }
 
 /**
- * Formats duration from minutes to human-readable string
+ * Formats duration from raw minutes into a human-readable "Xh Ym" string.
  *
  * @example
  * formatDuration(150) // "2h 30m"
@@ -315,7 +324,7 @@ function formatDuration(minutes: number | undefined): string | undefined {
 }
 
 /**
- * Formats author array into comma-separated string
+ * Formats an array of author objects into a single comma-separated string.
  *
  * @example
  * formatAuthors([{firstName: "Hajime", lastName: "Isayama"}])

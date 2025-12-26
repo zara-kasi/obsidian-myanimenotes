@@ -35,12 +35,15 @@ const log = new logger("StorageBatching");
  * 3. Reads MetadataCache to retrieve timestamps.
  * 4. Computes "Skip" vs "Update" decisions based on data freshness.
  *
+ * This function is critical for performance; it avoids touching the hard disk
+ * by leveraging Obsidian's internal caches.
+ *
  * @param plugin - Plugin instance (access to MetadataCache).
- * @param items - Raw media items from source.
+ * @param items - Raw media items from source (MyAnimeList).
  * @param config - Storage configuration.
- * @param folderPath - Target directory path.
- * @param index - JIT Index snapshot.
- * @returns Array of enriched BatchItems with pre-calculated decisions.
+ * @param folderPath - Target directory path (used for context, though creation happens later).
+ * @param index - JIT Index snapshot of the vault state.
+ * @returns Array of enriched BatchItems with pre-calculated decisions (skip/update).
  */
 export function prepareBatchItems(
     plugin: MyAnimeNotesPlugin,
@@ -60,10 +63,14 @@ export function prepareBatchItems(
     // Resolve all identifiers and retrieve current file state from cache.
 
     for (const item of items) {
+        // Generate the unique ID for this item
         const myanimenotes = generateMyAnimeNotesSync(item);
+
+        // Check the JIT index to see if this file exists
         const lookup = lookupExistingFiles(index, myanimenotes);
 
         // Optimistically retrieve timestamp if file exists (No disk I/O)
+        // We use Obsidian's MetadataCache which is much faster than reading the file
         let cachedTimestamp: string | undefined;
         if (lookup.files.length > 0) {
             const file = lookup.files[0];
@@ -71,6 +78,7 @@ export function prepareBatchItems(
             cachedTimestamp = cache ? getSyncedTimestampFast(cache) : undefined;
         }
 
+        // Push preliminary state (skip decision happens next)
         batchItems.push({
             item,
             myanimenotesSync: myanimenotes,
@@ -85,6 +93,7 @@ export function prepareBatchItems(
     // Apply business logic to determine if an update is required.
 
     for (const batch of batchItems) {
+        // Compare the cached timestamp in the file vs the 'updatedAt' from the API
         const decision = shouldSkipByTimestamp(
             batch.cachedTimestamp,
             batch.item.updatedAt,
@@ -117,6 +126,8 @@ export function prepareBatchItems(
 /**
  * Generates result objects for skipped items without performing I/O.
  * Used to immediately resolve "Fast-Path" items in the batch processor.
+ * * This allows the UI to report "Synced" or "Skipped" instantaneously for items
+ * that haven't changed, dramatically speeding up the perception of sync speed.
  *
  * @param skippedItems - Subset of BatchItems marked for skipping.
  * @returns Array of SyncActionResults (Status: 'skipped').

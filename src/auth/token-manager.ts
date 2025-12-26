@@ -9,9 +9,12 @@ import { logger } from "../utils/logger";
 const log = new logger("AuthTokenManager");
 
 /**
- * Checks if the current access token is valid
- * @param plugin Plugin instance
- * @returns True if token exists and hasn't expired
+ * Checks if the current access token is valid based on its expiry time.
+ * Uses a safety buffer to consider a token "expired" slightly before the actual deadline
+ * to avoid race conditions during network requests.
+ *
+ * @param plugin - Plugin instance containing settings.
+ * @returns True if token exists and is within the valid time window.
  */
 export function isTokenValid(plugin: MyAnimeNotesPlugin): boolean {
     return !!(
@@ -22,18 +25,22 @@ export function isTokenValid(plugin: MyAnimeNotesPlugin): boolean {
 }
 
 /**
- * Checks if user is authenticated (has valid token and auth flag is true)
- * @param plugin Plugin instance
- * @returns True if authenticated
+ * Comprehensive check for user authentication status.
+ * Verifies both the internal authenticated flag and the token's validity.
+ *
+ * @param plugin - Plugin instance.
+ * @returns True if the user is fully authenticated and ready to make requests.
  */
 export function isAuthenticated(plugin: MyAnimeNotesPlugin): boolean {
     return plugin.settings.malAuthenticated && isTokenValid(plugin);
 }
 
 /**
- * Refreshes the access token using refresh token
- * @param plugin Plugin instance
- * @throws Error if refresh fails
+ * Refreshes the access token using the stored refresh token.
+ * This is crucial for maintaining long-term sessions without forcing the user to re-login.
+ *
+ * @param plugin - Plugin instance.
+ * @throws Error if no refresh token exists or the API request fails.
  */
 export async function refreshAccessToken(
     plugin: MyAnimeNotesPlugin
@@ -48,10 +55,12 @@ export async function refreshAccessToken(
         grant_type: "refresh_token"
     });
 
+    // Add client secret if present (required by some API clients/configurations)
     if (plugin.settings.malClientSecret?.trim()) {
         body.append("client_secret", plugin.settings.malClientSecret.trim());
     }
 
+    // Perform the refresh request
     const res = await requestUrl({
         url: MAL_TOKEN_URL,
         method: "POST",
@@ -70,23 +79,28 @@ export async function refreshAccessToken(
 
     const data = (res.json || JSON.parse(res.text)) as MALTokenResponse;
 
-    // Update tokens
+    // Update tokens in settings
     plugin.settings.malAccessToken = data.access_token;
+    // Some OAuth providers rotate refresh tokens; if new one provided, save it, else keep old
     plugin.settings.malRefreshToken =
         data.refresh_token || plugin.settings.malRefreshToken;
     plugin.settings.malTokenExpiry = Date.now() + data.expires_in * 1000;
+    
     await plugin.saveSettings();
 }
 
 /**
- * Ensures the access token is valid, refreshing if necessary
- * @param plugin Plugin instance
- * @throws Error if not authenticated or refresh fails
+ * Middleware-like function to ensure a valid token exists before operations.
+ * If the token is expired, it automatically attempts to refresh it.
+ *
+ * @param plugin - Plugin instance.
+ * @throws Error if the token is invalid and cannot be refreshed (requiring user re-login).
  */
 export async function ensureValidToken(
     plugin: MyAnimeNotesPlugin
 ): Promise<void> {
     if (!isTokenValid(plugin)) {
+        // If expired and no way to refresh, we must fail
         if (!plugin.settings.malRefreshToken) {
             throw new Error(
                 "Token expired and no refresh token available. Please re-authenticate."
@@ -97,6 +111,7 @@ export async function ensureValidToken(
             await refreshAccessToken(plugin);
             log.debug("Token automatically refreshed");
         } catch (e) {
+            // If refresh fails (e.g., refresh token revoked), mark as unauthenticated
             log.error("Automatic token refresh failed", e);
             plugin.settings.malAuthenticated = false;
             await plugin.saveSettings();
@@ -108,9 +123,10 @@ export async function ensureValidToken(
 }
 
 /**
- * Gets authorization headers for API requests
- * @param plugin Plugin instance
- * @returns Authorization headers or null if not authenticated
+ * Generates the Authorization header for HTTP requests.
+ *
+ * @param plugin - Plugin instance.
+ * @returns An object containing the Authorization header, or null if invalid.
  */
 export function getAuthHeaders(
     plugin: MyAnimeNotesPlugin

@@ -1,12 +1,17 @@
 // PKCE (Proof Key for Code Exchange) utilities
+// Implements RFC 7636 to secure the OAuth authorization code flow for public clients.
 
 /**
- * Generates a cryptographically random code verifier
- * @returns Base64 URL-encoded random string (128 chars max per MAL spec)
- * @throws {Error} If crypto API is unavailable
+ * Generates a cryptographically random code verifier.
+ * The verifier is a high-entropy cryptographic random string that the client
+ * creates and keeps secret until the token exchange step.
+ *
+ * @returns Base64 URL-encoded random string (128 chars max per MAL spec).
+ * @throws {Error} If the Web Crypto API is unavailable in the current environment.
  */
 export function generateVerifier(): string {
-  // Validate crypto API availability
+  // Validate crypto API availability to ensure security
+  // In Obsidian (Electron), window.crypto is standard, but we guard just in case.
   if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
     throw new Error(
       '[MAL-AUTH] Crypto API unavailable. Cannot generate secure verifier. ' +
@@ -14,6 +19,7 @@ export function generateVerifier(): string {
     );
   }
   
+  // Generate 32 bytes of random entropy
   const arr = new Uint8Array(32);
   
   try {
@@ -30,27 +36,33 @@ export function generateVerifier(): string {
 }
 
 /**
- * Generates code challenge from verifier
- * MAL uses 'plain' method, so challenge = verifier
- * @param verifier The code verifier
- * @returns The code challenge (same as verifier for 'plain' method)
+ * Generates the code challenge derived from the verifier.
+ * * Note: MyAnimeList's API currently uses the "plain" transformation method,
+ * where the challenge is identical to the verifier.
+ * (Standard PKCE usually prefers "S256" hashing, but we must adhere to MAL specs).
+ *
+ * @param verifier - The secret code verifier generated previously.
+ * @returns The code challenge to be sent in the initial authorization request.
  */
 export function generateChallenge(verifier: string): string {
   return verifier;
 }
 
 /**
- * Generates a random state parameter for CSRF protection
- * @returns Random state string (32 characters)
- * @throws {Error} If crypto API is unavailable
+ * Generates a random "state" parameter for CSRF protection.
+ * This string is sent to the authorization server and verified upon return
+ * to ensure the response belongs to the request we initiated.
+ *
+ * @returns Random state string (32 characters).
+ * @throws {Error} If crypto API is unavailable.
  */
 export function generateState(): string {
-  // Try crypto.randomUUID first (most efficient)
+  // Try crypto.randomUUID first (most efficient and standard in modern JS)
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     try {
       return crypto.randomUUID();
     } catch (error) {
-      // Fall through to getRandomValues approach
+      // Fall through to getRandomValues approach if UUID generation fails
       console.warn('[MAL-AUTH] crypto.randomUUID failed, using getRandomValues', error);
     }
   }
@@ -80,8 +92,11 @@ export function generateState(): string {
 // Helper functions
 
 /**
- * Encodes Uint8Array to base64url format (URL-safe base64)
- * Per RFC 7636, removes padding and uses URL-safe characters
+ * Encodes a Uint8Array to base64url format.
+ * Adheres to RFC 7636 Section 3 (Base64url Encoding without Padding).
+ * Replaces '+' with '-', '/' with '_', and strips trailing '='.
+ * * @param arr - The input byte array.
+ * @returns The URL-safe base64 string.
  */
 function base64UrlEncode(arr: Uint8Array): string {
   return btoa(String.fromCharCode(...arr))

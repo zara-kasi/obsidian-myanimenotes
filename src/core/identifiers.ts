@@ -1,10 +1,13 @@
 /**
- * MyAnimeNotes Sync Manager
+ * MyAnimeNotes Sync Manager - Identifier Logic
  *
- * Handles myanimenotes identifier generation, validation, and file lookup.
+ * Handles the generation, validation, and file lookup of the unique identifiers
+ * used to link Obsidian notes to MyAnimeList entries.
  *
- * DESIGN: All file lookups use a pre-built index Map passed in.
- * No background indexing, no classes, just simple functions.
+ * DESIGN PRINCIPLE:
+ * - Pure functions (Stateless).
+ * - All file lookups use the pre-built, in-memory index passed in (O(1) lookup).
+ * - No background scanning or expensive I/O operations here.
  */
 
 import { TFile } from "obsidian";
@@ -17,16 +20,18 @@ import { logger } from "../utils/logger";
 const log = new logger("Identifier");
 
 /**
- * Validates myanimenotes format: provider:category:id
+ * Validates the strict format of the synchronization identifier.
  *
- * Format: mal:anime:1245 or mal:manga:2
+ * Format: `provider:category:id`
+ * Example: `mal:anime:1245` or `mal:manga:2`
  *
- * Rules:
- * - Provider: "mal" (MyAnimeList)
- * - Category: "anime" or "manga"
- * - ID: Positive integer (1-9 followed by 0-9, no leading zeros)
+ * Validation Rules:
+ * - Provider: Must be "mal" (MyAnimeList).
+ * - Category: Must be "anime" or "manga".
+ * - ID: Must be a positive integer (no leading zeros).
  *
- * Research confirms MAL IDs are strictly positive integers with no special characters.
+ * @param myanimenotesSync - The identifier string to test.
+ * @returns `true` if the format is valid.
  */
 export function validateMyAnimeNotesSyncFormat(
     myanimenotesSync: string
@@ -36,8 +41,13 @@ export function validateMyAnimeNotesSyncFormat(
 }
 
 /**
- * Generates myanimenotes identifier from media item
- * Format: provider:category:id (e.g., mal:anime:1245)
+ * Generates the canonical identifier string from a media item object.
+ *
+ * Normalizes input (lowercasing) to ensure consistency.
+ *
+ * @param item - The media item (Anime or Manga) to generate an ID for.
+ * @returns A string in the format `mal:category:id`.
+ * @throws {Error} If the generated format is invalid (e.g., negative ID).
  */
 export function generateMyAnimeNotesSync(item: MediaItem): string {
     const provider = item.platform.toLowerCase();
@@ -46,7 +56,7 @@ export function generateMyAnimeNotesSync(item: MediaItem): string {
 
     const myanimenotesSync = `${provider}:${category}:${id}`;
 
-    // Validate format
+    // Validate format immediately to catch bad data early
     if (!validateMyAnimeNotesSyncFormat(myanimenotesSync)) {
         throw new Error(
             `Invalid myanimenotes format generated: ${myanimenotesSync}`
@@ -57,11 +67,11 @@ export function generateMyAnimeNotesSync(item: MediaItem): string {
 }
 
 /**
- * Finds files by myanimenotes using the index
+ * Finds all Obsidian files associated with a specific identifier using the JIT index.
  *
- * @param index Pre-built index Map
- * @param myanimenotesSync MyAnimeNotes identifier to search for
- * @returns Array of files with matching myanimenotes
+ * @param index - The pre-built snapshot index (see `indexing.ts`).
+ * @param myanimenotesSync - The identifier to search for (e.g., "mal:anime:1").
+ * @returns Array of TFiles that contain this identifier in their frontmatter.
  */
 export function findFilesByMyAnimeNotesSync(
     index: MyAnimeNotesIndex,
@@ -71,8 +81,16 @@ export function findFilesByMyAnimeNotesSync(
 }
 
 /**
- * Selects deterministic file from duplicates
- * Uses most recent modification time as tiebreaker
+ * Deterministically selects the "best" file when multiple notes reference the same anime/manga.
+ *
+ * Conflict Resolution Strategy:
+ * - **Recency Rule:** Returns the file with the most recent modification time (`mtime`).
+ * - Assumption: The file the user touched last is likely the "primary" one they care about.
+ *
+ * @param plugin - Plugin instance (unused in logic but kept for interface consistency).
+ * @param files - Array of candidate files.
+ * @returns The single file selected as the primary sync target.
+ * @throws {Error} If the input file array is empty.
  */
 export function selectDeterministicFile(
     plugin: MyAnimeNotesPlugin,

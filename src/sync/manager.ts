@@ -14,20 +14,34 @@ import type { CompleteSyncOptions, SyncResult, MALSyncOptions } from "./types";
 const log = new logger("SyncManager");
 
 /**
- * Sync manager class
+ * SyncManager orchestrates the synchronization process between MyAnimeList and the Obsidian vault.
+ *
+ * Responsibilities:
+ * - Managing the sync lifecycle (start, execution, finish).
+ * - Enforcing rate limits (cooldowns) and concurrency locks (preventing overlapping syncs).
+ * - routing data to the storage layer based on template settings.
+ * - Providing helper methods for specific sync operations (Anime-only, Manga-only, Active-only).
  */
 export class SyncManager {
+    /** Flag to prevent multiple concurrent sync operations. */
     private isSyncing = false;
+
+    /** Timestamp of the last successful sync completion. */
     private lastSyncTime = 0;
 
+    /**
+     * Creates a new SyncManager instance.
+     * @param plugin - Reference to the main plugin instance.
+     */
     constructor(private plugin: MyAnimeNotesPlugin) {
-        // Load persisted last sync time from settings
+        // Load persisted last sync time from settings to enforce cooldowns across restarts
         this.lastSyncTime = plugin.settings.lastSuccessfulSync || 0;
     }
 
     /**
-     * Gets storage configuration from plugin settings
-     * NOW READS FROM TEMPLATE SETTINGS
+     * Retrieves storage configuration (folder paths) from plugin settings.
+     * * Prioritizes paths defined in user templates, falling back to defaults if necessary.
+     * @returns Configuration object containing destination folders for Anime and Manga.
      */
     private getStorageConfig(): StorageConfig {
         // Get folder paths from templates (with fallback to defaults)
@@ -47,8 +61,8 @@ export class SyncManager {
     }
 
     /**
-     * Saves the last successful sync timestamp
-     * (Note: Logic preserved, though internal usage is currently implicit in syncFromMAL)
+     * Persists the current timestamp as the last successful sync time.
+     * Updated automatically at the end of a successful `syncFromMAL` run.
      */
     private async saveLastSyncTimestamp(): Promise<void> {
         this.plugin.settings.lastSuccessfulSync = Date.now();
@@ -57,14 +71,18 @@ export class SyncManager {
     }
 
     /**
-     * Check if sync can proceed, throw error if not
+     * Guard clause to check if a sync operation is allowed.
+     * * Checks:
+     * 1. Is a sync already in progress? (Concurrency lock)
+     * 2. Has enough time passed since the last sync? (Cooldown enforcement)
+     * * @returns `true` if sync is allowed, `false` otherwise (and shows a UI notice).
      */
     private checkSyncGuard(): boolean {
         // Prevent overlapping syncs
         if (this.isSyncing) {
             log.debug("Sync already in progress - blocking new sync request");
 
-            showNotice("Sync already in progress.", "warning", 4000);
+            showNotice("Sync already in progress.", "warning");
             return false;
         }
 
@@ -95,9 +113,14 @@ export class SyncManager {
     }
 
     /**
-     * Performs a complete sync from MAL
-     * @param options Sync options
-     * @returns Synced items and result
+     * Performs a complete synchronization from MyAnimeList.
+     * * Workflow:
+     * 1. Check Guard (Cooldown/Lock).
+     * 2. Fetch data from MAL API via `syncMAL` service.
+     * 3. Save media items to the vault (Markdown files).
+     * 4. Update last sync timestamp.
+     * * @param options - Configuration options for the sync (filters, storage config, etc.).
+     * @returns Promise resolving to the synced items, execution result metrics, and saved file paths.
      */
     async syncFromMAL(options: CompleteSyncOptions = {}): Promise<{
         items: MediaItem[];
@@ -164,28 +187,30 @@ export class SyncManager {
             this.plugin.settings.lastSuccessfulSync = this.lastSyncTime;
             await this.plugin.saveSettings();
 
+            // Sync success notice
+            showNotice("MAL sync completed", "success");
+
             return { items, result, savedPaths };
         } catch (error) {
             log.error("Sync failed:", error);
 
             throw error;
         } finally {
-            // Always mark sync as complete
+            // Always mark sync as complete to release the lock
             this.isSyncing = false;
         }
     }
 
     /**
-     * Quick sync for a specific category
-     * @param category anime or manga
-     * @param saveToVault Whether to save to vault
-     * @returns Synced items
+     * Helper to perform a quick sync for a specific media category.
+     * * @param category - The media type (`anime` or `manga`).
+     * @param saveToVault - Whether to write the results to Markdown files (default: true).
+     * @returns List of synced items.
      */
     async quickSync(
         category: MediaCategory,
         saveToVault = true
     ): Promise<MediaItem[]> {
-
         log.debug(`Quick sync for ${category}...`);
 
         const options: MALSyncOptions = {
@@ -203,26 +228,31 @@ export class SyncManager {
     }
 
     /**
-     * Syncs only anime
-     * @param saveToVault Whether to save to vault
-     * @returns Synced anime items
+     * Wrapper to sync only Anime items.
+     * * @param saveToVault - Whether to save files.
+     * @returns Synced anime items.
      */
     async syncAnime(saveToVault = true): Promise<MediaItem[]> {
         return this.quickSync(MediaCategory.ANIME, saveToVault);
     }
 
     /**
-     * Syncs only manga
-     * @param saveToVault Whether to save to vault
-     * @returns Synced manga items
+     * Wrapper to sync only Manga items.
+     * * @param saveToVault - Whether to save files.
+     * @returns Synced manga items.
      */
     async syncManga(saveToVault = true): Promise<MediaItem[]> {
         return this.quickSync(MediaCategory.MANGA, saveToVault);
     }
 
     /**
-     * Syncs active statuses: Watching anime + Reading manga
-     * Used by both the "Sync active" command and optimized auto-sync
+     * Specialized sync for active content only.
+     * Fetches 'Watching' status for Anime and 'Reading' status for Manga.
+     * * Used by:
+     * - "Sync active" command.
+     * - Optimized auto-sync intervals (to reduce API load).
+     * * @param saveToVault - Whether to save files.
+     * @returns Synced active items.
      */
     async syncActiveStatuses(saveToVault = true): Promise<MediaItem[]> {
         log.debug(
@@ -242,8 +272,8 @@ export class SyncManager {
     }
 
     /**
-     * Gets sync statistics
-     * @returns Sync statistics
+     * Retrieves basic statistics about the sync state.
+     * * @returns Object containing the last successful sync timestamp.
      */
     getSyncStats(): {
         totalItems?: number;
@@ -257,9 +287,9 @@ export class SyncManager {
 }
 
 /**
- * Creates a sync manager instance
- * @param plugin Plugin instance
- * @returns Sync manager
+ * Factory function to create a new SyncManager.
+ * * @param plugin - The Obsidian plugin instance.
+ * @returns A new SyncManager instance.
  */
 export function createSyncManager(plugin: MyAnimeNotesPlugin): SyncManager {
     return new SyncManager(plugin);

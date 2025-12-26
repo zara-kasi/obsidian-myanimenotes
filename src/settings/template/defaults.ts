@@ -1,23 +1,36 @@
 import type { TemplateConfig } from "./types";
 
 /**
- * Generates a unique property ID
+ * Generates a unique string ID for a property item.
+ *
+ * This is used to track properties in the drag-and-drop interface, ensuring
+ * that reordering or modifying properties doesn't lose their reference.
+ *
+ * @returns A string in the format "prop-{timestamp}-{random}".
  */
 export function generatePropertyId(): string {
     return `prop-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**
- * Default anime template
- * NOTE: Properties with template='myanimenotes' and template='synced' are permanent and cannot be removed
- * Contains only common + anime-specific properties
+ * The default configuration for **Anime** notes.
+ *
+ * This template defines the folder structure, note content (Markdown), and
+ * the default frontmatter properties.
+ *
+ * @remarks
+ * - **Permanent Properties**: The properties 'myanimenotes' and 'synced' are essential
+ * for the plugin to identify which notes are managed by it. They should not be removed.
+ * - **Template Syntax**: Uses `{{variable}}` syntax. Filters like `|wikilink` or
+ * `|date:"YYYY-MM-DD"` are supported to format the output.
  */
-
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
     folderPath: "MyAnimeNotes/Anime",
     noteContent: "# {{title}}\n\n{{synopsis}}",
     properties: [
-        // Core properties
+        // ========================================================================
+        // Core User Data
+        // ========================================================================
         {
             id: "prop-1",
             template: "{{title}}",
@@ -68,7 +81,9 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
             type: "date"
         },
 
-        // Media details
+        // ========================================================================
+        // Media Metadata (Anime Specific)
+        // ========================================================================
         {
             id: "prop-9",
             template: "{{mediaType}}",
@@ -140,7 +155,9 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
             type: "number"
         },
 
-        // Additional
+        // ========================================================================
+        // Technical / External Links
+        // ========================================================================
         {
             id: "prop-7",
             template: "{{mainPicture}}",
@@ -177,7 +194,9 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
             type: "number"
         },
 
-        // Permanent
+        // ========================================================================
+        // Permanent System Properties (Do Not Edit IDs)
+        // ========================================================================
         {
             id: "prop-permanent-1",
             template: "myanimenotes",
@@ -195,10 +214,19 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
     ]
 };
 
+/**
+ * The default configuration for **Manga** notes.
+ *
+ * Distinct from the anime template, this includes manga-specific fields
+ * such as `numChaptersRead`, `numVolumes`, and `authors`.
+ */
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
     folderPath: "MyAnimeNotes/Manga",
     noteContent: "# {{title}}\n\n{{synopsis}}",
     properties: [
+        // ========================================================================
+        // Core User Data
+        // ========================================================================
         {
             id: "prop-1",
             template: "{{title}}",
@@ -256,6 +284,9 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
             type: "date"
         },
 
+        // ========================================================================
+        // Media Metadata (Manga Specific)
+        // ========================================================================
         {
             id: "prop-9",
             template: "{{mediaType}}",
@@ -327,6 +358,9 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
             type: "number"
         },
 
+        // ========================================================================
+        // Technical / External Links
+        // ========================================================================
         {
             id: "prop-7",
             template: "{{mainPicture}}",
@@ -363,6 +397,9 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
             type: "number"
         },
 
+        // ========================================================================
+        // Permanent System Properties
+        // ========================================================================
         {
             id: "prop-permanent-1",
             template: "myanimenotes",

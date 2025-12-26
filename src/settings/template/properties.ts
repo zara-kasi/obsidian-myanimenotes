@@ -11,7 +11,8 @@
 import { App, FuzzySuggestModal } from "obsidian";
 
 /**
- * Obsidian's supported property types
+ * Obsidian's supported property types.
+ * These correspond to the property types available in the Obsidian Properties UI.
  */
 export type PropertyType =
     | "text"
@@ -22,7 +23,8 @@ export type PropertyType =
     | "multitext";
 
 /**
- * Property type display information
+ * Internal interface for defining metadata about a property type.
+ * Used to populate the selection modal.
  */
 interface PropertyTypeInfo {
     type: PropertyType;
@@ -32,7 +34,7 @@ interface PropertyTypeInfo {
 }
 
 /**
- * Available property types
+ * Registry of available property types and their UI representation.
  */
 const PROPERTY_TYPES: PropertyTypeInfo[] = [
     { type: "text", label: "Text", icon: "text", description: "Plain text" },
@@ -69,26 +71,41 @@ const PROPERTY_TYPES: PropertyTypeInfo[] = [
 ];
 
 /**
- * Modal for selecting property type
+ * Modal for selecting a property type.
+ * Extends Obsidian's FuzzySuggestModal to allow quick searching and selection.
  */
 class PropertyTypeSelectorModal extends FuzzySuggestModal<PropertyTypeInfo> {
+    // Promise resolver to return the selected type back to the caller
     private resolvePromise: ((type: PropertyType | null) => void) | null = null;
     private propertyKey: string;
 
+    /**
+     * @param app - The Obsidian App instance.
+     * @param propertyKey - The name of the property being modified (for display).
+     */
     constructor(app: App, propertyKey: string) {
         super(app);
         this.propertyKey = propertyKey;
         this.setPlaceholder(`Select format type for: ${propertyKey}`);
     }
 
+    /**
+     * Returns the list of items to suggest.
+     */
     getItems(): PropertyTypeInfo[] {
         return PROPERTY_TYPES;
     }
 
+    /**
+     * Renders the text for each suggestion item.
+     */
     getItemText(item: PropertyTypeInfo): string {
         return `${item.label} - ${item.description}`;
     }
 
+    /**
+     * Called when the user selects an item.
+     */
     onChooseItem(item: PropertyTypeInfo): void {
         if (this.resolvePromise) {
             this.resolvePromise(item.type);
@@ -96,15 +113,22 @@ class PropertyTypeSelectorModal extends FuzzySuggestModal<PropertyTypeInfo> {
         }
     }
 
+    /**
+     * Called when the modal is closed (via Escape or clicking outside).
+     */
     onClose(): void {
         super.onClose();
-        // If modal closed without selection, resolve with null
+        // If modal closed without selection (resolvePromise is still active), resolve with null
         if (this.resolvePromise) {
             this.resolvePromise(null);
             this.resolvePromise = null;
         }
     }
 
+    /**
+     * Opens the modal and waits for a user selection.
+     * @returns A promise resolving to the selected PropertyType or null if cancelled.
+     */
     async promptForType(): Promise<PropertyType | null> {
         return new Promise(resolve => {
             this.resolvePromise = resolve;
@@ -114,7 +138,11 @@ class PropertyTypeSelectorModal extends FuzzySuggestModal<PropertyTypeInfo> {
 }
 
 /**
- * Opens modal to select property type
+ * Utility function to open the PropertyTypeSelectorModal.
+ *
+ * @param app - The Obsidian App instance.
+ * @param propertyKey - The name of the property to configure.
+ * @returns The selected property type or null.
  */
 export async function promptForPropertyType(
     app: App,
@@ -125,7 +153,10 @@ export async function promptForPropertyType(
 }
 
 /**
- * Gets icon name for a property type
+ * Gets the Lucide icon name associated with a specific property type.
+ *
+ * @param type - The property type.
+ * @returns The icon string (e.g., "calendar", "binary"). Defaults to "text".
  */
 export function getPropertyTypeIcon(type: PropertyType | undefined): string {
     if (!type) return "text";
@@ -134,12 +165,12 @@ export function getPropertyTypeIcon(type: PropertyType | undefined): string {
 }
 
 /**
- * Formats a value according to its property type
- * This is the core function that prevents Obsidian warnings
+ * Formats a raw value into the specific JavaScript type required by Obsidian's frontmatter parser.
+ * This is crucial for preventing "Invalid property type" warnings in the UI.
  *
- * @param value - The value to format (from template resolution)
- * @param type - The target property type
- * @returns Properly formatted value
+ * @param value - The value to format (often a string from template replacement).
+ * @param type - The target property type definition.
+ * @returns A properly typed value (string, number, boolean, array, or null).
  */
 export function formatPropertyValue(
     value: unknown,
@@ -150,15 +181,15 @@ export function formatPropertyValue(
         return value;
     }
 
-    // Handle null/undefined
+    // Handle empty/null values explicitly based on type expectations
     if (value === null || value === undefined || value === "") {
         switch (type) {
             case "checkbox":
-                return false;
+                return false; // Checkboxes default to unchecked
             case "number":
-                return null;
+                return null;  // Numbers default to null (empty field)
             case "multitext":
-                return [];
+                return [];    // Lists default to empty array
             default:
                 return null;
         }
@@ -166,7 +197,7 @@ export function formatPropertyValue(
 
     switch (type) {
         case "number":
-            // Format as number
+            // Ensure strictly numeric output
             if (typeof value === "number") return value;
             if (typeof value === "string") {
                 const num = parseFloat(value);
@@ -175,7 +206,7 @@ export function formatPropertyValue(
             return null;
 
         case "checkbox":
-            // Format as boolean
+            // Coerce various truthy/falsy values to boolean
             if (typeof value === "boolean") return value;
             if (typeof value === "string") {
                 return value.toLowerCase() === "true" || value === "1";
@@ -184,7 +215,7 @@ export function formatPropertyValue(
             return false;
 
         case "multitext":
-            // Format as array
+            // Ensure array output
             if (Array.isArray(value)) return value;
             if (typeof value === "string") return [value];
             return [];
@@ -192,7 +223,7 @@ export function formatPropertyValue(
         case "date":
             // Format as YYYY-MM-DD
             if (typeof value === "string") {
-                // Extract date part if datetime string
+                // Strip time component if present (e.g., "2023-01-01T12:00:00")
                 if (value.includes("T")) {
                     return value.split("T")[0];
                 }

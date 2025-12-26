@@ -12,12 +12,22 @@ import { logger } from "../utils/logger";
 
 const log = new logger("OAuthFlow");
 
-// Auth state timeout: 10 minutes
+/** * Auth state timeout: 10 minutes.
+ * If the user doesn't complete the login within this time, the state expires
+ * to prevent replay attacks or stale sessions.
+ */
 const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
 
 /**
- * Initiates the OAuth authorization flow
- * Stores PKCE parameters in plugin settings for persistence
+ * Initiates the OAuth 2.0 PKCE authorization flow.
+ * * Steps:
+ * 1. Validates prerequisites (Client ID, current auth status).
+ * 2. Generates PKCE cryptographics (Verifier, Challenge) and State.
+ * 3. Persists this state in plugin settings to survive the app reload/redirect.
+ * 4. Constructs the MAL Authorization URL.
+ * 5. Opens the system's default browser to let the user log in.
+ *
+ * @param plugin - The plugin instance.
  */
 export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
     if (!plugin.settings.malClientId) {
@@ -31,11 +41,14 @@ export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
     }
 
     // Generate PKCE parameters
+    // Verifier: Secret string used to verify the request later
+    // Challenge: Hashed version of the verifier sent in the initial request
     const verifier = generateVerifier();
     const challenge = generateChallenge(verifier);
     const state = generateState();
 
     // Store in plugin settings (persisted across reloads)
+    // This is crucial because Obsidian might reload or the protocol handler might trigger a new instance
     plugin.settings.malAuthState = {
         verifier,
         state,
@@ -43,13 +56,13 @@ export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
     };
     await plugin.saveSettings();
 
-    // Build authorization URL
+    // Build authorization URL with required OAuth parameters
     const params = new URLSearchParams({
         response_type: "code",
         client_id: plugin.settings.malClientId,
         redirect_uri: REDIRECT_URI,
-        code_challenge: challenge,
-        code_challenge_method: "plain",
+        code_challenge: challenge, // PKCE Challenge
+        code_challenge_method: "plain", // MAL API specifies 'plain' usually, check docs if 'S256' is supported
         state: state
     });
 
@@ -58,22 +71,30 @@ export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
     showNotice("Opening MyAnimeList login page…", 2000);
 
     // Open in external browser
-
+    // Obsidian runs in Electron, so we use the shell API to open the default system browser
     if (window.require) {
         const { shell } = window.require("electron") as {
             shell: { openExternal: (url: string) => Promise<void> };
         };
         await shell.openExternal(authUrl);
     } else {
+        // Fallback for mobile or standard web contexts
         window.open(authUrl, "_blank");
     }
 }
 
 /**
- * Handles the OAuth redirect callback
- * Retrieves PKCE parameters from plugin settings
+ * Handles the OAuth redirect callback.
+ * Called when the custom protocol (obsidian://...) receives data from the browser.
+ * * Steps:
+ * 1. Extracts the authorization code and state from the URL.
+ * 2. Validates the State against the stored session (CSRF protection).
+ * 3. Checks for timeout expiration.
+ * 4. Calls the token exchange function.
+ *
+ * @param plugin - The plugin instance.
+ * @param params - The query parameters received from the redirect.
  */
-
 export async function handleOAuthRedirect(
     plugin: MyAnimeNotesPlugin,
     params: OAuthParams
@@ -103,7 +124,8 @@ export async function handleOAuthRedirect(
             );
         }
 
-        // Validate state to prevent CSRF
+        // Validate state to prevent CSRF (Cross-Site Request Forgery)
+        // The state sent back by the server must match what we sent initially
         if (state !== authState.state) {
             throw new Error("State mismatch - possible CSRF attack");
         }
@@ -121,6 +143,7 @@ export async function handleOAuthRedirect(
             return;
         }
 
+        // Proceed to exchange the code for a real access token
         await exchangeCodeForToken(plugin, code, authState.verifier);
     } catch (error) {
         log.error("Failed to handle OAuth redirect:", error);
@@ -135,9 +158,11 @@ export async function handleOAuthRedirect(
 }
 
 /**
- * Exchanges authorization code for access token
+ * Exchanges the temporary authorization code for long-lived access/refresh tokens.
+ * * @param plugin - The plugin instance.
+ * @param code - The authorization code received from the redirect.
+ * @param verifier - The PKCE verifier generated in startAuthFlow.
  */
-
 async function exchangeCodeForToken(
     plugin: MyAnimeNotesPlugin,
     code: string,
@@ -152,12 +177,13 @@ async function exchangeCodeForToken(
     const body = new URLSearchParams({
         client_id: plugin.settings.malClientId,
         code: code,
-        code_verifier: verifier,
+        code_verifier: verifier, // Prove we initiated the request
         grant_type: "authorization_code",
         redirect_uri: REDIRECT_URI
     });
 
-    // Add client secret if provided
+    // Add client secret if provided (MAL API officially requires it for web apps, 
+    // but sometimes PKCE public clients don't. Including if user provided it.)
     if (plugin.settings.malClientSecret?.trim()) {
         body.append("client_secret", plugin.settings.malClientSecret.trim());
     }
@@ -170,7 +196,7 @@ async function exchangeCodeForToken(
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             body: body.toString(),
-            throw: false
+            throw: false // Handle status codes manually
         });
 
         if (res.status < 200 || res.status >= 300) {
@@ -182,20 +208,20 @@ async function exchangeCodeForToken(
             throw new Error("No access token received from MyAnimeList");
         }
 
-        // Save tokens
+        // Save tokens to settings
         plugin.settings.malAccessToken = data.access_token;
         plugin.settings.malRefreshToken = data.refresh_token;
         plugin.settings.malTokenExpiry = Date.now() + data.expires_in * 1000;
         plugin.settings.malAuthenticated = true;
 
-        // Clear auth state (no longer needed)
+        // Clear auth state (no longer needed after successful exchange)
         plugin.settings.malAuthState = null;
 
         await plugin.saveSettings();
 
         showNotice("✅ Authenticated successfully!", "success", 3000);
 
-        // Fetch user info
+        // Fetch user info immediately to update UI (avatar, username)
         try {
             await fetchUserInfo(plugin);
         } catch (userError) {
@@ -205,7 +231,7 @@ async function exchangeCodeForToken(
             );
         }
 
-        // Refresh settings UI after Authentication
+        // Refresh settings UI after Authentication to show the logged-in state
         plugin.refreshSettingsUI();
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
@@ -217,9 +243,11 @@ async function exchangeCodeForToken(
 // Helper functions
 
 /**
- * Extracts code and state from various OAuth redirect formats
+ * Normalizes and extracts 'code' and 'state' from various input formats.
+ * The Obsidian protocol handler might pass params as an object, a string, or a URL structure.
+ *
+ * @param params - The raw parameters from the protocol handler.
  */
-
 function extractOAuthParams(params: OAuthParams): {
     code: string | null;
     state: string | null;
@@ -228,9 +256,11 @@ function extractOAuthParams(params: OAuthParams): {
     let state: string | null = null;
 
     if (params.code) {
+        // Direct object access
         code = params.code;
         state = params.state || null;
     } else if (typeof params === "string") {
+        // Parse from query string
         const paramsStr = params as string;
         const urlParams = new URLSearchParams(
             paramsStr.startsWith("?") ? paramsStr.slice(1) : paramsStr
@@ -238,6 +268,7 @@ function extractOAuthParams(params: OAuthParams): {
         code = urlParams.get("code");
         state = urlParams.get("state");
     } else if (params.url) {
+        // Parse from full URL object
         try {
             const url = new URL(params.url);
             code = url.searchParams.get("code");
@@ -251,7 +282,10 @@ function extractOAuthParams(params: OAuthParams): {
 }
 
 /**
- * Formats token exchange error with helpful messages
+ * Formats token exchange errors into user-friendly messages.
+ * Attempts to parse specific OAuth error codes (like invalid_client) to provide tips.
+ *
+ * @param res - The response object from the failed request.
  */
 function formatTokenError(res: {
     status: number;
@@ -275,7 +309,7 @@ function formatTokenError(res: {
             }
         }
 
-        // Add helpful tips
+        // Add helpful troubleshooting tips for common errors
         if (errorData.error === "invalid_client") {
             errorMsg += "\n\nTip: Check your Client ID and Secret in settings.";
         } else if (errorData.error === "invalid_grant") {

@@ -20,12 +20,20 @@ import {
 const log = new logger("ModelsMedia");
 
 /**
- * parses a single MAL anime item to format
+ * Transforms a raw MAL Anime object into the internal `MediaItem` format.
+ *
+ * Handles differences in API response structures (e.g., "User List" vs "Details" endpoints)
+ * via the `malItem.node || malItem` fallback.
+ *
+ * @param plugin - Plugin instance (unused in logic but kept for future extensibility).
+ * @param malItem - The raw data object from MyAnimeList API.
+ * @returns A normalized MediaItem object ready for storage.
  */
 export function parseAnime(
     plugin: MyAnimeNotesPlugin,
     malItem: MALItem
 ): MediaItem {
+    // API responses usually wrap details in a 'node' property, but sometimes it's flat.
     const node = malItem.node || malItem;
     const listStatus = malItem.list_status;
 
@@ -71,7 +79,7 @@ export function parseAnime(
         studios: parseStudios(node.studios),
         duration: convertDurationToMinutes(node.average_episode_duration),
 
-        // User list data
+        // User list data (Watch status, score, progress)
         userStatus: listStatus ? mapUserStatus(listStatus.status) : undefined,
         userScore: listStatus?.score || 0,
         numEpisodesWatched: listStatus?.num_episodes_watched || 0,
@@ -86,7 +94,13 @@ export function parseAnime(
 }
 
 /**
- * parses a single MAL manga item to format
+ * Transforms a raw MAL Manga object into the internal `MediaItem` format.
+ *
+ * similar to `parseAnime`, but maps specific fields for Manga (Volumes, Chapters, Authors).
+ *
+ * @param plugin - Plugin instance.
+ * @param malItem - The raw data object from MyAnimeList API.
+ * @returns A normalized MediaItem object ready for storage.
  */
 export function parseManga(
     plugin: MyAnimeNotesPlugin,
@@ -130,7 +144,7 @@ export function parseManga(
         numChapters: node.num_chapters,
         authors: parseAuthors(node.authors),
 
-        // User list data
+        // User list data (Read status, score, progress)
         userStatus: listStatus ? mapUserStatus(listStatus.status) : undefined,
         userScore: listStatus?.score || 0,
         numVolumesRead: listStatus?.num_volumes_read || 0,
@@ -146,7 +160,12 @@ export function parseManga(
 }
 
 /**
- * parses an array of MAL anime items
+ * Batch processes an array of MAL Anime items.
+ * Handles array validation and maps each item individually.
+ *
+ * @param plugin - Plugin instance.
+ * @param malItems - Array of raw API items.
+ * @returns Array of clean MediaItem objects.
  */
 export function parseAnimeList(
     plugin: MyAnimeNotesPlugin,
@@ -162,7 +181,12 @@ export function parseAnimeList(
 }
 
 /**
- * parses an array of MAL manga items
+ * Batch processes an array of MAL Manga items.
+ * Handles array validation and maps each item individually.
+ *
+ * @param plugin - Plugin instance.
+ * @param malItems - Array of raw API items.
+ * @returns Array of clean MediaItem objects.
  */
 export function parseMangaList(
     plugin: MyAnimeNotesPlugin,

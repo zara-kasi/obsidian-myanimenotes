@@ -1,26 +1,26 @@
-## 1. Template Basics
+# 1. Template Basics
 
 MyAnimeNotes features a visual Template Builder to customize your notes without manual coding. Configuration is split into separate Anime and Manga templates found in the plugin settings.
 
-### Frontmatter Configuration
+## Frontmatter Configuration
 
 Use the interactive builder to define your note's YAML properties:
 
 -   **Reorder:** Drag the Handle Icon (☰) on the left to rearrange properties.
 -   **Data Types:** Click the Type Icon (e.g., text, number, list) to enforce specific formats (prevents "Invalid property type" warnings in Obsidian).
--   **Mapping:** Enter the desired Property Name (Obsidian key) and the corresponding Template [Variables](#3-variables) (e.g., `{{score}}`).
+-   **Mapping:** Enter the desired Property Name (Obsidian key) and the corresponding Template [variables](#2-variables) (e.g., `{{score}}`).
 
 > **Note:** You may notice some properties (like `myanimenotes` and `synced`) are locked. These are required for the plugin to track updates and cannot be removed.
 
-### Content Body
+## Content Body
 
-Define the note layout using standard Markdown in the Note Content text area. Add [variables](#3-variables) for more customization.
+Define the note layout using standard Markdown in the Note Content text area. Add [variables](#2-variables) for more customization.
 
-## 2. Variables
+# 2. Variables
 
-[Variables](#3-variables) dynamically inject MyAnimeList data into your template. Type `{{` in the editor to trigger the auto-complete menu.
+[Variables](#2-variables) dynamically inject MyAnimeList data into your template. Type `{{` in the editor to trigger the auto-complete menu.
 
-### Common [Variables](#3-variables)
+## Common [Variables](#2-variables)
 
 Available for both Anime and Manga notes.
 
@@ -42,7 +42,7 @@ Available for both Anime and Manga notes.
 | `{{userStartDate}}`     | Date you started.                                 |
 | `{{userFinishDate}}`    | Date you finished.                                |
 
-### Anime Specific
+## Anime Specific
 
 | Variable                 | Description                     |
 | :----------------------- | :------------------------------ |
@@ -51,7 +51,7 @@ Available for both Anime and Manga notes.
 | `{{studios}}`            | List of animation studios.      |
 | `{{duration}}`           | Episode duration (e.g., "24m"). |
 
-### Manga Specific
+## Manga Specific
 
 | Variable              | Description          |
 | :-------------------- | :------------------- |
@@ -61,9 +61,9 @@ Available for both Anime and Manga notes.
 | `{{numChaptersRead}}` | Chapters read count. |
 | `{{authors}}`         | List of authors.     |
 
-## 3. Filters
+# 3. Filters
 
-[Filters](#3-filters) transform data before it is rendered in your note. To apply a filter, add a pipe `|` after the [variables](#3-variables) name.
+[Filters](#3-filters) transform data before it is rendered in your note. To apply a filter, add a pipe `|` after the [variables](#2-variables) name.
 
 **Syntax:** `{{ variable | filter:argument }}`
 
@@ -77,7 +77,7 @@ Available for both Anime and Manga notes.
     -   **Description:** Combines a list into a single string using a separator. Defaults to `, `.
     -   **Example:** `{{genres | join:" / "}}` → `Action / Fantasy`
 -   **default**
-    -   **Description:** Returns a fallback value if the [variables](#3-variables) is empty or undefined.
+    -   **Description:** Returns a fallback value if the [variables](#2-variables) is empty or undefined.
     -   **Example:** `{{mean | default:"N/A"}}` → `N/A`
 -   **split**
     -   **Description:** Splits a string into a list based on a separator character.
@@ -86,23 +86,23 @@ Available for both Anime and Manga notes.
     -   **Description:** Converts text to lowercase or uppercase.
     -   **Example:** `{{status | lower}}` → `finished airing`
 
-#### Chaining [Filters](#3-filters)
+### Chaining [Filters](#3-filters)
 
 You can combine multiple [filters](#3-filters). They run in order from left to right.
 
 -   **Example:** `{{genres | wikilink | join:", "}}`
     -   _Result:_ `[[Action]], [[Fantasy]]`
 
-## 4. Current Limitations
+# 4. Current Limitations
 
 This template engine is currently under active development. While it draws inspiration from the [Obsidian Web Clipper](https://help.obsidian.md/Extending+Obsidian/Obsidian+Web+Clipper), not all features are currently implemented.
 
--   **Static Body Content:** [Variables](#3-variables) used in the Note Content area are populated only when the note is **first created**. They will not be updated during future syncs. However, properties in the Frontmatter are fully dynamic and will update automatically whenever you sync.
+-   **Static Body Content:** [Variables](#2-variables) used in the Note Content area are populated only when the note is **first created**. They will not be updated during future syncs. However, properties in the Frontmatter are fully dynamic and will update automatically whenever you sync.
 
--   **No Body Autocomplete:** The [variables](#3-variables) suggestion popup currently works only in the Properties builder. You must manually type [variables](#3-variables) (e.g., `{{synopsis}}`) into the Note Content area.
+-   **No Body Autocomplete:** The [variables](#2-variables) suggestion popup currently works only in the Properties builder. You must manually type [variables](#2-variables) (e.g., `{{synopsis}}`) into the Note Content area.
 
 -   **Limited [Filters](#3-filters):** Currently, only essential [filters](#3-filters) are available (`wikilink`, `date`, `join`, `split`, `default`, `lower`, `upper`). More advanced [filters](#3-filters) found in the Web Clipper are planned for future updates.
 
-### Feedback & Support
+## Feedback & Support
 
 If you encounter any issues or notice missing features, please [open an issue on GitHub](https://github.com/zara-kasi/obsidian-myanimenotes/issues).
