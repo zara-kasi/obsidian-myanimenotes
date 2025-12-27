@@ -72,7 +72,7 @@ export default class MyAnimeNotesPlugin extends Plugin {
 
         // Add a clickable icon to the Obsidian ribbon to trigger a manual sync of all lists.
         this.addRibbonIcon(
-            "cloud-download",
+            "origami",
             "Myanimenotes sync all",
             async () => {
                 if (!this.syncManager) return;
