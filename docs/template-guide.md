@@ -63,28 +63,31 @@ Available for both Anime and Manga notes.
 
 # 3. Filters
 
-[Filters](#3-filters) transform data before it is rendered in your note. To apply a filter, add a pipe `|` after the [variables](#2-variables) name.
+Filters transform data before it is rendered in your note. To apply a filter, add a pipe `|` after the [variables](#2-variables) name.
 
 **Syntax:** `{{ variable | filter:argument }}`
+**Example:** `{{studios | wikilink}}` → `[[MAPPA]]`
 
--   **wikilink**
-    -   **Description:** Wraps text in `[[brackets]]`. If applied to a list, wraps each item individually.
-    -   **Example:** `{{studios | wikilink}}` → `[[MAPPA]]`
--   **date**
-    -   **Description:** Formats dates using standard tokens (e.g., `YYYY`, `MM`). Defaults to `YYYY-MM-DD`.
-    -   **Example:** `{{releasedStart | date:"YYYY"}}` → `2023`
--   **join**
-    -   **Description:** Combines a list into a single string using a separator. Defaults to `, `.
-    -   **Example:** `{{genres | join:" / "}}` → `Action / Fantasy`
--   **default**
-    -   **Description:** Returns a fallback value if the [variables](#2-variables) is empty or undefined.
-    -   **Example:** `{{mean | default:"N/A"}}` → `N/A`
--   **split**
-    -   **Description:** Splits a string into a list based on a separator character.
-    -   **Example:** `{{tags | split:","}}` → `['Tag A', 'Tag B']`
--   **lower / upper**
-    -   **Description:** Converts text to lowercase or uppercase.
-    -   **Example:** `{{status | lower}}` → `finished airing`
+## Available Filters
+
+| Filter            | Description                                                                                                        |
+| :---------------- | :----------------------------------------------------------------------------------------------------------------- |
+| **wikilink**      | Wraps text in `[[brackets]]`. If applied to a list, wraps each item individually.                                  |
+| **date**          | Formats dates using standard tokens (e.g., `YYYY`, `MM`). Defaults to `YYYY-MM-DD`.                                |
+| **join**          | Combines a list into a single string using a separator. Defaults to `, `.                                          |
+| **default**       | Returns a fallback value if the variable is empty or undefined.                                                    |
+| **split**         | Splits a string into a list based on a separator character.                                                        |
+| **lower / upper** | Converts text to lowercase or uppercase.                                                                           |
+| **blockquote**    | Prefixes text with `> ` to create Markdown blockquotes. Automatically handles multi-line strings and nested lists. |
+| **callout**       | Wraps text in an Obsidian callout block. Accepts parameters for type, title, and fold state.                       |
+| **camel**         | Converts text to `camelCase`. Removes spaces, hyphens, and underscores.                                            |
+| **kebab**         | Converts text to `kebab-case` (lowercase with hyphens). Useful for file names or tags.                             |
+| **capitalize**    | Capitalizes the first letter of a string and lowers the rest. Works recursively on lists.                          |
+| **footnote**      | Converts a list or object into Markdown footnotes.                                                                 |
+| **calc**          | Performs basic mathematical operations (`+`, `-`, `*`, `/`, `^`) on numeric values.                                |
+| **first**         | Returns the first item of a list or array.                                                                         |
+| **date_modify**   | Adds or subtracts time from a date using units like years, months, weeks, days, or hours.                          |
+| **duration**      | Formats durations (from seconds or ISO 8601 strings) into readable time strings.                                   |
 
 ### Chaining [Filters](#3-filters)
 
@@ -92,6 +95,8 @@ You can combine multiple [filters](#3-filters). They run in order from left to r
 
 -   **Example:** `{{genres | wikilink | join:", "}}`
     -   _Result:_ `[[Action]], [[Fantasy]]`
+
+> For a more comprehensive guide, please refer to the official [Obsidian Web Clipper documentation on filters](https://help.obsidian.md/web-clipper/filters). Because this plugin's filter system is modeled directly after Web Clipper's, their documentation serves as an excellent reference for understanding advanced usage and syntax.
 
 # 4. Current Limitations
 
