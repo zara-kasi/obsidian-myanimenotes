@@ -1,28 +1,7 @@
 # Contributing to MyAnimeNotes
 
-Thank you for your interest in contributing to MyAnimeNotes! This guide will help you understand the plugin architecture and get started with development.
+Thank you for your interest in contributing to MyAnimeNotes! This guide will help you understand the [plugin architecture](./docs/plugin-architecture.md) and get started with development.
 
-### Code Reading Guide
-
-**If you want to understand...**
-
-**Authentication:**
-→ Start: `src/api/mal/auth/oauth-flow.ts`
-→ Read: [OAuth 2.0 Authentication Flow](./docs/oauth-2.0-authentication-flow-for-mal.md)
-
-**How items are synced:**
-→ Start: `src/sync/sync-manager.ts` → `syncFromMAL()`
-→ Read: [Sync Mechanism Documentation](./docs/sync-mechanism.md)
-
-**How files are saved:**
-→ Start: `src/storage/storage-service.ts` → `saveMediaItem()`
-→ Read: [Storage System Documentation](./docs/storage-system.md)
-
-**How the index works:**
-→ Start: `src/storage/myanimenotes/myanimenotes-index.ts`
-→ Read: [MyAnimeNotes Index System](./docs/myanimenotes-index.md)
-
----
 ## Contributing Guidelines
 
 ### Setting Up Development Environment
@@ -219,33 +198,13 @@ Logs will appear in Developer Console (Ctrl+Shift+I / Cmd+Opt+I):
 
 ---
 
-## Future Enhancement Ideas
-
-- **Incremental Sync**: Only fetch updated items using `updated_since` parameter
-- **Conflict Resolution UI**: Let users choose which duplicate to keep
-- **Template Variables**: Support nested objects (e.g., `{{studio.name}}`)
-- **Custom Filters**: Allow users to write custom JavaScript filters
-- **Sync Profiles**: Save different sync configurations (e.g., "Watching Only", "Completed Only")
-- **Progress Modal**: Show live sync progress with item names
-- **Webhook Support**: Trigger syncs when MAL list changes
-
----
-
 ## Additional Resources
 
+- [Plugin architecture overview](./docs/plugin-architecture.md)
 - [Obsidian Plugin API Docs](https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin)
 - [MyAnimeList API Docs](https://myanimelist.net/apiconfig/references/api/v2)
 - [OAuth 2.0 PKCE Spec (RFC 7636)](https://datatracker.ietf.org/doc/html/rfc7636)
 - [Plugin Repository](https://github.com/zara-kasi/obsidian-myanimenotes)
 - [Issue Tracker](https://github.com/zara-kasi/obsidian-myanimenotes/issues)
-
----
-
-## Contact & Support
-
-For questions or contributions:
-- **GitHub Issues**: Report bugs or request features
-- **Pull Requests**: Submit code improvements
-- **Discussions**: Ask questions or share ideas
 
 ---
