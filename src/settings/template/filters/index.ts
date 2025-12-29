@@ -25,6 +25,27 @@ import { duration } from "./duration";
 import { first } from "./first";
 import { footnote } from "./footnote";
 import { kebab } from "./kebab";
+import { last } from "./last";
+import { length } from "./length";
+import { list } from "./list";
+import { map } from "./map";
+import { merge } from "./merge";
+import { nth } from "./nth";
+import { number_format } from "./number_format";
+import { object } from "./object";
+import { pascal } from "./pascal";
+import { replace } from "./replace";
+import { reverse } from "./reverse";
+import { round } from "./round";
+import { safe_name } from "./safe_name";
+import { slice } from "./slice";
+import { snake } from "./snake";
+import { table } from "./table";
+import { template } from "./template";
+import { title } from "./title";
+import { trim } from "./trim";
+import { uncamel } from "./uncamel";
+import { unique } from "./unique";
 
 const log = new logger("FilterRegistry");
 
@@ -52,7 +73,28 @@ const filterRegistry: Record<string, FilterFunction> = {
     duration,
     first,
     footnote,
-    kebab
+    kebab,
+    last,
+    length,
+    list,
+    map,
+    merge,
+    nth,
+    number_format,
+    object,
+    pascal,
+    replace,
+    reverse,
+    round,
+    safe_name,
+    slice,
+    snake,
+    table,
+    template,
+    title,
+    trim,
+    uncamel,
+    unique
 };
 
 /**

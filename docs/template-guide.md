@@ -88,6 +88,27 @@ Filters transform data before it is rendered in your note. To apply a filter, ad
 | **first**         | Returns the first item of a list or array.                                                                         |
 | **date_modify**   | Adds or subtracts time from a date using units like years, months, weeks, days, or hours.                          |
 | **duration**      | Formats durations (from seconds or ISO 8601 strings) into readable time strings.                                   |
+| **last**          | Returns the last item of a list or array.                                                                          |
+| **length**        | Returns the count of items in a list, characters in a string, or properties in an object.                          |
+| **list**          | Converts arrays into Markdown lists (bullet, numbered, task, or numbered-task).                                    |
+| **map**           | Transforms array elements using arrow function syntax (e.g., `x => x.name`).                                       |
+| **merge**         | Combines arrays or adds items to an existing array.                                                                |
+| **nth**           | Selects elements at specific positions using CSS-style nth expressions (e.g., `2n`, `n+5`).                        |
+| **number_format** | Formats numbers with custom decimal places, decimal point, and thousands separator.                                |
+| **object**        | Extracts keys, values, or entries from objects for iteration or display.                                           |
+| **pascal**        | Converts text to `PascalCase` (similar to camelCase but first letter capitalized).                                 |
+| **replace**       | Replaces text within strings. Supports regex patterns and multiple replacements.                                   |
+| **reverse**       | Reverses the order of array elements, object entries, or string characters.                                        |
+| **round**         | Rounds numeric values to specified decimal places. Works recursively on arrays and objects.                        |
+| **safe_name**     | Sanitizes strings for use as file/folder names by removing invalid characters.                                     |
+| **slice**         | Extracts a portion of an array or string using start and end indices.                                              |
+| **snake**         | Converts text to `snake_case` (lowercase with underscores). Useful for variable names.                             |
+| **table**         | Converts JSON data into Markdown table format.                                                                     |
+| **template**      | Formats data using custom template strings with `${variable}` placeholders.                                        |
+| **title**         | Converts text to Title Case, capitalizing major words while keeping minor words lowercase.                         |
+| **trim**          | Removes leading and trailing whitespace from strings.                                                              |
+| **uncamel**       | Converts camelCase/PascalCase to space-separated lowercase text.                                                   |
+| **unique**        | Removes duplicate values from arrays and objects.                                                                  |
 
 ### Chaining Filters
 
