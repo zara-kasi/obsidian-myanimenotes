@@ -127,8 +127,6 @@ This template engine is currently under active development. While it draws inspi
 
 -   **No Body Autocomplete:** The [variables](#2-variables) suggestion popup currently works only in the Properties builder. You must manually type [variables](#2-variables) (e.g., `{{synopsis}}`) into the Note Content area.
 
--   **Limited [Filters](#3-filters):** Currently, only essential [filters](#3-filters) are available (`wikilink`, `date`, `join`, `split`, `default`, `lower`, `upper`). More advanced [filters](#3-filters) found in the Web Clipper are planned for future updates.
-
 ## Feedback & Support
 
 If you encounter any issues or notice missing features, please [open an issue on GitHub](https://github.com/zara-kasi/obsidian-myanimenotes/issues).
