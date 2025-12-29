@@ -13,8 +13,7 @@ import {
     parseAlternativeTitles,
     parseGenres,
     parseAuthors,
-    parseStudios,
-    convertDurationToMinutes
+    parseStudios
 } from "./mappers";
 
 const log = new logger("ModelsMedia");
@@ -77,7 +76,7 @@ export function parseAnime(
         numEpisodes: node.num_episodes,
         source: node.source,
         studios: parseStudios(node.studios),
-        duration: convertDurationToMinutes(node.average_episode_duration),
+        duration: node.average_episode_duration,
 
         // User list data (Watch status, score, progress)
         userStatus: listStatus ? mapUserStatus(listStatus.status) : undefined,
@@ -171,7 +170,6 @@ export function parseAnimeList(
     plugin: MyAnimeNotesPlugin,
     malItems: MALItem[]
 ): MediaItem[] {
-
     if (!Array.isArray(malItems)) {
         log.error("Expected array but got:", typeof malItems);
         return [];

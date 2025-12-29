@@ -144,7 +144,7 @@ function resolvePropertyValue(
         numEpisodes: item.numEpisodes,
         numEpisodesWatched: item.numEpisodesWatched,
         studios: item.studios?.map(s => s.name), // Extract studio names as array
-        duration: formatDuration(item.duration),
+        duration: item.duration,
 
         // Manga-specific
         numVolumes: item.numVolumes,
@@ -301,26 +301,6 @@ function extractAliases(
     }
 
     return aliases.length > 0 ? aliases : undefined;
-}
-
-/**
- * Formats duration from raw minutes into a human-readable "Xh Ym" string.
- *
- * @example
- * formatDuration(150) // "2h 30m"
- * formatDuration(45)  // "45m"
- */
-function formatDuration(minutes: number | undefined): string | undefined {
-    if (!minutes || minutes === 0) return undefined;
-
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-
-    if (hours === 0) {
-        return `${mins}m`;
-    }
-
-    return `${hours}h ${mins}m`;
 }
 
 /**

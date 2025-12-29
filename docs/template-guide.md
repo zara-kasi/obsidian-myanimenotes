@@ -18,9 +18,9 @@ Define the note layout using standard Markdown in the Note Content text area. Ad
 
 # 2. Variables
 
-[Variables](#2-variables) dynamically inject MyAnimeList data into your template. Type `{{` in the editor to trigger the auto-complete menu.
+Variables dynamically inject MyAnimeList data into your template. Type `{{` in the editor to trigger the auto-complete menu.
 
-## Common [Variables](#2-variables)
+## Common Variables
 
 Available for both Anime and Manga notes.
 
@@ -89,7 +89,7 @@ Filters transform data before it is rendered in your note. To apply a filter, ad
 | **date_modify**   | Adds or subtracts time from a date using units like years, months, weeks, days, or hours.                          |
 | **duration**      | Formats durations (from seconds or ISO 8601 strings) into readable time strings.                                   |
 
-### Chaining [Filters](#3-filters)
+### Chaining Filters
 
 You can combine multiple [filters](#3-filters). They run in order from left to right.
 

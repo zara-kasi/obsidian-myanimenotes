@@ -183,17 +183,3 @@ export function parseStudios(
         )
         .map(studio => ({ name: studio.name }));
 }
-
-/**
- * Utility to convert episode duration from seconds to minutes.
- * Rounds to the nearest whole number.
- *
- * @param seconds - Duration in seconds.
- * @returns Duration in minutes (rounded) or undefined.
- */
-export function convertDurationToMinutes(
-    seconds: number | undefined
-): number | undefined {
-    if (!seconds) return undefined;
-    return Math.round(seconds / 60);
-}

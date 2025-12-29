@@ -142,7 +142,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-19",
-            template: "{{duration}}",
+            template: "{{duration|duration:H:mm:ss}}",
             customName: "duration",
             order: 16,
             type: "text"
