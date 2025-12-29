@@ -1,6 +1,6 @@
 // OAuth 2.0 authorization flow
 
-import { requestUrl } from "obsidian";
+import { requestUrl, Platform } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
 import type { MALTokenResponse, OAuthParams } from "./types";
 import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from "./constants";
@@ -70,15 +70,16 @@ export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
 
     showNotice("Opening MyAnimeList login page…", 2000);
 
-    // Open in external browser
-    // Obsidian runs in Electron, so we use the shell API to open the default system browser
-    if (window.require) {
-        const { shell } = window.require("electron") as {
-            shell: { openExternal: (url: string) => Promise<void> };
-        };
-        await shell.openExternal(authUrl);
+    if (Platform.isDesktop) {
+        // Desktop: Safely use Electron
+        if (window.require) {
+            const { shell } = window.require("electron") as {
+                shell: { openExternal: (url: string) => Promise<void> };
+            };
+            await shell.openExternal(authUrl);
+        }
     } else {
-        // Fallback for mobile or standard web contexts
+        // Mobile
         window.open(authUrl, "_blank");
     }
 }
@@ -182,7 +183,7 @@ async function exchangeCodeForToken(
         redirect_uri: REDIRECT_URI
     });
 
-    // Add client secret if provided (MAL API officially requires it for web apps, 
+    // Add client secret if provided (MAL API officially requires it for web apps,
     // but sometimes PKCE public clients don't. Including if user provided it.)
     if (plugin.settings.malClientSecret?.trim()) {
         body.append("client_secret", plugin.settings.malClientSecret.trim());
