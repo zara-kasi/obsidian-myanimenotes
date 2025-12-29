@@ -27,7 +27,7 @@ export function generatePropertyId(): string {
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
     folderPath: "MyAnimeNotes/Anime",
     noteContent:
-        "# {{title}}\n\n{{synopsis|callout:( summary, Synopsis, true)}}",
+        '# {{title}}\n\n{{synopsis|callout:( "summary", "Synopsis", true)}}',
     properties: [
         // ========================================================================
         // Core User Data
@@ -224,7 +224,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
     folderPath: "MyAnimeNotes/Manga",
     noteContent:
-        "# {{title}}\n\n{{synopsis|callout:( summary, Synopsis, true)}}",
+        '# {{title}}\n\n{{synopsis|callout:( "summary", "Synopsis", true)}}',
     properties: [
         // ========================================================================
         // Core User Data

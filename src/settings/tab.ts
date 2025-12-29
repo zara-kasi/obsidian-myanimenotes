@@ -5,12 +5,13 @@ import {
     logout as malLogout,
     isAuthenticated as isMALAuthenticated
 } from "../auth";
+import { fetchUserInfo } from "../auth/user-service";
 import {
     renderTemplateSection,
     createTemplateSettingsState,
     TemplateSettingsState
 } from "./template";
-import { setNotificationsEnabled } from "../utils/notice";
+import { setNotificationsEnabled, showNotice } from "../utils/notice";
 import { logger } from "../utils/logger";
 
 /**
@@ -201,16 +202,14 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
      * This method dynamically switches between two views:
      * 1. Authenticated: Displays user avatar, name, and logout button.
      * 2. Unauthenticated: Displays Client ID/Secret inputs and Authenticate button.
-     *
-     * @param container - The HTML element to append the settings to.
+     * * @param container - The HTML element to append the settings to.
      */
     private renderMALSettings(container: HTMLElement): void {
         const isAuth = isMALAuthenticated(this.plugin);
+        const userInfo = this.plugin.settings.malUserInfo;
 
         // === View 1: Authenticated State ===
-        if (isAuth && this.plugin.settings.malUserInfo) {
-            const userInfo = this.plugin.settings.malUserInfo;
-
+        if (isAuth) {
             const userSetting = new Setting(container);
 
             // Create a custom flex container for avatar, name, and Logout button
@@ -223,38 +222,63 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 cls: "myanimenotes-user-details"
             });
 
-            // Add avatar image if URL is present
-            if (userInfo.picture) {
-                userDetailsContainer.createEl("img", {
-                    cls: "myanimenotes-user-avatar",
-                    attr: {
-                        src: userInfo.picture,
-                        alt: userInfo.name
+            if (userInfo) {
+                // Happy Path: User info exists. Render avatar and name.
+                if (userInfo.picture) {
+                    userDetailsContainer.createEl("img", {
+                        cls: "myanimenotes-user-avatar",
+                        attr: {
+                            src: userInfo.picture,
+                            alt: userInfo.name
+                        }
+                    });
+                }
+
+                const usernameLink = userDetailsContainer.createEl("a", {
+                    cls: "myanimenotes-user-name",
+                    text: userInfo.name,
+                    href: `https://myanimelist.net/profile/${userInfo.name}`
+                });
+
+                usernameLink.addEventListener("click", e => {
+                    e.preventDefault();
+                    const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
+
+                    if (window.require) {
+                        const { shell } = window.require("electron") as {
+                            shell: { openExternal: (url: string) => void };
+                        };
+                        shell.openExternal(profileUrl);
+                    } else {
+                        window.open(profileUrl, "_blank");
                     }
                 });
+            } else {
+                // Edge Case: Authenticated but missing User Info.
+                // FIX: Reused "myanimenotes-logout-button" for identical style.
+                // Note: We did NOT add "mod-warning", so it won't be red.
+                const retryBtn = userDetailsContainer.createEl("button", {
+                    cls: "myanimenotes-logout-button",
+                    text: "Refresh profile"
+                });
+
+                retryBtn.addEventListener("click", () => {
+                    void (async () => {
+                        retryBtn.textContent = "Loading...";
+                        retryBtn.disabled = true;
+
+                        try {
+                            await fetchUserInfo(this.plugin);
+                            showNotice("User info updated!", "success");
+                            this.display();
+                        } catch {
+                            showNotice("Failed to fetch info.");
+                            retryBtn.textContent = "Refresh profile";
+                            retryBtn.disabled = false;
+                        }
+                    })();
+                });
             }
-
-            // Add username as a clickable link to their MAL profile
-            const usernameLink = userDetailsContainer.createEl("a", {
-                cls: "myanimenotes-user-name",
-                text: userInfo.name,
-                href: `https://myanimelist.net/profile/${userInfo.name}`
-            });
-
-            // Handle link click to open in default browser (supports Electron/Desktop)
-            usernameLink.addEventListener("click", e => {
-                e.preventDefault();
-                const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
-
-                if (window.require) {
-                    const { shell } = window.require("electron") as {
-                        shell: { openExternal: (url: string) => void };
-                    };
-                    shell.openExternal(profileUrl);
-                } else {
-                    window.open(profileUrl, "_blank");
-                }
-            });
 
             // Right side container: Logout button
             const buttonContainer = userInfoContainer.createDiv({
@@ -269,7 +293,6 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
             logoutButton.addEventListener("click", () => {
                 void (async () => {
                     await malLogout(this.plugin);
-                    // Refresh view to show login inputs
                     this.display();
                 })();
             });
@@ -277,7 +300,6 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
 
         // === View 2: Unauthenticated State ===
         if (!isAuth) {
-            // Client ID Input
             new Setting(container)
                 .setName("Client ID")
                 .setDesc("Your myanimelist client ID.")
@@ -291,7 +313,6 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                         })
                 );
 
-            // Client Secret Input (Masked)
             new Setting(container)
                 .setName("Client secret")
                 .setDesc("Your myanimelist client secret.")
@@ -302,26 +323,22 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                             this.plugin.settings.malClientSecret = value.trim();
                             await this.plugin.saveSettings();
                         });
-                    text.inputEl.type = "password"; // Hide secret visually
+                    text.inputEl.type = "password";
                     return text;
                 });
-        }
 
-        // Authenticate Button (only shown when not authenticated)
-        if (!isAuth) {
             const authSetting = new Setting(container)
                 .setName("Authenticate")
                 .addButton(button => {
                     button
                         .setButtonText("Authenticate")
-                        .setCta() // Call To Action style (highlighted)
+                        .setCta()
                         .onClick(async () => {
                             await startMALAuth(this.plugin);
                             this.display();
                         });
                 });
 
-            // Add description with "Learn more" link for help
             const descEl = authSetting.descEl;
             descEl.createSpan({
                 text: "Link your myanimelist account. "

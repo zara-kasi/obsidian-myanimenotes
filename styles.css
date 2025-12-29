@@ -13,6 +13,7 @@
 .myanimenotes-user-details {
     display: flex;
     align-items: center;
+    justify-content: flex-start; /* Keeps the button aligned to the left */
     gap: 12px;
     flex: 1;
     min-width: 0;
