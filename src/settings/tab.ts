@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting, Platform } from "obsidian";
 import MyAnimeNotesPlugin from "../main";
 import {
     startAuthFlow as startMALAuth,
@@ -111,7 +111,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 )
                 .addText(text =>
                     text
-                        .setPlaceholder("60")
+                        .setPlaceholder("90")
                         .setValue(
                             String(this.plugin.settings.scheduledSyncInterval)
                         )
@@ -223,7 +223,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
             });
 
             if (userInfo) {
-                // Happy Path: User info exists. Render avatar and name.
+                //  User info exists. Render avatar and name.
                 if (userInfo.picture) {
                     userDetailsContainer.createEl("img", {
                         cls: "myanimenotes-user-avatar",
@@ -242,21 +242,29 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
 
                 usernameLink.addEventListener("click", e => {
                     e.preventDefault();
-                    const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
+                    void (async () => {
+                        const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
 
-                    if (window.require) {
-                        const { shell } = window.require("electron") as {
-                            shell: { openExternal: (url: string) => void };
-                        };
-                        shell.openExternal(profileUrl);
-                    } else {
-                        window.open(profileUrl, "_blank");
-                    }
+                        if (Platform.isDesktop) {
+                            if (window.require) {
+                                const { shell } = window.require(
+                                    "electron"
+                                ) as {
+                                    shell: {
+                                        openExternal: (
+                                            url: string
+                                        ) => Promise<void>;
+                                    };
+                                };
+                                await shell.openExternal(profileUrl);
+                            }
+                        } else {
+                            window.open(profileUrl, "_blank");
+                        }
+                    })();
                 });
             } else {
-                // Edge Case: Authenticated but missing User Info.
-                // FIX: Reused "myanimenotes-logout-button" for identical style.
-                // Note: We did NOT add "mod-warning", so it won't be red.
+                // Edge Case: Authenticated but missing User Info
                 const retryBtn = userDetailsContainer.createEl("button", {
                     cls: "myanimenotes-logout-button",
                     text: "Refresh profile"
@@ -350,10 +358,27 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 })
                 .addEventListener("click", e => {
                     e.preventDefault();
-                    window.open(
-                        "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md",
-                        "_blank"
-                    );
+                    void (async () => {
+                        const docUrl =
+                            "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md";
+
+                        if (Platform.isDesktop) {
+                            if (window.require) {
+                                const { shell } = window.require(
+                                    "electron"
+                                ) as {
+                                    shell: {
+                                        openExternal: (
+                                            url: string
+                                        ) => Promise<void>;
+                                    };
+                                };
+                                await shell.openExternal(docUrl);
+                            }
+                        } else {
+                            window.open(docUrl, "_blank");
+                        }
+                    })();
                 });
         }
     }

@@ -39,8 +39,8 @@ export const DEFAULT_SETTINGS: MyAnimeNotesSettings = {
     // Scheduled background sync is disabled by default to save resources.
     scheduledSync: false,
     
-    // Minimum interval is 60 minutes to respect MAL API rate limits.
-    scheduledSyncInterval: 60, 
+    // Minimum interval is 90 minutes to respect MAL API rate limits.
+    scheduledSyncInterval: 90, 
     
     // Tracks the timestamp of the last successful sync operation.
     lastSuccessfulSync: undefined, 

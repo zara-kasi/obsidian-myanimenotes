@@ -1,4 +1,4 @@
-import { Setting, setIcon, normalizePath } from "obsidian";
+import { Setting, setIcon, normalizePath, Platform } from "obsidian";
 import type MyAnimeNotesPlugin from "../../main";
 import { FolderSuggest, VariableSuggest } from "./suggesters";
 import { TemplateConfig, PropertyItem } from "./types";
@@ -170,10 +170,27 @@ function renderExpandableTemplate(
             })
             .addEventListener("click", e => {
                 e.preventDefault();
-                window.open(
-                    "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md",
-                    "_blank"
-                );
+                void (async () => {
+                    const docUrl =
+                        "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md";
+
+                    if (Platform.isDesktop) {
+                        // Desktop: Safely use Electron
+                        if (window.require) {
+                            const { shell } = window.require("electron") as {
+                                shell: {
+                                    openExternal: (
+                                        url: string
+                                    ) => Promise<void>;
+                                };
+                            };
+                            await shell.openExternal(docUrl);
+                        }
+                    } else {
+                        // Mobile
+                        window.open(docUrl, "_blank");
+                    }
+                })();
             });
 
         // Properties list container (target for re-rendering list items)
@@ -322,7 +339,7 @@ function renderPropertyRow(
         typeIconButton.addEventListener("click", e => {
             void (async () => {
                 e.stopPropagation(); // Prevent drag initiation
-                
+
                 // Show modal to select new property type
                 const selectedType = await promptForPropertyType(
                     plugin.app,
@@ -415,7 +432,7 @@ function renderPropertyRow(
     // ========================================================================
     // Drag and Drop Event Handlers
     // ========================================================================
-    
+
     // Start Dragging
     rowEl.addEventListener("dragstart", e => {
         state.draggedElement = rowEl;

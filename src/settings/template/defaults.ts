@@ -87,7 +87,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         // ========================================================================
         {
             id: "prop-9",
-            template: "{{mediaType}}",
+            template: "{{mediaTyp|capitalize}}",
             customName: "media",
             order: 8,
             type: "text"
@@ -129,7 +129,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-13",
-            template: "{{source}}",
+            template: "{{source|capitalize}}",
             customName: "origin",
             order: 14,
             type: "text"
@@ -175,14 +175,14 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-5",
-            template: "{{platform}}",
+            template: "{{platform|replace:(\"m\":\"My\",\"a\":\"Anime\",\"l\":\"List\")}}",
             customName: "platform",
             order: 20,
             type: "text"
         },
         {
             id: "prop-4",
-            template: "{{category}}",
+            template: "{{category|capitalize}}",
             customName: "category",
             order: 21,
             type: "text"
@@ -291,7 +291,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         // ========================================================================
         {
             id: "prop-9",
-            template: "{{mediaType}}",
+            template: "{{mediaType|capitalize}}",
             customName: "media",
             order: 9,
             type: "text"
@@ -333,7 +333,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-13",
-            template: "{{source}}",
+            template: "{{source|capitalize}}",
             customName: "origin",
             order: 15,
             type: "text"
@@ -379,14 +379,14 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-5",
-            template: "{{platform}}",
+            template: "{{platform|replace:(\"m\":\"My\",\"a\":\"Anime\",\"l\":\"List\")}}",
             customName: "platform",
             order: 21,
             type: "text"
         },
         {
             id: "prop-4",
-            template: "{{category}}",
+            template: "{{category|capitalize}}",
             customName: "category",
             order: 22,
             type: "text"
