@@ -123,7 +123,10 @@ function resolvePropertyValue(
 
         // Alternative titles - return as array for Obsidian aliases
         alternativeTitles: extractAliases(item.alternativeTitles),
-
+        // Individual alternative title components
+        titleEnglish: item.alternativeTitles?.en,
+        titleJapanese: item.alternativeTitles?.ja,
+        titleSynonyms: item.alternativeTitles?.synonyms,
         // Description
         synopsis: item.synopsis,
 

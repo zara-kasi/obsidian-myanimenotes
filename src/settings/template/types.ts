@@ -16,6 +16,7 @@ export interface PropertyItem {
  * Template configuration for anime or manga
  */
 export interface TemplateConfig {
+    fileName: string;
     folderPath: string;
     properties: PropertyItem[];
     noteContent: string;

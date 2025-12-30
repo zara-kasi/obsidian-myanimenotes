@@ -15,6 +15,21 @@ export const COMMON_PROPERTIES: PropertyMetadata[] = [
         label: "Alternative Titles",
         defaultName: "aliases"
     },
+    {
+        key: "titleEnglish",
+        label: "English Title",
+        defaultName: "title_en"
+    },
+    {
+        key: "titleJapanese",
+        label: "Japanese Title",
+        defaultName: "title_ja"
+    },
+    {
+        key: "titleSynonyms",
+        label: "Synonyms",
+        defaultName: "synonyms"
+    },
     { key: "id", label: "Media ID", defaultName: "id" },
     { key: "category", label: "Category", defaultName: "category" },
     { key: "platform", label: "Platform", defaultName: "platform" },
@@ -24,7 +39,7 @@ export const COMMON_PROPERTIES: PropertyMetadata[] = [
     { key: "mediaType", label: "Media Type", defaultName: "media" },
     { key: "status", label: "Status", defaultName: "state" },
     { key: "mean", label: "Average Score", defaultName: "score" },
-    { key: "genres", label: "Genres", defaultName: "genres" },
+    { key: "genres", label: "Genres & Themes", defaultName: "genres" },
     { key: "releasedStart", label: "Released Start", defaultName: "released" },
     { key: "releasedEnd", label: "Released End", defaultName: "ended" },
     { key: "source", label: "Source Material", defaultName: "origin" },

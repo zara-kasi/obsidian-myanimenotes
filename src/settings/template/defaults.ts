@@ -25,6 +25,7 @@ export function generatePropertyId(): string {
  * `|date:"YYYY-MM-DD"` are supported to format the output.
  */
 export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
+    fileName: "{{title}}",
     folderPath: "MyAnimeNotes/Anime",
     noteContent:
         '# {{title}}\n\n{{synopsis|callout:( "summary", "Synopsis", true)}}',
@@ -175,7 +176,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-5",
-            template: "{{platform|replace:(\"m\":\"My\",\"a\":\"Anime\",\"l\":\"List\")}}",
+            template: '{{platform|replace:("m":"My","a":"Anime","l":"List")}}',
             customName: "platform",
             order: 20,
             type: "text"
@@ -222,6 +223,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
  * such as `numChaptersRead`, `numVolumes`, and `authors`.
  */
 export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
+    fileName: "{{title}}",
     folderPath: "MyAnimeNotes/Manga",
     noteContent:
         '# {{title}}\n\n{{synopsis|callout:( "summary", "Synopsis", true)}}',
@@ -379,7 +381,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-5",
-            template: "{{platform|replace:(\"m\":\"My\",\"a\":\"Anime\",\"l\":\"List\")}}",
+            template: '{{platform|replace:("m":"My","a":"Anime","l":"List")}}',
             customName: "platform",
             order: 21,
             type: "text"

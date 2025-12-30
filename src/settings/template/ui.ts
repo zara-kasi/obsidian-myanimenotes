@@ -129,7 +129,58 @@ function renderExpandableTemplate(
             cls: "myanimenotes-template-content"
         });
 
-        // 1. Folder Path Setting
+        // 1 File Name Format Setting
+        const fileNameDesc = document.createDocumentFragment();
+        fileNameDesc.createSpan({
+            text: "Format for the file name of the note. You can use variables to pre-populate data from the API. "
+        });
+        fileNameDesc
+            .createEl("a", {
+                text: "Learn more",
+                href: "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md"
+            })
+            .addEventListener("click", e => {
+                e.preventDefault();
+                void (async () => {
+                    const docUrl =
+                        "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md";
+
+                    if (Platform.isDesktop) {
+                        // Desktop: Safely use Electron
+                        if (window.require) {
+                            const { shell } = window.require("electron") as {
+                                shell: {
+                                    openExternal: (
+                                        url: string
+                                    ) => Promise<void>;
+                                };
+                            };
+                            await shell.openExternal(docUrl);
+                        }
+                    } else {
+                        // Mobile
+                        window.open(docUrl, "_blank");
+                    }
+                })();
+            });
+
+        new Setting(contentContainer)
+            .setName("Note name")
+            .setDesc(fileNameDesc)
+            .addText(text => {
+                // Attach the VariableSuggest to allow autocomplete of {{variables}}
+                const variables = getAvailableProperties(type);
+                new VariableSuggest(plugin.app, text.inputEl, variables);
+
+                text.setPlaceholder("{{title}}")
+                    .setValue(config.fileName || "{{title}}")
+                    .onChange(async value => {
+                        config.fileName = value;
+                        await saveTemplateConfig(plugin, type, config);
+                    });
+            });
+
+        // 1.5 Folder Path Setting
         new Setting(contentContainer)
             .setName("Note location")
             .setDesc("The folder or path of the note.")
@@ -161,7 +212,7 @@ function renderExpandableTemplate(
             cls: "setting-item-description"
         });
         propertiesDesc.createSpan({
-            text: "Properties to add to the top of the media note. Use variables to populate data from the mal API. "
+            text: "Properties to add to the top of the media note. Use variables to populate data from the API. "
         });
         propertiesDesc
             .createEl("a", {
@@ -237,7 +288,7 @@ function renderExpandableTemplate(
         });
 
         contentContainer.createEl("p", {
-            text: "Customize the content of the note. Use variables to populate data from the mal API.",
+            text: "Customize the content of the note. Use variables to populate data from the API.",
             cls: "setting-item-description"
         });
 
