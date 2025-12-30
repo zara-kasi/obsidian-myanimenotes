@@ -130,7 +130,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-13",
-            template: "{{source|capitalize}}",
+            template: "{{source|unsnake|capitalize}}",
             customName: "origin",
             order: 14,
             type: "text"
@@ -176,7 +176,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-5",
-            template: '{{platform|replace:("m":"My","a":"Anime","l":"List")}}',
+            template: '{{platform|replace:"mal:MyAnimeList"}}',
             customName: "platform",
             order: 20,
             type: "text"
@@ -335,7 +335,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-13",
-            template: "{{source|capitalize}}",
+            template: "{{source|unsnake|capitalize}}",
             customName: "origin",
             order: 15,
             type: "text"
@@ -352,7 +352,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
             template: "{{authors}}",
             customName: "authors",
             order: 17,
-            type: "text"
+            type: "multitext"
         },
         {
             id: "prop-11",
@@ -381,7 +381,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-5",
-            template: '{{platform|replace:("m":"My","a":"Anime","l":"List")}}',
+            template: '{{platform|replace:"mal:MyAnimeList"}}',
             customName: "platform",
             order: 21,
             type: "text"

@@ -154,7 +154,13 @@ function resolvePropertyValue(
         numVolumesRead: item.numVolumesRead,
         numChapters: item.numChapters,
         numChaptersRead: item.numChaptersRead,
-        authors: formatAuthors(item.authors),
+        authors: item.authors
+            ?.map(a => {
+                const firstName = a.firstName || "";
+                const lastName = a.lastName || "";
+                return `${firstName} ${lastName}`.trim();
+            })
+            .filter(Boolean),
 
         // User data
         userStatus: item.userStatus,
@@ -304,27 +310,4 @@ function extractAliases(
     }
 
     return aliases.length > 0 ? aliases : undefined;
-}
-
-/**
- * Formats an array of author objects into a single comma-separated string.
- *
- * @example
- * formatAuthors([{firstName: "Hajime", lastName: "Isayama"}])
- * // Returns: "Hajime Isayama"
- */
-function formatAuthors(
-    authors: Array<{ firstName?: string; lastName?: string }> | undefined
-): string | undefined {
-    if (!authors || authors.length === 0) return undefined;
-
-    const authorNames = authors
-        .map(a => {
-            const firstName = a.firstName || "";
-            const lastName = a.lastName || "";
-            return `${firstName} ${lastName}`.trim();
-        })
-        .filter(Boolean); // Remove empty strings
-
-    return authorNames.length > 0 ? authorNames.join(", ") : undefined;
 }

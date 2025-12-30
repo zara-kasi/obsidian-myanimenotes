@@ -40,6 +40,7 @@ import { round } from "./round";
 import { safe_name } from "./safe_name";
 import { slice } from "./slice";
 import { snake } from "./snake";
+import { unsnake } from "./unsnake";
 import { table } from "./table";
 import { template } from "./template";
 import { title } from "./title";
@@ -89,6 +90,7 @@ const filterRegistry: Record<string, FilterFunction> = {
     safe_name,
     slice,
     snake,
+    unsnake,
     table,
     template,
     title,
