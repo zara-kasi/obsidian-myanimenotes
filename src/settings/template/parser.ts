@@ -166,7 +166,10 @@ function resolvePropertyValue(
         userStatus: item.userStatus,
         userScore: item.userScore,
         userStartDate: item.userStartDate,
-        userFinishDate: item.userFinishDate
+        userFinishDate: item.userFinishDate,
+
+        // Internal variable for current sync time
+        time: Date.now()
     };
 
     return valueMap[variableName];

@@ -1,4 +1,11 @@
-import { Setting, setIcon, normalizePath, Platform } from "obsidian";
+import {
+    Setting,
+    setIcon,
+    normalizePath,
+    Platform,
+    TextComponent,
+    ExtraButtonComponent
+} from "obsidian";
 import type MyAnimeNotesPlugin from "../../main";
 import { FolderSuggest, VariableSuggest } from "./suggesters";
 import { TemplateConfig, PropertyItem } from "./types";
@@ -10,7 +17,11 @@ import {
 
 import { getAvailableProperties } from "./metadata";
 
-import { promptForPropertyType, getPropertyTypeIcon } from "./properties";
+import {
+    promptForPropertyType,
+    getPropertyTypeIcon,
+    getPropertyTypeLabel
+} from "./properties";
 
 /**
  * Renders the entire template configuration section within the settings tab.
@@ -205,44 +216,11 @@ function renderExpandableTemplate(
             });
 
         // 2. Properties Section
-        contentContainer.createEl("h4", { text: "Properties" });
-
-        // Description with documentation link
-        const propertiesDesc = contentContainer.createEl("p", {
-            cls: "setting-item-description"
-        });
-        propertiesDesc.createSpan({
-            text: "Properties to add to the top of the media note. Use variables to populate data from the API. "
-        });
-        propertiesDesc
-            .createEl("a", {
-                text: "Learn more",
-                href: "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md"
-            })
-            .addEventListener("click", e => {
-                e.preventDefault();
-                void (async () => {
-                    const docUrl =
-                        "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md";
-
-                    if (Platform.isDesktop) {
-                        // Desktop: Safely use Electron
-                        if (window.require) {
-                            const { shell } = window.require("electron") as {
-                                shell: {
-                                    openExternal: (
-                                        url: string
-                                    ) => Promise<void>;
-                                };
-                            };
-                            await shell.openExternal(docUrl);
-                        }
-                    } else {
-                        // Mobile
-                        window.open(docUrl, "_blank");
-                    }
-                })();
-            });
+        new Setting(contentContainer)
+            .setName("Properties")
+            .setDesc(
+                "Properties to add to the top of the media note. Use variables to populate data from the API."
+            );
 
         // Properties list container (target for re-rendering list items)
         const propertyListEl = contentContainer.createDiv({
@@ -260,37 +238,18 @@ function renderExpandableTemplate(
         renderPropertyList(propertyListEl, plugin, state, config, type);
 
         // "Add Property" Button
-        const addButtonContainer = contentContainer.createDiv({
-            cls: "myanimenotes-add-property-container"
-        });
-        const addButton = addButtonContainer.createEl("button", {
-            cls: "myanimenotes-add-property-button"
-        });
-
-        const addButtonIcon = addButton.createSpan({
-            cls: "myanimenotes-button-icon"
-        });
-        setIcon(addButtonIcon, "plus");
-
-        addButton.createSpan({
-            cls: "myanimenotes-button-text",
-            text: "Add Property"
-        });
-
-        addButton.addEventListener("click", () => {
-            addEmptyProperty(plugin, state, config, type);
+        new Setting(contentContainer).addButton(btn => {
+            btn.setButtonText("Add property").onClick(() => {
+                addEmptyProperty(plugin, state, config, type);
+            });
         });
 
         // 3. Note Content Section
-        contentContainer.createEl("h4", {
-            text: "Note content",
-            cls: "myanimenotes-section-header"
-        });
-
-        contentContainer.createEl("p", {
-            text: "Customize the content of the note. Use variables to populate data from the API.",
-            cls: "setting-item-description"
-        });
+        new Setting(contentContainer)
+            .setName("Note content")
+            .setDesc(
+                "Customize the content of the note. Use variables to populate data from the API."
+            );
 
         // Content Template TextArea
         new Setting(contentContainer)
@@ -313,19 +272,14 @@ function renderExpandableTemplate(
 /**
  * Renders the list of properties for a specific template.
  * Clears the container and rebuilds the rows based on the current configuration.
- *
- * @param container - The DOM element to render properties into.
- * @param plugin - Plugin instance.
- * @param state - UI state.
- * @param config - The template configuration containing the properties.
- * @param type - "anime" or "manga".
  */
 function renderPropertyList(
     container: HTMLElement,
     plugin: MyAnimeNotesPlugin,
     state: TemplateSettingsState,
     config: TemplateConfig,
-    type: "anime" | "manga"
+    type: "anime" | "manga",
+    focusLastItem: boolean = false // <--- Added parameter
 ): void {
     container.empty();
 
@@ -334,21 +288,23 @@ function renderPropertyList(
         (a, b) => a.order - b.order
     );
 
-    sortedProps.forEach(prop => {
-        renderPropertyRow(container, plugin, state, prop, config, type);
+    sortedProps.forEach((prop, index) => {
+        // Check if this is the last item and we requested focus
+        const shouldFocus = focusLastItem && index === sortedProps.length - 1;
+        renderPropertyRow(
+            container,
+            plugin,
+            state,
+            prop,
+            config,
+            type,
+            shouldFocus
+        );
     });
 }
 
 /**
  * Renders a single property row with inputs for name, template value, and drag/delete controls.
- * This function also attaches all necessary event listeners for drag-and-drop reordering.
- *
- * @param container - The parent property list container.
- * @param plugin - Plugin instance.
- * @param state - UI state.
- * @param prop - The specific property item to render.
- * @param config - The parent template config.
- * @param type - "anime" or "manga".
  */
 function renderPropertyRow(
     container: HTMLElement,
@@ -356,13 +312,14 @@ function renderPropertyRow(
     state: TemplateSettingsState,
     prop: PropertyItem,
     config: TemplateConfig,
-    type: "anime" | "manga"
+    type: "anime" | "manga",
+    shouldFocus: boolean = false // <--- Added parameter
 ): void {
     const rowEl = container.createDiv({ cls: "myanimenotes-property-row" });
     rowEl.setAttribute("draggable", "true");
     rowEl.setAttribute("data-id", prop.id);
 
-    // Identify permanent system properties that cannot be deleted or renamed
+    // Identify permanent system properties
     const isPermanent =
         prop.template === "myanimenotes" || prop.template === "synced";
 
@@ -370,143 +327,109 @@ function renderPropertyRow(
     const dragHandle = rowEl.createDiv({ cls: "myanimenotes-drag-handle" });
     setIcon(dragHandle, "grip-vertical");
 
-    // ========================================================================
-    // Property Type Icon Button
-    // ========================================================================
-    const typeIconButton = rowEl.createDiv({
-        cls: "myanimenotes-type-icon-button"
-    });
-
+    // --- Property Type Icon Button (Native Component) ---
     const currentType = prop.type || "text";
-    const iconName = getPropertyTypeIcon(currentType);
-    setIcon(typeIconButton, iconName);
 
-    typeIconButton.setAttribute("aria-label", `Format: ${currentType}`);
+    // Create the button using Obsidian's component
+    const typeBtnComp = new ExtraButtonComponent(rowEl)
+        .setIcon(getPropertyTypeIcon(currentType))
+        .setTooltip(`Format: ${getPropertyTypeLabel(currentType)}`);
 
-    // If not permanent, allow changing the property type via click
+    // Add a class so we can still target it with CSS if needed (e.g. margins)
+    typeBtnComp.extraSettingsEl.addClass("myanimenotes-type-icon");
+
     if (!isPermanent) {
-        typeIconButton.addClass("myanimenotes-type-icon-clickable");
-
-        typeIconButton.addEventListener("click", e => {
+        // Interactive state: Click to open menu
+        typeBtnComp.onClick(() => {
             void (async () => {
-                e.stopPropagation(); // Prevent drag initiation
-
-                // Show modal to select new property type
                 const selectedType = await promptForPropertyType(
                     plugin.app,
                     prop.customName
                 );
 
                 if (selectedType) {
+                    // 1. Update Data
                     prop.type = selectedType;
                     await saveTemplateConfig(plugin, type, config);
 
-                    // Update UI immediately
-                    typeIconButton.empty();
-                    const newIconName = getPropertyTypeIcon(selectedType);
-                    setIcon(typeIconButton, newIconName);
-                    typeIconButton.setAttribute(
-                        "aria-label",
-                        `Format: ${selectedType}`
+                    // 2. Update Visuals (Icon & Tooltip)
+                    typeBtnComp.setIcon(getPropertyTypeIcon(selectedType));
+                    typeBtnComp.setTooltip(
+                        `Format: ${getPropertyTypeLabel(selectedType)}`
                     );
                 }
             })();
         });
     } else {
-        typeIconButton.addClass("myanimenotes-type-icon-readonly");
+        // Read-only state: Greyed out and unclickable
+        typeBtnComp.setDisabled(true);
+        typeBtnComp.extraSettingsEl.addClass("myanimenotes-type-icon-readonly");
     }
 
-    // ========================================================================
-    // Property Inputs
-    // ========================================================================
-
-    // 1. Property Name Input (Key)
-    const nameInput = rowEl.createEl("input", {
-        cls: "myanimenotes-property-name",
-        type: "text",
-        value: prop.customName,
-        attr: {
-            placeholder: "Property name",
-            ...(isPermanent && { readonly: "true" })
-        }
-    });
+    // --- 1. Property Name Input (Key) ---
+    const nameInputComp = new TextComponent(rowEl);
+    nameInputComp.inputEl.addClass("myanimenotes-property-name");
+    nameInputComp
+        .setValue(prop.customName)
+        .setPlaceholder("Property name")
+        .setDisabled(isPermanent);
 
     if (!isPermanent) {
-        nameInput.addEventListener("input", e => {
-            prop.customName = (e.target as HTMLInputElement).value;
-            void saveTemplateConfig(plugin, type, config);
+        nameInputComp.onChange(async value => {
+            prop.customName = value;
+            await saveTemplateConfig(plugin, type, config);
         });
     }
 
-    // 2. Template Variable Input (Value)
-    const templateInput = rowEl.createEl("input", {
-        cls: "myanimenotes-template-var",
-        type: "text",
-        value: prop.template || "",
-        attr: {
-            placeholder: "{{numEpisodes}} episodes",
-            ...(isPermanent && { readonly: "true" })
-        }
-    });
+    // --- 2. Template Variable Input (Value) ---
+    const templateInputComp = new TextComponent(rowEl);
+    templateInputComp.inputEl.addClass("myanimenotes-template-var");
+    templateInputComp
+        .setValue(prop.template || "")
+        .setPlaceholder("Property value")
+        .setDisabled(isPermanent);
 
     if (!isPermanent) {
-        // Update on blur to avoid excessive saves while typing
-        templateInput.addEventListener("blur", e => {
-            prop.template = (e.target as HTMLInputElement).value.trim();
-            void saveTemplateConfig(plugin, type, config);
-        });
-
-        // Update local object immediately for responsiveness
-        templateInput.addEventListener("input", e => {
-            prop.template = (e.target as HTMLInputElement).value;
+        templateInputComp.onChange(async value => {
+            prop.template = value;
+            await saveTemplateConfig(plugin, type, config);
         });
     }
 
-    // Delete Button
+    // Attach Variable Suggester to the TextComponent's input element
+    const variables = getAvailableProperties(type);
+    new VariableSuggest(plugin.app, templateInputComp.inputEl, variables);
+
+    // --- Delete Button (Native ExtraButtonComponent) ---
     if (!isPermanent) {
-        const deleteButton = rowEl.createDiv({
-            cls: "myanimenotes-delete-button"
-        });
-        setIcon(deleteButton, "trash-2");
-        deleteButton.addEventListener("click", () => {
-            void removeProperty(plugin, state, prop.id, config, type);
-        });
+        new ExtraButtonComponent(rowEl)
+            .setIcon("trash-2")
+            .setTooltip("Delete property")
+            .onClick(() => {
+                void removeProperty(plugin, state, prop.id, config, type);
+            });
     } else {
-        // Spacer to align read-only rows
         rowEl.createDiv({ cls: "myanimenotes-delete-button-spacer" });
     }
 
-    // Attach Variable Suggester (auto-complete for {{variables}})
-    const variables = getAvailableProperties(type);
-    new VariableSuggest(plugin.app, templateInput, variables);
-
-    // ========================================================================
-    // Drag and Drop Event Handlers
-    // ========================================================================
-
-    // Start Dragging
+    // --- Drag and Drop Event Handlers ---
+    // (Keep your existing drag logic exactly as it is, copied below for completeness)
     rowEl.addEventListener("dragstart", e => {
         state.draggedElement = rowEl;
         rowEl.addClass("dragging");
-        if (e.dataTransfer) {
-            e.dataTransfer.effectAllowed = "move";
-        }
+        if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
     });
 
-    // End Dragging
     rowEl.addEventListener("dragend", () => {
         rowEl.removeClass("dragging");
         state.draggedElement = null;
     });
 
-    // Drag Over (Calculate drop position)
     rowEl.addEventListener("dragover", e => {
-        e.preventDefault(); // Essential to allow dropping
+        e.preventDefault();
         if (state.draggedElement && state.draggedElement !== rowEl) {
             const rect = rowEl.getBoundingClientRect();
             const midpoint = rect.top + rect.height / 2;
-
-            // Visual feedback: Show line above or below row based on mouse position
             if (e.clientY < midpoint) {
                 rowEl.addClass("drag-over-top");
                 rowEl.removeClass("drag-over-bottom");
@@ -517,27 +440,21 @@ function renderPropertyRow(
         }
     });
 
-    // Drag Leave (Cleanup visual feedback)
     rowEl.addEventListener("dragleave", () => {
         rowEl.removeClass("drag-over-top");
         rowEl.removeClass("drag-over-bottom");
     });
 
-    // Drop Action
     rowEl.addEventListener("drop", e => {
         e.preventDefault();
-        // Cleanup styles
         rowEl.removeClass("drag-over-top");
         rowEl.removeClass("drag-over-bottom");
-
         if (state.draggedElement && state.draggedElement !== rowEl) {
-            // Calculate exact drop position logic
             void reorderProperties(
                 plugin,
                 state,
                 state.draggedElement.getAttribute("data-id") || "",
-                prop.id, // Target ID
-                // Determine if dropping before or after based on mouse Y position
+                prop.id,
                 e.clientY <
                     rowEl.getBoundingClientRect().top +
                         rowEl.getBoundingClientRect().height / 2,
@@ -546,6 +463,11 @@ function renderPropertyRow(
             );
         }
     });
+
+    // --- Auto Focus Logic ---
+    if (shouldFocus) {
+        nameInputComp.inputEl.focus();
+    }
 }
 
 /**
@@ -556,6 +478,7 @@ function renderPropertyRow(
  * @param config - Template config.
  * @param type - "anime" or "manga".
  */
+
 function addEmptyProperty(
     plugin: MyAnimeNotesPlugin,
     state: TemplateSettingsState,
@@ -577,8 +500,10 @@ function addEmptyProperty(
         type === "anime"
             ? state.animePropertyListEl
             : state.mangaPropertyListEl;
+
     if (listEl) {
-        renderPropertyList(listEl, plugin, state, config, type);
+        // Pass 'true' to focus the last item (the one we just added)
+        renderPropertyList(listEl, plugin, state, config, type, true);
     }
 }
 

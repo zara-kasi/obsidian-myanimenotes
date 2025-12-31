@@ -216,13 +216,6 @@
     color: var(--text-muted);
 }
 
-/* Delete button spacer for permanent properties */
-.myanimenotes-delete-button-spacer {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-}
-
 /* Add Property Button */
 
 .myanimenotes-add-property-button {

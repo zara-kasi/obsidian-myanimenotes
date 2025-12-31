@@ -1,6 +1,6 @@
 # 1. Template Basics
 
-MyAnimeNotes features a visual Template Builder to customize your notes without manual coding. Configuration is split into separate Anime and Manga templates found in the plugin settings.
+This template engine is currently under active development. While it draws inspiration from the [Obsidian Web Clipper](https://help.obsidian.md/Extending+Obsidian/Obsidian+Web+Clipper), not all features are currently implemented.
 
 ## Frontmatter Configuration
 
@@ -41,6 +41,7 @@ Available for both Anime and Manga notes.
 | `{{userScore}}`         | Your personal rating.                             |
 | `{{userStartDate}}`     | Date you started.                                 |
 | `{{userFinishDate}}`    | Date you finished.                                |
+| `{{time}}`              | Current date and time.                            |
 
 ## Anime Specific
 
@@ -65,8 +66,8 @@ Available for both Anime and Manga notes.
 
 Filters transform data before it is rendered in your note. To apply a filter, add a pipe `|` after the [variables](#2-variables) name.
 
-**Syntax:** `{{ variable | filter:argument }}`
-**Example:** `{{studios | wikilink}}` → `[[MAPPA]]`
+> **Syntax:** `{{ variable|filter:argument }}`
+> **Example:** `{{studios|wikilink}}` → `[[MAPPA]]`
 
 ## Available Filters
 
@@ -103,6 +104,7 @@ Filters transform data before it is rendered in your note. To apply a filter, ad
 | **safe_name**     | Sanitizes strings for use as file/folder names by removing invalid characters.                                     |
 | **slice**         | Extracts a portion of an array or string using start and end indices.                                              |
 | **snake**         | Converts text to `snake_case` (lowercase with underscores). Useful for variable names.                             |
+| **unsnake**       | Replaces underscores and hyphens with spaces.                                                                      |
 | **table**         | Converts JSON data into Markdown table format.                                                                     |
 | **template**      | Formats data using custom template strings with `${variable}` placeholders.                                        |
 | **title**         | Converts text to Title Case, capitalizing major words while keeping minor words lowercase.                         |
@@ -114,18 +116,18 @@ Filters transform data before it is rendered in your note. To apply a filter, ad
 
 You can combine multiple [filters](#3-filters). They run in order from left to right.
 
--   **Example:** `{{genres | wikilink | join:", "}}`
-    -   _Result:_ `[[Action]], [[Fantasy]]`
-
+>  **Example:** `{{genres|wikilink|join:", "}}`
+>  _Result:_ `[[Action]], [[Fantasy]]`
+>  
 > For a more comprehensive guide, please refer to the official [Obsidian Web Clipper documentation on filters](https://help.obsidian.md/web-clipper/filters). Because this plugin's filter system is modeled directly after Web Clipper's, their documentation serves as an excellent reference for understanding advanced usage and syntax.
 
 # 4. Current Limitations
 
-This template engine is currently under active development. While it draws inspiration from the [Obsidian Web Clipper](https://help.obsidian.md/Extending+Obsidian/Obsidian+Web+Clipper), not all features are currently implemented.
-
 -   **Static Body Content:** [Variables](#2-variables) used in the Note Content area are populated only when the note is **first created**. They will not be updated during future syncs. However, properties in the Frontmatter are fully dynamic and will update automatically whenever you sync.
 
 -   **No Body Autocomplete:** The [variables](#2-variables) suggestion popup currently works only in the Properties builder. You must manually type [variables](#2-variables) (e.g., `{{synopsis}}`) into the Note Content area.
+
+- **No Variable in Note location:** The current folder path settings doesn't support [variables](#2-variables).
 
 ## Feedback & Support
 

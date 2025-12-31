@@ -46,7 +46,8 @@ export const COMMON_PROPERTIES: PropertyMetadata[] = [
     { key: "userStatus", label: "User Status", defaultName: "status" },
     { key: "userScore", label: "User Rating", defaultName: "rating" },
     { key: "userStartDate", label: "Started Date", defaultName: "started" },
-    { key: "userFinishDate", label: "Finished Date", defaultName: "finished" }
+    { key: "userFinishDate", label: "Finished Date", defaultName: "finished" },
+    { key: "time", label: "Current date & time", defaultName: "updated" }
 ];
 
 /**

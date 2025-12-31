@@ -240,3 +240,16 @@ export function formatPropertyValue(
             return value;
     }
 }
+
+/**
+ * Gets the human-readable label associated with a specific property type.
+ * Useful for UI tooltips (e.g., returns "Date & Time" instead of "datetime").
+ *
+ * @param type - The property type.
+ * @returns The label string. Defaults to "Text".
+ */
+export function getPropertyTypeLabel(type: PropertyType | undefined): string {
+    if (!type) return "Text";
+    const typeInfo = PROPERTY_TYPES.find(t => t.type === type);
+    return typeInfo?.label || "Text";
+}

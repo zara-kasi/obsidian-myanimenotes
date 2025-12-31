@@ -195,6 +195,13 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
             order: 22,
             type: "number"
         },
+        {
+            id: "prop-25",
+            template: '{{time|date:"YYYY-MM-DDTHH:mm:ss"}}',
+            customName: "updated",
+            order: 23,
+            type: "datetime"
+        },
 
         // ========================================================================
         // Permanent System Properties (Do Not Edit IDs)
@@ -203,14 +210,14 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
             id: "prop-permanent-1",
             template: "myanimenotes",
             customName: "myanimenotes",
-            order: 23,
+            order: 24,
             type: "text"
         },
         {
             id: "prop-permanent-2",
             template: "synced",
             customName: "synced",
-            order: 24,
+            order: 25,
             type: "datetime"
         }
     ]
@@ -400,6 +407,13 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
             order: 23,
             type: "number"
         },
+        {
+            id: "prop-25",
+            template: '{{time|date:"YYYY-MM-DDTHH:mm:ss"}}',
+            customName: "updated",
+            order: 24,
+            type: "datetime"
+        },
 
         // ========================================================================
         // Permanent System Properties
@@ -408,14 +422,14 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
             id: "prop-permanent-1",
             template: "myanimenotes",
             customName: "myanimenotes",
-            order: 24,
+            order: 25,
             type: "text"
         },
         {
             id: "prop-permanent-2",
             template: "synced",
             customName: "synced",
-            order: 25,
+            order: 26,
             type: "datetime"
         }
     ]
