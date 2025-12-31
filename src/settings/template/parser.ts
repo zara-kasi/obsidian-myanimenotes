@@ -11,6 +11,7 @@
 
 import type { MediaItem, AlternativeTitles } from "../../models";
 import { applyFilters } from "../../settings/template/filters";
+import { createParserState, processCharacter } from "./scanner";
 
 /**
  * Extracts variable name and filters from a template variable string.
@@ -33,31 +34,23 @@ function parseTemplateVariable(varString: string): {
     // Logic to split on the first pipe '|' that is NOT inside quotes
     // This allows filters to accept arguments with pipes if they are quoted (e.g., default:'|')
     let pipeIndex = -1;
-    let inQuotes = false;
-    let quoteChar = "";
+    const state = createParserState();
 
     for (let i = 0; i < content.length; i++) {
         const char = content[i];
 
-        // Toggle quote state
-        if (
-            (char === '"' || char === "'") &&
-            (i === 0 || content[i - 1] !== "\\") // Ignore escaped quotes
-        ) {
-            if (!inQuotes) {
-                inQuotes = true;
-                quoteChar = char;
-            } else if (char === quoteChar) {
-                inQuotes = false;
-                quoteChar = "";
-            }
-        }
-
         // Found a pipe outside of quotes -> this splits variable from filters
-        if (char === "|" && !inQuotes) {
+        if (
+            char === "|" &&
+            !state.inQuote &&
+            !state.inRegex &&
+            state.parenDepth === 0
+        ) {
             pipeIndex = i;
             break;
         }
+
+        processCharacter(char, state);
     }
 
     if (pipeIndex === -1) {

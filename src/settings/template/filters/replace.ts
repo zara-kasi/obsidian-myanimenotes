@@ -10,7 +10,7 @@ import {
     processCharacter,
     parseRegexPattern,
     processEscapedCharacters
-} from "../../../utils/parser-utils";
+} from "../scanner";
 
 const log = new logger("ReplaceFilter");
 
