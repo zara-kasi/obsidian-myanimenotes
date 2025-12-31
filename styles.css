@@ -163,8 +163,8 @@
 }
 
 .myanimenotes-drag-handle svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 .myanimenotes-drag-handle:active {
@@ -183,7 +183,19 @@
 }
 
 .myanimenotes-property-name {
+    /* Change flex-basis to auto or a smaller percentage, 
+       but keeping width helps alignment on desktop. */
+    width: 150px;
     flex: 0 0 150px;
+}
+
+/* Add a mobile media query for better UX on phones */
+@media screen and (max-width: 400px) {
+    .myanimenotes-property-name {
+        /* Allow it to shrink on mobile so the value input is still visible */
+        flex: 1;
+        min-width: 80px;
+    }
 }
 
 .myanimenotes-template-var {
@@ -196,38 +208,8 @@
     border-color: var(--interactive-accent);
 }
 
-/* Delete Button */
-.myanimenotes-delete-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-faint);
-    cursor: pointer;
-    padding: 4px;
-    flex-shrink: 0;
-}
-
-.myanimenotes-delete-button svg {
-    width: 16px;
-    height: 16px;
-}
-
 .myanimenotes-delete-button:hover {
     color: var(--text-muted);
-}
-
-/* Add Property Button */
-
-.myanimenotes-add-property-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: transparent !important;
-    line-height: 1;
-}
-
-.myanimenotes-button-icon svg {
-    display: block;
 }
 
 /* Variable Suggestion Styles */
@@ -248,16 +230,6 @@
     margin-top: 2px;
 }
 
-/* Note Content TextArea Setting - remove separator line for cleaner appearance */
-.myanimenotes-textarea-setting {
-    border-top: none !important;
-    padding-top: 0 !important;
-}
-
-.myanimenotes-textarea-setting .setting-item-info {
-    display: none; /* Hide the info column since we don't need it */
-}
-
 .myanimenotes-textarea-setting .setting-item-control {
     width: 100%;
 }
@@ -269,36 +241,6 @@
 .myanimenotes-template-textarea {
     width: 100%;
     font-family: var(--font-monospace);
-}
-
-/* Type icon styles */
-
-.myanimenotes-type-icon-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-    color: var(--text-muted);
-    border-radius: 4px;
-    transition: all 0.1s ease;
-}
-
-.myanimenotes-type-icon-button svg {
-    width: 16px;
-    height: 16px;
-}
-
-.myanimenotes-type-icon-clickable {
-    cursor: pointer;
-}
-
-.myanimenotes-type-icon-clickable:hover {
-    color: var(--text-normal);
-    background-color: var(--background-modifier-hover);
-}
-
-.myanimenotes-type-icon-readonly {
-    opacity: 0.5;
+    min-height: 175px;
+    resize: vertical; /* Allows the user to resize it manually */
 }

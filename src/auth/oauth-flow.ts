@@ -70,7 +70,7 @@ export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
 
     showNotice("Opening MyAnimeList login page…", 2000);
 
-    window.open(authUrl);
+    window.open(authUrl, "_blank");
 }
 
 /**

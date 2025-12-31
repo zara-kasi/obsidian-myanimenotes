@@ -356,7 +356,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-20",
-            template: "{{authors}}",
+            template: "{{authors|wikilink}}",
             customName: "authors",
             order: 17,
             type: "multitext"

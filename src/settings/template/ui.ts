@@ -153,7 +153,7 @@ function renderExpandableTemplate(
                 e.preventDefault();
                 const docUrl =
                     "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md";
-                window.open(docUrl);
+                window.open(docUrl, "_blank")
             });
 
         new Setting(contentContainer)
@@ -233,20 +233,17 @@ function renderExpandableTemplate(
             );
 
         // Content Template TextArea
-        new Setting(contentContainer)
-            .setClass("myanimenotes-textarea-setting")
-            .addTextArea(textarea => {
-                textarea
-                    .setPlaceholder("# {{title}}\n\n{{synopsis}}\n")
-                    .setValue(config.noteContent || "")
-                    .onChange(async value => {
-                        config.noteContent = value;
-                        await saveTemplateConfig(plugin, type, config);
-                    });
+        new Setting(contentContainer).addTextArea(textarea => {
+            textarea
+                .setPlaceholder("# {{title}}\n\n{{synopsis}}\n")
+                .setValue(config.noteContent || "")
+                .onChange(async value => {
+                    config.noteContent = value;
+                    await saveTemplateConfig(plugin, type, config);
+                });
 
-                textarea.inputEl.rows = 8;
-                textarea.inputEl.addClass("myanimenotes-template-textarea");
-            });
+            textarea.inputEl.addClass("myanimenotes-template-textarea");
+        });
     }
 }
 
@@ -315,9 +312,6 @@ function renderPropertyRow(
     const typeBtnComp = new ExtraButtonComponent(rowEl)
         .setIcon(getPropertyTypeIcon(currentType))
         .setTooltip(`Format: ${getPropertyTypeLabel(currentType)}`);
-
-    // Add a class so we can still target it with CSS if needed (e.g. margins)
-    typeBtnComp.extraSettingsEl.addClass("myanimenotes-type-icon");
 
     if (!isPermanent) {
         // Interactive state: Click to open menu

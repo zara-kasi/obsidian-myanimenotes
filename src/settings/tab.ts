@@ -243,7 +243,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 usernameLink.addEventListener("click", e => {
                     e.preventDefault();
                     const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
-                    window.open(profileUrl);
+                    window.open(profileUrl, "_blank");
                 });
             } else {
                 // Edge Case: Authenticated but missing User Info
@@ -342,7 +342,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     e.preventDefault();
                     const docUrl =
                         "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md";
-                    window.open(docUrl);
+                    window.open(docUrl, "_blank");
                 });
         }
     }
