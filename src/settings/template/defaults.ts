@@ -151,7 +151,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-11",
-            template: '{{mean|default:"Not Rated"}}',
+            template: '{{mean}}',
             customName: "score",
             order: 17,
             type: "number"
@@ -363,7 +363,7 @@ export const DEFAULT_MANGA_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-11",
-            template: '{{mean|default:"Not Rated"}}',
+            template: "{{mean}}",
             customName: "score",
             order: 18,
             type: "number"
