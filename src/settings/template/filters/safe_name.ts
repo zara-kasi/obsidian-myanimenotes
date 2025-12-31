@@ -76,6 +76,7 @@ export function safe_name(value: unknown, param?: string): string {
             sanitized = sanitized
                 // Remove invalid Windows characters: < > : " / \ | ? * and control chars
                 // Fix: Used \x2F for forward slash to avoid escape warning and added disable comment for control chars
+                // eslint-disable-next-line no-control-regex -- Control characters are not allowed in filenames
                 .replace(/[<>:"\x2F\\|?*\x00-\x1F]/g, "")
                 // Prevent Windows reserved names (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
                 .replace(
@@ -90,6 +91,7 @@ export function safe_name(value: unknown, param?: string): string {
             sanitized = sanitized
                 // Remove invalid Mac characters: / : and control chars
                 // Fix: Used \x2F for forward slash
+                // eslint-disable-next-line no-control-regex -- Control characters are not allowed in filenames
                 .replace(/[\x2F:\x00-\x1F]/g, "")
                 // Prevent leading period (hidden files)
                 .replace(/^\./, "_");
@@ -99,6 +101,7 @@ export function safe_name(value: unknown, param?: string): string {
             sanitized = sanitized
                 // Remove invalid Linux characters: / and control chars
                 // Fix: Used \x2F for forward slash
+                // eslint-disable-next-line no-control-regex -- Control characters are not allowed in filenames
                 .replace(/[\x2F\x00-\x1F]/g, "")
                 // Prevent leading period (hidden files)
                 .replace(/^\./, "_");
@@ -109,6 +112,7 @@ export function safe_name(value: unknown, param?: string): string {
             sanitized = sanitized
                 // Remove all problematic characters from all platforms
                 // Fix: Used \x2F for forward slash
+                // eslint-disable-next-line no-control-regex -- Control characters are not allowed in filenames
                 .replace(/[<>:"\x2F\\|?*:\x00-\x1F]/g, "")
                 // Prevent Windows reserved names
                 .replace(
