@@ -198,30 +198,39 @@ async function exchangeCodeForToken(
             throw new Error("No access token received from MyAnimeList");
         }
 
-        // Save tokens to settings
+        // 1. CRITICAL: Save Auth State First
+        // We save the token immediately so that even if the profile fetch fails,
+        // the user is still considered "Logged In".
         plugin.settings.malAccessToken = data.access_token;
         plugin.settings.malRefreshToken = data.refresh_token;
         plugin.settings.malTokenExpiry = Date.now() + data.expires_in * 1000;
         plugin.settings.malAuthenticated = true;
 
-        // Clear auth state (no longer needed after successful exchange)
-        plugin.settings.malAuthState = null;
-
+        plugin.settings.malAuthState = null; // Clear temp state
         await plugin.saveSettings();
 
-        showNotice("✅ Authenticated successfully!", "success", 3000);
+        showNotice("Authenticated successfully!", "success", 3000);
 
-        // Fetch user info immediately to update UI (avatar, username)
+        // 2. OPTIONAL: Attempt to fetch user profile
+        // We wrap this in a try-catch so it DOES NOT break the authentication if it fails.
+        // This effectively "automates" the manual refresh button one time right here.
         try {
             await fetchUserInfo(plugin);
-        } catch (userError) {
+            log.debug("User info auto-fetched successfully");
+        } catch (error) {
+            // If this fails, we just log it and move on.
+            // The UI will naturally show the "Refresh profile" button because
+            // plugin.settings.malUserInfo will still be undefined/null.
             log.error(
-                "Failed to fetch user info but auth succeeded",
-                userError
+                "Auto-fetch of user info failed, user can retry manually in settings",
+                error
             );
         }
 
-        // Refresh settings UI after Authentication to show the logged-in state
+        // 3. FINAL: Refresh the UI
+        // This will update the settings tab.
+        // If step 2 succeeded -> It shows the Avatar/Name.
+        // If step 2 failed    -> It shows the "Refresh profile" button (handled by tab.ts).
         plugin.refreshSettingsUI();
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);

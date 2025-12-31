@@ -151,7 +151,7 @@ export const DEFAULT_ANIME_TEMPLATE: TemplateConfig = {
         },
         {
             id: "prop-11",
-            template: '{{mean}}',
+            template: "{{mean}}",
             customName: "score",
             order: 17,
             type: "number"
