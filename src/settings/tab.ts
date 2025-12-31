@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Platform } from "obsidian";
+import { App, PluginSettingTab, Setting } from "obsidian";
 import MyAnimeNotesPlugin from "../main";
 import {
     startAuthFlow as startMALAuth,
@@ -242,26 +242,8 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
 
                 usernameLink.addEventListener("click", e => {
                     e.preventDefault();
-                    void (async () => {
-                        const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
-
-                        if (Platform.isDesktop) {
-                            if (window.require) {
-                                const { shell } = window.require(
-                                    "electron"
-                                ) as {
-                                    shell: {
-                                        openExternal: (
-                                            url: string
-                                        ) => Promise<void>;
-                                    };
-                                };
-                                await shell.openExternal(profileUrl);
-                            }
-                        } else {
-                            window.open(profileUrl, "_blank");
-                        }
-                    })();
+                    const profileUrl = `https://myanimelist.net/profile/${userInfo.name}`;
+                    window.open(profileUrl);
                 });
             } else {
                 // Edge Case: Authenticated but missing User Info
@@ -358,27 +340,9 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 })
                 .addEventListener("click", e => {
                     e.preventDefault();
-                    void (async () => {
-                        const docUrl =
-                            "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md";
-
-                        if (Platform.isDesktop) {
-                            if (window.require) {
-                                const { shell } = window.require(
-                                    "electron"
-                                ) as {
-                                    shell: {
-                                        openExternal: (
-                                            url: string
-                                        ) => Promise<void>;
-                                    };
-                                };
-                                await shell.openExternal(docUrl);
-                            }
-                        } else {
-                            window.open(docUrl, "_blank");
-                        }
-                    })();
+                    const docUrl =
+                        "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md";
+                    window.open(docUrl);
                 });
         }
     }

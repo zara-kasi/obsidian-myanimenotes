@@ -1,6 +1,6 @@
 // OAuth 2.0 authorization flow
 
-import { requestUrl, Platform } from "obsidian";
+import { requestUrl } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
 import type { MALTokenResponse, OAuthParams } from "./types";
 import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from "./constants";
@@ -70,18 +70,7 @@ export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
 
     showNotice("Opening MyAnimeList login page…", 2000);
 
-    if (Platform.isDesktop) {
-        // Desktop: Safely use Electron
-        if (window.require) {
-            const { shell } = window.require("electron") as {
-                shell: { openExternal: (url: string) => Promise<void> };
-            };
-            await shell.openExternal(authUrl);
-        }
-    } else {
-        // Mobile
-        window.open(authUrl, "_blank");
-    }
+    window.open(authUrl);
 }
 
 /**

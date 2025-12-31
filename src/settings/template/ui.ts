@@ -2,7 +2,6 @@ import {
     Setting,
     setIcon,
     normalizePath,
-    Platform,
     TextComponent,
     ExtraButtonComponent
 } from "obsidian";
@@ -152,27 +151,9 @@ function renderExpandableTemplate(
             })
             .addEventListener("click", e => {
                 e.preventDefault();
-                void (async () => {
-                    const docUrl =
-                        "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md";
-
-                    if (Platform.isDesktop) {
-                        // Desktop: Safely use Electron
-                        if (window.require) {
-                            const { shell } = window.require("electron") as {
-                                shell: {
-                                    openExternal: (
-                                        url: string
-                                    ) => Promise<void>;
-                                };
-                            };
-                            await shell.openExternal(docUrl);
-                        }
-                    } else {
-                        // Mobile
-                        window.open(docUrl, "_blank");
-                    }
-                })();
+                const docUrl =
+                    "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md";
+                window.open(docUrl);
             });
 
         new Setting(contentContainer)
