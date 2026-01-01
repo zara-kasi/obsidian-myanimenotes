@@ -47,7 +47,10 @@ export const COMMON_PROPERTIES: PropertyMetadata[] = [
     { key: "userScore", label: "User Rating", defaultName: "rating" },
     { key: "userStartDate", label: "Started Date", defaultName: "started" },
     { key: "userFinishDate", label: "Finished Date", defaultName: "finished" },
-    { key: "time", label: "Current date & time", defaultName: "updated" }
+    { key: "time", label: "Current date & time", defaultName: "updated" },
+    { key: "userPriority", label: "User Priority", defaultName: "priority" },
+    { key: "userTags", label: "User Tags", defaultName: "tags" },
+    { key: "userComments", label: "User Comments", defaultName: "comments" }
 ];
 
 /**
@@ -63,7 +66,19 @@ export const ANIME_PROPERTIES: PropertyMetadata[] = [
         defaultName: "eps_seen"
     },
     { key: "studios", label: "Studios", defaultName: "studios" },
-    { key: "duration", label: "Duration", defaultName: "duration" }
+    { key: "duration", label: "Duration", defaultName: "duration" },
+    { key: "startSeason", label: "Start Season", defaultName: "season" },
+    { key: "isRewatching", label: "Is Rewatching", defaultName: "rewatching" },
+    {
+        key: "numTimesRewatched",
+        label: "Times Rewatched",
+        defaultName: "rewatches"
+    },
+    {
+        key: "rewatchValue",
+        label: "Rewatch Value",
+        defaultName: "rewatch_value"
+    }
 ];
 
 /**
@@ -80,7 +95,15 @@ export const MANGA_PROPERTIES: PropertyMetadata[] = [
         label: "Chapters Read",
         defaultName: "chap_read"
     },
-    { key: "authors", label: "Authors", defaultName: "authors" }
+    { key: "authors", label: "Authors", defaultName: "authors" },
+
+    { key: "isRereading", label: "Is Rereading", defaultName: "rereading" },
+    {
+        key: "numTimesReread",
+        label: "Times Reread",
+        defaultName: "rereads"
+    },
+    { key: "rereadValue", label: "Reread Value", defaultName: "reread_value" }
 ];
 
 /**

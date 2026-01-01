@@ -113,6 +113,17 @@ export interface MediaItem {
     source?: string; // manga, light_novel, etc.
     studios?: Array<{ name: string }>; // production studios
     duration?: number;
+    startSeason?: { year: number; season: string }; // Airing season info
+    isRewatching?: boolean; // For anime
+    isRereading?: boolean; // For manga
+
+    userPriority?: number; // 0 = Low, 1 = Medium, 2 = High
+    userTags?: string[]; // User-defined tags
+    userComments?: string; // User's personal comments/notes
+    numTimesRewatched?: number; // For anime
+    rewatchValue?: number; // 0-5 scale
+    numTimesReread?: number; // For manga
+    rereadValue?: number; // 0-5 scale
 
     // Manga-specific
     numVolumes?: number;
@@ -170,6 +181,11 @@ export interface MALStudio {
     name: string;
 }
 
+export interface MALStartSeason {
+    year: number;
+    season: string;
+}
+
 /**
  * Represents the user's interaction with the item (score, status, progress).
  */
@@ -179,6 +195,15 @@ export interface MALListStatus {
     num_episodes_watched?: number;
     num_volumes_read?: number;
     num_chapters_read?: number;
+    is_rewatching?: boolean;
+    is_rereading?: boolean;
+    priority?: number;
+    tags?: string[];
+    comments?: string;
+    num_times_rewatched?: number;
+    rewatch_value?: number;
+    num_times_reread?: number;
+    reread_value?: number;
     start_date?: string;
     finish_date?: string;
     updated_at?: string;
@@ -205,6 +230,7 @@ export interface MALNode {
     source?: string;
     studios?: MALStudio[];
     average_episode_duration?: number;
+    start_season?: MALStartSeason;
     num_volumes?: number;
     num_chapters?: number;
     authors?: MALAuthor[];

@@ -139,14 +139,32 @@ function resolvePropertyValue(
         // Anime-specific
         numEpisodes: item.numEpisodes,
         numEpisodesWatched: item.numEpisodesWatched,
+        isRewatching:
+            item.isRewatching !== undefined
+                ? String(item.isRewatching)
+                : undefined,
         studios: item.studios?.map(s => s.name), // Extract studio names as array
         duration: item.duration,
+        startSeason: item.startSeason
+            ? `${item.startSeason.season} ${item.startSeason.year}`
+            : undefined,
 
         // Manga-specific
         numVolumes: item.numVolumes,
         numVolumesRead: item.numVolumesRead,
         numChapters: item.numChapters,
         numChaptersRead: item.numChaptersRead,
+        isRereading:
+            item.isRereading !== undefined
+                ? String(item.isRereading)
+                : undefined,
+        userPriority: item.userPriority,
+        userTags: item.userTags,
+        userComments: item.userComments,
+        numTimesRewatched: item.numTimesRewatched,
+        rewatchValue: item.rewatchValue,
+        numTimesReread: item.numTimesReread,
+        rereadValue: item.rereadValue,
         authors: item.authors
             ?.map(a => {
                 const firstName = a.firstName || "";

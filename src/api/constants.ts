@@ -43,8 +43,16 @@ const API_FIELD_MAP: Record<string, string> = {
     // Progress & History
     numEpisodesWatched: "list_status{num_episodes_watched}",
     isRewatching: "list_status{is_rewatching}",
+    isRereading: "list_status{is_rereading}",
     numVolumesRead: "list_status{num_volumes_read}",
-    numChaptersRead: "list_status{num_chapters_read}"
+    numChaptersRead: "list_status{num_chapters_read}",
+    userPriority: "list_status{priority}",
+    userTags: "list_status{tags}",
+    userComments: "list_status{comments}",
+    numTimesRewatched: "list_status{num_times_rewatched}",
+    rewatchValue: "list_status{rewatch_value}",
+    numTimesReread: "list_status{num_times_reread}",
+    rereadValue: "list_status{reread_value}"
 };
 
 /**

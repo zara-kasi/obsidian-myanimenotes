@@ -13,7 +13,8 @@ import type {
     MALAlternativeTitles,
     MALGenre,
     MALAuthor,
-    MALStudio
+    MALStudio,
+    MALStartSeason
 } from "./types";
 
 /**
@@ -182,4 +183,22 @@ export function parseStudios(
                 studio != null && studio.name != null && studio.name !== ""
         )
         .map(studio => ({ name: studio.name }));
+}
+
+/**
+ * Parses the start season information (for Anime).
+ * Returns a structured object with year and season.
+ *
+ * @param malSeason - The raw season object from MAL.
+ * @returns Simplified season object or undefined.
+ */
+export function parseStartSeason(
+    malSeason: MALStartSeason | undefined
+): { year: number; season: string } | undefined {
+    if (!malSeason || !malSeason.year || !malSeason.season) return undefined;
+
+    return {
+        year: malSeason.year,
+        season: malSeason.season
+    };
 }

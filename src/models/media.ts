@@ -13,7 +13,8 @@ import {
     parseAlternativeTitles,
     parseGenres,
     parseAuthors,
-    parseStudios
+    parseStudios,
+    parseStartSeason
 } from "./mappers";
 
 const log = new logger("ModelsMedia");
@@ -77,11 +78,18 @@ export function parseAnime(
         source: node.source,
         studios: parseStudios(node.studios),
         duration: node.average_episode_duration,
+        startSeason: parseStartSeason(node.start_season),
 
         // User list data (Watch status, score, progress)
         userStatus: listStatus ? mapUserStatus(listStatus.status) : undefined,
         userScore: listStatus?.score || 0,
         numEpisodesWatched: listStatus?.num_episodes_watched || 0,
+        isRewatching: listStatus?.is_rewatching || false,
+        userPriority: listStatus?.priority,
+        userTags: listStatus?.tags,
+        userComments: listStatus?.comments,
+        numTimesRewatched: listStatus?.num_times_rewatched || 0,
+        rewatchValue: listStatus?.rewatch_value,
         userStartDate: listStatus?.start_date,
         userFinishDate: listStatus?.finish_date,
 
@@ -148,6 +156,12 @@ export function parseManga(
         userScore: listStatus?.score || 0,
         numVolumesRead: listStatus?.num_volumes_read || 0,
         numChaptersRead: listStatus?.num_chapters_read || 0,
+        isRereading: listStatus?.is_rereading || false,
+        userPriority: listStatus?.priority,
+        userTags: listStatus?.tags,
+        userComments: listStatus?.comments,
+        numTimesReread: listStatus?.num_times_reread || 0,
+        rereadValue: listStatus?.reread_value,
         userStartDate: listStatus?.start_date,
         userFinishDate: listStatus?.finish_date,
 
