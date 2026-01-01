@@ -1,7 +1,7 @@
 import type MyAnimeNotesPlugin from "../main";
 import { logger } from "../utils/logger";
-import { ANIME_FIELDS, MANGA_FIELDS } from "./constants";
 import { makeMALRequest } from "./client";
+import { getDynamicFields } from "./constants";
 import type { MALApiResponse } from "./types";
 import type { MALItem } from "../models";
 
@@ -70,9 +70,11 @@ async function fetchAllPages(
 export async function fetchCompleteMALAnimeList(
     plugin: MyAnimeNotesPlugin
 ): Promise<MALItem[]> {
+    const fields = getDynamicFields(plugin.settings.animeTemplate);
+
     return fetchAllPages(plugin, "/users/@me/animelist", {
-        fields: ANIME_FIELDS, // Request optimized field set
-        nsfw: "true" // include NSFW titles (API default is often false)
+        fields: fields, 
+        nsfw: "true" 
     });
 }
 
@@ -87,8 +89,10 @@ export async function fetchMALAnimeByStatus(
     plugin: MyAnimeNotesPlugin,
     status: "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch"
 ): Promise<MALItem[]> {
+    const fields = getDynamicFields(plugin.settings.animeTemplate);
+
     return fetchAllPages(plugin, "/users/@me/animelist", {
-        fields: ANIME_FIELDS,
+        fields: fields,
         status,
         nsfw: "true"
     });
@@ -105,8 +109,10 @@ export async function fetchMALAnimeDetails(
     plugin: MyAnimeNotesPlugin,
     animeId: number
 ): Promise<MALApiResponse> {
+    const fields = getDynamicFields(plugin.settings.animeTemplate);
+
     return makeMALRequest(plugin, `/anime/${animeId}`, {
-        fields: ANIME_FIELDS
+        fields: fields
     });
 }
 
@@ -121,8 +127,10 @@ export async function fetchMALAnimeDetails(
 export async function fetchCompleteMALMangaList(
     plugin: MyAnimeNotesPlugin
 ): Promise<MALItem[]> {
+    const fields = getDynamicFields(plugin.settings.mangaTemplate);
+
     return fetchAllPages(plugin, "/users/@me/mangalist", {
-        fields: MANGA_FIELDS,
+        fields: fields,
         nsfw: "true"
     });
 }
@@ -137,8 +145,10 @@ export async function fetchMALMangaByStatus(
     plugin: MyAnimeNotesPlugin,
     status: "reading" | "completed" | "on_hold" | "dropped" | "plan_to_read"
 ): Promise<MALItem[]> {
+    const fields = getDynamicFields(plugin.settings.mangaTemplate);
+
     return fetchAllPages(plugin, "/users/@me/mangalist", {
-        fields: MANGA_FIELDS,
+        fields: fields,
         status,
         nsfw: "true"
     });
@@ -154,7 +164,9 @@ export async function fetchMALMangaDetails(
     plugin: MyAnimeNotesPlugin,
     mangaId: number
 ): Promise<MALApiResponse> {
+    const fields = getDynamicFields(plugin.settings.mangaTemplate);
+
     return makeMALRequest(plugin, `/manga/${mangaId}`, {
-        fields: MANGA_FIELDS
+        fields: fields
     });
 }
