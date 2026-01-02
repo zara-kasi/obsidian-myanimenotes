@@ -38,7 +38,20 @@ jobs:
               with:
                   node-version: "18"
 
-            # Step 3: Calculate new version
+            # Step 3: Install Dependencies (Moved up)
+            - name: Install dependencies
+              run: npm install
+
+            # Step 4: Run Code Quality Checks
+            # Fails the workflow here if Linting or TypeScript errors exist
+            - name: Run Code Quality Checks
+              run: |
+                  echo "🔍 Running ESLint..."
+                  npm run lint
+                  echo "🔍 Running TypeScript checks..."
+                  npm run typecheck
+
+            # Step 5: Calculate new version
             - name: Calculate new version
               id: version
               run: |
@@ -73,7 +86,7 @@ jobs:
                   echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
                   echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
 
-            # Step 4: Update manifest.json
+            # Step 6: Update manifest.json
             - name: Update manifest.json
               run: |
                   NEW_VERSION="${{ steps.version.outputs.new_version }}"
@@ -84,7 +97,7 @@ jobs:
 
                   echo "✓ Updated manifest.json to version $NEW_VERSION"
 
-            # Step 5: Update versions.json
+            # Step 7: Update versions.json
             - name: Update versions.json
               run: |
                   NEW_VERSION="${{ steps.version.outputs.new_version }}"
@@ -104,7 +117,7 @@ jobs:
 
                   echo "✓ Updated versions.json"
 
-            # Step 6: Update package.json (if exists)
+            # Step 8: Update package.json (if exists)
             - name: Update package.json
               run: |
                   NEW_VERSION="${{ steps.version.outputs.new_version }}"
@@ -117,13 +130,13 @@ jobs:
                     echo "ℹ️ package.json not found, skipping"
                   fi
 
-            # Step 7: Build the plugin
-            - name: Install dependencies and build
+            # Step 9: Build the plugin
+            - name: Build plugin
               run: |
-                  npm install
+                  # Dependencies are already installed in Step 3
                   npm run build
 
-            # Step 8: Generate release notes
+            # Step 10: Generate release notes
             - name: Generate release notes
               id: release_notes
               run: |
@@ -142,7 +155,7 @@ jobs:
                   echo "$NOTES" >> $GITHUB_OUTPUT
                   echo "EOF" >> $GITHUB_OUTPUT
 
-            # Step 9: Commit version changes
+            # Step 11: Commit version changes
             - name: Commit version changes
               run: |
                   NEW_VERSION="${{ steps.version.outputs.new_version }}"
@@ -160,7 +173,7 @@ jobs:
 
                   echo "✓ Committed version changes"
 
-            # Step 10: Create and push tag
+            # Step 12: Create and push tag
             - name: Create and push tag
               run: |
                   NEW_VERSION="${{ steps.version.outputs.new_version }}"
@@ -174,7 +187,7 @@ jobs:
 
                   echo "✓ Created and pushed tag: $NEW_VERSION"
 
-            # Step 11: Create GitHub Release
+            # Step 13: Create GitHub Release
             - name: Create GitHub Release
               uses: softprops/action-gh-release@v1
               with:
@@ -190,7 +203,7 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            # Step 12: Summary
+            # Step 14: Summary
             - name: Release Summary
               run: |
                   NEW_VERSION="${{ steps.version.outputs.new_version }}"
