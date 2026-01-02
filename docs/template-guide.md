@@ -24,68 +24,75 @@ Variables dynamically inject MyAnimeList data into your template. Type `{{` in t
 
 Available for both Anime and Manga notes.
 
-| Variable | Description |
-| :--- | :--- |
-| `{{title}}` | The official main title of the media. |
+| Variable                | Description                                                                 |
+| :---------------------- | :-------------------------------------------------------------------------- |
+| `{{title}}`             | The official main title of the media.                                       |
 | `{{alternativeTitles}}` | Full list of alternative titles (includes English, Japanese, and synonyms). |
-| `{{titleEnglish}}` | The official English title. |
-| `{{titleJapanese}}` | The original Japanese title. |
-| `{{titleSynonyms}}` | A list of other synonym titles. |
-| `{{id}}` | The unique ID assigned by MyAnimeList. |
-| `{{category}}` | The media category (e.g., 'anime' or 'manga'). |
-| `{{platform}}` | The source platform (e.g., 'myanimelist'). |
-| `{{url}}` | The URL to the MyAnimeList entry. |
-| `{{mainPicture}}` | The URL of the main cover image. |
-| `{{synopsis}}` | The plot synopsis or description. |
-| `{{mediaType}}` | The format of the media (e.g., TV, Movie, OVA). |
-| `{{status}}` | The current release status (e.g., Finished Airing, Publishing). |
-| `{{mean}}` | The global average score on MyAnimeList. |
-| `{{genres}}` | A list of associated genres and themes. |
-| `{{releasedStart}}` | The date when airing or publishing started. |
-| `{{releasedEnd}}` | The date when airing or publishing ended. |
-| `{{source}}` | The original source material (e.g., Manga, Light Novel). |
-| `{{userStatus}}` | Your current status in the list (e.g., Watching, Completed). |
-| `{{userScore}}` | The score you assigned (0-10). |
-| `{{userStartDate}}` | The date you started watching or reading. |
-| `{{userFinishDate}}` | The date you finished watching or reading. |
-| `{{time}}` | The current system date and time. |
-| `{{userPriority}}` | The priority level assigned to the entry (e.g., Low, High). |
-| `{{userTags}}` | A list of custom tags you assigned on MyAnimeList. |
-| `{{userComments}}` | Your personal comments or notes from MyAnimeList. |
+| `{{titleEnglish}}`      | The official English title.                                                 |
+| `{{titleJapanese}}`     | The original Japanese title.                                                |
+| `{{titleSynonyms}}`     | A list of other synonym titles.                                             |
+| `{{id}}`                | The unique ID assigned by MyAnimeList.                                      |
+| `{{category}}`          | The media category (e.g., 'anime' or 'manga').                              |
+| `{{platform}}`          | The source platform (e.g., 'myanimelist').                                  |
+| `{{url}}`               | The URL to the MyAnimeList entry.                                           |
+| `{{mainPicture}}`       | The URL of the main cover image.                                            |
+| `{{synopsis}}`          | The plot synopsis or description.                                           |
+| `{{mediaType}}`         | The format of the media (e.g., TV, Movie, OVA).                             |
+| `{{status}}`            | The current release status (e.g., Finished Airing, Publishing).             |
+| `{{mean}}`              | The global average score on MyAnimeList.                                    |
+| `{{genres}}`            | A list of associated genres and themes.                                     |
+| `{{releasedStart}}`     | The date when airing or publishing started.                                 |
+| `{{releasedEnd}}`       | The date when airing or publishing ended.                                   |
+| `{{source}}`            | The original source material (e.g., Manga, Light Novel).                    |
+| `{{userStatus}}`        | Your current status in the list (e.g., Watching, Completed).                |
+| `{{userScore}}`         | The score you assigned (0-10).                                              |
+| `{{userStartDate}}`     | The date you started watching or reading.                                   |
+| `{{userFinishDate}}`    | The date you finished watching or reading.                                  |
+| `{{time}}`              | The current system date and time.                                           |
+| `{{userPriority}}`      | The priority level assigned to the entry (e.g., Low, High).                 |
+| `{{userTags}}`          | A list of custom tags you assigned on MyAnimeList.                          |
+| `{{userComments}}`      | Your personal comments or notes from MyAnimeList.                           |
+| `{{rank}}`              | The ranking position on MyAnimeList (based on score).                       |
+| `{{popularity}}`        | The popularity ranking on MyAnimeList.                                      |
+| `{{numListUsers}}`      | Total number of users who have this in their list.                          |
+| `{{numScoringUsers}}`   | Total number of users who have scored this.                                 |
+| `{{nsfw}}`              | Content rating level (white, gray, or black).                               |
+| `{{createdAt}}`         | The date this entry was created on MyAnimeList.                             |
+| `{{updatedAt}}`         | The date this entry was last updated on MyAnimeList.                        |
 
 ## Anime Specific
 
-| Variable | Description |
-| :--- | :--- |
-| `{{numEpisodes}}` | The total number of episodes. |
-| `{{numEpisodesWatched}}` | The number of episodes you have watched. |
-| `{{studios}}` | A list of animation studios involved. |
-| `{{duration}}` | The average duration per episode (e.g., '24m'). |
-| `{{startSeason}}` | The season and year of the premiere (e.g., Spring 2024). |
-| `{{isRewatching}}` | Boolean indicating if you are currently rewatching. |
-| `{{numTimesRewatched}}` | The number of times you have rewatched this anime. |
-| `{{rewatchValue}}` | The rewatch value rating you assigned. |
+| Variable                 | Description                                                |
+| :----------------------- | :--------------------------------------------------------- |
+| `{{numEpisodes}}`        | The total number of episodes.                              |
+| `{{numEpisodesWatched}}` | The number of episodes you have watched.                   |
+| `{{studios}}`            | A list of animation studios involved.                      |
+| `{{duration}}`           | The average duration per episode (e.g., '24m').            |
+| `{{startSeason}}`        | The season and year of the premiere (e.g., Spring 2024).   |
+| `{{isRewatching}}`       | Boolean indicating if you are currently rewatching.        |
+| `{{numTimesRewatched}}`  | The number of times you have rewatched this anime.         |
+| `{{rewatchValue}}`       | The rewatch value rating you assigned.                     |
+| `{{broadcast}}`          | The broadcast day and time (e.g., 'Fridays at 00:00 JST'). |
+| `{{rating}}`             | The age rating (e.g., PG-13, R, R+).                       |
 
 ## Manga Specific
 
-| Variable | Description |
-| :--- | :--- |
-| `{{numVolumes}}` | The total number of volumes. |
-| `{{numVolumesRead}}` | The number of volumes you have read. |
-| `{{numChapters}}` | The total number of chapters. |
-| `{{numChaptersRead}}` | The number of chapters you have read. |
-| `{{authors}}` | A list of authors and artists. |
-| `{{isRereading}}` | Boolean indicating if you are currently rereading. |
-| `{{numTimesReread}}` | The number of times you have reread this manga. |
-| `{{rereadValue}}` | The reread value rating you assigned. |
-
+| Variable              | Description                                        |
+| :-------------------- | :------------------------------------------------- |
+| `{{numVolumes}}`      | The total number of volumes.                       |
+| `{{numVolumesRead}}`  | The number of volumes you have read.               |
+| `{{numChapters}}`     | The total number of chapters.                      |
+| `{{numChaptersRead}}` | The number of chapters you have read.              |
+| `{{authors}}`         | A list of authors and artists.                     |
+| `{{isRereading}}`     | Boolean indicating if you are currently rereading. |
+| `{{numTimesReread}}`  | The number of times you have reread this manga.    |
+| `{{rereadValue}}`     | The reread value rating you assigned.              |
 
 # 3. Filters
 
 Filters transform data before it is rendered in your note. To apply a filter, add a pipe `|` after the [variables](#2-variables) name.
 
-> **Syntax:** `{{ variable|filter:argument }}`
-> **Example:** `{{studios|wikilink}}` → `[[MAPPA]]`
+> **Syntax:** `{{ variable|filter:argument }}` > **Example:** `{{studios|wikilink}}` → `[[MAPPA]]`
 
 ## Available Filters
 
@@ -134,9 +141,8 @@ Filters transform data before it is rendered in your note. To apply a filter, ad
 
 You can combine multiple [filters](#3-filters). They run in order from left to right.
 
->  **Example:** `{{genres|wikilink|join:", "}}`
->  _Result:_ `[[Action]], [[Fantasy]]`
->  
+> **Example:** `{{genres|wikilink|join:", "}}` > _Result:_ `[[Action]], [[Fantasy]]`
+>
 > For a more comprehensive guide, please refer to the official [Obsidian Web Clipper documentation on filters](https://help.obsidian.md/web-clipper/filters). Because this plugin's filter system is modeled directly after Web Clipper's, their documentation serves as an excellent reference for understanding advanced usage and syntax.
 
 # 4. Current Limitations
@@ -145,7 +151,7 @@ You can combine multiple [filters](#3-filters). They run in order from left to r
 
 -   **No Body Autocomplete:** The [variables](#2-variables) suggestion popup currently works only in the Properties builder. You must manually type [variables](#2-variables) (e.g., `{{synopsis}}`) into the Note Content area.
 
-- **No Variable in Note location:** The current folder path settings doesn't support [variables](#2-variables).
+-   **No Variable in Note location:** The current folder path settings doesn't support [variables](#2-variables).
 
 ## Feedback & Support
 

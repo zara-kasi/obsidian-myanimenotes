@@ -14,7 +14,8 @@ import {
     parseGenres,
     parseAuthors,
     parseStudios,
-    parseStartSeason
+    parseStartSeason,
+    parseBroadcast
 } from "./mappers";
 
 const log = new logger("ModelsMedia");
@@ -79,6 +80,20 @@ export function parseAnime(
         studios: parseStudios(node.studios),
         duration: node.average_episode_duration,
         startSeason: parseStartSeason(node.start_season),
+
+        // Scoring & Ranking
+        rank: node.rank,
+        popularity: node.popularity,
+        numListUsers: node.num_list_users,
+        numScoringUsers: node.num_scoring_users,
+
+        // Broadcast & Rating
+        broadcast: parseBroadcast(node.broadcast),
+        rating: node.rating,
+        nsfw: node.nsfw,
+
+        // Metadata
+        createdAt: node.created_at,
 
         // User list data (Watch status, score, progress)
         userStatus: listStatus ? mapUserStatus(listStatus.status) : undefined,
@@ -150,6 +165,18 @@ export function parseManga(
         numVolumes: node.num_volumes,
         numChapters: node.num_chapters,
         authors: parseAuthors(node.authors),
+        
+        // Scoring & Ranking
+        rank: node.rank,
+        popularity: node.popularity,
+        numListUsers: node.num_list_users,
+        numScoringUsers: node.num_scoring_users,
+        
+        // Rating
+        nsfw: node.nsfw,
+        
+        // Metadata
+        createdAt: node.created_at,
 
         // User list data (Read status, score, progress)
         userStatus: listStatus ? mapUserStatus(listStatus.status) : undefined,

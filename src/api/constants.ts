@@ -52,7 +52,22 @@ const API_FIELD_MAP: Record<string, string> = {
     numTimesRewatched: "list_status{num_times_rewatched}",
     rewatchValue: "list_status{rewatch_value}",
     numTimesReread: "list_status{num_times_reread}",
-    rereadValue: "list_status{reread_value}"
+    rereadValue: "list_status{reread_value}",
+
+    // Scoring & Ranking
+    rank: "rank",
+    popularity: "popularity",
+    numListUsers: "num_list_users",
+    numScoringUsers: "num_scoring_users",
+
+    // Broadcast & Rating
+    broadcast: "broadcast",
+    rating: "rating",
+    nsfw: "nsfw",
+
+    // Metadata
+    createdAt: "created_at",
+    updatedAt: "updated_at"
 };
 
 /**

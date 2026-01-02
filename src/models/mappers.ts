@@ -14,7 +14,8 @@ import type {
     MALGenre,
     MALAuthor,
     MALStudio,
-    MALStartSeason
+    MALStartSeason,
+    MALBroadcast
 } from "./types";
 
 /**
@@ -200,5 +201,28 @@ export function parseStartSeason(
     return {
         year: malSeason.year,
         season: malSeason.season
+    };
+}
+
+/**
+ * Parses the broadcast information (for Anime).
+ * Returns a structured object with day and time.
+ *
+ * @param malBroadcast - The raw broadcast object from MAL.
+ * @returns Simplified broadcast object or undefined.
+ */
+export function parseBroadcast(
+    malBroadcast: MALBroadcast | undefined
+): { dayOfWeek: string; startTime: string } | undefined {
+    if (
+        !malBroadcast ||
+        !malBroadcast.day_of_the_week ||
+        !malBroadcast.start_time
+    )
+        return undefined;
+
+    return {
+        dayOfWeek: malBroadcast.day_of_the_week,
+        startTime: malBroadcast.start_time
     };
 }

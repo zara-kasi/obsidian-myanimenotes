@@ -149,6 +149,23 @@ function resolvePropertyValue(
             ? `${item.startSeason.season} ${item.startSeason.year}`
             : undefined,
 
+        // Scoring & Ranking
+        rank: item.rank,
+        popularity: item.popularity,
+        numListUsers: item.numListUsers,
+        numScoringUsers: item.numScoringUsers,
+
+        // Broadcast & Rating
+        broadcast: item.broadcast
+            ? `${item.broadcast.dayOfWeek}s at ${item.broadcast.startTime}`
+            : undefined,
+        rating: item.rating,
+        nsfw: item.nsfw,
+
+        // Metadata
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+
         // Manga-specific
         numVolumes: item.numVolumes,
         numVolumesRead: item.numVolumesRead,

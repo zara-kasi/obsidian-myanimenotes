@@ -114,6 +114,20 @@ export interface MediaItem {
     studios?: Array<{ name: string }>; // production studios
     duration?: number;
     startSeason?: { year: number; season: string }; // Airing season info
+
+    // Scoring & Ranking
+    rank?: number;
+    popularity?: number;
+    numListUsers?: number;
+    numScoringUsers?: number;
+
+    // Broadcast & Rating
+    broadcast?: { dayOfWeek: string; startTime: string };
+    rating?: string; // Age rating (e.g., "pg_13", "r")
+    nsfw?: string; // Content rating: "white", "gray", "black"
+
+    // Metadata
+    createdAt?: string;
     isRewatching?: boolean; // For anime
     isRereading?: boolean; // For manga
 
@@ -185,6 +199,10 @@ export interface MALStartSeason {
     year: number;
     season: string;
 }
+export interface MALBroadcast {
+    day_of_the_week?: string;
+    start_time?: string;
+}
 
 /**
  * Represents the user's interaction with the item (score, status, progress).
@@ -231,6 +249,21 @@ export interface MALNode {
     studios?: MALStudio[];
     average_episode_duration?: number;
     start_season?: MALStartSeason;
+
+    // Scoring & Ranking
+    rank?: number;
+    popularity?: number;
+    num_list_users?: number;
+    num_scoring_users?: number;
+
+    // Broadcast & Rating
+    broadcast?: MALBroadcast;
+    rating?: string;
+    nsfw?: string;
+
+    // Metadata
+    created_at?: string;
+    updated_at?: string;
     num_volumes?: number;
     num_chapters?: number;
     authors?: MALAuthor[];

@@ -138,6 +138,41 @@ export const COMMON_PROPERTIES: PropertyMetadata[] = [
         key: "userComments",
         label: "Your personal comments or notes from MyAnimeList.",
         defaultName: "comments"
+    },
+    {
+        key: "rank",
+        label: "The ranking position on MyAnimeList (based on score).",
+        defaultName: "rank"
+    },
+    {
+        key: "popularity",
+        label: "The popularity ranking on MyAnimeList.",
+        defaultName: "popularity"
+    },
+    {
+        key: "numListUsers",
+        label: "Total number of users who have this in their list.",
+        defaultName: "list_users"
+    },
+    {
+        key: "numScoringUsers",
+        label: "Total number of users who have scored this.",
+        defaultName: "scoring_users"
+    },
+    {
+        key: "nsfw",
+        label: "Content rating level (white, gray, or black).",
+        defaultName: "nsfw"
+    },
+    {
+        key: "createdAt",
+        label: "The date this entry was created on MyAnimeList.",
+        defaultName: "created"
+    },
+    {
+        key: "updatedAt",
+        label: "The date this entry was last updated on MyAnimeList.",
+        defaultName: "modified"
     }
 ];
 
@@ -186,6 +221,16 @@ export const ANIME_PROPERTIES: PropertyMetadata[] = [
         key: "rewatchValue",
         label: "The rewatch value rating you assigned.",
         defaultName: "rewatch_value"
+    },
+    {
+        key: "broadcast",
+        label: "The broadcast day and time (e.g., 'Fridays at 00:00 JST').",
+        defaultName: "broadcast"
+    },
+    {
+        key: "rating",
+        label: "The age rating (e.g., PG-13, R, R+).",
+        defaultName: "age_rating"
     }
 ];
 

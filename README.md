@@ -1,4 +1,3 @@
-
 ![MyAnimeNotes_image](assets/MyAnimeNotes_image.webp)
 
 MyAnimeNotes is an [Obsidian](https://obsidian.md/) plugin that syncs your anime and manga lists from [MyAnimeList](https://myanimelist.net/) into structured Markdown notes, complete with metadata, cover image, and automatic updates.
@@ -17,7 +16,7 @@ If you'd like to help improve this plugin, see [CONTRIBUTING](./CONTRIBUTING.md)
 
 You can also report bugs or suggest new features in the [Issues](https://github.com/zara-kasi/obsidian-myanimenotes/issues) section.
 
-For details on data handling, privacy, and compliance with MyAnimeList’s API terms, see the 
+For details on data handling, privacy, and compliance with MyAnimeList’s API terms, see the
 [Privacy, Data Use & API Compliance Policy](./COMPLIANCE.md).
 
 License: [MIT License](./LICENSE)
