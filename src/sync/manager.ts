@@ -152,6 +152,13 @@ export class SyncManager {
             // Perform sync
             const { items, result } = await syncMAL(this.plugin, options);
 
+            // CRITICAL FIX: Check if sync actually succeeded before proceeding
+            if (!result.success) {
+                // Sync failed - don't save timestamp, don't show success notice
+                log.error("Sync failed - not updating last sync time");
+                return { items, result };
+            }
+
             // Save to vault if enabled
             let savedPaths: { anime: string[]; manga: string[] } | undefined;
 
@@ -182,12 +189,12 @@ export class SyncManager {
                 }
             }
 
-            // Update last sync time and save to settings
+            // Update last sync time and save to settings ONLY on success
             this.lastSyncTime = Date.now();
             this.plugin.settings.lastSuccessfulSync = this.lastSyncTime;
             await this.plugin.saveSettings();
 
-            // Sync success notice
+            // Show success notice ONLY when sync actually succeeded
             showNotice("MAL sync completed", "success");
 
             return { items, result, savedPaths };
