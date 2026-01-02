@@ -11,7 +11,11 @@ After authenticating, use the Command Palette and run `MyAnimeNotes: Sync all fr
 
 ### Contributing
 
-If you'd like to help improve this plugin, see [CONTRIBUTING](./CONTRIBUTING.md) for development instructions. You can also report bugs or suggest new features in the [Issues](https://github.com/zara-kasi/obsidian-myanimenotes/issues) section.
+If you'd like to help improve this plugin, see [CONTRIBUTING](./CONTRIBUTING.md) for development instructions.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zara-kasi/obsidian-myanimenotes)
+
+You can also report bugs or suggest new features in the [Issues](https://github.com/zara-kasi/obsidian-myanimenotes/issues) section.
 
 For details on data handling, privacy, and compliance with MyAnimeList’s API terms, see the 
 [Privacy, Data Use & API Compliance Policy](./COMPLIANCE.md).

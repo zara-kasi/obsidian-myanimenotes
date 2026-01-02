@@ -6,7 +6,9 @@ import {
     ExtraButtonComponent
 } from "obsidian";
 import type MyAnimeNotesPlugin from "../../main";
-import { FolderSuggest, VariableSuggest } from "./suggesters";
+import { FolderSuggest } from "./suggesters/folder";
+import { VariableSuggest } from "./suggesters/variable";
+import { FilterSuggest } from "./suggesters/filter";
 import { TemplateConfig, PropertyItem } from "./types";
 import {
     DEFAULT_ANIME_TEMPLATE,
@@ -153,16 +155,17 @@ function renderExpandableTemplate(
                 e.preventDefault();
                 const docUrl =
                     "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/template-guide.md";
-                window.open(docUrl, "_blank")
+                window.open(docUrl, "_blank");
             });
 
         new Setting(contentContainer)
             .setName("Note name")
             .setDesc(fileNameDesc)
             .addText(text => {
-                // Attach the VariableSuggest to allow autocomplete of {{variables}}
+                // Attach the suggesters to allow autocomplete
                 const variables = getAvailableProperties(type);
                 new VariableSuggest(plugin.app, text.inputEl, variables);
+                new FilterSuggest(plugin.app, text.inputEl);
 
                 text.setPlaceholder("{{title}}")
                     .setValue(config.fileName || "{{title}}")
@@ -371,9 +374,10 @@ function renderPropertyRow(
         });
     }
 
-    // Attach Variable Suggester to the TextComponent's input element
+    // Attach Suggester to the TextComponent's input element
     const variables = getAvailableProperties(type);
     new VariableSuggest(plugin.app, templateInputComp.inputEl, variables);
+    new FilterSuggest(plugin.app, templateInputComp.inputEl);
 
     // --- Delete Button (Native ExtraButtonComponent) ---
     if (!isPermanent) {

@@ -212,24 +212,6 @@
     color: var(--text-muted);
 }
 
-/* Variable Suggestion Styles */
-.myanimenotes-variable-suggestion {
-    padding: 4px 8px;
-}
-
-.myanimenotes-variable-key {
-    font-family: var(--font-monospace);
-    font-weight: 500;
-    color: var(--text-normal);
-    font-size: var(--font-ui-small);
-}
-
-.myanimenotes-variable-label {
-    font-size: var(--font-ui-smaller);
-    color: var(--text-muted);
-    margin-top: 2px;
-}
-
 .myanimenotes-textarea-setting .setting-item-control {
     width: 100%;
 }
@@ -243,4 +225,59 @@
     font-family: var(--font-monospace);
     min-height: 175px;
     resize: vertical; /* Allows the user to resize it manually */
+}
+
+/* ========================================================================
+   Variable Suggestion Styles
+   ======================================================================== */
+.myanimenotes-variable-suggestion {
+    padding: 4px 8px;
+}
+
+.myanimenotes-variable-key {
+    font-family: var(--font-monospace);
+    font-weight: bold; /* Changed to bold */
+    color: var(--text-accent); /* Changed to accent color */
+    font-size: var(--font-ui-small);
+}
+
+.myanimenotes-variable-label {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ========================================================================
+   Filter Suggestion Styles
+   ======================================================================== */
+.myanimenotes-filter-suggestion {
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.myanimenotes-filter-header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.myanimenotes-filter-name {
+    font-weight: bold;
+    color: var(--text-accent);
+    font-size: var(--font-ui-small);
+}
+
+.myanimenotes-filter-hint {
+    font-family: var(--font-monospace);
+    font-size: 0.85em;
+    opacity: 0.7;
+    color: var(--text-muted);
+}
+
+.myanimenotes-filter-desc {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    line-height: 1.2;
 }

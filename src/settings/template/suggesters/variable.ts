@@ -103,13 +103,13 @@ export class VariableSuggest extends AbstractInputSuggest<PropertyMetadata> {
             cls: "myanimenotes-variable-suggestion"
         });
 
-        // Main text: The actual variable key (e.g., "title")
+        // Main text: The actual variable key
         container.createDiv({
             cls: "myanimenotes-variable-key",
             text: variable.key
         });
 
-        // Subtext: The description (e.g., "Media Title")
+        // Subtext: The description
         container.createDiv({
             cls: "myanimenotes-variable-label",
             text: variable.label
