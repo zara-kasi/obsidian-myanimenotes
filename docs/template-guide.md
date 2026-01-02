@@ -24,43 +24,61 @@ Variables dynamically inject MyAnimeList data into your template. Type `{{` in t
 
 Available for both Anime and Manga notes.
 
-| Variable                | Description                                       |
-| :---------------------- | :------------------------------------------------ |
-| `{{title}}`             | Main title.                                       |
-| `{{alternativeTitles}}` | List of aliases (English, Japanese, Synonyms).    |
-| `{{id}}`                | MyAnimeList ID.                                   |
-| `{{url}}`               | Link to the MAL page.                             |
-| `{{mainPicture}}`       | URL to the cover image.                           |
-| `{{synopsis}}`          | Description/Summary.                              |
-| `{{mean}}`              | Global average score.                             |
-| `{{genres}}`            | List of genres.                                   |
-| `{{mediaType}}`         | Media format (e.g., TV, Movie, OVA).              |
-| `{{source}}`            | Source material (e.g., Manga, Light Novel).       |
-| `{{status}}`            | Publication status (e.g., "Finished Airing").     |
-| `{{userStatus}}`        | Your list status (e.g., "watching", "completed"). |
-| `{{userScore}}`         | Your personal rating.                             |
-| `{{userStartDate}}`     | Date you started.                                 |
-| `{{userFinishDate}}`    | Date you finished.                                |
-| `{{time}}`              | Current date and time.                            |
+| Variable | Description |
+| :--- | :--- |
+| `{{title}}` | The official main title of the media. |
+| `{{alternativeTitles}}` | Full list of alternative titles (includes English, Japanese, and synonyms). |
+| `{{titleEnglish}}` | The official English title. |
+| `{{titleJapanese}}` | The original Japanese title. |
+| `{{titleSynonyms}}` | A list of other synonym titles. |
+| `{{id}}` | The unique ID assigned by MyAnimeList. |
+| `{{category}}` | The media category (e.g., 'anime' or 'manga'). |
+| `{{platform}}` | The source platform (e.g., 'myanimelist'). |
+| `{{url}}` | The URL to the MyAnimeList entry. |
+| `{{mainPicture}}` | The URL of the main cover image. |
+| `{{synopsis}}` | The plot synopsis or description. |
+| `{{mediaType}}` | The format of the media (e.g., TV, Movie, OVA). |
+| `{{status}}` | The current release status (e.g., Finished Airing, Publishing). |
+| `{{mean}}` | The global average score on MyAnimeList. |
+| `{{genres}}` | A list of associated genres and themes. |
+| `{{releasedStart}}` | The date when airing or publishing started. |
+| `{{releasedEnd}}` | The date when airing or publishing ended. |
+| `{{source}}` | The original source material (e.g., Manga, Light Novel). |
+| `{{userStatus}}` | Your current status in the list (e.g., Watching, Completed). |
+| `{{userScore}}` | The score you assigned (0-10). |
+| `{{userStartDate}}` | The date you started watching or reading. |
+| `{{userFinishDate}}` | The date you finished watching or reading. |
+| `{{time}}` | The current system date and time. |
+| `{{userPriority}}` | The priority level assigned to the entry (e.g., Low, High). |
+| `{{userTags}}` | A list of custom tags you assigned on MyAnimeList. |
+| `{{userComments}}` | Your personal comments or notes from MyAnimeList. |
 
 ## Anime Specific
 
-| Variable                 | Description                     |
-| :----------------------- | :------------------------------ |
-| `{{numEpisodes}}`        | Total number of episodes.       |
-| `{{numEpisodesWatched}}` | Episodes watched count.         |
-| `{{studios}}`            | List of animation studios.      |
-| `{{duration}}`           | Episode duration (e.g., "24m"). |
+| Variable | Description |
+| :--- | :--- |
+| `{{numEpisodes}}` | The total number of episodes. |
+| `{{numEpisodesWatched}}` | The number of episodes you have watched. |
+| `{{studios}}` | A list of animation studios involved. |
+| `{{duration}}` | The average duration per episode (e.g., '24m'). |
+| `{{startSeason}}` | The season and year of the premiere (e.g., Spring 2024). |
+| `{{isRewatching}}` | Boolean indicating if you are currently rewatching. |
+| `{{numTimesRewatched}}` | The number of times you have rewatched this anime. |
+| `{{rewatchValue}}` | The rewatch value rating you assigned. |
 
 ## Manga Specific
 
-| Variable              | Description          |
-| :-------------------- | :------------------- |
-| `{{numVolumes}}`      | Total volumes.       |
-| `{{numVolumesRead}}`  | Volumes read count.  |
-| `{{numChapters}}`     | Total chapters.      |
-| `{{numChaptersRead}}` | Chapters read count. |
-| `{{authors}}`         | List of authors.     |
+| Variable | Description |
+| :--- | :--- |
+| `{{numVolumes}}` | The total number of volumes. |
+| `{{numVolumesRead}}` | The number of volumes you have read. |
+| `{{numChapters}}` | The total number of chapters. |
+| `{{numChaptersRead}}` | The number of chapters you have read. |
+| `{{authors}}` | A list of authors and artists. |
+| `{{isRereading}}` | Boolean indicating if you are currently rereading. |
+| `{{numTimesReread}}` | The number of times you have reread this manga. |
+| `{{rereadValue}}` | The reread value rating you assigned. |
+
 
 # 3. Filters
 

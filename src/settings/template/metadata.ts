@@ -9,48 +9,136 @@ import type { PropertyMetadata } from "./types";
  * 3. The user-friendly labels shown in the settings UI.
  */
 export const COMMON_PROPERTIES: PropertyMetadata[] = [
-    { key: "title", label: "Title", defaultName: "title" },
+    {
+        key: "title",
+        label: "The official main title of the media.",
+        defaultName: "title"
+    },
     {
         key: "alternativeTitles",
-        label: "Alternative Titles",
+        label: "Full list of alternative titles (includes English, Japanese, and synonyms).",
         defaultName: "aliases"
     },
     {
         key: "titleEnglish",
-        label: "English Title",
+        label: "The official English title.",
         defaultName: "title_en"
     },
     {
         key: "titleJapanese",
-        label: "Japanese Title",
+        label: "The original Japanese title.",
         defaultName: "title_ja"
     },
     {
         key: "titleSynonyms",
-        label: "Synonyms",
+        label: "A list of other synonym titles.",
         defaultName: "synonyms"
     },
-    { key: "id", label: "Media ID", defaultName: "id" },
-    { key: "category", label: "Category", defaultName: "category" },
-    { key: "platform", label: "Platform", defaultName: "platform" },
-    { key: "url", label: "Source URL", defaultName: "source" },
-    { key: "mainPicture", label: "Cover Image", defaultName: "image" },
-    { key: "synopsis", label: "Synopsis", defaultName: "description" },
-    { key: "mediaType", label: "Media Type", defaultName: "media" },
-    { key: "status", label: "Status", defaultName: "state" },
-    { key: "mean", label: "Average Score", defaultName: "score" },
-    { key: "genres", label: "Genres & Themes", defaultName: "genres" },
-    { key: "releasedStart", label: "Released Start", defaultName: "released" },
-    { key: "releasedEnd", label: "Released End", defaultName: "ended" },
-    { key: "source", label: "Source Material", defaultName: "origin" },
-    { key: "userStatus", label: "User Status", defaultName: "status" },
-    { key: "userScore", label: "User Rating", defaultName: "rating" },
-    { key: "userStartDate", label: "Started Date", defaultName: "started" },
-    { key: "userFinishDate", label: "Finished Date", defaultName: "finished" },
-    { key: "time", label: "Current date & time", defaultName: "updated" },
-    { key: "userPriority", label: "User Priority", defaultName: "priority" },
-    { key: "userTags", label: "User Tags", defaultName: "tags" },
-    { key: "userComments", label: "User Comments", defaultName: "comments" }
+    {
+        key: "id",
+        label: "The unique ID assigned by MyAnimeList.",
+        defaultName: "id"
+    },
+    {
+        key: "category",
+        label: "The media category (e.g., 'anime' or 'manga').",
+        defaultName: "category"
+    },
+    {
+        key: "platform",
+        label: "The source platform (e.g., 'MyAnimeList').",
+        defaultName: "platform"
+    },
+    {
+        key: "url",
+        label: "The URL to the MyAnimeList entry.",
+        defaultName: "source"
+    },
+    {
+        key: "mainPicture",
+        label: "The URL of the main cover image.",
+        defaultName: "image"
+    },
+    {
+        key: "synopsis",
+        label: "The plot synopsis or description.",
+        defaultName: "description"
+    },
+    {
+        key: "mediaType",
+        label: "The format of the media (e.g., TV, Movie, OVA).",
+        defaultName: "media"
+    },
+    {
+        key: "status",
+        label: "The current release status (e.g., Finished Airing, Publishing).",
+        defaultName: "state"
+    },
+    {
+        key: "mean",
+        label: "The global average score on MyAnimeList.",
+        defaultName: "score"
+    },
+    {
+        key: "genres",
+        label: "A list of associated genres and themes.",
+        defaultName: "genres"
+    },
+    {
+        key: "releasedStart",
+        label: "The date when airing or publishing started.",
+        defaultName: "released"
+    },
+    {
+        key: "releasedEnd",
+        label: "The date when airing or publishing ended.",
+        defaultName: "ended"
+    },
+    {
+        key: "source",
+        label: "The original source material (e.g., Manga, Light Novel).",
+        defaultName: "origin"
+    },
+    {
+        key: "userStatus",
+        label: "Your current status in the list (e.g., Watching, Completed).",
+        defaultName: "status"
+    },
+    {
+        key: "userScore",
+        label: "The score you assigned (0-10).",
+        defaultName: "rating"
+    },
+    {
+        key: "userStartDate",
+        label: "The date you started watching or reading.",
+        defaultName: "started"
+    },
+    {
+        key: "userFinishDate",
+        label: "The date you finished watching or reading.",
+        defaultName: "finished"
+    },
+    {
+        key: "time",
+        label: "The current system date and time.",
+        defaultName: "updated"
+    },
+    {
+        key: "userPriority",
+        label: "The priority level assigned to the entry (e.g., Low, High).",
+        defaultName: "priority"
+    },
+    {
+        key: "userTags",
+        label: "A list of custom tags you assigned on MyAnimeList.",
+        defaultName: "tags"
+    },
+    {
+        key: "userComments",
+        label: "Your personal comments or notes from MyAnimeList.",
+        defaultName: "comments"
+    }
 ];
 
 /**
@@ -59,24 +147,44 @@ export const COMMON_PROPERTIES: PropertyMetadata[] = [
  */
 export const ANIME_PROPERTIES: PropertyMetadata[] = [
     ...COMMON_PROPERTIES,
-    { key: "numEpisodes", label: "Total Episodes", defaultName: "episodes" },
+    {
+        key: "numEpisodes",
+        label: "The total number of episodes.",
+        defaultName: "episodes"
+    },
     {
         key: "numEpisodesWatched",
-        label: "Episodes Watched",
+        label: "The number of episodes you have watched.",
         defaultName: "eps_seen"
     },
-    { key: "studios", label: "Studios", defaultName: "studios" },
-    { key: "duration", label: "Duration", defaultName: "duration" },
-    { key: "startSeason", label: "Start Season", defaultName: "season" },
-    { key: "isRewatching", label: "Is Rewatching", defaultName: "rewatching" },
+    {
+        key: "studios",
+        label: "A list of animation studios involved.",
+        defaultName: "studios"
+    },
+    {
+        key: "duration",
+        label: "The average duration per episode (e.g., '24m').",
+        defaultName: "duration"
+    },
+    {
+        key: "startSeason",
+        label: "The season and year of the premiere (e.g., Spring 2024).",
+        defaultName: "season"
+    },
+    {
+        key: "isRewatching",
+        label: "Boolean indicating if you are currently rewatching.",
+        defaultName: "rewatching"
+    },
     {
         key: "numTimesRewatched",
-        label: "Times Rewatched",
+        label: "The number of times you have rewatched this anime.",
         defaultName: "rewatches"
     },
     {
         key: "rewatchValue",
-        label: "Rewatch Value",
+        label: "The rewatch value rating you assigned.",
         defaultName: "rewatch_value"
     }
 ];
@@ -87,23 +195,47 @@ export const ANIME_PROPERTIES: PropertyMetadata[] = [
  */
 export const MANGA_PROPERTIES: PropertyMetadata[] = [
     ...COMMON_PROPERTIES,
-    { key: "numVolumes", label: "Total Volumes", defaultName: "volumes" },
-    { key: "numVolumesRead", label: "Volumes Read", defaultName: "vol_read" },
-    { key: "numChapters", label: "Total Chapters", defaultName: "chapters" },
+    {
+        key: "numVolumes",
+        label: "The total number of volumes.",
+        defaultName: "volumes"
+    },
+    {
+        key: "numVolumesRead",
+        label: "The number of volumes you have read.",
+        defaultName: "vol_read"
+    },
+    {
+        key: "numChapters",
+        label: "The total number of chapters.",
+        defaultName: "chapters"
+    },
     {
         key: "numChaptersRead",
-        label: "Chapters Read",
+        label: "The number of chapters you have read.",
         defaultName: "chap_read"
     },
-    { key: "authors", label: "Authors", defaultName: "authors" },
+    {
+        key: "authors",
+        label: "A list of authors and artists.",
+        defaultName: "authors"
+    },
 
-    { key: "isRereading", label: "Is Rereading", defaultName: "rereading" },
+    {
+        key: "isRereading",
+        label: "Boolean indicating if you are currently rereading.",
+        defaultName: "rereading"
+    },
     {
         key: "numTimesReread",
-        label: "Times Reread",
+        label: "The number of times you have reread this manga.",
         defaultName: "rereads"
     },
-    { key: "rereadValue", label: "Reread Value", defaultName: "reread_value" }
+    {
+        key: "rereadValue",
+        label: "The reread value rating you assigned.",
+        defaultName: "reread_value"
+    }
 ];
 
 /**
