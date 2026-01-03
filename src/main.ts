@@ -72,15 +72,10 @@ export default class MyAnimeNotesPlugin extends Plugin {
 
         // Add a clickable icon to the Obsidian ribbon to trigger a manual sync of all lists.
 
-        this.addRibbonIcon(
-            "origami",
-            // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MyAnimeNotes" is the plugin name
-            "MyAnimeNotes sync all",
-            async () => {
-                if (!this.syncManager) return;
-                await this.syncManager.syncFromMAL();
-            }
-        );
+        this.addRibbonIcon("origami", "Myanimenotes sync all", async () => {
+            if (!this.syncManager) return;
+            await this.syncManager.syncFromMAL();
+        });
 
         // Initialize and add the settings tab to the plugin configuration UI.
         this.settingsTab = new MyAnimeNotesSettingTab(this.app, this);

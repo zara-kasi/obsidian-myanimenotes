@@ -204,8 +204,7 @@ function renderExpandableTemplate(
             .setName("Properties")
 
             .setDesc(
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MAL" is an acronym
-                "Properties to add to the top of the media note. Use variables to populate data from the MAL API."
+                "Properties to add to the top of the media note. Use variables to populate data from the mal API."
             );
 
         // Properties list container (target for re-rendering list items)
@@ -235,8 +234,7 @@ function renderExpandableTemplate(
             .setName("Note content")
 
             .setDesc(
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MAL" is an acronym
-                "Customize the content of the note. Use variables to populate data from the MAL API."
+                "Customize the content of the note. Use variables to populate data from the mal API."
             );
 
         // Content Template TextArea

@@ -182,8 +182,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName("Custom app")
             .setDesc(
-                // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MAL" is an acronym
-                "Use your own MAL app for authentication instead of the built-in one."
+                "Use your own mal app for authentication instead of the built-in one."
             )
             .addToggle(toggle =>
                 toggle
@@ -335,8 +334,8 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 // 2. Add Text Input (Masked)
                 clientIdSetting.addText(text => {
                     text.setPlaceholder(
-                        // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Client ID" is a standard acronym/proper myanimenotes-button-container
-                        "Enter Client ID"
+                       
+                        "Enter client ID"
                     )
                         .setValue(this.plugin.settings.malClientId)
                         .onChange(async value => {
@@ -353,9 +352,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
             // Login Button (Always Visible)
             new Setting(container).addButton(button => {
                 button
-
-                    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MyAnimeList" is a proper noun
-                    .setButtonText("Login with MyAnimeList")
+                    .setButtonText("Login")
                     .setCta()
                     .onClick(async () => {
                         await startMALAuth(this.plugin);
