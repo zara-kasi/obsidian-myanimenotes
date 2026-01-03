@@ -16,10 +16,10 @@
 
 > ⚠️ The Redirect URI must be exactly `obsidian://myanimenotes-auth/mal`, or authentication will fail.
 
-3. Click **Save** and copy your **Client ID** and **Client Secret**.
+3. Click **Save** and copy your **Client ID**.
 4. Open Obsidian **Settings** → **MyAnimeNotes**
-5. Enter your **Client ID** and **Client Secret**
-6. Click **Authenticate** and sign in via your browser
+5. Enter your **Client ID**
+6. Click **Login with MyAnimeList** and sign in via your browser
 
 # Screenshots
 
