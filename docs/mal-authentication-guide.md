@@ -19,7 +19,7 @@
 3. Click **Save** and copy your **Client ID**.
 4. Open Obsidian **Settings** → **MyAnimeNotes**
 5. Enter your **Client ID**
-6. Click **Login with MyAnimeList** and sign in via your browser
+6. Click **Login** and sign in via your browser
 
 # Screenshots
 

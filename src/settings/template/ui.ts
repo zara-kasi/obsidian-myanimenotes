@@ -144,7 +144,7 @@ function renderExpandableTemplate(
         // 1 File Name Format Setting
         const fileNameDesc = document.createDocumentFragment();
         fileNameDesc.createSpan({
-            text: "Format for the file name of the note. You can use variables to pre-populate data from the MAL API. "
+            text: "Format for the file name of the note. You can use variables to pre-populate data from the mal API. "
         });
         fileNameDesc
             .createEl("a", {

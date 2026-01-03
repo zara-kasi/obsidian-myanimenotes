@@ -153,6 +153,8 @@ You can combine multiple [filters](#3-filters). They run in order from left to r
 
 -   **No Variable in Note location:** The current folder path settings doesn't support [variables](#2-variables).
 
+- **Limited Multi-Language Support:**  The title case filter is English-specific and doesn't support multi-language title casing.
+
 ## Feedback & Support
 
 If you encounter any issues or notice missing features, please [open an issue on GitHub](https://github.com/zara-kasi/obsidian-myanimenotes/issues).

@@ -1,55 +1,84 @@
-# MyAnimeNotes: Privacy, Data Use & API Compliance
+# MyAnimeNotes: API Compliance & Terms of Use
 
-MyAnimeNotes is an open-source Obsidian plugin that syncs anime and manga lists from [MyAnimeList.net](https://myanimelist.net) into local Markdown files.  
-It runs entirely on the user’s device and does not use any external servers or services.
+**MyAnimeNotes** is an open-source Obsidian plugin designed to synchronize anime and manga tracking lists. This document outlines the plugin's strict adherence to the [MyAnimeList API License & Developer Agreement](https://myanimelist.net/static/apiagreement.html).
 
----
-
-## Data Handling
-
-- **Authentication:** Uses the official MyAnimeList OAuth 2.0 or a Client ID for public data. Tokens are stored locally in Obsidian and never shared.  
-- **Requests:** Communicates directly with `api.myanimelist.net` over HTTPS.  
-- **Storage:** Data retrieved from MAL is written to Markdown files inside the user’s Obsidian vault.  
-- **Transmission:** No data is ever sent to any third party or stored remotely.
+For details regarding data handling and user privacy, please refer to our separate **[Privacy Policy](./PRIVACY.md)**.
 
 ---
 
-## Compliance with MyAnimeList Terms
+## 1. Compliance with Data Storage Terms
 
-MyAnimeNotes's design and operation are guided by the requirements outlined in the [MyAnimeList API License & Developer Agreement](https://myanimelist.net/static/apiagreement.html).
+The architecture of MyAnimeNotes is legally grounded in **Section 3(c)** of the MyAnimeList API Agreement, which distinguishes between prohibited server-side storage and permitted client-side storage.
 
-The core of MyAnimeNotes's compliance rests on the following clause regarding data storage:
+### The "Client-Side" Distinction
 
-> “You may not maintain, store or process any MyAnimeList Content that consists of personal information of MyAnimeList users... On the server-side of Your Applications, but Your Applications may... Store such information and content on the client-side.”
+The API Agreement states:
 
-This clause makes a critical distinction: it forbids storing personal user data on a server but explicitly permits storing it on the client-side (the user's device). The agreement uses the broad term "store," which legally covers both temporary caching and the persistent local storage that MyAnimeNotes requires to function as a personal knowledge base.
+> “You may not maintain, store or process any MyAnimeList Content... On the server-side of Your Applications, but Your Applications may... **Store such information and content on the client-side.**”
 
-As MyAnimeNotes's primary function is to create a durable, offline-first personal record of a user's media history within Obsidian, this persistent local storage is "reasonably necessary for the proper functioning" of the plugin, fully aligning with the terms.
+**MyAnimeNotes operates exclusively on the client-side.**
 
-- **Local Storage:** All operations are limited to the user’s device.
-- **Personal Use:** MyAnimeNotes is free, open-source, and intended for individual, non-commercial use, as defined in the agreement.
-- **Redistribution:** The plugin has no features for uploading, publishing, or sharing MAL data.
-- **Retention:** Data is stored locally on the user's device as a persistent, personal reference, which is the plugin's primary function.
+-   The plugin runs inside **Obsidian**, a local desktop/mobile application.
+-   Data retrieved from the API is stored directly onto the user's physical device (local file system) within their Obsidian Vault.
+-   **No Intermediary Servers:** There is no "MyAnimeNotes Server." The developer maintains no backend infrastructure, database, or cache that stores user data.
 
-> For more detail compliance analysis see this [MAL Compliance Analysis](./docs/mal-compliance-analysis.md)
-
-## User Responsibilities
-
-- Use MyAnimeNotes only for personal, non-commercial purposes.  
-- Do not share or publish Markdown files containing MAL data.  
-- Avoid using the plugin for automated redistribution or public exposure of MAL content.
+This local storage is reasonably necessary for the proper functioning of the Application as a personal, offline-first knowledge base.
 
 ---
 
-## Attribution
+## 2. Non-Commercial Classification
 
-All anime and manga data are sourced from [MyAnimeList.net](https://myanimelist.net).  
-MyAnimeNotes is an independent project and is not affiliated with or endorsed by MyAnimeList Co., Ltd.  
-All trademarks and content belong to their respective owners.
+MyAnimeNotes is classified as a **"Non-Commercial Application"** under **Section 1(i)** of the Agreement.
+
+-   **Open Source:** The project is licensed under the **MIT License** and source code is publicly available.
+-   **No Monetization:** The plugin contains no advertisements, subscription fees, premium unlocks, or "pay-to-win" features.
+-   **Community Focused:** It is developed voluntarily for the Obsidian and Anime communities.
 
 ---
 
-## References
+## 3. API Usage Standards
 
-- [MyAnimeList API License & Developer Agreement](https://myanimelist.net/static/apiagreement.html)  
-- [Official MAL API Club Page](https://myanimelist.net/clubs.php?cid=13727)
+The plugin adheres to the operational restrictions outlined in **Section 4** and **Section 6** of the Agreement.
+
+### A. No Scraping (Section 4.i)
+
+MyAnimeNotes does not engage in "screen scraping," HTML parsing, or automated data harvesting of the MyAnimeList website. All data is retrieved strictly through the official **MyAnimeList API v2** endpoints.
+
+### B. Rate Limiting (Section 6)
+
+To prevent unreasonable burdens on MyAnimeList servers:
+
+-   The plugin implements **exponential backoff** strategies for retries.
+-   Automated sync features (if enabled by the user) enforce a **minimum interval** (defaulting to 60+ minutes) to respect API rate limits.
+-   Batch processing is throttled to prevent "thundering herd" behavior.
+
+### C. Direct Connection
+
+All network requests are made directly from the user's device to `api.myanimelist.net` via HTTPS. No traffic is routed through proxy servers or VPNs controlled by the developer.
+
+---
+
+## 4. Attribution
+
+In accordance with **Section 3(a)(xiii)**:
+
+-   All anime and manga metadata, covers, and list information are sourced from [MyAnimeList.net](https://myanimelist.net).
+-   **MyAnimeNotes** is an independent open-source project and is **not affiliated with, endorsed by, or sponsored by MyAnimeList Co., Ltd.**
+-   All trademarks, logos, and content belong to their respective owners.
+
+---
+
+## 5. User Responsibilities
+
+By using this plugin, users agree to the following:
+
+1.  **Personal Use Only:** You may not use this plugin or the data retrieved by it for commercial purposes or public redistribution.
+2.  **Credential Security:** You are responsible for maintaining the security of your MyAnimeList account credentials.
+3.  **No Redistribution:** You should not publish raw Markdown files containing MyAnimeList data to public repositories or websites in a way that violates MyAnimeList's terms regarding data redistribution.
+
+---
+
+## References & Audits
+
+-   [MyAnimeList API License & Developer Agreement](https://myanimelist.net/static/apiagreement.html)
+
