@@ -105,7 +105,7 @@ function renderExpandableTemplate(
 
     // Main setting header with toggle functionality
     const setting = new Setting(container)
-        .setName(`${type === "anime" ? "Anime" : "Manga"} Template`)
+        .setName(`${type === "anime" ? "Anime" : "Manga"} template`)
         .setDesc(`Configure the template used for ${type} notes.`)
         .setClass("myanimenotes-template-setting");
 
@@ -144,7 +144,7 @@ function renderExpandableTemplate(
         // 1 File Name Format Setting
         const fileNameDesc = document.createDocumentFragment();
         fileNameDesc.createSpan({
-            text: "Format for the file name of the note. You can use variables to pre-populate data from the API. "
+            text: "Format for the file name of the note. You can use variables to pre-populate data from the MAL API. "
         });
         fileNameDesc
             .createEl("a", {
@@ -202,8 +202,10 @@ function renderExpandableTemplate(
         // 2. Properties Section
         new Setting(contentContainer)
             .setName("Properties")
+
             .setDesc(
-                "Properties to add to the top of the media note. Use variables to populate data from the API."
+                // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MAL" is an acronym
+                "Properties to add to the top of the media note. Use variables to populate data from the MAL API."
             );
 
         // Properties list container (target for re-rendering list items)
@@ -231,8 +233,10 @@ function renderExpandableTemplate(
         // 3. Note Content Section
         new Setting(contentContainer)
             .setName("Note content")
+
             .setDesc(
-                "Customize the content of the note. Use variables to populate data from the API."
+                // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MAL" is an acronym
+                "Customize the content of the note. Use variables to populate data from the MAL API."
             );
 
         // Content Template TextArea

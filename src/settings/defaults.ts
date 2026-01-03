@@ -1,4 +1,4 @@
-import type { MyAnimeNotesSettings } from './types';
+import type { MyAnimeNotesSettings } from "./types";
 
 /**
  * The default configuration settings for the MyAnimeNotes plugin.
@@ -11,7 +11,6 @@ export const DEFAULT_SETTINGS: MyAnimeNotesSettings = {
     // ========================================================================
     // Credentials and tokens start empty/null until the user authenticates.
     malClientId: "",
-    malClientSecret: "",
     malAccessToken: "",
     malRefreshToken: "",
     malTokenExpiry: null,
@@ -32,36 +31,31 @@ export const DEFAULT_SETTINGS: MyAnimeNotesSettings = {
     // ========================================================================
     // By default, we respect file timestamps to avoid unnecessary writes.
     forceFullSync: false,
-    
+
     // Sync shortly after Obsidian opens to keep data fresh.
     syncOnLoad: true,
-    
+
     // Scheduled background sync is disabled by default to save resources.
     scheduledSync: false,
-    
+
     // Minimum interval is 90 minutes to respect MAL API rate limits.
-    scheduledSyncInterval: 90, 
-    
+    scheduledSyncInterval: 90,
+
     // Tracks the timestamp of the last successful sync operation.
-    lastSuccessfulSync: undefined, 
-    
+    lastSuccessfulSync: undefined,
+
     // Optimizes auto-sync by only fetching 'Watching' or 'Reading' items
     // (saves API calls compared to fetching the entire list every time).
     optimizeAutoSync: true,
-
-    // ========================================================================
-    // Legacy / Custom Template Defaults
-    // ========================================================================
-    // Controls for loading an external Markdown file as a template (if supported).
-    useCustomTemplate: false,
-    customTemplatePath: undefined,
-
     // ========================================================================
     // UI & Debug Defaults
     // ========================================================================
     // Show Obsidian notices (toast messages) for sync status/errors.
     notificationsEnabled: true,
-    
+
+    // Hide the technical "Client ID" field by default
+    useCustomApp: false,
+
     // verbose logging disabled by default for performance.
     debugMode: false
 };

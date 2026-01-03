@@ -2,7 +2,7 @@ import type MyAnimeNotesPlugin from "../main";
 import type { MediaItem } from "../models";
 import { MediaCategory } from "../models";
 import type { SyncResult, SyncItemResult, MALSyncOptions } from "./types";
-import { isAuthenticated } from "../auth";
+import { isAuthenticated } from "../auth/token";
 import { showNotice } from "../utils/notice";
 import { logger } from "../utils/logger";
 import { DEFAULT_SYNC_OPTIONS } from "./constants";

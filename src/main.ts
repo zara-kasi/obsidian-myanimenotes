@@ -1,7 +1,7 @@
 import { Plugin } from "obsidian";
 import { MyAnimeNotesSettingTab } from "./settings";
 import { MyAnimeNotesSettings, DEFAULT_SETTINGS } from "./settings";
-import { handleOAuthRedirect as handleMALRedirect } from "./auth";
+import { handleOAuthRedirect as handleMALRedirect } from "./auth/oauth";
 import { SyncManager, createSyncManager } from "./sync";
 import { AutoSyncManager, createAutoSyncManager } from "./sync/auto";
 import { MyAnimeNotesLockManager, createMyAnimeNotesLockManager } from "./core";
@@ -71,9 +71,12 @@ export default class MyAnimeNotesPlugin extends Plugin {
         setNotificationsEnabled(this.settings.notificationsEnabled);
 
         // Add a clickable icon to the Obsidian ribbon to trigger a manual sync of all lists.
+
         this.addRibbonIcon(
-            "origami",
-            "Myanimenotes sync all",
+          
+            "cloud-download",
+            // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MyAnimeNotes" is the plugin name
+            "MyAnimeNotes sync all",
             async () => {
                 if (!this.syncManager) return;
                 await this.syncManager.syncFromMAL();

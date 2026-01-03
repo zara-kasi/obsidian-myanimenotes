@@ -3,20 +3,30 @@
 import { requestUrl } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
 import type { MALTokenResponse, OAuthParams } from "./types";
-import { MAL_AUTH_URL, MAL_TOKEN_URL, REDIRECT_URI } from "./constants";
+import {
+    MAL_AUTH_URL,
+    MAL_TOKEN_URL,
+    REDIRECT_URI,
+    AUTH_STATE_TIMEOUT_MS,
+    DEFAULT_MAL_CLIENT_ID
+} from "./constants";
 import { generateVerifier, generateChallenge, generateState } from "./pkce";
-import { isTokenValid } from "./token-manager";
-import { fetchUserInfo } from "./user-service";
+import { isTokenValid } from "./token";
+import { fetchUserInfo } from "./user";
 import { showNotice } from "../utils/notice";
 import { logger } from "../utils/logger";
 
 const log = new logger("OAuthFlow");
 
-/** * Auth state timeout: 10 minutes.
- * If the user doesn't complete the login within this time, the state expires
- * to prevent replay attacks or stale sessions.
+/**
+ * Helper to get the correct Client ID based on user settings.
  */
-const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
+function getClientId(plugin: MyAnimeNotesPlugin): string {
+    if (plugin.settings.useCustomApp && plugin.settings.malClientId) {
+        return plugin.settings.malClientId.trim();
+    }
+    return DEFAULT_MAL_CLIENT_ID;
+}
 
 /**
  * Initiates the OAuth 2.0 PKCE authorization flow.
@@ -30,13 +40,20 @@ const AUTH_STATE_TIMEOUT_MS = 10 * 60 * 1000;
  * @param plugin - The plugin instance.
  */
 export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
-    if (!plugin.settings.malClientId) {
-        showNotice("Please enter your MAL Client ID first.", "warning", 5000);
+    // Use the helper instead of reading settings directly
+    const clientId = getClientId(plugin);
+
+    // Optional: Safety check if user enabled custom app but left it blank
+    if (plugin.settings.useCustomApp && !clientId) {
+        showNotice(
+            "Please enter your Custom Client ID in settings.",
+            "warning"
+        );
         return;
     }
 
     if (isTokenValid(plugin)) {
-        showNotice("Already authenticated with MyAnimeList", "success", 3000);
+        showNotice("Already authenticated with MyAnimeList", "success");
         return;
     }
 
@@ -59,10 +76,11 @@ export async function startAuthFlow(plugin: MyAnimeNotesPlugin): Promise<void> {
     // Build authorization URL with required OAuth parameters
     const params = new URLSearchParams({
         response_type: "code",
-        client_id: plugin.settings.malClientId,
+        client_id: clientId,
         redirect_uri: REDIRECT_URI,
-        code_challenge: challenge, // PKCE Challenge
-        code_challenge_method: "plain", // MAL API specifies 'plain' usually, check docs if 'S256' is supported
+        code_challenge: challenge,
+        // PKCE Challenge
+        code_challenge_method: "plain", // MAL API specifies 'plain' usually
         state: state
     });
 
@@ -161,22 +179,22 @@ async function exchangeCodeForToken(
     if (!code || code.length < 10) {
         throw new Error("Invalid authorization code");
     }
-
     showNotice("Exchanging authorization code for tokens…", 1500);
 
+    // Use the helper here too
+    const clientId = getClientId(plugin);
+
     const body = new URLSearchParams({
-        client_id: plugin.settings.malClientId,
+        client_id: clientId,
         code: code,
-        code_verifier: verifier, // Prove we initiated the request
+        code_verifier: verifier,
         grant_type: "authorization_code",
         redirect_uri: REDIRECT_URI
     });
 
-    // Add client secret if provided (MAL API officially requires it for web apps,
-    // but sometimes PKCE public clients don't. Including if user provided it.)
-    if (plugin.settings.malClientSecret?.trim()) {
-        body.append("client_secret", plugin.settings.malClientSecret.trim());
-    }
+    // NOTE: Client Secret logic has been removed.
+    // We are now operating purely as a Public Client (PKCE only),
+    // which simplifies the flow and removes the need for secret handling.
 
     try {
         const res = await requestUrl({
@@ -228,9 +246,7 @@ async function exchangeCodeForToken(
         }
 
         // 3. FINAL: Refresh the UI
-        // This will update the settings tab.
-        // If step 2 succeeded -> It shows the Avatar/Name.
-        // If step 2 failed    -> It shows the "Refresh profile" button (handled by tab.ts).
+        // This will update the settings tab to show the logged-in state.
         plugin.refreshSettingsUI();
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
@@ -310,7 +326,7 @@ function formatTokenError(res: {
 
         // Add helpful troubleshooting tips for common errors
         if (errorData.error === "invalid_client") {
-            errorMsg += "\n\nTip: Check your Client ID and Secret in settings.";
+            errorMsg += "\n\nTip: Check the Client ID in settings.";
         } else if (errorData.error === "invalid_grant") {
             errorMsg +=
                 "\n\nTip: The authorization code may have expired. Please try again.";

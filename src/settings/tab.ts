@@ -1,11 +1,9 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import MyAnimeNotesPlugin from "../main";
-import {
-    startAuthFlow as startMALAuth,
-    logout as malLogout,
-    isAuthenticated as isMALAuthenticated
-} from "../auth";
-import { fetchUserInfo } from "../auth/user-service";
+import { logout as malLogout } from "../auth/logout";
+import { isAuthenticated as isMALAuthenticated } from "../auth/token";
+import { startAuthFlow as startMALAuth } from "../auth/oauth";
+import { fetchUserInfo } from "../auth/user";
 import {
     renderTemplateSection,
     createTemplateSettingsState,
@@ -79,6 +77,40 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     })
             );
 
+        // Sync on Startup Toggle
+        new Setting(containerEl)
+            .setName("Sync after startup")
+            .setDesc("Automatically sync shortly after Obsidian starts.")
+            .addToggle(toggle =>
+                toggle
+                    .setValue(this.plugin.settings.syncOnLoad)
+                    .onChange(async value => {
+                        this.plugin.settings.syncOnLoad = value;
+                        await this.plugin.saveSettings();
+
+                        // Restart manager to update config
+                        if (this.plugin.autoSyncManager) {
+                            this.plugin.autoSyncManager.stop();
+                            this.plugin.autoSyncManager.start();
+                        }
+                    })
+            );
+
+        // Optimization Toggle
+        new Setting(containerEl)
+            .setName("Efficient auto-sync")
+            .setDesc(
+                "Reduce API requests by only auto-syncing watching and reading items."
+            )
+            .addToggle(toggle =>
+                toggle
+                    .setValue(this.plugin.settings.optimizeAutoSync)
+                    .onChange(async value => {
+                        this.plugin.settings.optimizeAutoSync = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
         // Scheduled Sync Toggle
         new Setting(containerEl)
             .setName("Scheduled sync")
@@ -133,40 +165,6 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 );
         }
 
-        // Sync on Startup Toggle
-        new Setting(containerEl)
-            .setName("Sync after startup")
-            .setDesc("Automatically sync shortly after Obsidian starts.")
-            .addToggle(toggle =>
-                toggle
-                    .setValue(this.plugin.settings.syncOnLoad)
-                    .onChange(async value => {
-                        this.plugin.settings.syncOnLoad = value;
-                        await this.plugin.saveSettings();
-
-                        // Restart manager to update config
-                        if (this.plugin.autoSyncManager) {
-                            this.plugin.autoSyncManager.stop();
-                            this.plugin.autoSyncManager.start();
-                        }
-                    })
-            );
-
-        // Optimization Toggle
-        new Setting(containerEl)
-            .setName("Efficient auto-sync")
-            .setDesc(
-                "Reduce API requests by only auto-syncing watching and reading items."
-            )
-            .addToggle(toggle =>
-                toggle
-                    .setValue(this.plugin.settings.optimizeAutoSync)
-                    .onChange(async value => {
-                        this.plugin.settings.optimizeAutoSync = value;
-                        await this.plugin.saveSettings();
-                    })
-            );
-
         // Force Full Sync Toggle
         new Setting(containerEl)
             .setName("Ignore timestamps")
@@ -177,6 +175,26 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                     .onChange(async value => {
                         this.plugin.settings.forceFullSync = value;
                         await this.plugin.saveSettings();
+                    })
+            );
+
+        // Custom Credentials Toggle
+        new Setting(containerEl)
+            .setName("Custom app")
+            .setDesc(
+                // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MAL" is an acronym
+                "Use your own MAL app for authentication instead of the built-in one."
+            )
+            .addToggle(toggle =>
+                toggle
+                    .setValue(this.plugin.settings.useCustomApp)
+                    .onChange(async value => {
+                        this.plugin.settings.useCustomApp = value;
+
+                        // Always logout when switching modes to prevent token mismatches
+                        await malLogout(this.plugin);
+                        await this.plugin.saveSettings();
+                        this.display();
                     })
             );
 
@@ -201,7 +219,7 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
      *
      * This method dynamically switches between two views:
      * 1. Authenticated: Displays user avatar, name, and logout button.
-     * 2. Unauthenticated: Displays Client ID/Secret inputs and Authenticate button.
+     * 2. Unauthenticated: Displays Client ID input and Login button.
      * * @param container - The HTML element to append the settings to.
      */
     private renderMALSettings(container: HTMLElement): void {
@@ -287,63 +305,63 @@ export class MyAnimeNotesSettingTab extends PluginSettingTab {
                 })();
             });
         }
-
         // === View 2: Unauthenticated State ===
+        // (Simplified: Single Client ID field + Login Button)
         if (!isAuth) {
-            new Setting(container)
-                .setName("Client ID")
-                .setDesc("Your myanimelist client ID.")
-                .addText(text =>
-                    text
-                        .setPlaceholder("Enter client ID")
+            // Only show the Client ID configuration if the user has enabled the "Custom app" toggle
+            if (this.plugin.settings.useCustomApp) {
+                const clientIdSetting = new Setting(container).setName(
+                    "Client ID"
+                );
+
+                // 1. Add Description with "Learn more" link
+                const descEl = clientIdSetting.descEl;
+                descEl.createSpan({
+                    text: "Enter a custom Client ID, or leave empty to use the default. Click 'Learn more' for a guide on creating your own application to obtain an ID. "
+                });
+
+                descEl
+                    .createEl("a", {
+                        text: "Learn more",
+                        href: "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md"
+                    })
+                    .addEventListener("click", e => {
+                        e.preventDefault();
+                        const docUrl =
+                            "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md";
+                        window.open(docUrl, "_blank");
+                    });
+
+                // 2. Add Text Input (Masked)
+                clientIdSetting.addText(text => {
+                    text.setPlaceholder(
+                        // eslint-disable-next-line obsidianmd/ui/sentence-case -- "Client ID" is a standard acronym/proper myanimenotes-button-container
+                        "Enter Client ID"
+                    )
                         .setValue(this.plugin.settings.malClientId)
                         .onChange(async value => {
                             this.plugin.settings.malClientId = value.trim();
                             await this.plugin.saveSettings();
-                        })
-                );
-
-            new Setting(container)
-                .setName("Client secret")
-                .setDesc("Your myanimelist client secret.")
-                .addText(text => {
-                    text.setPlaceholder("Enter client secret")
-                        .setValue(this.plugin.settings.malClientSecret || "")
-                        .onChange(async value => {
-                            this.plugin.settings.malClientSecret = value.trim();
-                            await this.plugin.saveSettings();
                         });
+
+                    // Mask the input so the long Default ID isn't distracting
                     text.inputEl.type = "password";
                     return text;
                 });
+            }
 
-            const authSetting = new Setting(container)
-                .setName("Authenticate")
-                .addButton(button => {
-                    button
-                        .setButtonText("Authenticate")
-                        .setCta()
-                        .onClick(async () => {
-                            await startMALAuth(this.plugin);
-                            this.display();
-                        });
-                });
+            // Login Button (Always Visible)
+            new Setting(container).addButton(button => {
+                button
 
-            const descEl = authSetting.descEl;
-            descEl.createSpan({
-                text: "Link your myanimelist account. "
+                    // eslint-disable-next-line obsidianmd/ui/sentence-case -- "MyAnimeList" is a proper noun
+                    .setButtonText("Login with MyAnimeList")
+                    .setCta()
+                    .onClick(async () => {
+                        await startMALAuth(this.plugin);
+                        this.display();
+                    });
             });
-            descEl
-                .createEl("a", {
-                    text: "Learn more",
-                    href: "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md"
-                })
-                .addEventListener("click", e => {
-                    e.preventDefault();
-                    const docUrl =
-                        "https://github.com/zara-kasi/obsidian-myanimenotes/blob/main/docs/mal-authentication-guide.md";
-                    window.open(docUrl, "_blank");
-                });
         }
     }
 }

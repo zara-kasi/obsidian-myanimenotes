@@ -1,6 +1,6 @@
 import { requestUrl } from "obsidian";
 import type MyAnimeNotesPlugin from "../main";
-import { ensureValidToken, getAuthHeaders } from "../auth";
+import { ensureValidToken, getAuthHeaders } from "../auth/token";
 import { logger } from "../utils/logger";
 import { MAL_API_BASE, RATE_LIMIT_CONFIG } from "./constants";
 import type { MALApiResponse, RequestResponse } from "./types";

@@ -1,4 +1,4 @@
-import type { MALUserInfo } from "../auth";
+import type { MALUserInfo } from "../auth/types";
 import type { TemplateConfig } from "./template";
 
 /**
@@ -10,15 +10,8 @@ export interface MyAnimeNotesSettings {
     // ========================================================================
     // MAL Authentication
     // ========================================================================
-    
     /** The Client ID for the MyAnimeList API application. */
     malClientId: string;
-
-    /** * The Client Secret for the MyAnimeList API application. 
-     * @remarks This is optional because public clients might not need it, 
-     * but standard web flows usually do.
-     */
-    malClientSecret?: string;
 
     /** The current access token for authenticating API requests. */
     malAccessToken?: string;
@@ -48,13 +41,13 @@ export interface MyAnimeNotesSettings {
         /** The unique state string to prevent CSRF attacks. */
         state: string;
         /** Timestamp of when the auth flow started, used for timeout checks. */
-        timestamp: number; 
+        timestamp: number;
     } | null;
 
     // ========================================================================
     // Template System
     // ========================================================================
-    
+
     /** Configuration for the generated Anime notes (frontmatter, content, etc.). */
     animeTemplate?: TemplateConfig;
 
@@ -65,50 +58,44 @@ export interface MyAnimeNotesSettings {
     // Sync Settings
     // ========================================================================
 
-    /** * If true, ignores the local file modification times and overwrites 
+    /** * If true, ignores the local file modification times and overwrites
      * all notes during sync. Useful for applying template changes to existing notes.
      */
     forceFullSync: boolean;
 
-    /** * If true, triggers a sync shortly after the plugin (and Obsidian) loads. 
+    /** * If true, triggers a sync shortly after the plugin (and Obsidian) loads.
      * Usually set to a 3-second delay to avoid blocking startup.
      */
-    syncOnLoad: boolean; 
+    syncOnLoad: boolean;
 
     /** If true, enables the background timer for automatic synchronization. */
-    scheduledSync: boolean; 
+    scheduledSync: boolean;
 
     /** * The interval in minutes between automatic syncs.
      * @defaultValue 60
      * @remarks Minimum is strictly enforced to 60 minutes to respect API limits.
      */
-    scheduledSyncInterval: number; 
+    scheduledSyncInterval: number;
 
     /** Timestamp (ms) of the last time a sync successfully completed. */
-    lastSuccessfulSync?: number; 
+    lastSuccessfulSync?: number;
 
     /** * If true, auto-sync only fetches items with "Watching" or "Reading" status.
      * This significantly reduces API overhead for frequent background updates.
      */
-    optimizeAutoSync: boolean; 
-
-    // ========================================================================
-    // Legacy / Future Template Settings
-    // ========================================================================
-    
-    /** @deprecated / Reserved for future use: Toggle for using an external MD file as template. */
-    useCustomTemplate: boolean;
-    
-    /** @deprecated / Reserved for future use: File path to the external template. */
-    customTemplatePath?: string;
+    optimizeAutoSync: boolean;
 
     // ========================================================================
     // UI & Debug Settings
     // ========================================================================
 
     /** Controls whether toast notifications appear for sync events. */
-    notificationsEnabled: boolean; 
+    notificationsEnabled: boolean;
     
+    
+    /** Controls whether the Client ID input field is visible in settings. */
+    useCustomApp: boolean;
+
     /** Controls verbose logging to the developer console. */
     debugMode: boolean;
 }

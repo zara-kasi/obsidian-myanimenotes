@@ -55,10 +55,8 @@ export async function refreshAccessToken(
         grant_type: "refresh_token"
     });
 
-    // Add client secret if present (required by some API clients/configurations)
-    if (plugin.settings.malClientSecret?.trim()) {
-        body.append("client_secret", plugin.settings.malClientSecret.trim());
-    }
+    // NOTE: Client Secret logic has been removed.
+    // We are strictly operating as a Public Client now.
 
     // Perform the refresh request
     const res = await requestUrl({
@@ -85,7 +83,7 @@ export async function refreshAccessToken(
     plugin.settings.malRefreshToken =
         data.refresh_token || plugin.settings.malRefreshToken;
     plugin.settings.malTokenExpiry = Date.now() + data.expires_in * 1000;
-    
+
     await plugin.saveSettings();
 }
 
